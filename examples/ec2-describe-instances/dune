@@ -1,0 +1,7 @@
+(executable
+ (name awso_ec2_describe_instances)
+ (libraries awso-ec2-async core_unix.command_unix)
+ (flags
+  (:standard -open Core -open Async))
+ (preprocess
+  (pps ppx_jane)))

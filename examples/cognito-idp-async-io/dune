@@ -1,0 +1,5 @@
+(executable
+ (name cognito_idp_async)
+ (libraries awso-cognito-idp-async core_unix.command_unix)
+ (preprocess
+  (pps ppx_jane)))
