@@ -5,7 +5,7 @@ let list_identity_pools cfg ?(max_results = default_max_results) ()
   =
   let maxResults = Values.QueryLimit.make max_results in
   Io.list_identity_pools
-    (Awso_async.Http.Io.call ~cfg ~service:Values.service)
+    ~cfg
     (Values.ListIdentityPoolsInput.make ~maxResults ())
   >>| function
   | Ok response -> Option.value response.identityPools ~default:[]

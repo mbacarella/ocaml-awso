@@ -2,7 +2,7 @@ type already_exists_error = [ `AlreadyExistsException ] [@@deriving sexp]
 
 let create_database ?catalog_id ?description ~name cfg =
   Io.create_database
-    (Awso_async.Http.Io.call ~cfg ~service:Values.service)
+    ~cfg
     (Values.CreateDatabaseRequest.make
        ?catalogId:(Option.map ~f:Values.CatalogIdString.make catalog_id)
        ~databaseInput:

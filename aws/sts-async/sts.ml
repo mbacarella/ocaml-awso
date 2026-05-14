@@ -75,7 +75,7 @@ let assume_role
   Awso_async.Import.with_retries ?retry_delay ?retry_cnt (fun () ->
     match%bind
       Io.assume_role
-        (Awso_async.Http.Io.call ~cfg ~service:Values.service)
+        ~cfg
         (Values.AssumeRoleRequest.make
            ~roleArn:(Values.ArnType.make role)
            ~roleSessionName:(Values.RoleSessionNameType.make session_name)
@@ -107,7 +107,7 @@ let assume_role_with_saml
   Awso_async.Import.with_retries ?retry_delay ?retry_cnt (fun () ->
     match%bind
       Io.assume_role_with_s_a_m_l
-        (Awso_async.Http.Io.call ~cfg ~service:Values.service)
+        ~cfg
         (Values.AssumeRoleWithSAMLRequest.make
            ~principalArn:principal_arn
            ~sAMLAssertion:saml_assertion

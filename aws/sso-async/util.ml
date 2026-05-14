@@ -11,8 +11,7 @@ module Cfg = struct
       | Error e -> return (Error e)
       | Ok (role_request, sso_cfg) ->
         let%map roleCredentials =
-          let call = Awso_async.Http.Io.call ~service:Values.service ~cfg:sso_cfg in
-          let%map res = Io.get_role_credentials call role_request in
+          let%map res = Io.get_role_credentials ~cfg:sso_cfg role_request in
           Awso_sso.Util.parse_role_credentials_response_exn res
         in
         Awso_sso.Util.update_cfg_with_role_credentials ~cfg roleCredentials)

@@ -5,32 +5,24 @@ module Ec2 = struct
   include Awso_ec2_lwt.Import
   module Values = Awso_ec2_lwt.Values
   module Io = Awso_ec2_lwt.Io
-
-  let call = Awso.Http.Io.call ~service:Values.service
 end
 
 module Ecs = struct
   include Awso_ecs_lwt.Import
   module Values = Awso_ecs_lwt.Values
   module Io = Awso_ecs_lwt.Io
-
-  let call = Awso.Http.Io.call ~service:Values.service
 end
 
 module Ecr = struct
   include Awso_ecr_lwt.Import
   module Values = Awso_ecr_lwt.Values
   module Io = Awso_ecr_lwt.Io
-
-  let call = Awso.Http.Io.call ~service:Values.service
 end
 
 module S3 = struct
   include Awso_s3_lwt.Import
   module Values = Awso_s3_lwt.Values
   module Io = Awso_s3_lwt.Io
-
-  let call = Awso.Http.Io.call ~service:Values.service
 end
 
 let pr = Caml.print_endline
@@ -57,7 +49,7 @@ let suite_main ~sso bucket () =
       ~sexp_of_error:Ec2.Values.Ec2_error.sexp_of_t
       ~f:(fun () ->
       Ec2.Io.describe_instances
-        (Ec2.call ~cfg)
+        ~cfg
         (Ec2.Values.DescribeInstancesRequest.make ()))
     >|= fun v ->
     Option.iter v.Ec2.Values.DescribeInstancesResult.reservations ~f:(fun reservation ->
@@ -71,7 +63,7 @@ let suite_main ~sso bucket () =
       ~sexp_of_error:Ecs.Values.DescribeClustersResponse.sexp_of_error
       ~f:(fun () ->
       Ecs.Io.describe_clusters
-        (Ecs.call ~cfg)
+        ~cfg
         (Ecs.Values.DescribeClustersRequest.make ()))
     >|= fun v ->
     Option.iter v.Ecs.Values.DescribeClustersResponse.clusters ~f:(fun cluster ->
@@ -80,7 +72,6 @@ let suite_main ~sso bucket () =
   in
   let%bind () =
     pr "=== ECR ===";
-    let ecr_call = Ecr.call ~cfg in
     let repositoryName = Ecr.Values.RepositoryName.make "delme/delme" in
     let%bind () =
       dispatch_exn
@@ -88,7 +79,7 @@ let suite_main ~sso bucket () =
         ~sexp_of_error:Ecr.Values.GetAuthorizationTokenResponse.sexp_of_error
         ~f:(fun () ->
         Ecr.Io.get_authorization_token
-          ecr_call
+          ~cfg
           (Ecr.Values.GetAuthorizationTokenRequest.make ()))
       >|= fun v ->
       Option.iter
@@ -105,7 +96,7 @@ let suite_main ~sso bucket () =
         ~sexp_of_error:Ecr.Values.CreateRepositoryResponse.sexp_of_error
         ~f:(fun () ->
         Ecr.Io.create_repository
-          ecr_call
+          ~cfg
           (Ecr.Values.CreateRepositoryRequest.make ~repositoryName ()))
       >|= fun _v -> ()
     in
@@ -115,7 +106,7 @@ let suite_main ~sso bucket () =
         ~sexp_of_error:Ecr.Values.DescribeRepositoriesResponse.sexp_of_error
         ~f:(fun () ->
         Ecr.Io.describe_repositories
-          ecr_call
+          ~cfg
           (Ecr.Values.DescribeRepositoriesRequest.make ()))
       >>= fun v ->
       Option.value_map
@@ -133,7 +124,7 @@ let suite_main ~sso bucket () =
               ~sexp_of_error:Ecr.Values.ListImagesResponse.sexp_of_error
               ~f:(fun () ->
               Ecr.Io.list_images
-                ecr_call
+                ~cfg
                 (Ecr.Values.ListImagesRequest.make ~repositoryName ()))
             >|= fun images ->
             let imageIds =
@@ -155,7 +146,7 @@ let suite_main ~sso bucket () =
         ~sexp_of_error:Ecr.Values.DeleteRepositoryResponse.sexp_of_error
         ~f:(fun () ->
         Ecr.Io.delete_repository
-          ecr_call
+          ~cfg
           (Ecr.Values.DeleteRepositoryRequest.make ~repositoryName ()))
       >|= fun _v -> ()
     in
@@ -163,19 +154,18 @@ let suite_main ~sso bucket () =
   in
   let%bind () =
     pr "=== S3 ===";
-    let s3_call = S3.call ~cfg in
     let%bind () =
       dispatch_exn
         ~name:"s3.list_buckets"
         ~sexp_of_error:S3.Values.ListBucketsOutput.sexp_of_error
-        ~f:(fun () -> S3.Io.list_buckets s3_call ())
+        ~f:(fun () -> S3.Io.list_buckets ~cfg ())
       >|= fun _ -> ()
     in
     dispatch_exn
       ~name:"s3.list_objects"
       ~sexp_of_error:S3.Values.ListObjectsOutput.sexp_of_error
       ~f:(fun () ->
-      S3.Io.list_objects s3_call (S3.Values.ListObjectsRequest.make ~bucket ()))
+      S3.Io.list_objects ~cfg (S3.Values.ListObjectsRequest.make ~bucket ()))
     >|= fun v ->
     Option.iter v.S3.Values.ListObjectsOutput.name ~f:pr;
     let contents = Option.value ~default:[] v.S3.Values.ListObjectsOutput.contents in
@@ -211,7 +201,6 @@ let multipart_main ~sso bucket key file () =
     | true -> Awso_sso_lwt.Util.Cfg.get_exn ()
     | false -> Cfg.get_exn ()
   in
-  let s3_call = S3.call ~cfg in
   Lwt_unix.stat file
   >>= fun { st_size = file_size; _ } ->
   let nb_parts = min ((file_size / default_chunk_size) + 1) 10000 in
@@ -224,7 +213,7 @@ let multipart_main ~sso bucket key file () =
       ~sexp_of_error:S3.Values.CreateMultipartUploadOutput.sexp_of_error
       ~f:(fun () ->
       S3.Io.create_multipart_upload
-        s3_call
+        ~cfg
         (S3.Values.CreateMultipartUploadRequest.make
            ~bucket
            ~key:(S3.Values.ObjectKey.make key)
@@ -241,7 +230,7 @@ let multipart_main ~sso bucket key file () =
       ~sexp_of_error:S3.Values.UploadPartOutput.sexp_of_error
       ~f:(fun () ->
       S3.Io.upload_part
-        s3_call
+        ~cfg
         (S3.Values.UploadPartRequest.make
            ~bucket
            ~uploadId
@@ -273,7 +262,7 @@ let multipart_main ~sso bucket key file () =
         ~uploadId
         ()
     in
-    S3.Io.complete_multipart_upload s3_call req)
+    S3.Io.complete_multipart_upload ~cfg req)
   >|= fun _ -> ()
 ;;
 

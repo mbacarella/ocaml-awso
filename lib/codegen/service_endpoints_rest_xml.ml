@@ -107,7 +107,7 @@ let of_response (service : Botodata.service) data =
              endpoint
          in
          match Endpoint.result_decoder endpoint with
-         | None -> [%expr return (Ok ())]
+         | None -> [%expr Ok ()]
          | Some Json -> assert false
          | Some Xml ->
            let of_xml =
@@ -119,7 +119,7 @@ let of_response (service : Botodata.service) data =
            [%expr
              match resp with
              | Error err -> handle_error err [%e error_of_xml]
-             | Ok resp -> response_to_xml resp >>| [%e of_xml] >>| ok]
+             | Ok resp -> Ok ([%e of_xml] (response_to_xml resp))]
          | Some (Of_header_and_body payload_opt) -> (
            let of_header_and_body =
              Endpoint.in_result_module endpoint "of_header_and_body"
@@ -149,13 +149,13 @@ let of_response (service : Botodata.service) data =
                match resp with
                | Error err -> handle_error err [%e error_of_xml]
                | Ok resp ->
-                 Awso.Http.Response.body_to_string state resp
-                 >>| [%e of_string]
-                 >>= fun body ->
+                 let body =
+                   [%e of_string] (Awso.Http.Response.body resp)
+                 in
                  let headers =
                    Awso.Http.Headers.to_list (Awso.Http.Response.headers resp)
                  in
-                 return (Ok ([%e of_header_and_body] (headers, body)))]
+                 Ok ([%e of_header_and_body] (headers, body))]
            | None ->
              [%expr
                match resp with
@@ -164,24 +164,18 @@ let of_response (service : Botodata.service) data =
                  let headers =
                    Awso.Http.Headers.to_list (Awso.Http.Response.headers resp)
                  in
-                 return (Ok ([%e of_header_and_body] (headers, ())))]))
+                 Ok ([%e of_header_and_body] (headers, ()))]))
     |> Ast_helper.Exp.match_ [%expr endpoint]
   in
   [%stri
     let of_response
-      (type s i o e)
-      (state : s Awso.Http.Monad.t)
+      (type i o e)
       (endpoint : (i, o, e) t)
-      resp
-      : ( (o, [ `AWS of e | `Transport of Awso.Http.Io.Error.call ]) result, s )
-      Awso.Http.Monad.app
+      (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result)
+      : (o, [ `AWS of e | `Transport of Awso.Http.Io.Error.call ]) result
       =
-      let ( >>= ) = state.Awso.Http.Monad.bind in
-      let return = state.Awso.Http.Monad.return in
-      let ( >>| ) x f = x >>= fun x -> return (f x) in
-      let ok x = Ok x in
       let handle_error err error_of_xml =
-        let generic_error () = return (Error (`Transport err)) in
+        let generic_error () = Error (`Transport err) in
         match err with
         | `Too_many_redirects -> generic_error ()
         | `Bad_response { Awso.Http.Io.Error.code; body; x_amzn_error_type = _ } -> (
@@ -201,13 +195,13 @@ let of_response (service : Botodata.service) data =
                       | `El _ -> "")
                     |> String.concat ~sep:""
                 in
-                return (Error (`AWS (error_of_xml (String.strip error_code) xml)))
+                Error (`AWS (error_of_xml (String.strip error_code) xml))
               with
               | Failure _ -> generic_error ())
             | `El _ -> generic_error ()))
       in
       let response_to_xml resp =
-        Awso.Http.Response.body_to_string state resp >>| Awso.Xml.parse_response
+        Awso.Xml.parse_response (Awso.Http.Response.body resp)
       in
       [%e body]
     ;;]
@@ -240,14 +234,11 @@ let%expect_test "of_response" =
   |> printf "%s%!";
   [%expect
     {|
-    let of_response (type s) (type i) (type o) (type e)
-      (state : s Awso.Http.Monad.t) (endpoint : (i, o, e) t) resp =
-      (let (>>=) = state.Awso.Http.Monad.bind in
-       let return = state.Awso.Http.Monad.return in
-       let (>>|) x f = x >>= (fun x -> return (f x)) in
-       let ok x = Ok x in
-       let handle_error err error_of_xml =
-         let generic_error () = return (Error (`Transport err)) in
+    let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
+      (resp :
+      (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) =
+      (let handle_error err error_of_xml =
+         let generic_error () = Error (`Transport err) in
          match err with
          | `Too_many_redirects -> generic_error ()
          | `Bad_response
@@ -266,14 +257,12 @@ let%expect_test "of_response" =
                                 (List.map children
                                    ~f:(function | `Data s -> s | `El _ -> ""))
                                   |> (String.concat ~sep:"") in
-                          return
-                            (Error
-                               (`AWS (error_of_xml (String.strip error_code) xml)))
+                          Error
+                            (`AWS (error_of_xml (String.strip error_code) xml))
                         with | Failure _ -> generic_error ())
                    | `El _ -> generic_error ())) in
        let response_to_xml resp =
-         (Awso.Http.Response.body_to_string state resp) >>|
-           Awso.Xml.parse_response in
+         Awso.Xml.parse_response (Awso.Http.Response.body resp) in
        match endpoint with
        | Of_header_and_no_body ->
            (match resp with
@@ -281,31 +270,27 @@ let%expect_test "of_response" =
             | Ok resp ->
                 let headers =
                   Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-                return (Ok (Result.of_header_and_body (headers, ()))))
+                Ok (Result.of_header_and_body (headers, ())))
        | Direct ->
            (match resp with
             | Error err -> handle_error err None
-            | Ok resp -> ((response_to_xml resp) >>| DirectResult.of_xml) >>| ok)
+            | Ok resp -> Ok (DirectResult.of_xml (response_to_xml resp)))
        | Of_header_and_body ->
            (match resp with
             | Error err -> handle_error err None
             | Ok resp ->
-                ((Awso.Http.Response.body_to_string state resp) >>|
-                   Payload_module.of_string)
-                  >>=
-                  ((fun body ->
-                      let headers =
-                        Awso.Http.Headers.to_list
-                          (Awso.Http.Response.headers resp) in
-                      return
-                        (Ok
-                           (Result_of_header_and_body.of_header_and_body
-                              (headers, body))))))
-       | No_output -> return (Ok ()) : ((o,
-                                          [ `AWS of e
-                                          | `Transport of Awso.Http.Io.Error.call ])
-                                          result,
-                                         s) Awso.Http.Monad.app) |}]
+                let body =
+                  Payload_module.of_string (Awso.Http.Response.body resp) in
+                let headers =
+                  Awso.Http.Headers.to_list
+                    (Awso.Http.Response.headers resp) in
+                Ok
+                  (Result_of_header_and_body.of_header_and_body
+                     (headers, body)))
+       | No_output ->
+           Ok () : (o,
+                     [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ])
+                     result) |}]
 ;;
 
 let make_structure_for_protocol service data =

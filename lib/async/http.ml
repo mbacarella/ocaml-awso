@@ -1,26 +1,9 @@
 open! Import
 
-module Io = struct
-  include Awso.Http.Monad.Make (struct
-    type +'a t = 'a Deferred.t
-  end)
-
-  let monad =
-    { Awso.Http.Monad.bind = (fun x f -> inj (prj x >>= fun x -> prj (f x)))
-    ; return = (fun x -> inj (return x))
-    }
-  ;;
-
-  let make_stream pipe =
-    let read pipe = inj (Pipe.read pipe) in
-    let ( >>= ) = monad.bind in
-    let return = monad.return in
-    fun () ->
-      read pipe
-      >>= function
-      | `Ok v -> return (Some v)
-      | `Eof -> return None
-  ;;
+module Io : Awso.Http.Io.S with type 'a t := 'a Deferred.t = struct
+  let return = return
+  let bind x f = x >>= f
+  let map x f = x >>| f
 
   module Call : sig
     val cohttp_async
@@ -30,7 +13,7 @@ module Io = struct
       -> Awso.Http.Meth.t
       -> Awso.Http.Request.t
       -> Uri.t
-      -> (t Awso.Http.Response.t, Awso.Http.Io.Error.call) result Deferred.t
+      -> (Awso.Http.Response.t, Awso.Http.Io.Error.call) result Deferred.t
   end = struct
     let find_xml_redirect_endpoint xml =
       let get x = Awso.Xml.child_exn xml x |> Awso.Xml.string_data_exn in
@@ -49,7 +32,7 @@ module Io = struct
     ;;
 
     let rec interpret_response ~limit request (resp, body)
-      : (Cohttp.Response.t * Cohttp.Body.t, Awso.Http.Io.Error.call) result s
+      : (Cohttp.Response.t * Cohttp.Body.t, Awso.Http.Io.Error.call) result Deferred.t
       =
       if limit >= 50
       then return (Error `Too_many_redirects)
@@ -87,9 +70,6 @@ module Io = struct
 
     let interpret_response = interpret_response ~limit:0
 
-    (** Wrapper around [Cohttp.Client.request] that always uses https.
-
-    @see <https://github.com/mirage/ocaml-cohttp/issues/670> *)
     let cohttp_async_client_request request req_body =
       let uri = Uri.with_scheme (Cohttp.Request.uri request) (Some "https") in
       let body = Cohttp.Body.of_string req_body in
@@ -98,17 +78,6 @@ module Io = struct
 
     let request_and_follow request req_body =
       cohttp_async_client_request request req_body >>= interpret_response request
-    ;;
-
-    let stream_of_body = function
-      | `Empty -> fun () -> monad.return None
-      | `Pipe pipe -> make_stream pipe
-      | `String x ->
-        let pipe = Pipe.of_list [ x ] in
-        make_stream pipe
-      | `Strings l ->
-        let pipe = Pipe.of_list l in
-        make_stream pipe
     ;;
 
     let cohttp_async ?endpoint_url ~cfg ~service meth request uri =
@@ -144,15 +113,6 @@ module Io = struct
       let req_body = Awso.Http.Request.body request in
       let body_length = Int64.of_int (String.length req_body) in
       let payload_hash = Awso.Auth.payload_hash req_body in
-      (*
-      eprintf "request: %s\n" (uri |> Uri.to_string);
-      eprintf "headers:\n";
-      List.iter (headers |> Cohttp.Header.to_list) ~f:(fun (k, v) ->
-        eprintf " %s=%s\n" k v);
-      eprintf "body: %s\n" req_body;
-      eprintf "meth: %s\n" (Cohttp.Code.string_of_method meth);
-      eprintf "\n%!";
-      *)
       let request =
         Cohttp.Request.make_for_client ~headers ~chunked:false ~body_length meth uri
         |> Awso.Auth.sign_request
@@ -170,15 +130,19 @@ module Io = struct
         let version = Cohttp.of_version resp in
         let headers = Cohttp.of_headers resp in
         let status = Cohttp.of_status resp in
-        let body = stream_of_body body in
-        return (Ok (Awso.Http.Response.make ~version ~headers ~body status))
+        Cohttp.Body.to_string body
+        >>| fun body_str ->
+        Ok (Awso.Http.Response.make ~version ~headers ~body:body_str status)
     ;;
   end
 
-  let make_http http meth request uri = inj (http meth request uri)
-
   let call ?endpoint_url ~cfg ~service meth request uri =
-    make_http (Call.cohttp_async ?endpoint_url ~cfg ~service) meth request uri
+    Call.cohttp_async ?endpoint_url ~cfg ~service meth request uri
+  ;;
+
+  let resolve_cfg = function
+    | Some cfg -> return cfg
+    | None -> Cfg.get_exn ()
   ;;
 end
 

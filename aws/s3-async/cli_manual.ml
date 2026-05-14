@@ -50,7 +50,7 @@ module List_buckets = struct
       ~name:"list_buckets"
       ~sexp_of_error:Values.ListBucketsOutput.sexp_of_error
       ~f:(fun () ->
-      Io.list_buckets (Awso_async.Http.Io.call ~cfg ~service:Values.service) ())
+      Io.list_buckets ~cfg ())
     >>| fun v -> Format.printf "%a" pp_out v
   ;;
 
@@ -90,7 +90,7 @@ module List_objects = struct
       ~sexp_of_error:Values.ListObjectsOutput.sexp_of_error
       ~f:(fun () ->
       Io.list_objects
-        (Awso_async.Http.Io.call ~cfg ~service:Values.service)
+        ~cfg
         (Values.ListObjectsRequest.make ~bucket ~prefix:"" ()))
     >>| fun v -> Format.printf "%a" pp_out v
   ;;
@@ -143,7 +143,7 @@ module Get_object = struct
       ~sexp_of_error:Values.GetObjectOutput.sexp_of_error
       ~f:(fun () ->
       Io.get_object
-        (Awso_async.Http.Io.call ~cfg ~service:Values.service)
+        ~cfg
         (Values.GetObjectRequest.make ~bucket ~key ()))
     >>| fun out ->
     match dest_opt with
@@ -179,7 +179,7 @@ module Put_object = struct
       ~sexp_of_error:Values.PutObjectOutput.sexp_of_error
       ~f:(fun () ->
       Io.put_object
-        (Awso_async.Http.Io.call ~cfg ~service:Values.service)
+        ~cfg
         (Values.PutObjectRequest.make ~bucket ~key ~body ()))
     >>| fun v -> Format.printf "%a" pp_out v
   ;;
@@ -204,7 +204,7 @@ module Put_multipart = struct
       ~sexp_of_error:Values.CreateMultipartUploadOutput.sexp_of_error
       ~f:(fun () ->
       Io.create_multipart_upload
-        (Awso_async.Http.Io.call ~cfg ~service:Values.service)
+        ~cfg
         (Values.CreateMultipartUploadRequest.make ~bucket ~key ()))
     >>= fun creation ->
     let upload_part ~nparts i part =
@@ -215,7 +215,7 @@ module Put_multipart = struct
         ~name:"upload_part"
         ~sexp_of_error:Values.UploadPartOutput.sexp_of_error
         ~f:(fun () ->
-        Io.upload_part (Awso_async.Http.Io.call ~cfg ~service:Values.service) req)
+        Io.upload_part ~cfg req)
       >>| fun v -> Part.completed_part part v
     in
     let parts = Part.build_parts infile in
@@ -227,7 +227,7 @@ module Put_multipart = struct
       ~sexp_of_error:Values.CompleteMultipartUploadOutput.sexp_of_error
       ~f:(fun () ->
       Io.complete_multipart_upload
-        (Awso_async.Http.Io.call ~cfg ~service:Values.service)
+        ~cfg
         (Part.complete_request ~creation ~parts))
     >>| fun { location; _ } ->
     Format.printf

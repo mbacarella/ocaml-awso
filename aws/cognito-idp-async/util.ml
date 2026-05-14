@@ -1,11 +1,10 @@
-let idp_call cfg = Awso_async.Http.Io.call ~cfg ~service:Values.service
 let default_max_results = 20
 
 let list_user_pools cfg ?(max_results = default_max_results) () =
   Log.Global.debug "list-user-pools" ~tags:[ "max_results", Int.to_string max_results ];
   let maxResults = Values.PoolQueryLimitType.make max_results in
   match%bind
-    Io.list_user_pools (idp_call cfg) (Values.ListUserPoolsRequest.make ~maxResults ())
+    Io.list_user_pools ~cfg (Values.ListUserPoolsRequest.make ~maxResults ())
   with
   | Error _ -> failwithf "idp.list_user_pools" ()
   | Ok x -> return x
@@ -101,7 +100,7 @@ let get_user ?retry_delay ?retry_cnt cfg ~access_token () =
   @@ fun () ->
   let accessToken = Values.TokenModelType.make access_token in
   let request = Values.GetUserRequest.make ~accessToken () in
-  match%map Io.get_user (idp_call cfg) request with
+  match%map Io.get_user ~cfg request with
   | Error e -> Error e
   | Ok
       ({ Values.GetUserResponse.username
@@ -126,7 +125,7 @@ let admin_get_user ?retry_delay ?retry_cnt cfg ~user_pool_id ~username () =
   Awso_async.Import.with_retries ?retry_delay ?retry_cnt
   @@ fun () ->
   Io.admin_get_user
-    (idp_call cfg)
+    ~cfg
     (Values.AdminGetUserRequest.make
        ~userPoolId:(Values.UserPoolIdType.make user_pool_id)
        ~username:(Values.UsernameType.make username)
