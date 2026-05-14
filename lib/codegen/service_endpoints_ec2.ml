@@ -14,42 +14,35 @@ let of_response endpoints =
   in
   [%stri
     let of_response
-      (type s i o e)
-      (state : s Awso.Http.Monad.t)
+      (type i o e)
       (endpoint : (i, o, e) t)
-      resp
-      : ( (o, [ `AWS of Ec2_error.t | `Transport of Awso.Http.Io.Error.call ]) result, s
-      ) Awso.Http.Monad.app
+      (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result)
+      : (o, [ `AWS of Ec2_error.t | `Transport of Awso.Http.Io.Error.call ]) result
       =
-      let ( >>= ) = state.Awso.Http.Monad.bind in
-      let return = state.Awso.Http.Monad.return in
       let response_of_error err =
         match err with
-        | `Too_many_redirects -> return (Error (`Transport `Too_many_redirects))
+        | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
         | `Bad_response { Awso.Http.Io.Error.code; body; x_amzn_error_type } ->
           if code >= 400 && code <= 599
           then (
             let xml = Awso.Xml.parse_response body in
-            return (Error (`AWS (Ec2_error.of_xml xml))))
+            Error (`AWS (Ec2_error.of_xml xml)))
           else
-            return
-              (Error
-                 (`Transport
-                   (`Bad_response { Awso.Http.Io.Error.code; body; x_amzn_error_type })))
+            Error
+              (`Transport
+                (`Bad_response { Awso.Http.Io.Error.code; body; x_amzn_error_type }))
       in
       let response_of_none () =
         match resp with
         | Error err -> response_of_error err
-        | Ok _ -> return (Ok ())
+        | Ok _ -> Ok ()
       in
       let response_of_some_xml of_xml =
         match resp with
         | Error err -> response_of_error err
         | Ok resp ->
-          Awso.Http.Response.body_to_string state resp
-          >>= fun xmls ->
-          let xml = Awso.Xml.parse_response xmls in
-          return (Ok (of_xml xml))
+          let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+          Ok (of_xml xml)
       in
       [%e body]
     ;;]
@@ -66,50 +59,44 @@ let%expect_test "of_response" =
   |> printf "%s%!";
   [%expect
     {|
-    let of_response (type s) (type i) (type o) (type e)
-      (state : s Awso.Http.Monad.t) (endpoint : (i, o, e) t) resp =
-      (let (>>=) = state.Awso.Http.Monad.bind in
-       let return = state.Awso.Http.Monad.return in
-       let response_of_error err =
+    let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
+      (resp :
+      (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) =
+      (let response_of_error err =
          match err with
-         | `Too_many_redirects -> return (Error (`Transport `Too_many_redirects))
+         | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
          | `Bad_response
              { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
              if (code >= 400) && (code <= 599)
              then
                let xml = Awso.Xml.parse_response body in
-               return (Error (`AWS (Ec2_error.of_xml xml)))
+               Error (`AWS (Ec2_error.of_xml xml))
              else
-               return
-                 (Error
-                    (`Transport
-                       (`Bad_response
-                          {
-                            Awso.Http.Io.Error.code = code;
-                            body;
-                            x_amzn_error_type
-                          }))) in
+               Error
+                 (`Transport
+                    (`Bad_response
+                       {
+                         Awso.Http.Io.Error.code = code;
+                         body;
+                         x_amzn_error_type
+                       })) in
        let response_of_none () =
-         match resp with
-         | Error err -> response_of_error err
-         | Ok _ -> return (Ok ()) in
+         match resp with | Error err -> response_of_error err | Ok _ -> Ok () in
        let response_of_some_xml of_xml =
          match resp with
          | Error err -> response_of_error err
          | Ok resp ->
-             (Awso.Http.Response.body_to_string state resp) >>=
-               ((fun xmls ->
-                   let xml = Awso.Xml.parse_response xmls in
-                   return (Ok (of_xml xml)))) in
+             let xml =
+               Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+             Ok (of_xml xml) in
        match endpoint with
        | Name1 -> response_of_some_xml ResultModule1.of_xml
        | Name2 -> response_of_some_xml ResultModule2.of_xml
-       | Name3 -> response_of_none () : ((o,
-                                           [ `AWS of Ec2_error.t
-                                           | `Transport of
-                                               Awso.Http.Io.Error.call ])
-                                           result,
-                                          s) Awso.Http.Monad.app) |}]
+       | Name3 ->
+           response_of_none () : (o,
+                                   [ `AWS of Ec2_error.t
+                                   | `Transport of Awso.Http.Io.Error.call ])
+                                   result) |}]
 ;;
 
 let make_structure_for_protocol _service _metadata data =

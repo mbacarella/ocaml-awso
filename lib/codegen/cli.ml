@@ -196,7 +196,7 @@ let preamble ~loc =
       in
       Awso_async.Cfg.get_exn ?profile ?region ()
       >>= fun cfg ->
-      f (Awso_async.Http.Io.call ?endpoint_url ~service:Values.service ~cfg) m
+      f ?endpoint_url ?cfg:(Some cfg) m
       >>= fun result ->
       match result with
       | Error err -> (

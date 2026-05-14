@@ -2,8 +2,6 @@ module Cognito_idp = struct
   module Values = Awso_cognito_idp_async.Values
   module Io = Awso_cognito_idp_async.Io
 
-  let call = Awso_async.Http.Io.call ~service:Values.service
-
   include Awso_cognito_idp_async.Util
 end
 
@@ -43,7 +41,7 @@ let authenticate ~user_pool_id ~client_id ~username ~password =
     ; aws_secret_access_key = None
     }
   in
-  Cognito_idp.Io.initiate_auth (Cognito_idp.call ~cfg) initiate_auth_request
+  Cognito_idp.Io.initiate_auth ~cfg initiate_auth_request
   >>= fun resp ->
   match resp with
   | Error err -> return (Error (`Initiate_auth err))
@@ -111,7 +109,7 @@ let authenticate ~user_pool_id ~client_id ~username ~password =
         ~challengeResponses
         ()
     in
-    Cognito_idp.Io.respond_to_auth_challenge (Cognito_idp.call ~cfg) challenge_request
+    Cognito_idp.Io.respond_to_auth_challenge ~cfg challenge_request
     >>= fun resp ->
     match resp with
     | Error err -> return (Error (`Respond_to_auth_challenge err))

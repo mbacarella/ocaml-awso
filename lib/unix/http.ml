@@ -1,11 +1,16 @@
 open! Import
 
 module Io = struct
-  include Awso.Http.Monad.Make (struct
-    type +'a t = 'a
-  end)
+  let return x = x
+  let bind x f = f x
+  let map x f = f x
 
-  let monad = { Awso.Http.Monad.bind = (fun x f -> f (prj x)); return = (fun x -> inj x) }
-  let make_stream stream () = inj (stream ())
-  let make_http http meth request uri = inj (http meth request uri)
+  let call ?endpoint_url:_ ~cfg:_ ~service:_ _meth _request _uri =
+    failwith "awso_unix.Http.Io.call: not implemented (use awso_async or awso_lwt)"
+  ;;
+
+  let resolve_cfg = function
+    | Some cfg -> cfg
+    | None -> failwith "awso_unix.Http.Io.resolve_cfg: cfg is required"
+  ;;
 end

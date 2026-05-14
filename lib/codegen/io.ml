@@ -6,61 +6,45 @@ let eval_structure ~base_module ~io_subsystem operations =
   let make binding ctor =
     let p = Ast_convenience.pvar binding in
     let c = Printf.ksprintf Ast_convenience.evar "Endpoints.%s" ctor in
-    [%stri let [%p p] = fun http -> eval http [%e c]]
+    [%stri let [%p p] = fun ?endpoint_url ?cfg input -> eval ?endpoint_url ?cfg [%e c] input]
   in
-  let loc = !Ast_helper.default_loc in
-  let open_ =
-    let lid = Ast_convenience.lid base_module in
-    let s = Ast_helper.Opn.mk lid in
-    (* 2022-05-14 mbac: this got more ugly when porting from ppx_tools_versioned to
-       ppxlib. It *seems* not quite right. We should be using the lid after
-       creating it from base_module, but instead using base_module again. *)
+  let make_open mod_name =
     let longident_loc txt loc = { txt = Longident.Lident txt; loc } in
     Ast_helper.Str.open_
       { popen_expr =
-          { pmod_desc = Pmod_ident (longident_loc base_module loc)
-          ; pmod_loc = s.popen_loc
+          { pmod_desc = Pmod_ident (longident_loc mod_name loc)
+          ; pmod_loc = loc
           ; pmod_attributes = []
           }
-      ; popen_override = s.popen_override
-      ; popen_loc = s.popen_loc
-      ; popen_attributes = s.popen_attributes
+      ; popen_override = Fresh
+      ; popen_loc = loc
+      ; popen_attributes = []
       }
   in
-  let preamble =
+  let io_module =
     match io_subsystem with
-    | `Lwt ->
-      [%str
-        [%%i open_]
+    | `Async -> "Awso_async"
+    | `Lwt -> "Awso_lwt"
+  in
+  let base_open = make_open base_module in
+  let io_open = make_open io_module in
+  let preamble =
+    [%str
+      [%%i base_open]
+      [%%i io_open]
 
-        let eval http endpoint input =
-          let open Awso_lwt.Http.Io in
+      module Io = Http.Io
+
+      let eval ?endpoint_url ?cfg endpoint input =
+        Io.bind (Io.resolve_cfg cfg) (fun cfg ->
           let meth = Endpoints.method_of_endpoint endpoint in
           let uri = Endpoints.uri_of_endpoint endpoint input in
-          let fiber =
-            let ( >>= ) = monad.bind in
-            let _return = monad.return in
-            http meth (Endpoints.to_request endpoint input) uri
-            >>= fun resp_result -> Endpoints.of_response monad endpoint resp_result
-          in
-          prj fiber
-        ;;]
-    | `Async ->
-      [%str
-        [%%i open_]
-
-        let eval http endpoint input =
-          let open Awso_async.Http.Io in
-          let meth = Endpoints.method_of_endpoint endpoint in
-          let uri = Endpoints.uri_of_endpoint endpoint input in
-          let fiber =
-            let ( >>= ) = monad.bind in
-            let _return = monad.return in
-            http meth (Endpoints.to_request endpoint input) uri
-            >>= fun resp_result -> Endpoints.of_response monad endpoint resp_result
-          in
-          prj fiber
-        ;;]
+          Io.map
+            (Io.call ?endpoint_url ~cfg ~service:Values.service meth
+               (Endpoints.to_request endpoint input)
+               uri)
+            (fun resp_result -> Endpoints.of_response endpoint resp_result))
+      ;;]
   in
   preamble
   @ List.map
@@ -82,19 +66,21 @@ let%expect_test "eval_structure_async" =
   [%expect
     {|
     open Base_module
-    let eval http endpoint input =
-      let open Awso_async.Http.Io in
-        let meth = Endpoints.method_of_endpoint endpoint in
-        let uri = Endpoints.uri_of_endpoint endpoint input in
-        let fiber =
-          let (>>=) = monad.bind in
-          let _return = monad.return in
-          (http meth (Endpoints.to_request endpoint input) uri) >>=
-            (fun resp_result -> Endpoints.of_response monad endpoint resp_result) in
-        prj fiber
-    let abort_multipart_upload http = eval http Endpoints.AbortMultipartUpload
-    let complete_multipart_upload http =
-      eval http Endpoints.CompleteMultipartUpload |}]
+    open Awso_async
+    module Io = Http.Io
+    let eval ?endpoint_url ?cfg endpoint input =
+      Io.bind (Io.resolve_cfg cfg)
+        (fun cfg ->
+           let meth = Endpoints.method_of_endpoint endpoint in
+           let uri = Endpoints.uri_of_endpoint endpoint input in
+           Io.map
+             (Io.call ?endpoint_url ~cfg ~service:Values.service meth
+                (Endpoints.to_request endpoint input) uri)
+             (fun resp_result -> Endpoints.of_response endpoint resp_result))
+    let abort_multipart_upload ?endpoint_url ?cfg input =
+      eval ?endpoint_url ?cfg Endpoints.AbortMultipartUpload input
+    let complete_multipart_upload ?endpoint_url ?cfg input =
+      eval ?endpoint_url ?cfg Endpoints.CompleteMultipartUpload input |}]
 ;;
 
 let%expect_test "eval_structure_lwt" =
@@ -109,19 +95,21 @@ let%expect_test "eval_structure_lwt" =
   [%expect
     {|
     open Base_module
-    let eval http endpoint input =
-      let open Awso_lwt.Http.Io in
-        let meth = Endpoints.method_of_endpoint endpoint in
-        let uri = Endpoints.uri_of_endpoint endpoint input in
-        let fiber =
-          let (>>=) = monad.bind in
-          let _return = monad.return in
-          (http meth (Endpoints.to_request endpoint input) uri) >>=
-            (fun resp_result -> Endpoints.of_response monad endpoint resp_result) in
-        prj fiber
-    let abort_multipart_upload http = eval http Endpoints.AbortMultipartUpload
-    let complete_multipart_upload http =
-      eval http Endpoints.CompleteMultipartUpload |}]
+    open Awso_lwt
+    module Io = Http.Io
+    let eval ?endpoint_url ?cfg endpoint input =
+      Io.bind (Io.resolve_cfg cfg)
+        (fun cfg ->
+           let meth = Endpoints.method_of_endpoint endpoint in
+           let uri = Endpoints.uri_of_endpoint endpoint input in
+           Io.map
+             (Io.call ?endpoint_url ~cfg ~service:Values.service meth
+                (Endpoints.to_request endpoint input) uri)
+             (fun resp_result -> Endpoints.of_response endpoint resp_result))
+    let abort_multipart_upload ?endpoint_url ?cfg input =
+      eval ?endpoint_url ?cfg Endpoints.AbortMultipartUpload input
+    let complete_multipart_upload ?endpoint_url ?cfg input =
+      eval ?endpoint_url ?cfg Endpoints.CompleteMultipartUpload input |}]
 ;;
 
 let eval_signature ~protocol ~base_module ~io_subsystem endpoints =
@@ -135,14 +123,6 @@ let eval_signature ~protocol ~base_module ~io_subsystem endpoints =
   [%sig: [%%i open_]]
   @ List.map endpoints ~f:(fun e ->
       let name = Endpoint.name e |> Util.camel_to_snake_case |> Ast_convenience.mknoloc in
-      let call_type =
-        let io_arg =
-          match io_subsystem with
-          | `Lwt -> [%type: Awso_lwt.Http.Io.t]
-          | `Async -> [%type: Awso_async.Http.Io.t]
-        in
-        [%type: ([%t io_arg], Awso.Http.Io.Error.call) Awso.Http.Call.t]
-      in
       let request_type = Endpoint.request_type e in
       let result_type =
         let ok_arg = Endpoint.result_ok_type e in
@@ -161,7 +141,8 @@ let eval_signature ~protocol ~base_module ~io_subsystem endpoints =
       Ast_helper.Sig.value
         (Ast_helper.Val.mk
            name
-           [%type: [%t call_type] -> [%t request_type] -> [%t result_type]]))
+           [%type:
+             ?endpoint_url:string -> ?cfg:Awso.Cfg.t -> [%t request_type] -> [%t result_type]]))
 ;;
 
 let%expect_test "eval_signature_async" =
@@ -188,25 +169,29 @@ let%expect_test "eval_signature_async" =
     {|
     open Base_module.Values
     val input_and_output :
-      (Awso_async.Http.Io.t, Awso.Http.Io.Error.call) Awso.Http.Call.t ->
-        Input.t ->
-          (Output.t,
-            [ `AWS of Output.error  | `Transport of Awso.Http.Io.Error.call ])
-            Result.t Async.Deferred.t
+      ?endpoint_url:string ->
+        ?cfg:Awso.Cfg.t ->
+          Input.t ->
+            (Output.t,
+              [ `AWS of Output.error  | `Transport of Awso.Http.Io.Error.call ])
+              Result.t Async.Deferred.t
     val only_input :
-      (Awso_async.Http.Io.t, Awso.Http.Io.Error.call) Awso.Http.Call.t ->
-        Input.t ->
-          (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-            Result.t Async.Deferred.t
+      ?endpoint_url:string ->
+        ?cfg:Awso.Cfg.t ->
+          Input.t ->
+            (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
+              Result.t Async.Deferred.t
     val only_output :
-      (Awso_async.Http.Io.t, Awso.Http.Io.Error.call) Awso.Http.Call.t ->
-        unit ->
-          (Output.t,
-            [ `AWS of Output.error  | `Transport of Awso.Http.Io.Error.call ])
-            Result.t Async.Deferred.t
+      ?endpoint_url:string ->
+        ?cfg:Awso.Cfg.t ->
+          unit ->
+            (Output.t,
+              [ `AWS of Output.error  | `Transport of Awso.Http.Io.Error.call ])
+              Result.t Async.Deferred.t
     val no_input_and_no_output :
-      (Awso_async.Http.Io.t, Awso.Http.Io.Error.call) Awso.Http.Call.t ->
-        unit ->
-          (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-            Result.t Async.Deferred.t |}]
+      ?endpoint_url:string ->
+        ?cfg:Awso.Cfg.t ->
+          unit ->
+            (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
+              Result.t Async.Deferred.t |}]
 ;;

@@ -103,20 +103,10 @@ module Headers : sig
 end
 
 module Monad : sig
-  (** Monad type class. The technique used here relies on lightweight higher-kinded
-    polymorphism as described by Yallop and White in FLOPS (2014). Familiarity
-    with the concepts in that paper is a prerequisite to understanding this
-    module. However, most users do not need to understand this module since
-    common useful instances of the abstract types here are provided elsewhere. *)
-
-  (* Type level application. Conceptually represents the type ['x 'f]. *)
   type (+'x, 'f) app
 
   module type S = sig
-    (** The underlying actual monad type. *)
     type 'a s
-
-    (** Monad type lifted into the [app] type. *)
     type t
 
     external inj : 'a s -> ('a, t) app = "%identity"
@@ -127,12 +117,20 @@ module Monad : sig
     type 'a t
   end) : S with type 'a s = 'a T.t
 
-  (** Monad type class. The monad type is the type parameter ['m], and the
-    monadic operations are provided as a dictionary of functions. *)
   type 'm t =
     { bind : 'a 'b. ('a, 'm) app -> ('a -> ('b, 'm) app) -> ('b, 'm) app
     ; return : 'a. 'a -> ('a, 'm) app
     }
+end
+
+module Backend : sig
+  module type S = sig
+    type +'a t
+
+    val return : 'a -> 'a t
+    val bind : 'a t -> ('a -> 'b t) -> 'b t
+    val map : 'a t -> ('a -> 'b) -> 'b t
+  end
 end
 
 module Range : sig
@@ -241,45 +239,31 @@ module Request : sig
 end
 
 module Response : sig
-  type 's t
-  and ('a, 's) stream = unit -> ('a option, 's) Monad.app
+  type t =
+    { version : int * int
+    ; status : Status.t
+    ; reason : string
+    ; headers : Headers.t
+    ; body : string
+    }
 
-  val version : 's t -> int * int
-  val reason : 's t -> string
-  val status : 's t -> Status.t
-  val headers : 's t -> Headers.t
-  val body : 's t -> (string, 's) stream
-  val body_to_string : ?buffer:int -> 's Monad.t -> 's t -> (string, 's) Monad.app
+  val version : t -> int * int
+  val reason : t -> string
+  val status : t -> Status.t
+  val headers : t -> Headers.t
+  val body : t -> string
 
   val make
     :  ?version:int * int
     -> ?reason:string
     -> ?headers:Headers.t
-    -> body:(string, 's) stream
+    -> body:string
     -> Status.t
-    -> 's t
+    -> t
 end
 
-module Call : sig
-  type ('s, 'error) t =
-    Meth.t -> Request.t -> Uri.t -> (('s Response.t, 'error) result, 's) Monad.app
-end
-
-module Io : module type of struct
-  module type S = sig
-    include Monad.S
-
-    type 'a stream
-
-    val monad : t Monad.t
-    val make_stream : 'a stream -> ('a, t) Response.stream
-
-    val make_http
-      :  (Meth.t -> Request.t -> Uri.t -> (t Response.t, 'error) result s)
-      -> (t, 'error) Call.t
-  end
-
-  module Error = struct
+module Io : sig
+  module Error : sig
     type bad_response =
       { code : int
       ; body : string
@@ -292,5 +276,20 @@ module Io : module type of struct
       | `Too_many_redirects
       ]
     [@@deriving sexp]
+  end
+
+  module type S = sig
+    include Backend.S
+
+    val call
+      :  ?endpoint_url:string
+      -> cfg:Cfg.t
+      -> service:Service.t
+      -> Meth.t
+      -> Request.t
+      -> Uri.t
+      -> (Response.t, Error.call) result t
+
+    val resolve_cfg : Cfg.t option -> Cfg.t t
   end
 end

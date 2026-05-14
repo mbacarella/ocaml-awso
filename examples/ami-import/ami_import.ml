@@ -3,15 +3,11 @@ module Cfg = Awso_async.Cfg
 module Ec2 = struct
   module Values = Awso_ec2_async.Values
   module Io = Awso_ec2_async.Io
-
-  let call = Awso_async.Http.Io.call ~service:Values.service
 end
 
 module Ebs = struct
   module Values = Awso_ebs_async.Values
   module Io = Awso_ebs_async.Io
-
-  let call = Awso_async.Http.Io.call ~service:Values.service
 end
 
 (* This is a port of https://github.com/ipxe/ipxe/blob/master/contrib/cloud/aws-import *)
@@ -51,7 +47,7 @@ let start_snapshot ~cfg ~volume_size ~description =
     ~sexp_of_error:Ebs.Values.StartSnapshotResponse.sexp_of_error
     ~f:(fun () ->
     Ebs.Io.start_snapshot
-      (Ebs.call ~cfg)
+      ~cfg
       (Ebs.Values.StartSnapshotRequest.make
          ~description
          ~volumeSize:(Int64.of_int volume_size)
@@ -66,7 +62,7 @@ let put_snapshot_block ~cfg request =
   dispatch_exn
     ~name:"put_snapshot_block"
     ~sexp_of_error:Ebs.Values.PutSnapshotBlockResponse.sexp_of_error
-    ~f:(fun () -> Ebs.Io.put_snapshot_block (Ebs.call ~cfg) request)
+    ~f:(fun () -> Ebs.Io.put_snapshot_block ~cfg request)
   >>| fun v ->
   let _checksum = v.Ebs.Values.PutSnapshotBlockResponse.checksum in
   ()
@@ -78,7 +74,7 @@ let complete_snapshot ~cfg ~snapshot_id ~changed_blocks_count =
     ~sexp_of_error:Ebs.Values.CompleteSnapshotResponse.sexp_of_error
     ~f:(fun () ->
     Ebs.Io.complete_snapshot
-      (Ebs.call ~cfg)
+      ~cfg
       (Ebs.Values.CompleteSnapshotRequest.make
          ~snapshotId:snapshot_id
          ~changedBlocksCount:changed_blocks_count
@@ -95,7 +91,7 @@ let describe_snapshots ~cfg ~snapshot_id =
     ~sexp_of_error:Ec2.Values.Ec2_error.sexp_of_t
     ~f:(fun () ->
     Ec2.Io.describe_snapshots
-      (Ec2.call ~cfg)
+      ~cfg
       (Ec2.Values.DescribeSnapshotsRequest.make ~snapshotIds:[ snapshot_id ] ()))
   >>| fun v ->
   match v.Ec2.Values.DescribeSnapshotsResult.snapshots with
@@ -115,7 +111,7 @@ let describe_images ~cfg ~image_id =
     ~sexp_of_error:Ec2.Values.Ec2_error.sexp_of_t
     ~f:(fun () ->
     Ec2.Io.describe_images
-      (Ec2.call ~cfg)
+      ~cfg
       (Ec2.Values.DescribeImagesRequest.make ~imageIds:[ image_id ] ()))
   >>| fun v ->
   match v.Ec2.Values.DescribeImagesResult.images with
@@ -168,7 +164,7 @@ let all_regions ~cfg =
     ~name:"describe_regions"
     ~sexp_of_error:Ec2.Values.Ec2_error.sexp_of_t
     ~f:(fun () ->
-    Ec2.Io.describe_regions (Ec2.call ~cfg) (Ec2.Values.DescribeRegionsRequest.make ()))
+    Ec2.Io.describe_regions ~cfg (Ec2.Values.DescribeRegionsRequest.make ()))
   >>| fun v ->
   Option.value_exn ~message:"regions is None" v.Ec2.Values.DescribeRegionsResult.regions
 ;;
@@ -218,7 +214,7 @@ let create_snapshot ~cfg ~description ~image =
 let register_image ~cfg request =
   dispatch_exn
     ~name:"register_image"
-    ~f:(fun () -> Ec2.Io.register_image (Ec2.call ~cfg) request)
+    ~f:(fun () -> Ec2.Io.register_image ~cfg request)
     ~sexp_of_error:Ec2.Values.Ec2_error.sexp_of_t
   >>| fun v ->
   Option.value_exn

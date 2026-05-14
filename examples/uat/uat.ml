@@ -3,8 +3,6 @@ module Cfg = Awso_async.Cfg
 module Ec2 = struct
   module Values = Awso_ec2_async.Values
   module Io = Awso_ec2_async.Io
-
-  let call = Awso_async.Http.Io.call ~service:Values.service
 end
 
 let default_region = "us-east-2"
@@ -20,11 +18,11 @@ let dispatch_exn ~name ~sexp_of_error ~f =
     failwithf "%s: %s" name (aws |> sexp_of_error |> Sexp.to_string_hum) ()
 ;;
 
-let call = ref None
+let cfg_ref = ref None
 
 let ec2 name f r =
-  let call = Option.value_exn ~message:"need to intialize call first" !call in
-  dispatch_exn ~name ~sexp_of_error:Ec2.Values.Ec2_error.sexp_of_t ~f:(fun () -> f call r)
+  let cfg = Option.value_exn ~message:"need to intialize cfg first" !cfg_ref in
+  dispatch_exn ~name ~sexp_of_error:Ec2.Values.Ec2_error.sexp_of_t ~f:(fun () -> f ?endpoint_url:None ?cfg:(Some cfg) r)
 ;;
 
 let describe_instances_no_terminated () =
@@ -882,7 +880,7 @@ let run_all_tests ?image_id ~region () =
 let main ?profile ?image_id ~region () =
   let region = Awso.Region.of_string region in
   let%bind cfg = Cfg.get_exn ?profile ~region () in
-  call := Some (Ec2.call ~cfg);
+  cfg_ref := Some cfg;
   run_all_tests ?image_id ~region ()
 ;;
 

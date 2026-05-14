@@ -81,32 +81,25 @@ let of_response endpoints =
           endpoint
       in
       match Endpoint.in_result_module endpoint "of_json" with
-      | None -> [%expr return (Ok ())]
+      | None -> [%expr Ok ()]
       | Some of_json ->
         [%expr
           match resp with
           | Error err -> handle_error err [%e error_of_json]
           | Ok resp ->
-            Awso.Http.Response.body_to_string state resp
-            >>= fun jsons ->
-            let json = Awso.Json.from_string jsons in
-            return (Ok ([%e of_json] json))])
+            let json = Awso.Json.from_string (Awso.Http.Response.body resp) in
+            Ok ([%e of_json] json)])
     |> Ast_helper.Exp.match_ [%expr endpoint]
   in
   [%stri
     let of_response
-      (type s i o e)
-      (state : s Awso.Http.Monad.t)
+      (type i o e)
       (endpoint : (i, o, e) t)
-      resp
-      : ( (o, [ `AWS of e | `Transport of Awso.Http.Io.Error.call ]) result, s )
-      Awso.Http.Monad.app
+      (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result)
+      : (o, [ `AWS of e | `Transport of Awso.Http.Io.Error.call ]) result
       =
-      let ( >>= ) = state.Awso.Http.Monad.bind in
-      let return = state.Awso.Http.Monad.return in
       let handle_error err error_of_json =
-        (* FIXME: this error handling pattern appears over and over again. factor out. *)
-        let generic_error () = return (Error (`Transport err)) in
+        let generic_error () = Error (`Transport err) in
         match err with
         | `Too_many_redirects -> generic_error ()
         | `Bad_response { Awso.Http.Io.Error.code; body; x_amzn_error_type = _ } -> (
@@ -114,7 +107,7 @@ let of_response endpoints =
           | Some error_of_json, true -> (
             let json = Awso.Json.from_string body in
             match json |> Awso.Json.Util.member_or_null "__type" with
-            | `String error_type -> return (Error (`AWS (error_of_json error_type json)))
+            | `String error_type -> Error (`AWS (error_of_json error_type json))
             | `Null -> generic_error ()
             | _ -> failwith (sprintf "Error '__type' did not have string type: %s" body))
           | None, _ | _, false -> generic_error ())
@@ -134,12 +127,11 @@ let%expect_test "of_response" =
   |> printf "%s%!";
   [%expect
     {|
-    let of_response (type s) (type i) (type o) (type e)
-      (state : s Awso.Http.Monad.t) (endpoint : (i, o, e) t) resp =
-      (let (>>=) = state.Awso.Http.Monad.bind in
-       let return = state.Awso.Http.Monad.return in
-       let handle_error err error_of_json =
-         let generic_error () = return (Error (`Transport err)) in
+    let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
+      (resp :
+      (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) =
+      (let handle_error err error_of_json =
+         let generic_error () = Error (`Transport err) in
          match err with
          | `Too_many_redirects -> generic_error ()
          | `Bad_response
@@ -149,7 +141,7 @@ let%expect_test "of_response" =
                   let json = Awso.Json.from_string body in
                   (match json |> (Awso.Json.Util.member_or_null "__type") with
                    | `String error_type ->
-                       return (Error (`AWS (error_of_json error_type json)))
+                       Error (`AWS (error_of_json error_type json))
                    | `Null -> generic_error ()
                    | _ ->
                        failwith
@@ -161,23 +153,20 @@ let%expect_test "of_response" =
            (match resp with
             | Error err -> handle_error err None
             | Ok resp ->
-                (Awso.Http.Response.body_to_string state resp) >>=
-                  ((fun jsons ->
-                      let json = Awso.Json.from_string jsons in
-                      return (Ok (ResultModule1.of_json json)))))
+                let json =
+                  Awso.Json.from_string (Awso.Http.Response.body resp) in
+                Ok (ResultModule1.of_json json))
        | Name2 ->
            (match resp with
             | Error err -> handle_error err None
             | Ok resp ->
-                (Awso.Http.Response.body_to_string state resp) >>=
-                  ((fun jsons ->
-                      let json = Awso.Json.from_string jsons in
-                      return (Ok (ResultModule2.of_json json)))))
-       | Name3 -> return (Ok ()) : ((o,
-                                      [ `AWS of e
-                                      | `Transport of Awso.Http.Io.Error.call ])
-                                      result,
-                                     s) Awso.Http.Monad.app) |}]
+                let json =
+                  Awso.Json.from_string (Awso.Http.Response.body resp) in
+                Ok (ResultModule2.of_json json))
+       | Name3 ->
+           Ok () : (o,
+                     [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ])
+                     result) |}]
 ;;
 
 let make_structure_for_protocol (metadata : Botodata.metadata) data =

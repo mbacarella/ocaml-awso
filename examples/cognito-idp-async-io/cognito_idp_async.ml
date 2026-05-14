@@ -2,7 +2,6 @@ open Core
 open Awso_cognito_idp_async.Io
 open Awso_cognito_idp.Values
 
-let http ~cfg = Awso_async.Http.Io.call ~cfg ~service
 let failwithf fmt = Format.kasprintf failwith fmt
 
 let pool_name =
@@ -15,7 +14,7 @@ module List_user_pools = struct
     let open Async.Deferred in
     Awso_async.Cfg.get_exn ()
     >>= fun cfg ->
-    list_user_pools (http ~cfg) (ListUserPoolsRequest.make ~maxResults:10 ())
+    list_user_pools ~cfg (ListUserPoolsRequest.make ~maxResults:10 ())
     >>| function
     | Ok response -> ListUserPoolsResponse.sexp_of_t response |> print_s
     | Error (`Transport _) -> failwithf "list_user_pools: http error" ()
@@ -39,7 +38,7 @@ module Create_user_pool = struct
     let open Async.Deferred in
     Awso_async.Cfg.get_exn ()
     >>= fun cfg ->
-    create_user_pool (http ~cfg) (CreateUserPoolRequest.make ~poolName ())
+    create_user_pool ~cfg (CreateUserPoolRequest.make ~poolName ())
     >>| function
     | Ok response -> CreateUserPoolResponse.sexp_of_t response |> print_s
     | Error (`Transport _) -> failwithf "create_user_pool: http error" ()

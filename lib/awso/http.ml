@@ -125,6 +125,16 @@ module Monad = struct
     }
 end
 
+module Backend = struct
+  module type S = sig
+    type +'a t
+
+    val return : 'a -> 'a t
+    val bind : 'a t -> ('a -> 'b t) -> 'b t
+    val map : 'a t -> ('a -> 'b) -> 'b t
+  end
+end
+
 module Range = struct
   type byte_range_spec =
     [ `Range of int64 * int64
@@ -324,15 +334,13 @@ module Request = struct
 end
 
 module Response = struct
-  type 's t =
+  type t =
     { version : int * int
     ; status : Status.t
     ; reason : string
     ; headers : Headers.t
-    ; body : (string, 's) stream
+    ; body : string
     }
-
-  and ('a, 's) stream = unit -> ('a option, 's) Monad.app
 
   let make ?(version = 1, 1) ?(reason = "") ?(headers = Headers.empty) ~body status =
     { version; reason; headers; status; body }
@@ -343,41 +351,9 @@ module Response = struct
   let body { body; _ } = body
   let version { version; _ } = version
   let reason { reason; _ } = reason
-
-  let body_to_string ?(buffer = 0x1000) { Monad.return; bind } { body; _ } =
-    let ( >>= ) = bind in
-    let buf = Buffer.create buffer in
-    let rec go () =
-      body ()
-      >>= function
-      | Some x ->
-        Buffer.add_string buf x;
-        go ()
-      | None -> return (Buffer.contents buf)
-    in
-    go ()
-  ;;
-end
-
-module Call = struct
-  type ('s, 'error) t =
-    Meth.t -> Request.t -> Uri.t -> (('s Response.t, 'error) result, 's) Monad.app
 end
 
 module Io = struct
-  module type S = sig
-    include Monad.S
-
-    type 'a stream
-
-    val monad : t Monad.t
-    val make_stream : 'a stream -> ('a, t) Response.stream
-
-    val make_http
-      :  (Meth.t -> Request.t -> Uri.t -> (t Response.t, 'error) result s)
-      -> (t, 'error) Call.t
-  end
-
   module Error = struct
     type bad_response =
       { code : int
@@ -391,5 +367,20 @@ module Io = struct
       | `Too_many_redirects
       ]
     [@@deriving sexp]
+  end
+
+  module type S = sig
+    include Backend.S
+
+    val call
+      :  ?endpoint_url:string
+      -> cfg:Cfg.t
+      -> service:Service.t
+      -> Meth.t
+      -> Request.t
+      -> Uri.t
+      -> (Response.t, Error.call) result t
+
+    val resolve_cfg : Cfg.t option -> Cfg.t t
   end
 end

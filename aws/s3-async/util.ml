@@ -1,5 +1,3 @@
-let io_call = Awso_async.Http.Io.call ~service:Values.service
-
 module Source = struct
   let default_chunk_size = Byte_units.of_megabytes 8.
 
@@ -88,7 +86,7 @@ let put_object cfg ~bucket ~key body =
   let key = Values.ObjectKey.make key in
   let body = Values.Body.of_string body in
   let request = Values.PutObjectRequest.make ~body ~bucket ~key () in
-  Io.put_object (io_call ~cfg) request
+  Io.put_object ~cfg request
   >>| function
   | Error e -> Error (`Put_object e)
   | Ok response -> (
@@ -99,7 +97,7 @@ let put_object cfg ~bucket ~key body =
 
 let delete_object cfg ~bucket ~key =
   Io.delete_object
-    (io_call ~cfg)
+    ~cfg
     (Values.DeleteObjectRequest.make ~bucket ~key:(Values.ObjectKey.make key) ())
 ;;
 
@@ -113,7 +111,7 @@ let get_object cfg ?(range : Awso.Http.Range.t option) ~bucket ~key () =
   let key = Values.ObjectKey.make key in
   let range = Option.map ~f:Awso.Http.Range.to_header_value range in
   let request = Values.GetObjectRequest.make ?range ~bucket ~key () in
-  Io.get_object (io_call ~cfg) request
+  Io.get_object ~cfg request
 ;;
 
 type ('acc, 'error) callback =
@@ -142,7 +140,7 @@ let initialize_multipart cfg ~bucket ~key =
   let req = Values.CreateMultipartUploadRequest.make ~bucket ~key:key_obj () in
   Awso_async.Import.with_retries
   @@ fun () ->
-  Io.create_multipart_upload (io_call ~cfg) req
+  Io.create_multipart_upload ~cfg req
   >>| function
   | Ok { Values.CreateMultipartUploadOutput.uploadId = Some uploadId; _ } ->
     Ok (`Upload_id uploadId)
@@ -195,7 +193,7 @@ let multipart
           ~contentMD5
           ()
       in
-      Io.upload_part (io_call ~cfg) upload_part_request
+      Io.upload_part ~cfg upload_part_request
       >>= function
       | Error e -> return (Error (`Upload_part e))
       | Ok uploadPartResp -> (
@@ -244,7 +242,7 @@ let multipart
           ~uploadId:upload_id
           ()
       in
-      Io.complete_multipart_upload (io_call ~cfg) req
+      Io.complete_multipart_upload ~cfg req
       >>= function
       | Error e -> return (Error (`Complete_multipart_upload e))
       | Ok completedUpload -> (
@@ -265,7 +263,7 @@ let map_bucket cfg ~bucket ~f =
   let rec loop ?nextContinuationToken () =
     match%bind
       Io.list_objects_v2
-        (io_call ~cfg)
+        ~cfg
         (Values.ListObjectsV2Request.make
            ?delimiter:None
            ?encodingType:None
