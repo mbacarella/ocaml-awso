@@ -1,0 +1,5 @@
+(executable
+ (name awso_ec2)
+ (libraries awso-ec2-async core_unix.command_unix)
+ (flags
+  (:standard -open Core -open Async)))

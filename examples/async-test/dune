@@ -1,0 +1,14 @@
+(executable
+ (name awso_test)
+ (libraries
+  awso-s3-async
+  awso-ec2-async
+  awso-ecr-async
+  awso-ecs-async
+  awso-sso-async
+  core_unix.filename_unix
+  core_unix.command_unix)
+ (flags
+  (:standard -open Core -open Async))
+ (preprocess
+  (pps ppx_jane)))
