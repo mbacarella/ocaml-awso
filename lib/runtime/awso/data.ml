@@ -8,7 +8,7 @@ module type S = sig
   val to_query : t -> Client.Query.t io
   val to_header : t -> string io
   val of_xml : Xml.t -> t
-  val of_json : Json.t -> t
-  val to_json : t -> Json.t io
+  val of_json : Yojson.Safe.t -> t
+  val to_json : t -> Yojson.Safe.t io
   val of_string : string -> t
 end

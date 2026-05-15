@@ -712,4 +712,4 @@ let fix_shape_name_collisions (service : Botodata.service) =
   }
 ;;
 
-let of_json x = x |> Json.from_string |> parse |> fix_shape_name_collisions
+let of_json x = x |> Yojson.Safe.from_string |> parse |> fix_shape_name_collisions

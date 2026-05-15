@@ -139,7 +139,7 @@ let request_args (service : Botodata.service) (op : Botodata.operation option) =
                    (List.map [%e body_values] ~f:(fun (x, y) ->
                       let value = Awso.Botodata.Json.value_to_json_scalar y in
                       x, value))
-                |> Awso.Json.to_string)
+                |> Yojson.Safe.to_string)
             in
             headers, body])))
 ;;
@@ -297,12 +297,12 @@ let of_response data =
           in
           match x_amzn_error_type, error_of_json, code >= 400 && code <= 599 with
           | Some error_type, Some error_of_json, true ->
-            let json = Awso.Json.from_string body in
+            let json = Yojson.Safe.from_string body in
             Error (`AWS (error_of_json error_type json))
           | None, Some error_of_json, true -> (
             try
-              let json = Awso.Json.from_string body in
-              match json |> Awso.Json.Util.member_or_null "__type" with
+              let json = Yojson.Safe.from_string body in
+              match json |> Yojson.Safe.Util.member "__type" with
               | `String error_type ->
                 let error_type =
                   (* sometimes errors have names like
@@ -320,7 +320,7 @@ let of_response data =
           | None, _, _ | _, None, _ | _, _, false -> generic_error ())
       in
       let response_to_json resp =
-        Awso.Json.from_string (Awso.Http.Response.body resp)
+        Yojson.Safe.from_string (Awso.Http.Response.body resp)
       in
       let _ = resp in
       let _ = handle_error in
@@ -367,12 +367,12 @@ let%expect_test "of_response" =
                      ((code >= 400) && (code <= 599)))
              with
              | (Some error_type, Some error_of_json, true) ->
-                 let json = Awso.Json.from_string body in
+                 let json = Yojson.Safe.from_string body in
                  Error (`AWS (error_of_json error_type json))
              | (None, Some error_of_json, true) ->
                  (try
-                    let json = Awso.Json.from_string body in
-                    match json |> (Awso.Json.Util.member_or_null "__type") with
+                    let json = Yojson.Safe.from_string body in
+                    match json |> (Yojson.Safe.Util.member "__type") with
                     | `String error_type ->
                         let error_type =
                           match String.lsplit2 error_type ~on:'#' with
@@ -386,7 +386,7 @@ let%expect_test "of_response" =
                   with | _ -> generic_error ())
              | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
       let response_to_json resp =
-        Awso.Json.from_string (Awso.Http.Response.body resp) in
+        Yojson.Safe.from_string (Awso.Http.Response.body resp) in
       let _ = resp in
       let _ = handle_error in
       let _ = response_to_json in

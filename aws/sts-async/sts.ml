@@ -62,7 +62,7 @@ module Policy = struct
 
   let create ?(version = "2012-10-17") statement =
     let t = { version; statement } in
-    Log.Global.debug "policy as json: %s" (to_json t |> Awso.Json.to_string);
+    Log.Global.debug "policy as json: %s" (to_json t |> Yojson.Safe.to_string);
     t
   ;;
 end
@@ -89,7 +89,7 @@ let assume_role
              (Option.map
                 ~f:(fun x ->
                   Policy.to_json x
-                  |> Awso.Json.to_string
+                  |> Yojson.Safe.to_string
                   |> Values.SessionPolicyDocumentType.make)
                 policy)
            ())
@@ -122,7 +122,7 @@ let assume_role_with_saml
              (Option.map
                 ~f:(fun x ->
                   Policy.to_json x
-                  |> Awso.Json.to_string
+                  |> Yojson.Safe.to_string
                   |> Values.SessionPolicyDocumentType.make)
                 policy)
            ())

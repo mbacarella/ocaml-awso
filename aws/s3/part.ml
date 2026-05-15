@@ -38,7 +38,7 @@ let build_parts_from_size ~part_size size =
   |> List.rev
 ;;
 
-let to_json { number; start_offset; size } : Awso.Json.t =
+let to_json { number; start_offset; size } : Yojson.Safe.t =
   `Assoc
     [ "number", `Int number
     ; "start_offset", `Intlit (Int64.to_string start_offset)
@@ -51,7 +51,7 @@ let%expect_test "build_parts_from_size" =
     build_parts_from_size ~part_size size
     |> List.map ~f:to_json
     |> (fun l -> `List l)
-    |> Awso.Json.to_string
+    |> Yojson.Safe.to_string
     |> print_endline
   in
   test ~part_size:10L 30L;

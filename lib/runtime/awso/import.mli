@@ -78,26 +78,29 @@ val check_float_max : float -> max:float -> (unit, string) Result.t
 val string_of_xml : kind:string -> ('a Xmlm.frag as 'a) Xmlm.frag -> string
 
 (** Convert a JSON value to a boolean (or fail with an exception). *)
-val bool_of_json : Json.t -> bool
+val bool_of_json : Yojson.Safe.t -> bool
 
 (** Convert a JSON value to a float (or fail with an exception mentioning the
     [kind] of value being parsed). *)
-val float_of_json : kind:string -> Json.t -> float
+val float_of_json : kind:string -> Yojson.Safe.t -> float
 
 (** Convert a JSON value to a string (or fail with an exception mentioning the
     [kind] of value being parsed). *)
-val string_of_json : kind:string -> Json.t -> string
+val string_of_json : kind:string -> Yojson.Safe.t -> string
 
 (** Convert a JSON value to a timestamp (or fail with an exception). *)
-val timestamp_of_json : Json.t -> string
+val timestamp_of_json : Yojson.Safe.t -> string
 
 (** Convert a JSON value to a list (or fail with an exception mentioning the
     [kind] of value being parsed). *)
-val list_of_json : kind:string -> of_json:(Json.t -> 'a) -> [> Json.t ] -> 'a list
+val list_of_json : kind:string -> of_json:(Yojson.Safe.t -> 'a) -> [> Yojson.Safe.t ] -> 'a list
 
 (** Convert a JSON object to an association list (or fail with an exception). *)
 val object_of_json
   :  key_of_string:(string -> 'key)
-  -> of_json:(Json.t -> 'value)
-  -> Json.t
+  -> of_json:(Yojson.Safe.t -> 'value)
+  -> Yojson.Safe.t
   -> ('key * 'value) list
+
+val field_map : Yojson.Safe.t -> string -> (Yojson.Safe.t -> 'a) -> 'a option
+val field_map_exn : Yojson.Safe.t -> string -> (Yojson.Safe.t -> 'a) -> 'a

@@ -17,12 +17,12 @@ module List_user_pools = struct
     list_user_pools ~cfg (ListUserPoolsRequest.make ~maxResults:10 ())
     >>| function
     | Ok response ->
-      response |> ListUserPoolsResponse.to_json |> Awso.Json.to_string |> print_endline
+      response |> ListUserPoolsResponse.to_json |> Yojson.Safe.to_string |> print_endline
     | Error (`Transport _) -> failwithf "list_user_pools: http error" ()
     | Error (`AWS err) ->
       failwithf
         "list_user_pools: %s"
-        (err |> ListUserPoolsResponse.error_to_json |> Awso.Json.to_string)
+        (err |> ListUserPoolsResponse.error_to_json |> Yojson.Safe.to_string)
         ()
   ;;
 
@@ -42,12 +42,12 @@ module Create_user_pool = struct
     create_user_pool ~cfg (CreateUserPoolRequest.make ~poolName ())
     >>| function
     | Ok response ->
-      response |> CreateUserPoolResponse.to_json |> Awso.Json.to_string |> print_endline
+      response |> CreateUserPoolResponse.to_json |> Yojson.Safe.to_string |> print_endline
     | Error (`Transport _) -> failwithf "create_user_pool: http error" ()
     | Error (`AWS err) ->
       failwithf
         "create_user_pool: %s"
-        (err |> CreateUserPoolResponse.error_to_json |> Awso.Json.to_string)
+        (err |> CreateUserPoolResponse.error_to_json |> Yojson.Safe.to_string)
         ()
   ;;
 

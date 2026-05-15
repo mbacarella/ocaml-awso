@@ -3,8 +3,8 @@ open! Import
 include Awso_codegen.Botodata
 
 module Json : sig
-  val value_to_json_scalar : value -> Json.t
-  val value_to_json : value -> Json.t
+  val value_to_json_scalar : value -> Yojson.Safe.t
+  val value_to_json : value -> Yojson.Safe.t
 end = struct
   let value_to_string : value -> string option = function
     | `Blob b -> Some b
@@ -16,7 +16,7 @@ end = struct
     | _ -> None
   ;;
 
-  let rec value_to_json_scalar : value -> Json.t = function
+  let rec value_to_json_scalar : value -> Yojson.Safe.t = function
     | `Boolean b -> `Bool b
     | `Integer i -> `Int i
     | `Long l -> (
@@ -29,7 +29,7 @@ end = struct
     | `List xs -> list_to_json xs
     | `Map xs -> map_to_json xs
 
-  and map_to_json (xs : (value * value) list) : Json.t =
+  and map_to_json (xs : (value * value) list) : Yojson.Safe.t =
     `Assoc
       (List.map
          ~f:(fun (k, v) ->
@@ -44,14 +44,14 @@ end = struct
            k_string, v_value)
          xs)
 
-  and structure_to_json (fields : (string * value) list) : Json.t =
+  and structure_to_json (fields : (string * value) list) : Yojson.Safe.t =
     let f (k, v) = k, value_to_json_scalar v in
     `Assoc (List.map fields ~f)
 
-  and list_to_json (xs : value list) : Json.t =
+  and list_to_json (xs : value list) : Yojson.Safe.t =
     `List (List.map xs ~f:value_to_json_scalar)
 
-  and value_to_json : value -> Json.t = function
+  and value_to_json : value -> Yojson.Safe.t = function
     | `Map fields -> map_to_json fields
     | `Structure fields -> structure_to_json fields
     | `List xs -> list_to_json xs

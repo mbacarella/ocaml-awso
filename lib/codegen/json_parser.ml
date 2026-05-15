@@ -19,7 +19,7 @@ module Json_path = struct
     ; path : path
     }
 
-  type t = Json.t with_path
+  type t = Yojson.Safe.t with_path
 
   type error =
     { message : string
@@ -46,7 +46,7 @@ module Json_path = struct
     | _ -> Error (error_at jp "not a list")
   ;;
 
-  type record = (string * Json.t) list with_path
+  type record = (string * Yojson.Safe.t) list with_path
 
   let error_at_record = error_at
   let get_field_in key r = List.Assoc.find r.value ~equal:String.equal key
@@ -142,9 +142,9 @@ let%expect_test "int" =
 
 let%expect_test "int strictness" =
   let test j = print_result (fun i -> `Int i) (run int j) in
-  test (Json.from_string {| 1 |});
+  test (Yojson.Safe.from_string {| 1 |});
   [%expect {| ["Ok",1] |}];
-  test (Json.from_string {| 1.5 |});
+  test (Yojson.Safe.from_string {| 1.5 |});
   [%expect {| ["Error","not an int"] |}]
 ;;
 

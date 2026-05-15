@@ -265,3 +265,21 @@ let object_of_json ~key_of_string ~of_json = function
   | `Assoc alst -> List.map alst ~f:(fun (key, json) -> key_of_string key, of_json json)
   | _ -> failwith "Expected json representing a map"
 ;;
+
+let field_map (x : Yojson.Safe.t) field_name f =
+  match x with
+  | `Assoc fields -> (
+    match List.Assoc.find fields field_name ~equal:String.equal with
+    | None | Some `Null -> None
+    | Some value -> Some (f value))
+  | _ -> failwithf "Expected JSON object for field '%s'" field_name ()
+;;
+
+let field_map_exn (x : Yojson.Safe.t) field_name f =
+  match x with
+  | `Assoc fields -> (
+    match List.Assoc.find fields field_name ~equal:String.equal with
+    | Some value -> f value
+    | None -> failwithf "Expected field '%s'" field_name ())
+  | _ -> failwithf "Expected JSON object for field '%s'" field_name ()
+;;

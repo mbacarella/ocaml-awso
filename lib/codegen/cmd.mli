@@ -21,9 +21,9 @@
     val make : ... -> unit -> t
 
     val of_xml : ('a Xmlm.frag as 'a) Xmlm.frag -> t
-    val of_json : Awso.Json.t -> t
+    val of_json : Yojson.Safe.t -> t
 
-    val to_json : t -> Awso.Json.t
+    val to_json : t -> Yojson.Safe.t
 
     end
 

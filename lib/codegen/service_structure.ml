@@ -22,7 +22,7 @@ let make_error_of_json shapes =
            (Some (Ast_convenience.constr of_json [ [%expr json] ])))
     in
     let error_e =
-      [%expr `Unknown_operation_error (name, Some (Awso.Json.to_string json))]
+      [%expr `Unknown_operation_error (name, Some (Yojson.Safe.to_string json))]
     in
     List.map shapes ~f:case
     @ [ Ast_helper.Exp.case (Ast_convenience.pvar "name") error_e ]
@@ -427,8 +427,8 @@ let of_json_converter_of_shape shape_name shape =
           in
           let field_map_e =
             if argument_is_required
-            then [%expr Awso.Json.Util.field_map_exn]
-            else [%expr Awso.Json.Util.field_map]
+            then [%expr field_map_exn]
+            else [%expr field_map]
           in
           let arg_id = Shape.uncapitalized_id field_name in
           let pat = Ast_helper.Pat.var (Ast_convenience.mknoloc arg_id) in

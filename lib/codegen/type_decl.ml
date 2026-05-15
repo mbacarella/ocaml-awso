@@ -75,7 +75,7 @@ let error_to_json_of_errors (op : Botodata.operation) =
             | Some m -> [ "message", `String m ]))]
   in
   let body = Ast_helper.Exp.function_ (cases @ [ catch_all ]) in
-  [%stri let error_to_json : error -> Awso.Json.t = [%e body]]
+  [%stri let error_to_json : error -> Yojson.Safe.t = [%e body]]
 ;;
 
 let%expect_test "type_declaration_of_errors" =

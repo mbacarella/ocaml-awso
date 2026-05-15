@@ -87,7 +87,7 @@ let convert_rest_json
                 param
                 |> [%e to_value]
                 |> Awso.Botodata.Json.value_to_json
-                |> Awso.Json.to_string])
+                |> Yojson.Safe.to_string])
         in
         if is_required
         then

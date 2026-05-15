@@ -193,5 +193,5 @@ end
 
 type t = Botodata.service
 
-val parse : Json.t -> t
+val parse : Yojson.Safe.t -> t
 val of_json : string -> t
