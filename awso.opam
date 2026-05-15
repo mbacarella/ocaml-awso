@@ -20,6 +20,7 @@ depends: [
   "cryptokit"
   "ppx_expect"
   "ppx_jane"
+  "ppx_yojson_conv"
   "re" {>= "1.7.2"}
   "xmlm"
   "zarith"

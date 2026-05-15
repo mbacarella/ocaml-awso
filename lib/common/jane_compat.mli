@@ -87,6 +87,7 @@ end
 module String : sig
   include module type of Stdlib.String
 
+  val hash : string -> int
   val equal : string -> string -> bool
   val concat : ?sep:string -> string list -> string
   val map : string -> f:(char -> char) -> string

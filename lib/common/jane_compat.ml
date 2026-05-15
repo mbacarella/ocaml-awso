@@ -192,6 +192,7 @@ end
 module String = struct
   include Stdlib.String
 
+  let hash (s : string) = Stdlib.Hashtbl.hash s
   let equal = Stdlib.String.equal
   let concat ?(sep = "") l = Stdlib.String.concat sep l
   let map s ~f = Stdlib.String.map f s

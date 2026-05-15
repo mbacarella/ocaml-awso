@@ -19,6 +19,8 @@
  (name awso)
  (synopsis "AWS API base library")
  (depends
+  (ocaml
+   (>= 4.14))
   awso-codegen
   (base64
    (>= 3.1.0))
@@ -29,6 +31,7 @@
   cryptokit
   ppx_expect
   ppx_jane
+  ppx_yojson_conv
   (re
    (>= 1.7.2))
   xmlm
@@ -38,10 +41,13 @@
  (name awso-async)
  (synopsis "AWS API base library Async")
  (depends
+  (ocaml
+   (>= 4.14))
   awso
   cohttp-async
   core_unix
   ppx_jane
+  ppx_yojson_conv
   (async
    (>= v0.11.0))
   async_ssl))
@@ -49,17 +55,29 @@
 (package
  (name awso-lwt)
  (synopsis "AWS API base library Lwt")
- (depends awso core_unix lwt lwt_ppx cohttp-lwt-unix))
+ (depends
+  (ocaml
+   (>= 4.14))
+  awso
+  core_unix
+  lwt
+  lwt_ppx
+  cohttp-lwt-unix))
 
 (package
  (name awso-common)
  (synopsis "Jane Street Core/Base compatibility shim")
- (depends ppx_expect))
+ (depends
+  (ocaml
+   (>= 4.14))
+  ppx_expect))
 
 (package
  (name awso-codegen)
  (synopsis "AWS botocore code generator")
  (depends
+  (ocaml
+   (>= 4.14))
   awso-common
   ocamlgraph
   ppxlib
@@ -75,4 +93,8 @@
 (package
  (name awso-unix)
  (synopsis "AWS API base library Unix")
- (depends awso ppx_jane))
+ (depends
+  (ocaml
+   (>= 4.14))
+  awso
+  ppx_jane))
