@@ -60,8 +60,7 @@ let%expect_test "of_response" =
   [%expect
     {|
     let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-      (resp :
-      (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) =
+      (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) =
       (let response_of_error err =
          match err with
          | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
@@ -75,10 +74,7 @@ let%expect_test "of_response" =
                Error
                  (`Transport
                     (`Bad_response
-                       {
-                         Awso.Http.Io.Error.code = code;
-                         body;
-                         x_amzn_error_type
+                       { Awso.Http.Io.Error.code = code; body; x_amzn_error_type
                        })) in
        let response_of_none () =
          match resp with | Error err -> response_of_error err | Ok _ -> Ok () in
@@ -86,17 +82,16 @@ let%expect_test "of_response" =
          match resp with
          | Error err -> response_of_error err
          | Ok resp ->
-             let xml =
-               Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+             let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
              Ok (of_xml xml) in
        match endpoint with
        | Name1 -> response_of_some_xml ResultModule1.of_xml
        | Name2 -> response_of_some_xml ResultModule2.of_xml
-       | Name3 ->
-           response_of_none () : (o,
-                                   [ `AWS of Ec2_error.t
-                                   | `Transport of Awso.Http.Io.Error.call ])
-                                   result) |}]
+       | Name3 -> response_of_none () : (o,
+                                          [ `AWS of Ec2_error.t
+                                          | `Transport of Awso.Http.Io.Error.call ])
+                                          result)
+    |}]
 ;;
 
 let make_structure_for_protocol _service _metadata data =

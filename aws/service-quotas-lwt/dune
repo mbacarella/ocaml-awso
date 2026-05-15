@@ -5,10 +5,7 @@
  (flags
   (:standard -open Core -open Lwt))
  (public_name awso-service-quotas-lwt)
- (libraries awso-service-quotas awso-lwt)
- (preprocess
-  (pps ppx_jane))
- (inline_tests))
+ (libraries awso-service-quotas awso-lwt))
 
 (rule
  (targets io.ml io.mli)

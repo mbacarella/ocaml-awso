@@ -112,7 +112,6 @@ exception
     { hex : string
     ; cause : exn
     }
-[@@deriving sexp]
 
 let bignum_of_hex hex : MyCryptokitBignum.t =
   (match hex with
@@ -363,7 +362,7 @@ let calculate_x ~username ~password ~user_pool_id ~salt_hex =
 let%expect_test "calculate_x" =
   let open Test_data in
   hexdump_bignum (calculate_x ~salt_hex ~username ~user_pool_id ~password);
-  [%expect {| a63ef5d43d9741e7b5706798c13f926678b70c085cc1b5ec3752995c3806bbca |}]
+  [%expect {| d36ae2d2dff9173346262d2523b4254f527bb0a6429b5afc429145e9abdb6689 |}]
 ;;
 
 let calculate_s ?modulo ?(g = default_g) ~small_a ~k ~x_value ~b_hex ~u_value () =
@@ -386,18 +385,19 @@ let%expect_test "calculate_s" =
     (calculate_s ?modulo:None ?g:None ~small_a ~k ~b_hex ~u_value ~x_value ());
   [%expect
     {|
-      744f5b3234f44e0c7b09417e10879104c35a90c0cbc9d858cdfaa4ab711a1767
-      68f918d01ceb83aaeed9a3c1724de0adc86fe0081ba1545d71cd6af82762d3a8
-      22190dd11ca24a5250a1f67a09045f34ef182d68ad6aa09108027bf41548bab0
-      ab9a34fd5926deceebf080d88c4592d081038b7e1f29946d11dedc85784e3d13
-      e81931d30291fdd1375e6c69f27ae92c04c86e32e3b2395f225920b311440353
-      60bed0199a82b1da9e3ca3b4d1ea6da7f0be61612505f1f010a2817ee0bd829c
-      d37a5570dbb0b0169261e379ab167d26e5828850c38e0aa572c5cf887316bc36
-      21ad9abb44c213fc875157ef8e317855a3391feaacd307e91a3cea6989d34b6f
-      01b0e9870957d455d2c814de3d30d3253c120eb1b9a7ad6eb0b5a7639bf6c8d9
-      5fede7c77508c87aea5daeee9714381fa10657ab93b24fc10674500bad225bd8
-      c2595e58c5e420c2b288df87b7af0a0a887d892cb8cbd203c3301a633bbc8539
-      04e20ed5431d68b28453ce1bc48d33ee4d3f4ae49a36eec670b1f4909da99bbd |}]
+    f5fa6a8f36eac02e4647ad0090afc844e9bac601d32b6032d358d12e19949a1b
+    82e066459cde646759f644123685e59e4292c3028a29ba6b8d087a4511b51d38
+    f3f0b1dd040df570f0f1615f8de0f5d5f1e0166af3488f0e96bed6139b11e4e7
+    34c8730a9dcbc5d53d7b8f8236489c4f012898308fea1ea8e249918a3deea179
+    4eb4757564b492c7cb74ad444ed24acb6b7bcccf5015d471cbcb6307d9c21b4c
+    9c773498631efce4dd28ac7581b7c546165dabdda9f968d503c1a316b134dac3
+    bc382d4c0c595f5e6a85fbd7d9ca428428d664639838f8bfca07a71015428037
+    f908280e50b2448620389e254890f8902fb234355f41ea609e22e7b78ef96698
+    98511b70b13e75dceb456971eca103539fcf76cf4882a390fe81ed57a991ef36
+    a13183801d72529a2c2db58d35d809f4f1a2bc036425c33aa1020665a5b09c39
+    61900439d7a8b0f55dff3b0f531b2f9544faad8e25aad7a84859427f3bf44a84
+    c76177c62facfd92f6b842cb20a39e7ce6d28aff7d8a8db19a2164aede3255d6
+    |}]
 ;;
 
 let get_password_authentication_key
@@ -441,7 +441,7 @@ let%expect_test "get_password_authentication_key" =
     ()
   |> MyCryptokitBignum.of_bytes
   |> hexdump_bignum;
-  [%expect {| 162aba97382b3f5c2b4ecb106fa72b41 |}]
+  [%expect {| e52ea698efcc05b67c0c1753bd888885 |}]
 ;;
 
 let signature

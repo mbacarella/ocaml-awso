@@ -5,10 +5,7 @@
  (flags
   (:standard -open Core -open Lwt))
  (public_name awso-kinesis-video-signaling-lwt)
- (libraries awso-kinesis-video-signaling awso-lwt)
- (preprocess
-  (pps ppx_jane))
- (inline_tests))
+ (libraries awso-kinesis-video-signaling awso-lwt))
 
 (rule
  (targets io.ml io.mli)

@@ -5,10 +5,7 @@
  (flags
   (:standard -open Core -open Lwt))
  (public_name awso-apigatewaymanagementapi-lwt)
- (libraries awso-apigatewaymanagementapi awso-lwt)
- (preprocess
-  (pps ppx_jane))
- (inline_tests))
+ (libraries awso-apigatewaymanagementapi awso-lwt))
 
 (rule
  (targets io.ml io.mli)

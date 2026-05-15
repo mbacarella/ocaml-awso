@@ -5,10 +5,7 @@
  (flags
   (:standard -open Core -open Lwt))
  (public_name awso-mediapackage-vod-lwt)
- (libraries awso-mediapackage-vod awso-lwt)
- (preprocess
-  (pps ppx_jane))
- (inline_tests))
+ (libraries awso-mediapackage-vod awso-lwt))
 
 (rule
  (targets io.ml io.mli)

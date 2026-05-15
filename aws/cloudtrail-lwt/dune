@@ -5,10 +5,7 @@
  (flags
   (:standard -open Core -open Lwt))
  (public_name awso-cloudtrail-lwt)
- (libraries awso-cloudtrail awso-lwt)
- (preprocess
-  (pps ppx_jane))
- (inline_tests))
+ (libraries awso-cloudtrail awso-lwt))
 
 (rule
  (targets io.ml io.mli)

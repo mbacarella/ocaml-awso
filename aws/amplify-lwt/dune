@@ -5,10 +5,7 @@
  (flags
   (:standard -open Core -open Lwt))
  (public_name awso-amplify-lwt)
- (libraries awso-amplify awso-lwt)
- (preprocess
-  (pps ppx_jane))
- (inline_tests))
+ (libraries awso-amplify awso-lwt))
 
 (rule
  (targets io.ml io.mli)

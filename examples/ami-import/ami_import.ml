@@ -26,18 +26,18 @@ let raise_transport_error ~name err =
   failwithf "%s: %s" name (Awso.Http.Io.Error.sexp_of_call err |> Sexp.to_string_hum) ()
 ;;
 
-let dispatch_exn ~name ~sexp_of_error ~f =
+let dispatch_exn ~name ~error_to_json ~f =
   match%bind f () with
   | Ok v -> return v
   | Error (`Transport err) -> raise_transport_error ~name err
   | Error (`AWS aws) ->
-    failwithf "%s: %s" name (aws |> sexp_of_error |> Sexp.to_string_hum) ()
+    failwithf "%s: %s" name (aws |> error_to_json |> Awso.Json.to_string) ()
 ;;
 
 let start_snapshot ~cfg ~volume_size ~description =
   dispatch_exn
     ~name:"start_snapshot"
-    ~sexp_of_error:Ebs.Values.StartSnapshotResponse.sexp_of_error
+    ~error_to_json:Ebs.Values.StartSnapshotResponse.error_to_json
     ~f:(fun () ->
     Ebs.start_snapshot
       ~cfg
@@ -54,7 +54,7 @@ let start_snapshot ~cfg ~volume_size ~description =
 let put_snapshot_block ~cfg request =
   dispatch_exn
     ~name:"put_snapshot_block"
-    ~sexp_of_error:Ebs.Values.PutSnapshotBlockResponse.sexp_of_error
+    ~error_to_json:Ebs.Values.PutSnapshotBlockResponse.error_to_json
     ~f:(fun () -> Ebs.put_snapshot_block ~cfg request)
   >>| fun v ->
   let _checksum = v.Ebs.Values.PutSnapshotBlockResponse.checksum in
@@ -64,7 +64,7 @@ let put_snapshot_block ~cfg request =
 let complete_snapshot ~cfg ~snapshot_id ~changed_blocks_count =
   dispatch_exn
     ~name:"complete_snapshot"
-    ~sexp_of_error:Ebs.Values.CompleteSnapshotResponse.sexp_of_error
+    ~error_to_json:Ebs.Values.CompleteSnapshotResponse.error_to_json
     ~f:(fun () ->
     Ebs.complete_snapshot
       ~cfg
@@ -81,7 +81,7 @@ let complete_snapshot ~cfg ~snapshot_id ~changed_blocks_count =
 let describe_snapshots ~cfg ~snapshot_id =
   dispatch_exn
     ~name:"describe_snapshots"
-    ~sexp_of_error:Ec2.Values.Ec2_error.sexp_of_t
+    ~error_to_json:Ec2.Values.Ec2_error.to_json
     ~f:(fun () ->
     Ec2.describe_snapshots
       ~cfg
@@ -101,7 +101,7 @@ let describe_snapshots ~cfg ~snapshot_id =
 let describe_images ~cfg ~image_id =
   dispatch_exn
     ~name:"describe_images"
-    ~sexp_of_error:Ec2.Values.Ec2_error.sexp_of_t
+    ~error_to_json:Ec2.Values.Ec2_error.to_json
     ~f:(fun () ->
     Ec2.describe_images
       ~cfg
@@ -155,7 +155,7 @@ let image_available_waiter ~cfg ~image_id =
 let all_regions ~cfg =
   dispatch_exn
     ~name:"describe_regions"
-    ~sexp_of_error:Ec2.Values.Ec2_error.sexp_of_t
+    ~error_to_json:Ec2.Values.Ec2_error.to_json
     ~f:(fun () ->
     Ec2.describe_regions ~cfg (Ec2.Values.DescribeRegionsRequest.make ()))
   >>| fun v ->
@@ -208,7 +208,7 @@ let register_image ~cfg request =
   dispatch_exn
     ~name:"register_image"
     ~f:(fun () -> Ec2.register_image ~cfg request)
-    ~sexp_of_error:Ec2.Values.Ec2_error.sexp_of_t
+    ~error_to_json:Ec2.Values.Ec2_error.to_json
   >>| fun v ->
   Option.value_exn
     ~message:"No registerImageResult.imageId"

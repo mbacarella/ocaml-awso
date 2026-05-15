@@ -5,10 +5,7 @@
  (flags
   (:standard -open Core -open Lwt))
  (public_name awso-keyspaces-lwt)
- (libraries awso-keyspaces awso-lwt)
- (preprocess
-  (pps ppx_jane))
- (inline_tests))
+ (libraries awso-keyspaces awso-lwt))
 
 (rule
  (targets io.ml io.mli)

@@ -5,10 +5,7 @@
  (flags
   (:standard -open Core -open Lwt))
  (public_name awso-personalize-events-lwt)
- (libraries awso-personalize-events awso-lwt)
- (preprocess
-  (pps ppx_jane))
- (inline_tests))
+ (libraries awso-personalize-events awso-lwt))
 
 (rule
  (targets io.ml io.mli)

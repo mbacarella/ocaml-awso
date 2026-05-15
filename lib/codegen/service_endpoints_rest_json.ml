@@ -352,8 +352,7 @@ let%expect_test "of_response" =
   [%expect
     {|
     let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-      (resp :
-      (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) =
+      (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) =
       (let handle_error err error_of_json =
          match err with
          | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
@@ -363,10 +362,7 @@ let%expect_test "of_response" =
                Error
                  (`Transport
                     (`Bad_response
-                       {
-                         Awso.Http.Io.Error.code = code;
-                         body;
-                         x_amzn_error_type
+                       { Awso.Http.Io.Error.code = code; body; x_amzn_error_type
                        })) in
              (match (x_amzn_error_type, error_of_json,
                       ((code >= 400) && (code <= 599)))
@@ -414,15 +410,12 @@ let%expect_test "of_response" =
                 let body =
                   Payload_module.of_string (Awso.Http.Response.body resp) in
                 let headers =
-                  Awso.Http.Headers.to_list
-                    (Awso.Http.Response.headers resp) in
-                Ok
-                  (Result_of_header_and_body.of_header_and_body
-                     (headers, body)))
-       | No_output ->
-           Ok () : (o,
-                     [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ])
-                     result) |}]
+                  Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+                Ok (Result_of_header_and_body.of_header_and_body (headers, body)))
+       | No_output -> Ok () : (o,
+                                [ `AWS of e
+                                | `Transport of Awso.Http.Io.Error.call ]) result)
+    |}]
 ;;
 
 let make_structure_for_protocol service data =

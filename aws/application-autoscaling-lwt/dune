@@ -5,10 +5,7 @@
  (flags
   (:standard -open Core -open Lwt))
  (public_name awso-application-autoscaling-lwt)
- (libraries awso-application-autoscaling awso-lwt)
- (preprocess
-  (pps ppx_jane))
- (inline_tests))
+ (libraries awso-application-autoscaling awso-lwt))
 
 (rule
  (targets io.ml io.mli)

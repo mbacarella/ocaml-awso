@@ -5,10 +5,7 @@
  (flags
   (:standard -open Core -open Lwt))
  (public_name awso-chime-sdk-messaging-lwt)
- (libraries awso-chime-sdk-messaging awso-lwt)
- (preprocess
-  (pps ppx_jane))
- (inline_tests))
+ (libraries awso-chime-sdk-messaging awso-lwt))
 
 (rule
  (targets io.ml io.mli)

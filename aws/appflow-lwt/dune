@@ -5,10 +5,7 @@
  (flags
   (:standard -open Core -open Lwt))
  (public_name awso-appflow-lwt)
- (libraries awso-appflow awso-lwt)
- (preprocess
-  (pps ppx_jane))
- (inline_tests))
+ (libraries awso-appflow awso-lwt))
 
 (rule
  (targets io.ml io.mli)

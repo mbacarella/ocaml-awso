@@ -5,10 +5,7 @@
  (flags
   (:standard -open Core -open Lwt))
  (public_name awso-mediaconvert-lwt)
- (libraries awso-mediaconvert awso-lwt)
- (preprocess
-  (pps ppx_jane))
- (inline_tests))
+ (libraries awso-mediaconvert awso-lwt))
 
 (rule
  (targets io.ml io.mli)

@@ -5,10 +5,7 @@
  (flags
   (:standard -open Core -open Lwt))
  (public_name awso-connect-contact-lens-lwt)
- (libraries awso-connect-contact-lens awso-lwt)
- (preprocess
-  (pps ppx_jane))
- (inline_tests))
+ (libraries awso-connect-contact-lens awso-lwt))
 
 (rule
  (targets io.ml io.mli)

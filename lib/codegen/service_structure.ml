@@ -515,7 +515,10 @@ let structure_of_shape (service : Botodata.service) sn shape =
                 |> List.dedup_and_sort ~compare:String.compare
             in
             let funs =
-              [ Some (make_error_of_json errors); Some (make_error_of_xml errors) ]
+              [ Some (make_error_of_json errors)
+              ; Some (make_error_of_xml errors)
+              ; Some (Type_decl.error_to_json_of_errors operation)
+              ]
             in
             Some (Type_decl.type_declaration_of_errors operation, funs)))
     with

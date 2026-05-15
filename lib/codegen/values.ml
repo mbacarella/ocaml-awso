@@ -14,6 +14,19 @@ let ec2_error_module () =
     @ [ Ast_helper.Exp.case (Ast_convenience.pvar "name") [%expr `Unknown_code name] ]
     |> Ast_helper.Exp.match_ [%expr name]
   in
+  let code_to_string =
+    let case name =
+      Ast_helper.Exp.case
+        (Ast_helper.Pat.variant (Shape.capitalized_id name) None)
+        (Ast_convenience.str name)
+    in
+    (all_errors |> List.map ~f:(fun { name; description = _ } -> name) |> List.map ~f:case)
+    @ [ Ast_helper.Exp.case
+          (Ast_helper.Pat.variant "Unknown_code" (Some (Ast_convenience.pvar "s")))
+          (Ast_convenience.evar "s")
+      ]
+    |> Ast_helper.Exp.function_
+  in
   let gen_variants enumeration =
     let case name typ =
       { prf_desc = Rtag ({ txt = name; loc = Location.none }, false, typ)
@@ -38,23 +51,28 @@ let ec2_error_module () =
   let server_errors = gen_variants (Ec2_errors.Server_errors.enumerate ()) in
   [%str
     module Ec2_error = struct
-      type common_client_errors = [%t common_client_errors] [@@deriving sexp]
-
+      type common_client_errors = [%t common_client_errors]
       type client_errors_for_specific_actions = [%t client_errors_for_specific_actions]
-      [@@deriving sexp]
-
-      type server_errors = [%t server_errors] [@@deriving sexp]
+      type server_errors = [%t server_errors]
 
       type code =
         [ common_client_errors
         | client_errors_for_specific_actions
         | server_errors
         ]
-      [@@deriving sexp]
 
-      type t = code * string option [@@deriving sexp]
+      type t = code * string option
 
       let string_to_code name = [%e string_to_code]
+      let code_to_string : code -> string = [%e code_to_string]
+
+      let to_json ((code, message) : t) : Awso.Json.t =
+        `Assoc
+          (("code", `String (code_to_string code))
+           ::
+           (match message with
+            | None -> []
+            | Some m -> [ "message", `String m ]))
 
       let of_xml = function
         | `Data _ as xml ->

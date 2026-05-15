@@ -2,11 +2,11 @@ open Awso_athena_async
 module Values = Awso_athena_async.Values
 
 
-let dispatch_exn ~name ~sexp_of_error ~f =
+let dispatch_exn ~name ~error_to_json ~f =
   match%bind f () with
   | Ok v -> return v
   | Error (`AWS err) ->
-    failwithf "%s: %s" name (err |> sexp_of_error |> Sexp.to_string_hum) ()
+    failwithf "%s: %s" name (err |> error_to_json |> Awso.Json.to_string) ()
   | Error (`Transport _) -> failwithf "%s: transport error" name ()
 ;;
 
@@ -15,21 +15,18 @@ module Query = struct
     { execution_id : string
     ; next_token : string option
     }
-  [@@deriving sexp]
-
+  
   type athena_start =
     { result_configuration : Values.ResultConfiguration.t
     ; query_execution_output : Values.StartQueryExecutionOutput.t
     }
-  [@@deriving sexp]
-
+  
   type t =
     [ `Athena_execution_id of string
     | `Athena_start of athena_start
     | `Athena_execution of Values.GetQueryExecutionOutput.t
     ]
-  [@@deriving sexp]
-
+  
   let of_id id : [< t ] = `Athena_execution_id id
 
   let submit ?idem_potency_token ?output_location ~query_string ~bucket cfg =
@@ -49,7 +46,7 @@ module Query = struct
     in
     dispatch_exn
       ~name:"athena.start_query_execution"
-      ~sexp_of_error:Values.StartQueryExecutionOutput.sexp_of_error
+      ~error_to_json:Values.StartQueryExecutionOutput.error_to_json
       ~f:(fun () ->
       start_query_execution
         ~cfg
@@ -110,7 +107,7 @@ module Query = struct
     | Some execution_id ->
       dispatch_exn
         ~name:"athena.get_query_execution"
-        ~sexp_of_error:Values.GetQueryExecutionOutput.sexp_of_error
+        ~error_to_json:Values.GetQueryExecutionOutput.error_to_json
         ~f:(fun () ->
         get_query_execution
           ~cfg
@@ -127,7 +124,7 @@ module Query = struct
       execution_id;
     dispatch_exn
       ~name:"athena.get_query_results"
-      ~sexp_of_error:Values.GetQueryResultsOutput.sexp_of_error
+      ~error_to_json:Values.GetQueryResultsOutput.error_to_json
       ~f:(fun () ->
       get_query_results
         ~cfg
@@ -258,7 +255,7 @@ module Query = struct
     let rec paginator ?next_token writer =
       dispatch_exn
         ~name:"athena.list_query_executions"
-        ~sexp_of_error:Values.ListQueryExecutionsOutput.sexp_of_error
+        ~error_to_json:Values.ListQueryExecutionsOutput.error_to_json
         ~f:(fun () ->
         list_query_executions
           ~cfg

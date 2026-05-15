@@ -5,10 +5,7 @@
  (flags
   (:standard -open Core -open Lwt))
  (public_name awso-directconnect-lwt)
- (libraries awso-directconnect awso-lwt)
- (preprocess
-  (pps ppx_jane))
- (inline_tests))
+ (libraries awso-directconnect awso-lwt))
 
 (rule
  (targets io.ml io.mli)

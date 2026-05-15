@@ -5,10 +5,7 @@
  (flags
   (:standard -open Core -open Lwt))
  (public_name awso-sagemaker-a2i-runtime-lwt)
- (libraries awso-sagemaker-a2i-runtime awso-lwt)
- (preprocess
-  (pps ppx_jane))
- (inline_tests))
+ (libraries awso-sagemaker-a2i-runtime awso-lwt))
 
 (rule
  (targets io.ml io.mli)

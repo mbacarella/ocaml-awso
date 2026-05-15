@@ -5,10 +5,7 @@
  (flags
   (:standard -open Core -open Lwt))
  (public_name awso-codestar-connections-lwt)
- (libraries awso-codestar-connections awso-lwt)
- (preprocess
-  (pps ppx_jane))
- (inline_tests))
+ (libraries awso-codestar-connections awso-lwt))
 
 (rule
  (targets io.ml io.mli)

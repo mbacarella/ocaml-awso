@@ -2,18 +2,11 @@ open! Core
 open! Import
 
 let type_declaration ?kind ?manifest ?priv n =
-  let loc = !Ast_helper.default_loc in
   Ast_helper.Type.mk
     (Ast_convenience.mknoloc (Shape.uncapitalized_id n))
     ?manifest
     ?kind
     ?priv
-    ~attrs:
-      [ { attr_name = Ast_convenience.mknoloc "deriving"
-        ; attr_payload = PStr [%str sexp]
-        ; attr_loc = loc
-        }
-      ]
 ;;
 
 let error_cases (op : Botodata.operation) =
@@ -45,6 +38,45 @@ let error_cases (op : Botodata.operation) =
 let type_declaration_of_errors op =
   let name, manifest = error_cases op in
   type_declaration ~manifest name
+;;
+
+let error_to_json_of_errors (op : Botodata.operation) =
+  let loc = !Ast_helper.default_loc in
+  let error_shapes =
+    op.errors
+    |> Option.value ~default:[]
+    |> List.map ~f:(fun { shape; _ } -> shape)
+    |> List.dedup_and_sort ~compare:String.compare
+  in
+  let cases =
+    List.map error_shapes ~f:(fun shape ->
+      let cap = Shape.capitalized_id shape in
+      let to_json =
+        sprintf "%s.to_json" cap |> Ast_convenience.evar
+      in
+      Ast_helper.Exp.case
+        (Ast_helper.Pat.variant cap (Some (Ast_convenience.pvar "e")))
+        [%expr
+          `Assoc
+            [ "error", `String [%e Ast_convenience.str cap]
+            ; "details", [%e to_json] e
+            ]])
+  in
+  let catch_all =
+    Ast_helper.Exp.case
+      (Ast_helper.Pat.variant
+         "Unknown_operation_error"
+         (Some [%pat? code, msg]))
+      [%expr
+        `Assoc
+          (("error", `String code)
+           ::
+           (match msg with
+            | None -> []
+            | Some m -> [ "message", `String m ]))]
+  in
+  let body = Ast_helper.Exp.function_ (cases @ [ catch_all ]) in
+  [%stri let error_to_json : error -> Awso.Json.t = [%e body]]
 ;;
 
 let%expect_test "type_declaration_of_errors" =
@@ -83,20 +115,17 @@ let%expect_test "type_declaration_of_errors" =
   in
   test (operation None);
   [%expect
-    {|
-    type nonrec error = [ `Unknown_operation_error of (string * string option) ]
-    [@@deriving sexp] |}];
+    {| type nonrec error = [ `Unknown_operation_error of (string * string option) ] |}];
   test (operation (Some []));
   [%expect
-    {|
-    type nonrec error = [ `Unknown_operation_error of (string * string option) ]
-    [@@deriving sexp] |}];
+    {| type nonrec error = [ `Unknown_operation_error of (string * string option) ] |}];
   test (operation (Some [ error "error_a"; error "error_b" ]));
   [%expect
     {|
     type nonrec error =
       [ `Error_a of Error_a.t  | `Error_b of Error_b.t
-      | `Unknown_operation_error of (string * string option) ][@@deriving sexp] |}]
+      | `Unknown_operation_error of (string * string option) ]
+    |}]
 ;;
 
 let type_alias ?priv manifest = type_declaration ?priv "t" ~manifest
@@ -185,9 +214,9 @@ let%expect_test "type_declarations_of_shape" =
       (Util.structure_to_string [ Ast_helper.Str.type_ Nonrecursive tdecls ])
   in
   test (Boolean_shape { box = None; documentation = None });
-  [%expect {| type nonrec t = bool[@@deriving sexp] |}];
+  [%expect {| type nonrec t = bool |}];
   test (Float_shape { box = None; min = None; max = None; documentation = None });
-  [%expect {| type nonrec t = float[@@deriving sexp] |}];
+  [%expect {| type nonrec t = float |}];
   test
     (Integer_shape
        { box = None
@@ -197,7 +226,7 @@ let%expect_test "type_declarations_of_shape" =
        ; deprecated = None
        ; deprecatedMessage = None
        });
-  [%expect {| type nonrec t = int[@@deriving sexp] |}];
+  [%expect {| type nonrec t = int |}];
   test
     (String_shape
        { pattern = None
@@ -208,13 +237,13 @@ let%expect_test "type_declarations_of_shape" =
        ; deprecated = None
        ; deprecatedMessage = None
        });
-  [%expect {| type nonrec t = string[@@deriving sexp] |}];
+  [%expect {| type nonrec t = string |}];
   test (Long_shape { box = None; min = None; max = None; documentation = None });
-  [%expect {| type nonrec t = Int64.t[@@deriving sexp] |}];
+  [%expect {| type nonrec t = Int64.t |}];
   test (Double_shape { box = None; documentation = None; min = None; max = None });
-  [%expect {| type nonrec t = float[@@deriving sexp] |}];
+  [%expect {| type nonrec t = float |}];
   test (Timestamp_shape { timestampFormat = None; documentation = None });
-  [%expect {| type nonrec t = string[@@deriving sexp] |}];
+  [%expect {| type nonrec t = string |}];
   test
     (Blob_shape
        { streaming = None
@@ -223,7 +252,7 @@ let%expect_test "type_declarations_of_shape" =
        ; max = None
        ; documentation = None
        });
-  [%expect {| type nonrec t = string[@@deriving sexp] |}];
+  [%expect {| type nonrec t = string |}];
   test
     (Enum_shape
        { cases = [ "a"; "b"; "c" ]
@@ -241,7 +270,8 @@ let%expect_test "type_declarations_of_shape" =
       | A
       | B
       | C
-      | Non_static_id of string [@@deriving sexp] |}];
+      | Non_static_id of string
+    |}];
   let member_shape shape =
     { Botodata.shape
     ; deprecated = None
@@ -272,7 +302,7 @@ let%expect_test "type_declarations_of_shape" =
        ; deprecated = None
        ; deprecatedMessage = None
        });
-  [%expect {| type nonrec t = Member_shape.t list[@@deriving sexp] |}];
+  [%expect {| type nonrec t = Member_shape.t list |}];
   test
     (Map_shape
        { key = "key"
@@ -284,12 +314,12 @@ let%expect_test "type_declarations_of_shape" =
        ; documentation = None
        ; sensitive = None
        });
-  [%expect {| type nonrec t = (Key.t * Value.t) list[@@deriving sexp] |}];
+  [%expect {| type nonrec t = (Key.t * Value.t) list |}];
   let structure_shape members =
     Botodata.Structure_shape { Botodata.empty_structure_shape with members }
   in
   test (structure_shape []);
-  [%expect {| type nonrec t = unit[@@deriving sexp] |}];
+  [%expect {| type nonrec t = unit |}];
   let nonempty_structure =
     structure_shape
       [ "name_a", member_shape "member_a"; "name_b", member_shape "member_b" ]
@@ -299,16 +329,18 @@ let%expect_test "type_declarations_of_shape" =
     {|
     type nonrec t = {
       name_a: Member_a.t option ;
-      name_b: Member_b.t option }[@@deriving sexp] |}];
+      name_b: Member_b.t option }
+    |}];
   test ~result_wrapper:"result_wrapper" nonempty_structure;
   [%expect
     {|
     type nonrec result_wrapper =
       {
       name_a: Member_a.t option ;
-      name_b: Member_b.t option }[@@deriving sexp]
-    and responseMetaData = unit[@@deriving sexp]
+      name_b: Member_b.t option }
+    and responseMetaData = unit
     and t = {
       result_wrapper: result_wrapper ;
-      responseMetaData: responseMetaData }[@@deriving sexp] |}]
+      responseMetaData: responseMetaData }
+    |}]
 ;;

@@ -22,10 +22,10 @@ let validate_expiration expiration =
   if Time_float_unix.( < ) expiration now
   then
     failwithf
-      !"Sso.get_role_credentials returned roleCredentials that were already expired! \
-        %{Time_float_unix.to_string_utc} < now (%{Time_float_unix.to_string_utc})"
-      expiration
-      now
+      "Sso.get_role_credentials returned roleCredentials that were already expired! \
+       %s < now (%s)"
+      (Time_float_unix.to_string_utc expiration)
+      (Time_float_unix.to_string_utc now)
       ()
 ;;
 
@@ -90,17 +90,15 @@ let parse_role_credentials_response_exn = function
     eprintf "Maybe you need to re-run `aws sso login`?\n";
     exit 1
   | Error (`AWS err) ->
-    failwiths
-      ~here:[%here]
-      "Sso.get_role_credentials: AWS call"
-      err
-      Values.GetRoleCredentialsResponse.sexp_of_error
+    failwithf
+      "Sso.get_role_credentials: AWS call: %s"
+      (err |> Values.GetRoleCredentialsResponse.error_to_json |> Awso.Json.to_string)
+      ()
   | Error (`Transport err) ->
-    failwiths
-      ~here:[%here]
-      "Sso.get_role_credentials: transport"
-      err
-      Awso.Http.Io.Error.sexp_of_call
+    failwithf
+      "Sso.get_role_credentials: transport: %s"
+      (err |> Awso.Http.Io.Error.sexp_of_call |> Sexp.to_string_hum)
+      ()
 ;;
 
 let update_cfg_with_role_credentials_exn ~(cfg : Awso.Cfg.t) role_credentials =

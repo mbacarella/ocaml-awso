@@ -5,10 +5,7 @@
  (flags
   (:standard -open Core -open Lwt))
  (public_name awso-workspaces-web-lwt)
- (libraries awso-workspaces-web awso-lwt)
- (preprocess
-  (pps ppx_jane))
- (inline_tests))
+ (libraries awso-workspaces-web awso-lwt))
 
 (rule
  (targets io.ml io.mli)

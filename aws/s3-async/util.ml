@@ -127,14 +127,6 @@ type ('acc, 'error) callback =
      ]
   -> ('acc, 'error) Deferred.Result.t
 
-module Error = struct
-  type ('acc, 'error) multipart =
-    [ `Missing_upload_id
-    | `Callback_error of 'acc * Values.CompletedPartList.t * 'error
-    ]
-  [@@deriving sexp]
-end
-
 let initialize_multipart cfg ~bucket ~key =
   let key_obj = Values.ObjectKey.make key in
   let req = Values.CreateMultipartUploadRequest.make ~bucket ~key:key_obj () in

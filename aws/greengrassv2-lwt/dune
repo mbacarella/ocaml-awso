@@ -5,10 +5,7 @@
  (flags
   (:standard -open Core -open Lwt))
  (public_name awso-greengrassv2-lwt)
- (libraries awso-greengrassv2 awso-lwt)
- (preprocess
-  (pps ppx_jane))
- (inline_tests))
+ (libraries awso-greengrassv2 awso-lwt))
 
 (rule
  (targets io.ml io.mli)

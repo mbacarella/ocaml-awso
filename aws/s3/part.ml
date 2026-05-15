@@ -6,7 +6,6 @@ type t =
   ; start_offset : int64
   ; size : int64
   }
-[@@deriving sexp_of]
 
 let number p = p.number + 1
 
@@ -39,27 +38,32 @@ let build_parts_from_size ~part_size size =
   |> List.rev
 ;;
 
+let to_json { number; start_offset; size } : Awso.Json.t =
+  `Assoc
+    [ "number", `Int number
+    ; "start_offset", `Intlit (Int64.to_string start_offset)
+    ; "size", `Intlit (Int64.to_string size)
+    ]
+;;
+
 let%expect_test "build_parts_from_size" =
   let test ~part_size size =
-    build_parts_from_size ~part_size size |> [%sexp_of: t list] |> print_s
+    build_parts_from_size ~part_size size
+    |> List.map ~f:to_json
+    |> (fun l -> `List l)
+    |> Awso.Json.to_string
+    |> print_endline
   in
   test ~part_size:10L 30L;
   [%expect
-    {|
-    (((number 0) (start_offset 0) (size 10))
-     ((number 1) (start_offset 10) (size 10))
-     ((number 2) (start_offset 20) (size 10))) |}];
+    {| [{"number":0,"start_offset":0,"size":10},{"number":1,"start_offset":10,"size":10},{"number":2,"start_offset":20,"size":10}] |}];
   test ~part_size:10L 34L;
   [%expect
-    {|
-    (((number 0) (start_offset 0) (size 10))
-     ((number 1) (start_offset 10) (size 10))
-     ((number 2) (start_offset 20) (size 10))
-     ((number 3) (start_offset 30) (size 4))) |}];
+    {| [{"number":0,"start_offset":0,"size":10},{"number":1,"start_offset":10,"size":10},{"number":2,"start_offset":20,"size":10},{"number":3,"start_offset":30,"size":4}] |}];
   test ~part_size:10L 0L;
-  [%expect {| () |}];
+  [%expect {| [] |}];
   test ~part_size:10L 1L;
-  [%expect {| (((number 0) (start_offset 0) (size 1))) |}]
+  [%expect {| [{"number":0,"start_offset":0,"size":1}] |}]
 ;;
 
 let build_parts path =

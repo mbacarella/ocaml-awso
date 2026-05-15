@@ -5,10 +5,7 @@
  (flags
   (:standard -open Core -open Lwt))
  (public_name awso-docdb-lwt)
- (libraries awso-docdb awso-lwt)
- (preprocess
-  (pps ppx_jane))
- (inline_tests))
+ (libraries awso-docdb awso-lwt))
 
 (rule
  (targets io.ml io.mli)

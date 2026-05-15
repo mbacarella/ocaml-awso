@@ -5,10 +5,7 @@
  (flags
   (:standard -open Core -open Lwt))
  (public_name awso-finspace-data-lwt)
- (libraries awso-finspace-data awso-lwt)
- (preprocess
-  (pps ppx_jane))
- (inline_tests))
+ (libraries awso-finspace-data awso-lwt))
 
 (rule
  (targets io.ml io.mli)

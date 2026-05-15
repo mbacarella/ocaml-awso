@@ -5,10 +5,7 @@
  (flags
   (:standard -open Core -open Lwt))
  (public_name awso-iotevents-data-lwt)
- (libraries awso-iotevents-data awso-lwt)
- (preprocess
-  (pps ppx_jane))
- (inline_tests))
+ (libraries awso-iotevents-data awso-lwt))
 
 (rule
  (targets io.ml io.mli)
