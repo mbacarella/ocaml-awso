@@ -5,13 +5,13 @@ module S3 = Awso_s3_async
 
 let pr = Stdlib.print_endline
 
-let dispatch_exn ~name ~sexp_of_error ~f =
+let dispatch_exn ~name ~error_to_json ~f =
   match%bind f () with
   | Ok v -> return v
   | Error (`Transport err) ->
     failwithf "%s: %s" name (Awso.Http.Io.Error.sexp_of_call err |> Sexp.to_string_hum) ()
   | Error (`AWS aws) ->
-    failwithf "%s: %s" name (aws |> sexp_of_error |> Sexp.to_string_hum) ()
+    failwithf "%s: %s" name (aws |> error_to_json |> Awso.Json.to_string) ()
 ;;
 
 let suite_main ~sso bucket () =
@@ -24,7 +24,7 @@ let suite_main ~sso bucket () =
     pr "=== EC2 ===";
     dispatch_exn
       ~name:"ec2.describe_instances"
-      ~sexp_of_error:Ec2.Values.Ec2_error.sexp_of_t
+      ~error_to_json:Ec2.Values.Ec2_error.to_json
       ~f:(fun () ->
       Ec2.describe_instances
         ~cfg
@@ -38,7 +38,7 @@ let suite_main ~sso bucket () =
     pr "=== ECS ===";
     dispatch_exn
       ~name:"ecs.describe_clusters"
-      ~sexp_of_error:Ecs.Values.DescribeClustersResponse.sexp_of_error
+      ~error_to_json:Ecs.Values.DescribeClustersResponse.error_to_json
       ~f:(fun () ->
       Ecs.describe_clusters
         ~cfg
@@ -54,7 +54,7 @@ let suite_main ~sso bucket () =
     let%bind () =
       dispatch_exn
         ~name:"ecr.get_authorization_token"
-        ~sexp_of_error:Ecr.Values.GetAuthorizationTokenResponse.sexp_of_error
+        ~error_to_json:Ecr.Values.GetAuthorizationTokenResponse.error_to_json
         ~f:(fun () ->
         Ecr.get_authorization_token
           ~cfg
@@ -71,7 +71,7 @@ let suite_main ~sso bucket () =
     let%bind () =
       dispatch_exn
         ~name:"ecr.create_repository"
-        ~sexp_of_error:Ecr.Values.CreateRepositoryResponse.sexp_of_error
+        ~error_to_json:Ecr.Values.CreateRepositoryResponse.error_to_json
         ~f:(fun () ->
         Ecr.create_repository
           ~cfg
@@ -81,7 +81,7 @@ let suite_main ~sso bucket () =
     let%bind () =
       dispatch_exn
         ~name:"ecr.describe_repositories"
-        ~sexp_of_error:Ecr.Values.DescribeRepositoriesResponse.sexp_of_error
+        ~error_to_json:Ecr.Values.DescribeRepositoriesResponse.error_to_json
         ~f:(fun () ->
         Ecr.describe_repositories
           ~cfg
@@ -99,7 +99,7 @@ let suite_main ~sso bucket () =
             pr (repositoryName :> string);
             dispatch_exn
               ~name:"ecr.list_images"
-              ~sexp_of_error:Ecr.Values.ListImagesResponse.sexp_of_error
+              ~error_to_json:Ecr.Values.ListImagesResponse.error_to_json
               ~f:(fun () ->
               Ecr.list_images
                 ~cfg
@@ -121,7 +121,7 @@ let suite_main ~sso bucket () =
     let%bind () =
       dispatch_exn
         ~name:"ecr.delete_repository"
-        ~sexp_of_error:Ecr.Values.DeleteRepositoryResponse.sexp_of_error
+        ~error_to_json:Ecr.Values.DeleteRepositoryResponse.error_to_json
         ~f:(fun () ->
         Ecr.delete_repository
           ~cfg
@@ -135,13 +135,13 @@ let suite_main ~sso bucket () =
     let%bind () =
       dispatch_exn
         ~name:"s3.list_buckets"
-        ~sexp_of_error:S3.Values.ListBucketsOutput.sexp_of_error
+        ~error_to_json:S3.Values.ListBucketsOutput.error_to_json
         ~f:(fun () -> S3.list_buckets ~cfg ())
       >>| fun _ -> ()
     in
     dispatch_exn
       ~name:"s3.list_objects"
-      ~sexp_of_error:S3.Values.ListObjectsOutput.sexp_of_error
+      ~error_to_json:S3.Values.ListObjectsOutput.error_to_json
       ~f:(fun () ->
       S3.list_objects ~cfg (S3.Values.ListObjectsRequest.make ~bucket ()))
     >>| fun v ->
@@ -187,7 +187,7 @@ let multipart_main ~sso bucket key file () =
   let%bind uploadId =
     dispatch_exn
       ~name:"s3.create_multipart"
-      ~sexp_of_error:S3.Values.CreateMultipartUploadOutput.sexp_of_error
+      ~error_to_json:S3.Values.CreateMultipartUploadOutput.error_to_json
       ~f:(fun () ->
       S3.create_multipart_upload
         ~cfg
@@ -204,7 +204,7 @@ let multipart_main ~sso bucket key file () =
     let%bind part = read_slice ~start ~end_ file in
     dispatch_exn
       ~name:"s3.upload_part_request"
-      ~sexp_of_error:S3.Values.UploadPartOutput.sexp_of_error
+      ~error_to_json:S3.Values.UploadPartOutput.error_to_json
       ~f:(fun () ->
       S3.upload_part
         ~cfg
@@ -228,7 +228,7 @@ let multipart_main ~sso bucket key file () =
   >>= fun rev_etags ->
   dispatch_exn
     ~name:"s3.completed_multipart_upload_request"
-    ~sexp_of_error:S3.Values.CompleteMultipartUploadOutput.sexp_of_error
+    ~error_to_json:S3.Values.CompleteMultipartUploadOutput.error_to_json
     ~f:(fun () ->
     let req =
       S3.Values.CompleteMultipartUploadRequest.make

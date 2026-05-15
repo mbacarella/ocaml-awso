@@ -5,13 +5,13 @@ let pp_opt pp ppf = function
 
 let failwithf fmt = Format.kasprintf failwith fmt
 
-let dispatch_exn ~name ~sexp_of_error ~f =
+let dispatch_exn ~name ~error_to_json ~f =
   match%bind f () with
   | Ok v -> return v
   | Error (`Transport err) ->
     failwithf "%s: %s" name (Awso.Http.Io.Error.sexp_of_call err |> Sexp.to_string_hum) ()
   | Error (`AWS aws) ->
-    failwithf "%s: %s" name (aws |> sexp_of_error |> Sexp.to_string_hum) ()
+    failwithf "%s: %s" name (aws |> error_to_json |> Awso.Json.to_string) ()
 ;;
 
 module List_buckets = struct
@@ -48,7 +48,7 @@ module List_buckets = struct
     >>= fun cfg ->
     dispatch_exn
       ~name:"list_buckets"
-      ~sexp_of_error:Values.ListBucketsOutput.sexp_of_error
+      ~error_to_json:Values.ListBucketsOutput.error_to_json
       ~f:(fun () ->
       Io.list_buckets ~cfg ())
     >>| fun v -> Format.printf "%a" pp_out v
@@ -87,7 +87,7 @@ module List_objects = struct
     >>= fun cfg ->
     dispatch_exn
       ~name:"list_objects"
-      ~sexp_of_error:Values.ListObjectsOutput.sexp_of_error
+      ~error_to_json:Values.ListObjectsOutput.error_to_json
       ~f:(fun () ->
       Io.list_objects
         ~cfg
@@ -140,7 +140,7 @@ module Get_object = struct
     >>= fun cfg ->
     dispatch_exn
       ~name:"get_object"
-      ~sexp_of_error:Values.GetObjectOutput.sexp_of_error
+      ~error_to_json:Values.GetObjectOutput.error_to_json
       ~f:(fun () ->
       Io.get_object
         ~cfg
@@ -176,7 +176,7 @@ module Put_object = struct
     >>= fun cfg ->
     dispatch_exn
       ~name:"put_object"
-      ~sexp_of_error:Values.PutObjectOutput.sexp_of_error
+      ~error_to_json:Values.PutObjectOutput.error_to_json
       ~f:(fun () ->
       Io.put_object
         ~cfg
@@ -201,7 +201,7 @@ module Put_multipart = struct
     >>= fun cfg ->
     dispatch_exn
       ~name:"create_multipart_upload"
-      ~sexp_of_error:Values.CreateMultipartUploadOutput.sexp_of_error
+      ~error_to_json:Values.CreateMultipartUploadOutput.error_to_json
       ~f:(fun () ->
       Io.create_multipart_upload
         ~cfg
@@ -213,7 +213,7 @@ module Put_multipart = struct
       printf "%d/%d (%.1f%%)\n%!" i nparts progress;
       dispatch_exn
         ~name:"upload_part"
-        ~sexp_of_error:Values.UploadPartOutput.sexp_of_error
+        ~error_to_json:Values.UploadPartOutput.error_to_json
         ~f:(fun () ->
         Io.upload_part ~cfg req)
       >>| fun v -> Part.completed_part part v
@@ -224,7 +224,7 @@ module Put_multipart = struct
     >>= fun parts ->
     dispatch_exn
       ~name:"complete_multipart_upload"
-      ~sexp_of_error:Values.CompleteMultipartUploadOutput.sexp_of_error
+      ~error_to_json:Values.CompleteMultipartUploadOutput.error_to_json
       ~f:(fun () ->
       Io.complete_multipart_upload
         ~cfg

@@ -5,10 +5,7 @@
  (flags
   (:standard -open Core -open Lwt))
  (public_name awso-cloud9-lwt)
- (libraries awso-cloud9 awso-lwt)
- (preprocess
-  (pps ppx_jane))
- (inline_tests))
+ (libraries awso-cloud9 awso-lwt))
 
 (rule
  (targets io.ml io.mli)

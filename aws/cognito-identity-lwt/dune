@@ -5,10 +5,7 @@
  (flags
   (:standard -open Core -open Lwt))
  (public_name awso-cognito-identity-lwt)
- (libraries awso-cognito-identity awso-lwt)
- (preprocess
-  (pps ppx_jane))
- (inline_tests))
+ (libraries awso-cognito-identity awso-lwt))
 
 (rule
  (targets io.ml io.mli)

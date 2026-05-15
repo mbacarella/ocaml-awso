@@ -128,8 +128,7 @@ let%expect_test "of_response" =
   [%expect
     {|
     let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-      (resp :
-      (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) =
+      (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) =
       (let handle_error err error_of_json =
          let generic_error () = Error (`Transport err) in
          match err with
@@ -153,20 +152,18 @@ let%expect_test "of_response" =
            (match resp with
             | Error err -> handle_error err None
             | Ok resp ->
-                let json =
-                  Awso.Json.from_string (Awso.Http.Response.body resp) in
+                let json = Awso.Json.from_string (Awso.Http.Response.body resp) in
                 Ok (ResultModule1.of_json json))
        | Name2 ->
            (match resp with
             | Error err -> handle_error err None
             | Ok resp ->
-                let json =
-                  Awso.Json.from_string (Awso.Http.Response.body resp) in
+                let json = Awso.Json.from_string (Awso.Http.Response.body resp) in
                 Ok (ResultModule2.of_json json))
-       | Name3 ->
-           Ok () : (o,
-                     [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ])
-                     result) |}]
+       | Name3 -> Ok () : (o,
+                            [ `AWS of e
+                            | `Transport of Awso.Http.Io.Error.call ]) result)
+    |}]
 ;;
 
 let make_structure_for_protocol (metadata : Botodata.metadata) data =

@@ -5,20 +5,20 @@ let default_region = "us-east-2"
 let instance_type = Ec2.Values.InstanceType.T4g_nano
 let architecture = "arm64"
 
-let dispatch_exn ~name ~sexp_of_error ~f =
+let dispatch_exn ~name ~error_to_json ~f =
   match%bind f () with
   | Ok v -> return v
   | Error (`Transport err) ->
     failwithf "%s: %s" name (Awso.Http.Io.Error.sexp_of_call err |> Sexp.to_string_hum) ()
   | Error (`AWS aws) ->
-    failwithf "%s: %s" name (aws |> sexp_of_error |> Sexp.to_string_hum) ()
+    failwithf "%s: %s" name (aws |> error_to_json |> Awso.Json.to_string) ()
 ;;
 
 let cfg_ref = ref None
 
 let ec2 name f r =
   let cfg = Option.value_exn ~message:"need to intialize cfg first" !cfg_ref in
-  dispatch_exn ~name ~sexp_of_error:Ec2.Values.Ec2_error.sexp_of_t ~f:(fun () ->
+  dispatch_exn ~name ~error_to_json:Ec2.Values.Ec2_error.to_json ~f:(fun () ->
     f ?endpoint_url:None ?cfg:(Some cfg) r)
 ;;
 
@@ -136,8 +136,7 @@ let describe_instance_types () =
       |> List.map ~f:(fun { instanceType; _ } ->
         instanceType
         |> Option.value_exn ~here:[%here]
-        |> Ec2.Values.InstanceType.sexp_of_t
-        |> Sexp.to_string)
+        |> Ec2.Values.InstanceType.to_string)
     in
     match nextToken with
     | None -> return acc
@@ -269,7 +268,7 @@ let retry_forever ?(interval = sec 5.0) ~description f =
   loop ()
 ;;
 
-let sexp_lower s = s |> Sexp.to_string |> String.lowercase
+let json_lower j = j |> Awso.Json.to_string |> String.lowercase
 
 let wait_for_instance_state ~instance_id ~state_name ~state =
   retry_forever
@@ -280,7 +279,7 @@ let wait_for_instance_state ~instance_id ~state_name ~state =
          printf ". <no instance status yet>\n";
          None
        | Some name ->
-         printf ". %s\n" (name |> Ec2.Values.InstanceStateName.sexp_of_t |> sexp_lower);
+         printf ". %s\n" (name |> Ec2.Values.InstanceStateName.to_json |> json_lower);
          if Stdlib.( = ) name state then Some () else None)
 ;;
 
@@ -312,7 +311,7 @@ let wait_for_volume_available ~volume_id =
        with
        | Ec2.Values.VolumeState.Available -> Some volume
        | other_state ->
-         printf !". %s\n" (other_state |> Ec2.Values.VolumeState.sexp_of_t |> sexp_lower);
+         printf !". %s\n" (other_state |> Ec2.Values.VolumeState.to_json |> json_lower);
          None)
 ;;
 
@@ -336,7 +335,7 @@ let wait_for_volume_modification_completed ~volume_id =
        in
        printf
          !". %s\n"
-         (state |> Ec2.Values.VolumeModificationState.sexp_of_t |> sexp_lower);
+         (state |> Ec2.Values.VolumeModificationState.to_json |> json_lower);
        match state with
        | Ec2.Values.VolumeModificationState.(Completed | Optimizing) -> Some mod_
        | _ -> None)
@@ -366,7 +365,7 @@ let wait_for_network_interface_available ~network_interface_id =
        | other_state ->
          printf
            !". %s\n"
-           (other_state |> Ec2.Values.NetworkInterfaceStatus.sexp_of_t |> sexp_lower);
+           (other_state |> Ec2.Values.NetworkInterfaceStatus.to_json |> json_lower);
          None)
 ;;
 
@@ -395,7 +394,7 @@ let print_instance_type_offerings () =
   tos.instanceTypeOfferings
   |> Option.value_exn ~here:[%here] ~message:"no instanceTypeOfferings?!"
   |> List.iter ~f:(fun o ->
-    o |> Ec2.Values.InstanceTypeOffering.sexp_of_t |> Sexp.to_string_hum |> print_endline)
+    o |> Ec2.Values.InstanceTypeOffering.to_json |> Awso.Json.to_string |> print_endline)
 ;;
 
 let _print_volumes () =
@@ -551,8 +550,8 @@ let test_network_interface_operations ~instance_id ~availability_zone =
     let%bind attribute = describe_network_interface_attribute ~network_interface_id () in
     let () =
       attribute
-      |> Ec2.Values.DescribeNetworkInterfaceAttributeResult.sexp_of_t
-      |> Sexp.to_string_hum
+      |> Ec2.Values.DescribeNetworkInterfaceAttributeResult.to_json
+      |> Awso.Json.to_string
       |> print_endline
     in
     return ()
@@ -766,7 +765,7 @@ let modify_and_describe_instance_attribute instance_id =
   let%bind attribute = describe_instance_attribute ~instance_id ~attribute:"userData" in
   printf
     "instance-attribute: %s\n"
-    (attribute |> Ec2.Values.InstanceAttribute.sexp_of_t |> Sexp.to_string_hum);
+    (attribute |> Ec2.Values.InstanceAttribute.to_json |> Awso.Json.to_string);
   return ()
 ;;
 
@@ -845,8 +844,8 @@ let run_all_tests ?image_id ~region () =
     in
     let () =
       meta_modify_result
-      |> Ec2.Values.ModifyInstanceMetadataOptionsResult.sexp_of_t
-      |> Sexp.to_string_hum
+      |> Ec2.Values.ModifyInstanceMetadataOptionsResult.to_json
+      |> Awso.Json.to_string
       |> printf "modify-instance-metadata-options result: %s\n"
     in
     return ()

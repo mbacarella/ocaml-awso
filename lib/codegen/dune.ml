@@ -29,7 +29,7 @@ let make ~date ~service =
     (libraries awso %{extra_deps})
     (flags :standard -open Core -open Printf)
     (ocamlopt_flags (-linscan))
-    (preprocess (pps ppx_jane))
+    (preprocess (pps ppx_expect))
     (synopsis "OCaml AWS %{service} API.")
     (inline_tests))
        |}]
@@ -107,6 +107,11 @@ let make_io (io_kind : [ `Async | `Lwt ]) ~date ~service =
          | c -> c)
   in
   let io_cap = String.capitalize io in
+  let preprocess =
+    match io_kind with
+    | `Async -> "\n  (preprocess (pps ppx_jane))\n  (inline_tests)"
+    | `Lwt -> ""
+  in
   let library =
     [%string
       {|
@@ -114,9 +119,7 @@ let make_io (io_kind : [ `Async | `Lwt ]) ~date ~service =
   (name awso_%{service_under}_%{io})
   (flags (:standard -open Core -open %{io_cap}))
   (public_name awso-%{service}-%{io})
-  (libraries awso-%{service} awso-%{io})
-  (preprocess (pps ppx_jane))
-  (inline_tests))
+  (libraries awso-%{service} awso-%{io})%{preprocess})
       |}]
   in
   let num_submodules =

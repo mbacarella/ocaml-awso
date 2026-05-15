@@ -5,10 +5,7 @@
  (flags
   (:standard -open Core -open Lwt))
  (public_name awso-iotfleethub-lwt)
- (libraries awso-iotfleethub awso-lwt)
- (preprocess
-  (pps ppx_jane))
- (inline_tests))
+ (libraries awso-iotfleethub awso-lwt))
 
 (rule
  (targets io.ml io.mli)

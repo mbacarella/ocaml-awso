@@ -83,7 +83,6 @@ type get_user_error =
   [ `AWS of Values.GetUserResponse.error
   | `Transport of Awso.Http.Io.Error.call
   ]
-[@@deriving sexp]
 
 exception
   (* Convenience exception for [get_user] AWS calls which wraps the many error

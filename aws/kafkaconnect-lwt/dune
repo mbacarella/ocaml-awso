@@ -5,10 +5,7 @@
  (flags
   (:standard -open Core -open Lwt))
  (public_name awso-kafkaconnect-lwt)
- (libraries awso-kafkaconnect awso-lwt)
- (preprocess
-  (pps ppx_jane))
- (inline_tests))
+ (libraries awso-kafkaconnect awso-lwt))
 
 (rule
  (targets io.ml io.mli)

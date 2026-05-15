@@ -5,10 +5,7 @@
  (flags
   (:standard -open Core -open Lwt))
  (public_name awso-route53-recovery-cluster-lwt)
- (libraries awso-route53-recovery-cluster awso-lwt)
- (preprocess
-  (pps ppx_jane))
- (inline_tests))
+ (libraries awso-route53-recovery-cluster awso-lwt))
 
 (rule
  (targets io.ml io.mli)

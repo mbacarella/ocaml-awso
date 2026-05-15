@@ -5,10 +5,7 @@
  (flags
   (:standard -open Core -open Lwt))
  (public_name awso-applicationcostprofiler-lwt)
- (libraries awso-applicationcostprofiler awso-lwt)
- (preprocess
-  (pps ppx_jane))
- (inline_tests))
+ (libraries awso-applicationcostprofiler awso-lwt))
 
 (rule
  (targets io.ml io.mli)

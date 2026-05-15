@@ -5,10 +5,7 @@
  (flags
   (:standard -open Core -open Lwt))
  (public_name awso-kinesis-lwt)
- (libraries awso-kinesis awso-lwt)
- (preprocess
-  (pps ppx_jane))
- (inline_tests))
+ (libraries awso-kinesis awso-lwt))
 
 (rule
  (targets io.ml io.mli)

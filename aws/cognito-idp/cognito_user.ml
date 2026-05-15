@@ -6,7 +6,6 @@ module Attribute = struct
     { name : string
     ; value : string option
     }
-  [@@deriving sexp]
 
   type t =
     [ `Unknown of raw_attribute
@@ -25,17 +24,15 @@ module Attribute = struct
     | `Preferred_user_name of string option
     | `Given_name of string
     ]
-  [@@deriving sexp]
 end
 
-type attribute = Attribute.t [@@deriving sexp]
+type attribute = Attribute.t
 
 type t =
   { username : string
   ; attributes : attribute list
   ; access_token : string
   }
-[@@deriving sexp]
 
 type msg = string
 
@@ -60,14 +57,14 @@ let%expect_test "required_attribute" =
     required_attribute user ~name ~f
   in
   let test ~attributes =
-    printf !"%{sexp: (string, string) Base.Result.t}" (call ~attributes)
+    match call ~attributes with
+    | Ok s -> printf "Ok %s" s
+    | Error s -> printf "Error %s" s
   in
-  (* Test 1: attribute 'name' found, value of 'name' attribute returned *)
   test ~attributes:[ `Name "foo" ];
-  [%expect {|(Ok foo)|}];
-  (* Test 2: attribute 'name' not found, error raised *)
+  [%expect {|Ok foo|}];
   test ~attributes:[ `Email "foo" ];
-  [%expect {|(Error "name attribute required but not present")|}]
+  [%expect {|Error name attribute required but not present|}]
 ;;
 
 let optional_attribute t ~f = List.find_map t.attributes ~f
@@ -79,15 +76,14 @@ let%expect_test "optional_attribute" =
       | `Name n -> Some n
       | _ -> None
     in
-    let res = optional_attribute user ~f in
-    printf !"%{sexp:string Option.t}" res
+    match optional_attribute user ~f with
+    | Some s -> printf "Some %s" s
+    | None -> printf "None"
   in
-  (* Test 1: attribute 'name' found, value of 'name' attribute returned *)
   test ~attributes:[ `Name "foo" ];
-  [%expect {|(foo)|}];
-  (* Test 2: attribute 'name' not found, no value returned *)
+  [%expect {|Some foo|}];
   test ~attributes:[ `Email "foo" ];
-  [%expect {|()|}]
+  [%expect {|None|}]
 ;;
 
 let email t =
@@ -101,14 +97,14 @@ let email_exn t = Result.ok_or_failwith (email t)
 let%expect_test "email" =
   let call ~attributes = email { username = ""; attributes; access_token = "" } in
   let test ~attributes =
-    printf !"%{sexp: (string, string) Base.Result.t}" (call ~attributes)
+    match call ~attributes with
+    | Ok s -> printf "Ok %s" s
+    | Error s -> printf "Error %s" s
   in
-  (* Test 1: attribute 'email' found, value of 'email' attribute returned *)
   test ~attributes:[ `Email "foo" ];
-  [%expect {|(Ok foo)|}];
-  (* Test 2: attribute 'email' not found, error raised *)
+  [%expect {|Ok foo|}];
   test ~attributes:[ `Name "foo" ];
-  [%expect {|(Error "email attribute required but not present")|}]
+  [%expect {|Error email attribute required but not present|}]
 ;;
 
 let preferred_name t =
@@ -119,18 +115,17 @@ let preferred_name t =
 
 let%expect_test "preferred_name" =
   let test ~attributes =
-    let res = preferred_name { username = ""; attributes; access_token = "" } in
-    printf !"%{sexp:string Option.t Option.t}" res
+    match preferred_name { username = ""; attributes; access_token = "" } with
+    | Some (Some s) -> printf "Some (Some %s)" s
+    | Some None -> printf "Some None"
+    | None -> printf "None"
   in
-  (* Test 1: attribute 'preferred_user_name' found, value returned *)
   test ~attributes:[ `Preferred_user_name (Some "foo") ];
-  [%expect {|((foo))|}];
-  (* Test 2: attribute 'preferred_user_name' found with no value, value returned *)
+  [%expect {|Some (Some foo)|}];
   test ~attributes:[ `Preferred_user_name None ];
-  [%expect {|(())|}];
-  (* Test 3: attribute 'preferred_user_name' not found *)
+  [%expect {|Some None|}];
   test ~attributes:[ `Email "foo" ];
-  [%expect {|()|}]
+  [%expect {|None|}]
 ;;
 
 let family_name t =
@@ -144,14 +139,14 @@ let family_name_exn t = Result.ok_or_failwith (family_name t)
 let%expect_test "family_name" =
   let call ~attributes = family_name { username = ""; attributes; access_token = "" } in
   let test ~attributes =
-    printf !"%{sexp: (string, string) Base.Result.t}" (call ~attributes)
+    match call ~attributes with
+    | Ok s -> printf "Ok %s" s
+    | Error s -> printf "Error %s" s
   in
-  (* Test 1: attribute 'family_name' found, value returned *)
   test ~attributes:[ `Family_name "foo" ];
-  [%expect {|(Ok foo)|}];
-  (* Test 2: attribute 'family_name' not found, error raised *)
+  [%expect {|Ok foo|}];
   test ~attributes:[ `Name "foo" ];
-  [%expect {|(Error "family_name attribute required but not present")|}]
+  [%expect {|Error family_name attribute required but not present|}]
 ;;
 
 let name t =
@@ -162,15 +157,14 @@ let name t =
 
 let%expect_test "name" =
   let test ~attributes =
-    let res = name { username = ""; attributes; access_token = "" } in
-    printf !"%{sexp:string Option.t}" res
+    match name { username = ""; attributes; access_token = "" } with
+    | Some s -> printf "Some %s" s
+    | None -> printf "None"
   in
-  (* Test 1: attribute 'name' found, value returned *)
   test ~attributes:[ `Name "foo" ];
-  [%expect {|(foo)|}];
-  (* Test 2: attribute 'name' not found, no value returned *)
+  [%expect {|Some foo|}];
   test ~attributes:[ `Email "foo" ];
-  [%expect {|()|}]
+  [%expect {|None|}]
 ;;
 
 module Exn = struct

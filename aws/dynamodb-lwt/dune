@@ -5,10 +5,7 @@
  (flags
   (:standard -open Core -open Lwt))
  (public_name awso-dynamodb-lwt)
- (libraries awso-dynamodb awso-lwt)
- (preprocess
-  (pps ppx_jane))
- (inline_tests))
+ (libraries awso-dynamodb awso-lwt))
 
 (rule
  (targets io.ml io.mli)

@@ -5,10 +5,7 @@
  (flags
   (:standard -open Core -open Lwt))
  (public_name awso-rekognition-lwt)
- (libraries awso-rekognition awso-lwt)
- (preprocess
-  (pps ppx_jane))
- (inline_tests))
+ (libraries awso-rekognition awso-lwt))
 
 (rule
  (targets io.ml io.mli)

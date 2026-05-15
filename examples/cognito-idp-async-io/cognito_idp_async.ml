@@ -16,12 +16,13 @@ module List_user_pools = struct
     >>= fun cfg ->
     list_user_pools ~cfg (ListUserPoolsRequest.make ~maxResults:10 ())
     >>| function
-    | Ok response -> ListUserPoolsResponse.sexp_of_t response |> print_s
+    | Ok response ->
+      response |> ListUserPoolsResponse.to_json |> Awso.Json.to_string |> print_endline
     | Error (`Transport _) -> failwithf "list_user_pools: http error" ()
     | Error (`AWS err) ->
       failwithf
         "list_user_pools: %s"
-        (err |> ListUserPoolsResponse.sexp_of_error |> Sexp.to_string_hum)
+        (err |> ListUserPoolsResponse.error_to_json |> Awso.Json.to_string)
         ()
   ;;
 
@@ -40,12 +41,13 @@ module Create_user_pool = struct
     >>= fun cfg ->
     create_user_pool ~cfg (CreateUserPoolRequest.make ~poolName ())
     >>| function
-    | Ok response -> CreateUserPoolResponse.sexp_of_t response |> print_s
+    | Ok response ->
+      response |> CreateUserPoolResponse.to_json |> Awso.Json.to_string |> print_endline
     | Error (`Transport _) -> failwithf "create_user_pool: http error" ()
     | Error (`AWS err) ->
       failwithf
         "create_user_pool: %s"
-        (err |> CreateUserPoolResponse.sexp_of_error |> Sexp.to_string_hum)
+        (err |> CreateUserPoolResponse.error_to_json |> Awso.Json.to_string)
         ()
   ;;
 

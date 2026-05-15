@@ -5,10 +5,7 @@
  (flags
   (:standard -open Core -open Lwt))
  (public_name awso-servicecatalog-appregistry-lwt)
- (libraries awso-servicecatalog-appregistry awso-lwt)
- (preprocess
-  (pps ppx_jane))
- (inline_tests))
+ (libraries awso-servicecatalog-appregistry awso-lwt))
 
 (rule
  (targets io.ml io.mli)

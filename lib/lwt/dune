@@ -5,5 +5,5 @@
  (flags
   (:standard -open Core -open Printf))
  (preprocess
-  (pps ppx_jane))
+  (pps lwt_ppx ppx_let))
  (synopsis "OCaml lwt library for AWS clients."))

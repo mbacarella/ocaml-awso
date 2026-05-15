@@ -5,10 +5,7 @@
  (flags
   (:standard -open Core -open Lwt))
  (public_name awso-compute-optimizer-lwt)
- (libraries awso-compute-optimizer awso-lwt)
- (preprocess
-  (pps ppx_jane))
- (inline_tests))
+ (libraries awso-compute-optimizer awso-lwt))
 
 (rule
  (targets io.ml io.mli)

@@ -68,15 +68,15 @@ let make_structure_for_protocol
   List.filter_map data ~f:(fun e ->
     let name = Endpoint.name e in
     let request_shape = Endpoint.request_module e in
-    let error_to_sexp =
+    let error_to_json =
       match metadata.protocol with
-      | `ec2 -> [%expr Some Values.Ec2_error.sexp_of_t]
+      | `ec2 -> [%expr Some Values.Ec2_error.to_json]
       | `json | `query | `rest_xml | `rest_json -> (
         match Endpoint.result_module e with
         | None -> [%expr None]
         | Some result_shape ->
           let f =
-            sprintf "Values.%s.sexp_of_error" result_shape |> Ast_convenience.evar
+            sprintf "Values.%s.error_to_json" result_shape |> Ast_convenience.evar
           in
           [%expr Some [%e f]])
     in
@@ -157,7 +157,7 @@ let make_structure_for_protocol
                   (List.map make_args ~f:(member_to_arg ~loc)
                    @ [ Ast_convenience.Label.nolabel, Ast_convenience.unit () ])]
               [%e result_to_json]
-              [%e error_to_sexp]]
+              [%e error_to_json]]
     in
     Some
       [%stri
@@ -188,7 +188,7 @@ let preamble ~loc =
   [%str
     let json_arg = Command.Arg_type.create Awso_codegen.Json.from_string
 
-    let call ?endpoint_url ?profile ?region f m result_to_json error_to_sexp =
+    let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
       let region =
         match region with
         | Some region -> Some (Awso.Region.of_string region)
@@ -204,9 +204,11 @@ let preamble ~loc =
         | `Transport err ->
           failwiths ~here:[%here] "Transport error" err Awso.Http.Io.Error.sexp_of_call
         | `AWS err -> (
-          match error_to_sexp with
+          match error_to_json with
           | None -> failwithf "endpoint error, but no error values defined in boto" ()
-          | Some to_sexp -> failwiths ~here:[%here] "AWS error" err to_sexp))
+          | Some to_json ->
+            let s = err |> to_json |> Awso_codegen.Json.to_string in
+            failwithf "AWS error: %s" s ()))
       | Ok result ->
         (match result_to_json with
          | None -> print_endline "ok response from endpoint"

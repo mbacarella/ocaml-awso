@@ -5,10 +5,7 @@
  (flags
   (:standard -open Core -open Lwt))
  (public_name awso-outposts-lwt)
- (libraries awso-outposts awso-lwt)
- (preprocess
-  (pps ppx_jane))
- (inline_tests))
+ (libraries awso-outposts awso-lwt))
 
 (rule
  (targets io.ml io.mli)
