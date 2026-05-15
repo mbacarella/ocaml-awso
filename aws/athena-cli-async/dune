@@ -3,8 +3,7 @@
 (executable
  (package awso-athena-async)
  (name awso_athena)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-athena)
  (libraries awso-athena-async awso-async core_unix.command_unix)
  (preprocess

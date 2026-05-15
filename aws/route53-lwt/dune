@@ -2,8 +2,7 @@
 
 (library
  (name awso_route53_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-route53-lwt)
  (libraries awso-route53 awso-lwt))
 

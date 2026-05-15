@@ -3,8 +3,7 @@
 (executable
  (package awso-servicecatalog-appregistry-async)
  (name awso_servicecatalog_appregistry)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-servicecatalog-appregistry)
  (libraries
   awso-servicecatalog-appregistry-async

@@ -4,7 +4,7 @@
  (name awso_cloud9)
  (public_name awso-cloud9)
  (libraries awso)
- (flags :standard -open Core -open Printf)
+ (flags :standard)
  (ocamlopt_flags (-linscan))
  (preprocess
   (pps ppx_expect))

@@ -3,8 +3,7 @@
 (executable
  (package awso-workmail-async)
  (name awso_workmail)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-workmail)
  (libraries awso-workmail-async awso-async core_unix.command_unix)
  (preprocess

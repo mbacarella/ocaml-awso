@@ -2,8 +2,7 @@
 
 (library
  (name awso_meteringmarketplace_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-meteringmarketplace-async)
  (libraries awso-meteringmarketplace awso-async)
  (preprocess

@@ -4,7 +4,7 @@
  (name awso_autoscaling)
  (public_name awso-autoscaling)
  (libraries awso)
- (flags :standard -open Core -open Printf)
+ (flags :standard)
  (ocamlopt_flags (-linscan))
  (preprocess
   (pps ppx_expect))

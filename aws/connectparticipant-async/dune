@@ -2,8 +2,7 @@
 
 (library
  (name awso_connectparticipant_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-connectparticipant-async)
  (libraries awso-connectparticipant awso-async)
  (preprocess

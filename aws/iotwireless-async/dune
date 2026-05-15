@@ -2,8 +2,7 @@
 
 (library
  (name awso_iotwireless_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-iotwireless-async)
  (libraries awso-iotwireless awso-async)
  (preprocess

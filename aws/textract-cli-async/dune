@@ -3,8 +3,7 @@
 (executable
  (package awso-textract-async)
  (name awso_textract)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-textract)
  (libraries awso-textract-async awso-async core_unix.command_unix)
  (preprocess

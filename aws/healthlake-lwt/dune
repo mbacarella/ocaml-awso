@@ -2,8 +2,7 @@
 
 (library
  (name awso_healthlake_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-healthlake-lwt)
  (libraries awso-healthlake awso-lwt))
 

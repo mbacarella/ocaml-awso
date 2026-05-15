@@ -2,8 +2,7 @@
 
 (library
  (name awso_timestream_write_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-timestream-write-async)
  (libraries awso-timestream-write awso-async)
  (preprocess

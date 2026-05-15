@@ -3,8 +3,7 @@
 (executable
  (package awso-amplifybackend-async)
  (name awso_amplifybackend)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-amplifybackend)
  (libraries awso-amplifybackend-async awso-async core_unix.command_unix)
  (preprocess

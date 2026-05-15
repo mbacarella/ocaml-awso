@@ -1,7 +1,6 @@
 (library
  (name awso_srp_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags :standard)
  (public_name awso-srp-async)
  (libraries awso-srp awso-async awso-cognito-idp-async core_unix.time_unix)
  (preprocess

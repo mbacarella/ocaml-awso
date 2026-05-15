@@ -3,8 +3,7 @@
 (executable
  (package awso-mgn-async)
  (name awso_mgn)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-mgn)
  (libraries awso-mgn-async awso-async core_unix.command_unix)
  (preprocess

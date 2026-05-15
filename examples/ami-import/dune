@@ -2,6 +2,6 @@
  (name ami_import)
  (libraries awso-ebs-async awso-ec2-async core_unix.command_unix)
  (flags
-  (:standard -open Core -open Async))
+  (:standard))
  (preprocess
   (pps ppx_jane)))

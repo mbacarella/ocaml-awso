@@ -186,6 +186,9 @@ let command_main ~loc data =
 
 let preamble ~loc =
   [%str
+    open Core
+    open Async
+
     let json_arg = Command.Arg_type.create Awso_codegen.Json.from_string
 
     let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
@@ -239,9 +242,11 @@ let structure_multi ~loc index service open_submodules metadata data =
     @ open_all ~loc open_submodules
     @ make_structure_for_protocol ~loc service metadata data
   | _ ->
-    (* The subsequent submodules open all of the preceding submodules so
-       we don't need to repeat most of the boilerplate. *)
-    open_all ~loc open_submodules @ make_structure_for_protocol ~loc service metadata data
+    [%str
+      open Core
+      open Async]
+    @ open_all ~loc open_submodules
+    @ make_structure_for_protocol ~loc service metadata data
 ;;
 
 let module_name_of_ml fn = fn |> String.chop_suffix_exn ~suffix:".ml" |> String.capitalize

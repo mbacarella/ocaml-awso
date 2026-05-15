@@ -2,8 +2,7 @@
 
 (library
  (name awso_robomaker_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-robomaker-async)
  (libraries awso-robomaker awso-async)
  (preprocess

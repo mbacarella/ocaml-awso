@@ -2,8 +2,7 @@
 
 (library
  (name awso_macie2_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-macie2-lwt)
  (libraries awso-macie2 awso-lwt))
 

@@ -2,8 +2,7 @@
 
 (library
  (name awso_swf_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-swf-async)
  (libraries awso-swf awso-async)
  (preprocess

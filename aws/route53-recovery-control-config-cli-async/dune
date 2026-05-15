@@ -3,8 +3,7 @@
 (executable
  (package awso-route53-recovery-control-config-async)
  (name awso_route53_recovery_control_config)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-route53-recovery-control-config)
  (libraries
   awso-route53-recovery-control-config-async

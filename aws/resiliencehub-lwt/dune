@@ -2,8 +2,7 @@
 
 (library
  (name awso_resiliencehub_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-resiliencehub-lwt)
  (libraries awso-resiliencehub awso-lwt))
 

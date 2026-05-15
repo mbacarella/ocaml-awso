@@ -2,8 +2,7 @@
 
 (library
  (name awso_application_insights_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-application-insights-async)
  (libraries awso-application-insights awso-async)
  (preprocess

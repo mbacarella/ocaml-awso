@@ -2,8 +2,7 @@
 
 (library
  (name awso_mobile_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-mobile-async)
  (libraries awso-mobile awso-async)
  (preprocess

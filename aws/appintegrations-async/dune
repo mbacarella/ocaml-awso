@@ -2,8 +2,7 @@
 
 (library
  (name awso_appintegrations_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-appintegrations-async)
  (libraries awso-appintegrations awso-async)
  (preprocess

@@ -3,8 +3,7 @@
 (executable
  (package awso-translate-async)
  (name awso_translate)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-translate)
  (libraries awso-translate-async awso-async core_unix.command_unix)
  (preprocess

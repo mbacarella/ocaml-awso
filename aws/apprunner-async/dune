@@ -2,8 +2,7 @@
 
 (library
  (name awso_apprunner_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-apprunner-async)
  (libraries awso-apprunner awso-async)
  (preprocess

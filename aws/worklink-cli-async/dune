@@ -3,8 +3,7 @@
 (executable
  (package awso-worklink-async)
  (name awso_worklink)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-worklink)
  (libraries awso-worklink-async awso-async core_unix.command_unix)
  (preprocess

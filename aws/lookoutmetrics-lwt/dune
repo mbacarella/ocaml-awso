@@ -2,8 +2,7 @@
 
 (library
  (name awso_lookoutmetrics_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-lookoutmetrics-lwt)
  (libraries awso-lookoutmetrics awso-lwt))
 

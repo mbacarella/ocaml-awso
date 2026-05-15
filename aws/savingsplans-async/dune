@@ -2,8 +2,7 @@
 
 (library
  (name awso_savingsplans_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-savingsplans-async)
  (libraries awso-savingsplans awso-async)
  (preprocess

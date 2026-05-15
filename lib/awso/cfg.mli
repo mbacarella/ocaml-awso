@@ -12,6 +12,7 @@
     This module should not be confused with the
     {{:http://aws.amazon.com/config/}AWS Config} service. *)
 
+open! Core
 open! Import
 
 module S3_custom_command_settings : sig

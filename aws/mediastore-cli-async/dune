@@ -3,8 +3,7 @@
 (executable
  (package awso-mediastore-async)
  (name awso_mediastore)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-mediastore)
  (libraries awso-mediastore-async awso-async core_unix.command_unix)
  (preprocess

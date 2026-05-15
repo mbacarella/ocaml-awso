@@ -3,8 +3,7 @@
 (executable
  (package awso-codeguru-reviewer-async)
  (name awso_codeguru_reviewer)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-codeguru-reviewer)
  (libraries awso-codeguru-reviewer-async awso-async core_unix.command_unix)
  (preprocess

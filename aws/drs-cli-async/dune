@@ -3,8 +3,7 @@
 (executable
  (package awso-drs-async)
  (name awso_drs)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-drs)
  (libraries awso-drs-async awso-async core_unix.command_unix)
  (preprocess

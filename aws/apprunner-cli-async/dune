@@ -3,8 +3,7 @@
 (executable
  (package awso-apprunner-async)
  (name awso_apprunner)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-apprunner)
  (libraries awso-apprunner-async awso-async core_unix.command_unix)
  (preprocess

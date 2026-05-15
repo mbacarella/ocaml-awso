@@ -1,3 +1,6 @@
+open Core
+open Async
+
 open Awso_sqs_async
 
 let main () =

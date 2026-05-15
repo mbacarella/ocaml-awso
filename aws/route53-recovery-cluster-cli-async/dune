@@ -3,8 +3,7 @@
 (executable
  (package awso-route53-recovery-cluster-async)
  (name awso_route53_recovery_cluster)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-route53-recovery-cluster)
  (libraries
   awso-route53-recovery-cluster-async

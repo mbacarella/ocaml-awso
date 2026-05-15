@@ -2,8 +2,7 @@
 
 (library
  (name awso_connect_contact_lens_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-connect-contact-lens-async)
  (libraries awso-connect-contact-lens awso-async)
  (preprocess

@@ -2,8 +2,7 @@
 
 (library
  (name awso_applicationcostprofiler_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-applicationcostprofiler-async)
  (libraries awso-applicationcostprofiler awso-async)
  (preprocess

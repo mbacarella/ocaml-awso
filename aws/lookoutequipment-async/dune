@@ -2,8 +2,7 @@
 
 (library
  (name awso_lookoutequipment_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-lookoutequipment-async)
  (libraries awso-lookoutequipment awso-async)
  (preprocess

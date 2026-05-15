@@ -3,8 +3,7 @@
 (executable
  (package awso-ce-async)
  (name awso_ce)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-ce)
  (libraries awso-ce-async awso-async core_unix.command_unix)
  (preprocess

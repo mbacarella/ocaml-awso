@@ -3,8 +3,7 @@
 (executable
  (package awso-kinesis-video-signaling-async)
  (name awso_kinesis_video_signaling)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-kinesis-video-signaling)
  (libraries
   awso-kinesis-video-signaling-async

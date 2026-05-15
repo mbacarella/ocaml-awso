@@ -4,7 +4,7 @@
  (name awso_evidently)
  (public_name awso-evidently)
  (libraries awso)
- (flags :standard -open Core -open Printf)
+ (flags :standard)
  (ocamlopt_flags (-linscan))
  (preprocess
   (pps ppx_expect))

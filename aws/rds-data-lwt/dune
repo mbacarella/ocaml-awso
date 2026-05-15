@@ -2,8 +2,7 @@
 
 (library
  (name awso_rds_data_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-rds-data-lwt)
  (libraries awso-rds-data awso-lwt))
 

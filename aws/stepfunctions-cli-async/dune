@@ -3,8 +3,7 @@
 (executable
  (package awso-stepfunctions-async)
  (name awso_stepfunctions)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-stepfunctions)
  (libraries awso-stepfunctions-async awso-async core_unix.command_unix)
  (preprocess

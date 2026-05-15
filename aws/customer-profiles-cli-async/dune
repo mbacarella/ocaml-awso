@@ -3,8 +3,7 @@
 (executable
  (package awso-customer-profiles-async)
  (name awso_customer_profiles)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-customer-profiles)
  (libraries awso-customer-profiles-async awso-async core_unix.command_unix)
  (preprocess

@@ -3,8 +3,7 @@
 (executable
  (package awso-application-autoscaling-async)
  (name awso_application_autoscaling)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-application-autoscaling)
  (libraries
   awso-application-autoscaling-async

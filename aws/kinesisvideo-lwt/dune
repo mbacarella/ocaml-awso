@@ -2,8 +2,7 @@
 
 (library
  (name awso_kinesisvideo_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-kinesisvideo-lwt)
  (libraries awso-kinesisvideo awso-lwt))
 

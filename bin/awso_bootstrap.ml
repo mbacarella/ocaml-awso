@@ -1,3 +1,5 @@
+open! Core
+
 module Process = struct
   module Output = struct
     type t =

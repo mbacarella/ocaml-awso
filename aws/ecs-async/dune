@@ -2,8 +2,7 @@
 
 (library
  (name awso_ecs_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-ecs-async)
  (libraries awso-ecs awso-async)
  (preprocess

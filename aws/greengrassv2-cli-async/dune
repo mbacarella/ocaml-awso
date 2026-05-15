@@ -3,8 +3,7 @@
 (executable
  (package awso-greengrassv2-async)
  (name awso_greengrassv2)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-greengrassv2)
  (libraries awso-greengrassv2-async awso-async core_unix.command_unix)
  (preprocess

@@ -2,8 +2,7 @@
 
 (library
  (name awso_mediaconvert_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-mediaconvert-async)
  (libraries awso-mediaconvert awso-async)
  (preprocess

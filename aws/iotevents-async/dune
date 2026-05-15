@@ -2,8 +2,7 @@
 
 (library
  (name awso_iotevents_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-iotevents-async)
  (libraries awso-iotevents awso-async)
  (preprocess

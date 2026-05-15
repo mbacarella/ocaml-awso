@@ -1,3 +1,6 @@
+open! Core
+open! Async
+
 module Cfg = struct
   let get ?profile ?region ?output () =
     match%bind Awso_async.Cfg.get ?profile ?region ?output () with

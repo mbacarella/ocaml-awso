@@ -2,8 +2,7 @@
 
 (library
  (name awso_redshift_data_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-redshift-data-async)
  (libraries awso-redshift-data awso-async)
  (preprocess

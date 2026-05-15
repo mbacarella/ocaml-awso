@@ -2,8 +2,7 @@
 
 (library
  (name awso_wafv2_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-wafv2-async)
  (libraries awso-wafv2 awso-async)
  (preprocess

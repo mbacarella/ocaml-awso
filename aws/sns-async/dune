@@ -2,8 +2,7 @@
 
 (library
  (name awso_sns_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-sns-async)
  (libraries awso-sns awso-async)
  (preprocess

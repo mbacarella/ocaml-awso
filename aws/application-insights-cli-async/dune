@@ -3,8 +3,7 @@
 (executable
  (package awso-application-insights-async)
  (name awso_application_insights)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-application-insights)
  (libraries
   awso-application-insights-async

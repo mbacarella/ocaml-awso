@@ -2,8 +2,7 @@
 
 (library
  (name awso_lex_models_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-lex-models-lwt)
  (libraries awso-lex-models awso-lwt))
 

@@ -1,3 +1,6 @@
+open! Core
+open! Async
+
 let cognito_list_identity_pools' cfg ?max_results () =
   Cognito_identity.list_identity_pools cfg ?max_results ()
   >>= fun l ->

@@ -3,8 +3,7 @@
 (executable
  (package awso-efs-async)
  (name awso_efs)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-efs)
  (libraries awso-efs-async awso-async core_unix.command_unix)
  (preprocess

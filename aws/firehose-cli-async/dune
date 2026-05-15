@@ -3,8 +3,7 @@
 (executable
  (package awso-firehose-async)
  (name awso_firehose)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-firehose)
  (libraries awso-firehose-async awso-async core_unix.command_unix)
  (preprocess

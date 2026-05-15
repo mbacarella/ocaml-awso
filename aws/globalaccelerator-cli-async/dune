@@ -3,8 +3,7 @@
 (executable
  (package awso-globalaccelerator-async)
  (name awso_globalaccelerator)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-globalaccelerator)
  (libraries awso-globalaccelerator-async awso-async core_unix.command_unix)
  (preprocess

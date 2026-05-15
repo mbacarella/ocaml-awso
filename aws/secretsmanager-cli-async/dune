@@ -3,8 +3,7 @@
 (executable
  (package awso-secretsmanager-async)
  (name awso_secretsmanager)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-secretsmanager)
  (libraries awso-secretsmanager-async awso-async core_unix.command_unix)
  (preprocess

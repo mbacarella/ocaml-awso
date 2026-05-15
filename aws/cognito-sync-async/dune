@@ -2,8 +2,7 @@
 
 (library
  (name awso_cognito_sync_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-cognito-sync-async)
  (libraries awso-cognito-sync awso-async)
  (preprocess

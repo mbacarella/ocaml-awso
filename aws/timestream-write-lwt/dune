@@ -2,8 +2,7 @@
 
 (library
  (name awso_timestream_write_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-timestream-write-lwt)
  (libraries awso-timestream-write awso-lwt))
 

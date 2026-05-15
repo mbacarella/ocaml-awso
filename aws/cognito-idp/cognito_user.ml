@@ -1,3 +1,4 @@
+open! Core
 open! Awso.Import
 module Stdlib = Stdlib
 

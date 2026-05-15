@@ -3,6 +3,8 @@
     commonly used AWS functions which are otherhwise just code generated
     directly from the boto service files. *)
 
+open! Core
+open! Async
 open Awso_async
 open! Import
 

@@ -2,8 +2,7 @@
 
 (library
  (name awso_rds_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-rds-async)
  (libraries awso-rds awso-async)
  (preprocess

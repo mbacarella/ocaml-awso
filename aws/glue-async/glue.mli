@@ -1,3 +1,6 @@
+open! Core
+open! Async
+
 (** AWS Glue API, cohttp-async implementation *)
 
 (** Convenience definition for already_exists_error which is often treated

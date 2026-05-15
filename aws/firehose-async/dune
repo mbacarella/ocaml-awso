@@ -2,8 +2,7 @@
 
 (library
  (name awso_firehose_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-firehose-async)
  (libraries awso-firehose awso-async)
  (preprocess

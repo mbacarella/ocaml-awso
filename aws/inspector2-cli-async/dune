@@ -3,8 +3,7 @@
 (executable
  (package awso-inspector2-async)
  (name awso_inspector2)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-inspector2)
  (libraries awso-inspector2-async awso-async core_unix.command_unix)
  (preprocess

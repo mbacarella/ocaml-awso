@@ -1,3 +1,6 @@
+open! Core
+open! Async
+
 module Cfg : sig
   (* This is an SSO credentials aware version of Cfg. It internally calls to
      Awso.Cfg.get () and may dispatch to Sso.get_role_credentials.

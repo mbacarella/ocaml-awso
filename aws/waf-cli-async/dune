@@ -3,8 +3,7 @@
 (executable
  (package awso-waf-async)
  (name awso_waf)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-waf)
  (libraries awso-waf-async awso-async core_unix.command_unix)
  (preprocess

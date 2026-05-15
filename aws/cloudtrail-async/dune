@@ -2,8 +2,7 @@
 
 (library
  (name awso_cloudtrail_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-cloudtrail-async)
  (libraries awso-cloudtrail awso-async)
  (preprocess

@@ -2,8 +2,7 @@
 
 (library
  (name awso_macie2_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-macie2-async)
  (libraries awso-macie2 awso-async)
  (preprocess

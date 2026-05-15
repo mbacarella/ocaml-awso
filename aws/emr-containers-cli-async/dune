@@ -3,8 +3,7 @@
 (executable
  (package awso-emr-containers-async)
  (name awso_emr_containers)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-emr-containers)
  (libraries awso-emr-containers-async awso-async core_unix.command_unix)
  (preprocess

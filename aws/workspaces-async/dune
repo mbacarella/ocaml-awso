@@ -2,8 +2,7 @@
 
 (library
  (name awso_workspaces_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-workspaces-async)
  (libraries awso-workspaces awso-async)
  (preprocess

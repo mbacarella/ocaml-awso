@@ -1,3 +1,4 @@
+open! Core
 open! Import
 
 (** Get a configuration, following a provider chain as follows:

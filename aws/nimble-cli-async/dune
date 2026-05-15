@@ -3,8 +3,7 @@
 (executable
  (package awso-nimble-async)
  (name awso_nimble)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-nimble)
  (libraries awso-nimble-async awso-async core_unix.command_unix)
  (preprocess

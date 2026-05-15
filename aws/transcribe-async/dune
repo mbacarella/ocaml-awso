@@ -2,8 +2,7 @@
 
 (library
  (name awso_transcribe_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-transcribe-async)
  (libraries awso-transcribe awso-async)
  (preprocess

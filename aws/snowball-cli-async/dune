@@ -3,8 +3,7 @@
 (executable
  (package awso-snowball-async)
  (name awso_snowball)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-snowball)
  (libraries awso-snowball-async awso-async core_unix.command_unix)
  (preprocess

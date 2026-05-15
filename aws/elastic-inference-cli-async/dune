@@ -3,8 +3,7 @@
 (executable
  (package awso-elastic-inference-async)
  (name awso_elastic_inference)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-elastic-inference)
  (libraries awso-elastic-inference-async awso-async core_unix.command_unix)
  (preprocess

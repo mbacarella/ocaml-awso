@@ -3,8 +3,7 @@
 (executable
  (package awso-resource-groups-async)
  (name awso_resource_groups)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-resource-groups)
  (libraries awso-resource-groups-async awso-async core_unix.command_unix)
  (preprocess

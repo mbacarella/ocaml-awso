@@ -4,7 +4,7 @@
  (name awso_sso)
  (public_name awso-sso)
  (libraries awso)
- (flags :standard -open Core -open Printf)
+ (flags :standard)
  (ocamlopt_flags (-linscan))
  (preprocess
   (pps ppx_expect))

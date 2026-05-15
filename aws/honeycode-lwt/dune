@@ -2,8 +2,7 @@
 
 (library
  (name awso_honeycode_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-honeycode-lwt)
  (libraries awso-honeycode awso-lwt))
 

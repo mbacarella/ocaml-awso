@@ -3,8 +3,7 @@
 (executable
  (package awso-kafka-async)
  (name awso_kafka)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-kafka)
  (libraries awso-kafka-async awso-async core_unix.command_unix)
  (preprocess

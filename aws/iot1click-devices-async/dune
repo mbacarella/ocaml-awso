@@ -2,8 +2,7 @@
 
 (library
  (name awso_iot1click_devices_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-iot1click-devices-async)
  (libraries awso-iot1click-devices awso-async)
  (preprocess

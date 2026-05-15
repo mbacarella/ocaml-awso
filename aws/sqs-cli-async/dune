@@ -3,8 +3,7 @@
 (executable
  (package awso-sqs-async)
  (name awso_sqs)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-sqs)
  (libraries awso-sqs-async awso-async core_unix.command_unix)
  (preprocess

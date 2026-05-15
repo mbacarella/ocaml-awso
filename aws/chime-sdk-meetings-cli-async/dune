@@ -3,8 +3,7 @@
 (executable
  (package awso-chime-sdk-meetings-async)
  (name awso_chime_sdk_meetings)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-chime-sdk-meetings)
  (libraries awso-chime-sdk-meetings-async awso-async core_unix.command_unix)
  (preprocess

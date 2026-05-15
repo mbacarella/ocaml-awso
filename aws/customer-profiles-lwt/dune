@@ -2,8 +2,7 @@
 
 (library
  (name awso_customer_profiles_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-customer-profiles-lwt)
  (libraries awso-customer-profiles awso-lwt))
 

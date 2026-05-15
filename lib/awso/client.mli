@@ -1,3 +1,5 @@
+open! Core
+
 module Query : sig
   type t =
     | String of string

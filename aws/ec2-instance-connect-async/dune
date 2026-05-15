@@ -2,8 +2,7 @@
 
 (library
  (name awso_ec2_instance_connect_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-ec2-instance-connect-async)
  (libraries awso-ec2-instance-connect awso-async)
  (preprocess

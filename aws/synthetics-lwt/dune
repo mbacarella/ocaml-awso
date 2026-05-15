@@ -2,8 +2,7 @@
 
 (library
  (name awso_synthetics_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-synthetics-lwt)
  (libraries awso-synthetics awso-lwt))
 

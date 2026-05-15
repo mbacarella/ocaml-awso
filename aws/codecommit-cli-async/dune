@@ -3,8 +3,7 @@
 (executable
  (package awso-codecommit-async)
  (name awso_codecommit)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-codecommit)
  (libraries awso-codecommit-async awso-async core_unix.command_unix)
  (preprocess

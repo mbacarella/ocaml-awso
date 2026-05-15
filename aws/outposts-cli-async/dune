@@ -3,8 +3,7 @@
 (executable
  (package awso-outposts-async)
  (name awso_outposts)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-outposts)
  (libraries awso-outposts-async awso-async core_unix.command_unix)
  (preprocess

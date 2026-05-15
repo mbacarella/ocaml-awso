@@ -3,8 +3,7 @@
 (executable
  (package awso-qldb-session-async)
  (name awso_qldb_session)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-qldb-session)
  (libraries awso-qldb-session-async awso-async core_unix.command_unix)
  (preprocess

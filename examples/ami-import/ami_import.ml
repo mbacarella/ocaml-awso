@@ -1,3 +1,6 @@
+open Core
+open Async
+
 module Cfg = Awso_async.Cfg
 
 module Ec2 = Awso_ec2_async

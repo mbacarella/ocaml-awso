@@ -2,8 +2,7 @@
 
 (library
  (name awso_nimble_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-nimble-async)
  (libraries awso-nimble awso-async)
  (preprocess

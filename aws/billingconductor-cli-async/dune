@@ -3,8 +3,7 @@
 (executable
  (package awso-billingconductor-async)
  (name awso_billingconductor)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-billingconductor)
  (libraries awso-billingconductor-async awso-async core_unix.command_unix)
  (preprocess

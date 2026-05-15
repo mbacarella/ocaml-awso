@@ -3,8 +3,7 @@
 (executable
  (package awso-ivs-async)
  (name awso_ivs)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-ivs)
  (libraries awso-ivs-async awso-async core_unix.command_unix)
  (preprocess

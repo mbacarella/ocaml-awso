@@ -3,8 +3,7 @@
 (executable
  (package awso-serverlessrepo-async)
  (name awso_serverlessrepo)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-serverlessrepo)
  (libraries awso-serverlessrepo-async awso-async core_unix.command_unix)
  (preprocess

@@ -2,8 +2,7 @@
 
 (library
  (name awso_iam_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-iam-async)
  (libraries awso-iam awso-async)
  (preprocess

@@ -2,8 +2,7 @@
 
 (library
  (name awso_iotfleethub_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-iotfleethub-async)
  (libraries awso-iotfleethub awso-async)
  (preprocess

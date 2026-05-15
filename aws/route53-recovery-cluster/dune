@@ -4,7 +4,7 @@
  (name awso_route53_recovery_cluster)
  (public_name awso-route53-recovery-cluster)
  (libraries awso)
- (flags :standard -open Core -open Printf)
+ (flags :standard)
  (ocamlopt_flags (-linscan))
  (preprocess
   (pps ppx_expect))

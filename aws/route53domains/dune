@@ -4,7 +4,7 @@
  (name awso_route53domains)
  (public_name awso-route53domains)
  (libraries awso)
- (flags :standard -open Core -open Printf)
+ (flags :standard)
  (ocamlopt_flags (-linscan))
  (preprocess
   (pps ppx_expect))

@@ -3,8 +3,7 @@
 (executable
  (package awso-account-async)
  (name awso_account)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-account)
  (libraries awso-account-async awso-async core_unix.command_unix)
  (preprocess

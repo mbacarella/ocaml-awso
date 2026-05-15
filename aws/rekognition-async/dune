@@ -2,8 +2,7 @@
 
 (library
  (name awso_rekognition_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-rekognition-async)
  (libraries awso-rekognition awso-async)
  (preprocess

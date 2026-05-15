@@ -3,8 +3,7 @@
 (executable
  (package awso-rbin-async)
  (name awso_rbin)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-rbin)
  (libraries awso-rbin-async awso-async core_unix.command_unix)
  (preprocess

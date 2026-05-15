@@ -1,3 +1,6 @@
+open! Core
+open! Async
+
 module Statement : sig
   type effect_ =
     | Accept

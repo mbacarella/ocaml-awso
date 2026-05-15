@@ -2,8 +2,7 @@
 
 (library
  (name awso_cloudcontrol_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-cloudcontrol-async)
  (libraries awso-cloudcontrol awso-async)
  (preprocess

@@ -2,8 +2,7 @@
 
 (library
  (name awso_dms_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-dms-async)
  (libraries awso-dms awso-async)
  (preprocess

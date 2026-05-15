@@ -3,8 +3,7 @@
 (executable
  (package awso-forecast-async)
  (name awso_forecast)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-forecast)
  (libraries awso-forecast-async awso-async core_unix.command_unix)
  (preprocess

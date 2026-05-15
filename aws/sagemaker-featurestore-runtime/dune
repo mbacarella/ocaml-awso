@@ -4,7 +4,7 @@
  (name awso_sagemaker_featurestore_runtime)
  (public_name awso-sagemaker-featurestore-runtime)
  (libraries awso)
- (flags :standard -open Core -open Printf)
+ (flags :standard)
  (ocamlopt_flags (-linscan))
  (preprocess
   (pps ppx_expect))

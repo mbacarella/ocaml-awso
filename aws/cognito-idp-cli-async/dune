@@ -3,8 +3,7 @@
 (executable
  (package awso-cognito-idp-async)
  (name awso_cognito_idp)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-cognito-idp)
  (libraries awso-cognito-idp-async awso-async core_unix.command_unix)
  (preprocess

@@ -3,8 +3,7 @@
 (executable
  (package awso-chime-sdk-identity-async)
  (name awso_chime_sdk_identity)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-chime-sdk-identity)
  (libraries awso-chime-sdk-identity-async awso-async core_unix.command_unix)
  (preprocess

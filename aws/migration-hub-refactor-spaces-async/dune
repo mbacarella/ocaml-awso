@@ -2,8 +2,7 @@
 
 (library
  (name awso_migration_hub_refactor_spaces_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-migration-hub-refactor-spaces-async)
  (libraries awso-migration-hub-refactor-spaces awso-async)
  (preprocess

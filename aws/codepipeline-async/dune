@@ -2,8 +2,7 @@
 
 (library
  (name awso_codepipeline_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-codepipeline-async)
  (libraries awso-codepipeline awso-async)
  (preprocess

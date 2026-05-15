@@ -2,8 +2,7 @@
 
 (library
  (name awso_cloudsearch_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-cloudsearch-lwt)
  (libraries awso-cloudsearch awso-lwt))
 

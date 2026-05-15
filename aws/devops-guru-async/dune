@@ -2,8 +2,7 @@
 
 (library
  (name awso_devops_guru_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-devops-guru-async)
  (libraries awso-devops-guru awso-async)
  (preprocess

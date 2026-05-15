@@ -2,8 +2,7 @@
 
 (library
  (name awso_amplify_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-amplify-async)
  (libraries awso-amplify awso-async)
  (preprocess

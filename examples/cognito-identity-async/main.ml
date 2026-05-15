@@ -1,3 +1,4 @@
+open Core
 open Awso_cognito_identity_async
 
 let () =

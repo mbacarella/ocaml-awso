@@ -3,8 +3,7 @@
 (executable
  (package awso-route53-recovery-readiness-async)
  (name awso_route53_recovery_readiness)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-route53-recovery-readiness)
  (libraries
   awso-route53-recovery-readiness-async

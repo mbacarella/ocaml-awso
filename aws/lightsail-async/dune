@@ -2,8 +2,7 @@
 
 (library
  (name awso_lightsail_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-lightsail-async)
  (libraries awso-lightsail awso-async)
  (preprocess

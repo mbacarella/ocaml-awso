@@ -4,7 +4,7 @@
  (name awso_iot_jobs_data)
  (public_name awso-iot-jobs-data)
  (libraries awso)
- (flags :standard -open Core -open Printf)
+ (flags :standard)
  (ocamlopt_flags (-linscan))
  (preprocess
   (pps ppx_expect))

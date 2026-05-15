@@ -1,3 +1,4 @@
+open! Core
 open Lwt.Infix
 
 let file_contents file =

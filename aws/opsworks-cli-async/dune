@@ -3,8 +3,7 @@
 (executable
  (package awso-opsworks-async)
  (name awso_opsworks)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-opsworks)
  (libraries awso-opsworks-async awso-async core_unix.command_unix)
  (preprocess

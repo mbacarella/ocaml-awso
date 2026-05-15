@@ -1,3 +1,4 @@
+open! Core
 open! Import
 
 val lookup_credential_scope : region:Region.t -> Service.t -> Region.t

@@ -4,7 +4,7 @@
  (name awso_personalize_events)
  (public_name awso-personalize-events)
  (libraries awso)
- (flags :standard -open Core -open Printf)
+ (flags :standard)
  (ocamlopt_flags (-linscan))
  (preprocess
   (pps ppx_expect))

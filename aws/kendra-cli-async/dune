@@ -3,8 +3,7 @@
 (executable
  (package awso-kendra-async)
  (name awso_kendra)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-kendra)
  (libraries awso-kendra-async awso-async core_unix.command_unix)
  (preprocess

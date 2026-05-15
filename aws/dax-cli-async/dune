@@ -3,8 +3,7 @@
 (executable
  (package awso-dax-async)
  (name awso_dax)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-dax)
  (libraries awso-dax-async awso-async core_unix.command_unix)
  (preprocess

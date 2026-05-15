@@ -2,8 +2,7 @@
 
 (library
  (name awso_alexaforbusiness_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-alexaforbusiness-async)
  (libraries awso-alexaforbusiness awso-async)
  (preprocess

@@ -9,6 +9,6 @@
   core_unix.filename_unix
   core_unix.command_unix)
  (flags
-  (:standard -open Core -open Async))
+  (:standard))
  (preprocess
   (pps ppx_jane)))

@@ -2,8 +2,7 @@
 
 (library
  (name awso_sso_admin_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-sso-admin-lwt)
  (libraries awso-sso-admin awso-lwt))
 

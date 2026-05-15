@@ -2,8 +2,7 @@
 
 (library
  (name awso_mediapackage_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-mediapackage-async)
  (libraries awso-mediapackage awso-async)
  (preprocess

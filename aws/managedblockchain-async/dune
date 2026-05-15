@@ -2,8 +2,7 @@
 
 (library
  (name awso_managedblockchain_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-managedblockchain-async)
  (libraries awso-managedblockchain awso-async)
  (preprocess

@@ -2,8 +2,7 @@
 
 (library
  (name awso_service_quotas_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-service-quotas-async)
  (libraries awso-service-quotas awso-async)
  (preprocess

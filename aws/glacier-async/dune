@@ -2,8 +2,7 @@
 
 (library
  (name awso_glacier_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-glacier-async)
  (libraries awso-glacier awso-async)
  (preprocess

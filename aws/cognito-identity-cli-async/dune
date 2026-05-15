@@ -3,8 +3,7 @@
 (executable
  (package awso-cognito-identity-async)
  (name awso_cognito_identity)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-cognito-identity)
  (libraries awso-cognito-identity-async awso-async core_unix.command_unix)
  (preprocess

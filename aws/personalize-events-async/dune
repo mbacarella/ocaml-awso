@@ -2,8 +2,7 @@
 
 (library
  (name awso_personalize_events_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-personalize-events-async)
  (libraries awso-personalize-events awso-async)
  (preprocess

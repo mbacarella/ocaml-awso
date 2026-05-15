@@ -3,8 +3,7 @@
 (executable
  (package awso-apigatewaymanagementapi-async)
  (name awso_apigatewaymanagementapi)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-apigatewaymanagementapi)
  (libraries
   awso-apigatewaymanagementapi-async

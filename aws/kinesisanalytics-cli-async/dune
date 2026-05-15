@@ -3,8 +3,7 @@
 (executable
  (package awso-kinesisanalytics-async)
  (name awso_kinesisanalytics)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-kinesisanalytics)
  (libraries awso-kinesisanalytics-async awso-async core_unix.command_unix)
  (preprocess

@@ -2,8 +2,7 @@
 
 (library
  (name awso_polly_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-polly-lwt)
  (libraries awso-polly awso-lwt))
 

@@ -1,3 +1,5 @@
+open Core
+open Async
 open Awso_athena_async
 module Values = Awso_athena_async.Values
 

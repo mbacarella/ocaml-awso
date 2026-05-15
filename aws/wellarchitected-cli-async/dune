@@ -3,8 +3,7 @@
 (executable
  (package awso-wellarchitected-async)
  (name awso_wellarchitected)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-wellarchitected)
  (libraries awso-wellarchitected-async awso-async core_unix.command_unix)
  (preprocess

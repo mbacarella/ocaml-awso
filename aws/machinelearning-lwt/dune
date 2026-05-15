@@ -2,8 +2,7 @@
 
 (library
  (name awso_machinelearning_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-machinelearning-lwt)
  (libraries awso-machinelearning awso-lwt))
 

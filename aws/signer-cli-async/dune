@@ -3,8 +3,7 @@
 (executable
  (package awso-signer-async)
  (name awso_signer)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-signer)
  (libraries awso-signer-async awso-async core_unix.command_unix)
  (preprocess

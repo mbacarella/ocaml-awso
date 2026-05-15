@@ -3,8 +3,7 @@
 (executable
  (package awso-iotanalytics-async)
  (name awso_iotanalytics)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-iotanalytics)
  (libraries awso-iotanalytics-async awso-async core_unix.command_unix)
  (preprocess

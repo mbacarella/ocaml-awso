@@ -1,3 +1,4 @@
+open Core
 open Awso_ec2_async
 
 let () =

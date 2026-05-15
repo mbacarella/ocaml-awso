@@ -2,8 +2,7 @@
 
 (library
  (name awso_voice_id_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-voice-id-lwt)
  (libraries awso-voice-id awso-lwt))
 

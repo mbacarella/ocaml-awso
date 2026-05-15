@@ -2,8 +2,7 @@
 
 (library
  (name awso_personalize_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-personalize-lwt)
  (libraries awso-personalize awso-lwt))
 

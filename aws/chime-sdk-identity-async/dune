@@ -2,8 +2,7 @@
 
 (library
  (name awso_chime_sdk_identity_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-chime-sdk-identity-async)
  (libraries awso-chime-sdk-identity awso-async)
  (preprocess

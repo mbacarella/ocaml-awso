@@ -3,8 +3,7 @@
 (executable
  (package awso-directconnect-async)
  (name awso_directconnect)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-directconnect)
  (libraries awso-directconnect-async awso-async core_unix.command_unix)
  (preprocess

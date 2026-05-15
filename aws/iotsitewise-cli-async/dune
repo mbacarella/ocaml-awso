@@ -3,8 +3,7 @@
 (executable
  (package awso-iotsitewise-async)
  (name awso_iotsitewise)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-iotsitewise)
  (libraries awso-iotsitewise-async awso-async core_unix.command_unix)
  (preprocess

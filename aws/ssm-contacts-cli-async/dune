@@ -3,8 +3,7 @@
 (executable
  (package awso-ssm-contacts-async)
  (name awso_ssm_contacts)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-ssm-contacts)
  (libraries awso-ssm-contacts-async awso-async core_unix.command_unix)
  (preprocess

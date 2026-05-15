@@ -3,8 +3,7 @@
 (executable
  (package awso-sagemaker-async)
  (name awso_sagemaker)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-sagemaker)
  (libraries awso-sagemaker-async awso-async core_unix.command_unix)
  (preprocess

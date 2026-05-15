@@ -3,8 +3,7 @@
 (executable
  (package awso-personalize-events-async)
  (name awso_personalize_events)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-personalize-events)
  (libraries awso-personalize-events-async awso-async core_unix.command_unix)
  (preprocess

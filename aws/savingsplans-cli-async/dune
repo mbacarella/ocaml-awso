@@ -3,8 +3,7 @@
 (executable
  (package awso-savingsplans-async)
  (name awso_savingsplans)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-savingsplans)
  (libraries awso-savingsplans-async awso-async core_unix.command_unix)
  (preprocess

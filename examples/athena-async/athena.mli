@@ -1,3 +1,6 @@
+open! Core
+open! Async
+
 (** AWS Athena Async API *)
 
 module Values = Awso_athena_async.Values

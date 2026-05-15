@@ -2,8 +2,7 @@
 
 (library
  (name awso_cloudhsmv2_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-cloudhsmv2-async)
  (libraries awso-cloudhsmv2 awso-async)
  (preprocess

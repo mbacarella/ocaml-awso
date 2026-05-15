@@ -3,8 +3,7 @@
 (executable
  (package awso-servicecatalog-async)
  (name awso_servicecatalog)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-servicecatalog)
  (libraries awso-servicecatalog-async awso-async core_unix.command_unix)
  (preprocess

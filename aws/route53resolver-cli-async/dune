@@ -3,8 +3,7 @@
 (executable
  (package awso-route53resolver-async)
  (name awso_route53resolver)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-route53resolver)
  (libraries awso-route53resolver-async awso-async core_unix.command_unix)
  (preprocess

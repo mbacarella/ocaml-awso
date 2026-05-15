@@ -2,8 +2,7 @@
 
 (library
  (name awso_iot_data_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-iot-data-lwt)
  (libraries awso-iot-data awso-lwt))
 

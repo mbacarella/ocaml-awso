@@ -3,8 +3,7 @@
 (executable
  (package awso-ssm-incidents-async)
  (name awso_ssm_incidents)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-ssm-incidents)
  (libraries awso-ssm-incidents-async awso-async core_unix.command_unix)
  (preprocess

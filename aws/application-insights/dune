@@ -4,7 +4,7 @@
  (name awso_application_insights)
  (public_name awso-application-insights)
  (libraries awso)
- (flags :standard -open Core -open Printf)
+ (flags :standard)
  (ocamlopt_flags (-linscan))
  (preprocess
   (pps ppx_expect))

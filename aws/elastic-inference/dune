@@ -4,7 +4,7 @@
  (name awso_elastic_inference)
  (public_name awso-elastic-inference)
  (libraries awso)
- (flags :standard -open Core -open Printf)
+ (flags :standard)
  (ocamlopt_flags (-linscan))
  (preprocess
   (pps ppx_expect))

@@ -3,8 +3,7 @@
 (executable
  (package awso-emr-async)
  (name awso_emr)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-emr)
  (libraries awso-emr-async awso-async core_unix.command_unix)
  (preprocess

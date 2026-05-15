@@ -4,7 +4,7 @@
  (name awso_pinpoint_email)
  (public_name awso-pinpoint-email)
  (libraries awso)
- (flags :standard -open Core -open Printf)
+ (flags :standard)
  (ocamlopt_flags (-linscan))
  (preprocess
   (pps ppx_expect))

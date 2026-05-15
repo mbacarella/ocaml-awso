@@ -3,8 +3,7 @@
 (executable
  (package awso-keyspaces-async)
  (name awso_keyspaces)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-keyspaces)
  (libraries awso-keyspaces-async awso-async core_unix.command_unix)
  (preprocess

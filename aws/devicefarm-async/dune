@@ -2,8 +2,7 @@
 
 (library
  (name awso_devicefarm_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-devicefarm-async)
  (libraries awso-devicefarm awso-async)
  (preprocess

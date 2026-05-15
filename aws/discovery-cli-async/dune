@@ -3,8 +3,7 @@
 (executable
  (package awso-discovery-async)
  (name awso_discovery)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-discovery)
  (libraries awso-discovery-async awso-async core_unix.command_unix)
  (preprocess

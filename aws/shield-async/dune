@@ -2,8 +2,7 @@
 
 (library
  (name awso_shield_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-shield-async)
  (libraries awso-shield awso-async)
  (preprocess

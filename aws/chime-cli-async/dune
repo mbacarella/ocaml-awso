@@ -3,8 +3,7 @@
 (executable
  (package awso-chime-async)
  (name awso_chime)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-chime)
  (libraries awso-chime-async awso-async core_unix.command_unix)
  (preprocess

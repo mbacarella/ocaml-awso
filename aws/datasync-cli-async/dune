@@ -3,8 +3,7 @@
 (executable
  (package awso-datasync-async)
  (name awso_datasync)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-datasync)
  (libraries awso-datasync-async awso-async core_unix.command_unix)
  (preprocess

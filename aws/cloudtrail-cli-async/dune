@@ -3,8 +3,7 @@
 (executable
  (package awso-cloudtrail-async)
  (name awso_cloudtrail)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-cloudtrail)
  (libraries awso-cloudtrail-async awso-async core_unix.command_unix)
  (preprocess

@@ -3,8 +3,7 @@
 (executable
  (package awso-resourcegroupstaggingapi-async)
  (name awso_resourcegroupstaggingapi)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-resourcegroupstaggingapi)
  (libraries
   awso-resourcegroupstaggingapi-async

@@ -3,8 +3,7 @@
 (executable
  (package awso-migrationhub-config-async)
  (name awso_migrationhub_config)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-migrationhub-config)
  (libraries awso-migrationhub-config-async awso-async core_unix.command_unix)
  (preprocess

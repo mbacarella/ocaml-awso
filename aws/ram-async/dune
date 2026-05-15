@@ -2,8 +2,7 @@
 
 (library
  (name awso_ram_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-ram-async)
  (libraries awso-ram awso-async)
  (preprocess

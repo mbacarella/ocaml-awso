@@ -2,8 +2,7 @@
 
 (library
  (name awso_timestream_query_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-timestream-query-async)
  (libraries awso-timestream-query awso-async)
  (preprocess

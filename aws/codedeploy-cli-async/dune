@@ -3,8 +3,7 @@
 (executable
  (package awso-codedeploy-async)
  (name awso_codedeploy)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-codedeploy)
  (libraries awso-codedeploy-async awso-async core_unix.command_unix)
  (preprocess

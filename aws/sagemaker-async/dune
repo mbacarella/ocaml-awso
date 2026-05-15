@@ -2,8 +2,7 @@
 
 (library
  (name awso_sagemaker_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-sagemaker-async)
  (libraries awso-sagemaker awso-async)
  (preprocess

@@ -2,8 +2,7 @@
 
 (library
  (name awso_synthetics_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-synthetics-async)
  (libraries awso-synthetics awso-async)
  (preprocess

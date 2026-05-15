@@ -2,8 +2,7 @@
 
 (library
  (name awso_efs_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-efs-lwt)
  (libraries awso-efs awso-lwt))
 

@@ -2,8 +2,7 @@
 
 (library
  (name awso_memorydb_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-memorydb-async)
  (libraries awso-memorydb awso-async)
  (preprocess

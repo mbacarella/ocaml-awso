@@ -2,8 +2,7 @@
 
 (library
  (name awso_s3outposts_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-s3outposts-lwt)
  (libraries awso-s3outposts awso-lwt))
 

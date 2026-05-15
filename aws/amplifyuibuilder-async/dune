@@ -2,8 +2,7 @@
 
 (library
  (name awso_amplifyuibuilder_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-amplifyuibuilder-async)
  (libraries awso-amplifyuibuilder awso-async)
  (preprocess

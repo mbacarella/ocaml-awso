@@ -2,8 +2,7 @@
 
 (library
  (name awso_kinesis_video_media_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-kinesis-video-media-async)
  (libraries awso-kinesis-video-media awso-async)
  (preprocess

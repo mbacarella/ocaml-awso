@@ -3,8 +3,7 @@
 (executable
  (package awso-kinesis-video-media-async)
  (name awso_kinesis_video_media)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-kinesis-video-media)
  (libraries awso-kinesis-video-media-async awso-async core_unix.command_unix)
  (preprocess

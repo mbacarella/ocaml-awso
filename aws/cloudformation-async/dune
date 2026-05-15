@@ -2,8 +2,7 @@
 
 (library
  (name awso_cloudformation_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-cloudformation-async)
  (libraries awso-cloudformation awso-async)
  (preprocess

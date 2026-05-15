@@ -2,8 +2,7 @@
 
 (library
  (name awso_backup_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-backup-async)
  (libraries awso-backup awso-async)
  (preprocess

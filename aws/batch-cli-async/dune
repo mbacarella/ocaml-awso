@@ -3,8 +3,7 @@
 (executable
  (package awso-batch-async)
  (name awso_batch)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-batch)
  (libraries awso-batch-async awso-async core_unix.command_unix)
  (preprocess

@@ -2,4 +2,4 @@
  (name main)
  (libraries awso-sts-async core_unix.command_unix)
  (flags
-  (:standard -open Core -open Async)))
+  (:standard)))

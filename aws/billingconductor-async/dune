@@ -2,8 +2,7 @@
 
 (library
  (name awso_billingconductor_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-billingconductor-async)
  (libraries awso-billingconductor awso-async)
  (preprocess

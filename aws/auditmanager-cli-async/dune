@@ -3,8 +3,7 @@
 (executable
  (package awso-auditmanager-async)
  (name awso_auditmanager)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-auditmanager)
  (libraries awso-auditmanager-async awso-async core_unix.command_unix)
  (preprocess

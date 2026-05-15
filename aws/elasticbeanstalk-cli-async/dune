@@ -3,8 +3,7 @@
 (executable
  (package awso-elasticbeanstalk-async)
  (name awso_elasticbeanstalk)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-elasticbeanstalk)
  (libraries awso-elasticbeanstalk-async awso-async core_unix.command_unix)
  (preprocess

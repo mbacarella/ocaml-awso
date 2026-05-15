@@ -2,8 +2,7 @@
 
 (library
  (name awso_chime_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-chime-async)
  (libraries awso-chime awso-async)
  (preprocess

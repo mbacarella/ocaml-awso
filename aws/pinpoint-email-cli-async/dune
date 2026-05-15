@@ -3,8 +3,7 @@
 (executable
  (package awso-pinpoint-email-async)
  (name awso_pinpoint_email)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-pinpoint-email)
  (libraries awso-pinpoint-email-async awso-async core_unix.command_unix)
  (preprocess

@@ -2,8 +2,7 @@
 
 (library
  (name awso_servicediscovery_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-servicediscovery-async)
  (libraries awso-servicediscovery awso-async)
  (preprocess

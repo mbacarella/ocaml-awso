@@ -4,7 +4,7 @@
  (name awso_lexv2_models)
  (public_name awso-lexv2-models)
  (libraries awso)
- (flags :standard -open Core -open Printf)
+ (flags :standard)
  (ocamlopt_flags (-linscan))
  (preprocess
   (pps ppx_expect))

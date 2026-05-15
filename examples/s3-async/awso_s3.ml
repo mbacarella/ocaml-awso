@@ -1,3 +1,4 @@
+open Core
 open Awso_s3_async
 
 let () =

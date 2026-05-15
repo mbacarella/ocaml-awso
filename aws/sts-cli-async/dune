@@ -3,8 +3,7 @@
 (executable
  (package awso-sts-async)
  (name awso_sts)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-sts)
  (libraries awso-sts-async awso-async core_unix.command_unix)
  (preprocess

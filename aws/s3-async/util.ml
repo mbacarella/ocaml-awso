@@ -1,3 +1,6 @@
+open! Core
+open! Async
+
 module Source = struct
   let default_chunk_size = Byte_units.of_megabytes 8.
 

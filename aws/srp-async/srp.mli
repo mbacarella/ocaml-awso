@@ -1,3 +1,6 @@
+open! Core
+open! Async
+
 (** Cognito Secure Remote Password (SRP) protocol implementation. Extends the
     unix version with async support and direct cognito integration via usage of
     the [async] [cognito_idp] module. *)

@@ -3,8 +3,7 @@
 (executable
  (package awso-devicefarm-async)
  (name awso_devicefarm)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-devicefarm)
  (libraries awso-devicefarm-async awso-async core_unix.command_unix)
  (preprocess

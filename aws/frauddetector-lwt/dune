@@ -2,8 +2,7 @@
 
 (library
  (name awso_frauddetector_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-frauddetector-lwt)
  (libraries awso-frauddetector awso-lwt))
 

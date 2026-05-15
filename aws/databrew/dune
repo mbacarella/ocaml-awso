@@ -4,7 +4,7 @@
  (name awso_databrew)
  (public_name awso-databrew)
  (libraries awso)
- (flags :standard -open Core -open Printf)
+ (flags :standard)
  (ocamlopt_flags (-linscan))
  (preprocess
   (pps ppx_expect))

@@ -3,8 +3,7 @@
 (executable
  (package awso-lookoutequipment-async)
  (name awso_lookoutequipment)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-lookoutequipment)
  (libraries awso-lookoutequipment-async awso-async core_unix.command_unix)
  (preprocess

@@ -2,8 +2,7 @@
 
 (library
  (name awso_ssm_contacts_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-ssm-contacts-lwt)
  (libraries awso-ssm-contacts awso-lwt))
 

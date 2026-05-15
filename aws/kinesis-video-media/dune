@@ -4,7 +4,7 @@
  (name awso_kinesis_video_media)
  (public_name awso-kinesis-video-media)
  (libraries awso)
- (flags :standard -open Core -open Printf)
+ (flags :standard)
  (ocamlopt_flags (-linscan))
  (preprocess
   (pps ppx_expect))

@@ -3,8 +3,7 @@
 (executable
  (package awso-redshift-async)
  (name awso_redshift)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-redshift)
  (libraries awso-redshift-async awso-async core_unix.command_unix)
  (preprocess

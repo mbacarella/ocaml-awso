@@ -3,8 +3,7 @@
 (executable
  (package awso-macie-async)
  (name awso_macie)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-macie)
  (libraries awso-macie-async awso-async core_unix.command_unix)
  (preprocess

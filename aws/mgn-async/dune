@@ -2,8 +2,7 @@
 
 (library
  (name awso_mgn_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-mgn-async)
  (libraries awso-mgn awso-async)
  (preprocess

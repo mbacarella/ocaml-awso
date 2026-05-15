@@ -2,8 +2,7 @@
 
 (library
  (name awso_iotdeviceadvisor_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-iotdeviceadvisor-async)
  (libraries awso-iotdeviceadvisor awso-async)
  (preprocess

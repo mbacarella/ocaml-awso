@@ -3,8 +3,7 @@
 (executable
  (package awso-dynamodb-async)
  (name awso_dynamodb)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-dynamodb)
  (libraries awso-dynamodb-async awso-async core_unix.command_unix)
  (preprocess

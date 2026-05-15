@@ -2,8 +2,7 @@
 
 (library
  (name awso_textract_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-textract-lwt)
  (libraries awso-textract awso-lwt))
 

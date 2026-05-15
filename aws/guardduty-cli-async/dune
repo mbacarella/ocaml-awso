@@ -3,8 +3,7 @@
 (executable
  (package awso-guardduty-async)
  (name awso_guardduty)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-guardduty)
  (libraries awso-guardduty-async awso-async core_unix.command_unix)
  (preprocess

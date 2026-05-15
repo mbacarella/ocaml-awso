@@ -2,8 +2,7 @@
 
 (library
  (name awso_marketplace_entitlement_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-marketplace-entitlement-async)
  (libraries awso-marketplace-entitlement awso-async)
  (preprocess

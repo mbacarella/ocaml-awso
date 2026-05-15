@@ -2,8 +2,7 @@
 
 (library
  (name awso_iot_jobs_data_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-iot-jobs-data-async)
  (libraries awso-iot-jobs-data awso-async)
  (preprocess

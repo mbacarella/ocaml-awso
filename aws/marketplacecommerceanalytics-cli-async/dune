@@ -3,8 +3,7 @@
 (executable
  (package awso-marketplacecommerceanalytics-async)
  (name awso_marketplacecommerceanalytics)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-marketplacecommerceanalytics)
  (libraries
   awso-marketplacecommerceanalytics-async
