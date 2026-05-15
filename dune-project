@@ -8,7 +8,7 @@
 
 (license MIT)
 
-(authors "Solvuu Inc.")
+(authors "Ashish Agarwal <ashish@solvuu.com>" "Solvuu Inc." "Michael Bacarella <m@bacarella.com>")
 
 (maintainers "Michael Bacarella <m@bacarella.com>")
 
