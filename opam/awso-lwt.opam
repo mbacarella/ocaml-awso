@@ -4,12 +4,14 @@ synopsis: "AWS API base library Lwt"
 maintainer: ["Michael Bacarella <m@bacarella.com>"]
 authors: ["Solvuu Inc."]
 license: "MIT"
-homepage: "https://github.com/solvuu/awso"
+homepage: "https://github.com/mbacarella/awso"
 bug-reports: "https://github.com/mbacarella/awso/issues"
 depends: [
   "dune" {>= "3.8"}
   "awso"
+  "core_unix"
   "lwt"
+  "lwt_ppx"
   "cohttp-lwt-unix"
   "odoc" {with-doc}
 ]
