@@ -2,8 +2,7 @@
 
 (library
  (name awso_finspace_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-finspace-async)
  (libraries awso-finspace awso-async)
  (preprocess

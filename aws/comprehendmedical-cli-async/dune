@@ -3,8 +3,7 @@
 (executable
  (package awso-comprehendmedical-async)
  (name awso_comprehendmedical)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-comprehendmedical)
  (libraries awso-comprehendmedical-async awso-async core_unix.command_unix)
  (preprocess

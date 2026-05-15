@@ -2,8 +2,7 @@
 
 (library
  (name awso_textract_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-textract-async)
  (libraries awso-textract awso-async)
  (preprocess

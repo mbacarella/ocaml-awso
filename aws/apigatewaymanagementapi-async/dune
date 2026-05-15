@@ -2,8 +2,7 @@
 
 (library
  (name awso_apigatewaymanagementapi_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-apigatewaymanagementapi-async)
  (libraries awso-apigatewaymanagementapi awso-async)
  (preprocess

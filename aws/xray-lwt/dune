@@ -2,8 +2,7 @@
 
 (library
  (name awso_xray_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-xray-lwt)
  (libraries awso-xray awso-lwt))
 

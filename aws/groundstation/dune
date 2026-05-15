@@ -4,7 +4,7 @@
  (name awso_groundstation)
  (public_name awso-groundstation)
  (libraries awso)
- (flags :standard -open Core -open Printf)
+ (flags :standard)
  (ocamlopt_flags (-linscan))
  (preprocess
   (pps ppx_expect))

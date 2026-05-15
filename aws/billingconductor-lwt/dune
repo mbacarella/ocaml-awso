@@ -2,8 +2,7 @@
 
 (library
  (name awso_billingconductor_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-billingconductor-lwt)
  (libraries awso-billingconductor awso-lwt))
 

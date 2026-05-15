@@ -2,8 +2,7 @@
 
 (library
  (name awso_mediatailor_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-mediatailor-async)
  (libraries awso-mediatailor awso-async)
  (preprocess

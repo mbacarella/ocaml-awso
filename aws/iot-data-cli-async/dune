@@ -3,8 +3,7 @@
 (executable
  (package awso-iot-data-async)
  (name awso_iot_data)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-iot-data)
  (libraries awso-iot-data-async awso-async core_unix.command_unix)
  (preprocess

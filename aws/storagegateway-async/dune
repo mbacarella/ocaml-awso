@@ -2,8 +2,7 @@
 
 (library
  (name awso_storagegateway_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-storagegateway-async)
  (libraries awso-storagegateway awso-async)
  (preprocess

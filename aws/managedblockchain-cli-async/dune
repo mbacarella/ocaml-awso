@@ -3,8 +3,7 @@
 (executable
  (package awso-managedblockchain-async)
  (name awso_managedblockchain)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-managedblockchain)
  (libraries awso-managedblockchain-async awso-async core_unix.command_unix)
  (preprocess

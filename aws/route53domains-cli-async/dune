@@ -3,8 +3,7 @@
 (executable
  (package awso-route53domains-async)
  (name awso_route53domains)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-route53domains)
  (libraries awso-route53domains-async awso-async core_unix.command_unix)
  (preprocess

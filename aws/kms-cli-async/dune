@@ -3,8 +3,7 @@
 (executable
  (package awso-kms-async)
  (name awso_kms)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-kms)
  (libraries awso-kms-async awso-async core_unix.command_unix)
  (preprocess

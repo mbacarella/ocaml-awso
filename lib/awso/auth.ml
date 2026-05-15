@@ -1,3 +1,4 @@
+open! Core
 open! Import
 
 type payload_hash = string * int

@@ -1,3 +1,6 @@
+open Core
+open Async
+
 module Ec2 = Awso_ec2_async
 module Ecs = Awso_ecs_async
 module Ecr = Awso_ecr_async

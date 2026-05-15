@@ -2,8 +2,7 @@
 
 (library
  (name awso_amplify_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-amplify-lwt)
  (libraries awso-amplify awso-lwt))
 

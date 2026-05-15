@@ -2,8 +2,7 @@
 
 (library
  (name awso_pricing_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-pricing-async)
  (libraries awso-pricing awso-async)
  (preprocess

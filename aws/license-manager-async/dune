@@ -2,8 +2,7 @@
 
 (library
  (name awso_license_manager_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-license-manager-async)
  (libraries awso-license-manager awso-async)
  (preprocess

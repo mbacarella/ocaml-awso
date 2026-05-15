@@ -1,3 +1,4 @@
+open! Core
 open! Import
 
 module type Stanza_spec = sig

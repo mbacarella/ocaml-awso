@@ -3,8 +3,7 @@
 (executable
  (package awso-quicksight-async)
  (name awso_quicksight)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-quicksight)
  (libraries awso-quicksight-async awso-async core_unix.command_unix)
  (preprocess

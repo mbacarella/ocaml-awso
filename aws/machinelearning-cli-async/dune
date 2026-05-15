@@ -3,8 +3,7 @@
 (executable
  (package awso-machinelearning-async)
  (name awso_machinelearning)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-machinelearning)
  (libraries awso-machinelearning-async awso-async core_unix.command_unix)
  (preprocess

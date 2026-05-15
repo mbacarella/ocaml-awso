@@ -2,8 +2,7 @@
 
 (library
  (name awso_polly_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-polly-async)
  (libraries awso-polly awso-async)
  (preprocess

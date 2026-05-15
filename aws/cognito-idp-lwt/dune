@@ -2,8 +2,7 @@
 
 (library
  (name awso_cognito_idp_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-cognito-idp-lwt)
  (libraries awso-cognito-idp awso-lwt))
 

@@ -4,7 +4,7 @@
  (name awso_fsx)
  (public_name awso-fsx)
  (libraries awso)
- (flags :standard -open Core -open Printf)
+ (flags :standard)
  (ocamlopt_flags (-linscan))
  (preprocess
   (pps ppx_expect))

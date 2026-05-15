@@ -1,3 +1,6 @@
+open! Core
+open! Async
+
 let default_max_results = 20
 
 let list_user_pools cfg ?(max_results = default_max_results) () =

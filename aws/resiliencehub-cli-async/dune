@@ -3,8 +3,7 @@
 (executable
  (package awso-resiliencehub-async)
  (name awso_resiliencehub)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-resiliencehub)
  (libraries awso-resiliencehub-async awso-async core_unix.command_unix)
  (preprocess

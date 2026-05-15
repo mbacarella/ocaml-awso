@@ -3,8 +3,7 @@
 (executable
  (package awso-pinpoint-sms-voice-v2-async)
  (name awso_pinpoint_sms_voice_v2)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-pinpoint-sms-voice-v2)
  (libraries
   awso-pinpoint-sms-voice-v2-async

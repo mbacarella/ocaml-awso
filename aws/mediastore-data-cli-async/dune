@@ -3,8 +3,7 @@
 (executable
  (package awso-mediastore-data-async)
  (name awso_mediastore_data)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-mediastore-data)
  (libraries awso-mediastore-data-async awso-async core_unix.command_unix)
  (preprocess

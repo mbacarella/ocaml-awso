@@ -2,8 +2,7 @@
 
 (library
  (name awso_personalize_runtime_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-personalize-runtime-async)
  (libraries awso-personalize-runtime awso-async)
  (preprocess

@@ -2,8 +2,7 @@
 
 (library
  (name awso_iotfleethub_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-iotfleethub-lwt)
  (libraries awso-iotfleethub awso-lwt))
 

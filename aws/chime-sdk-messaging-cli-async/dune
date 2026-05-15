@@ -3,8 +3,7 @@
 (executable
  (package awso-chime-sdk-messaging-async)
  (name awso_chime_sdk_messaging)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-chime-sdk-messaging)
  (libraries awso-chime-sdk-messaging-async awso-async core_unix.command_unix)
  (preprocess

@@ -2,8 +2,7 @@
 
 (library
  (name awso_route53_recovery_cluster_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-route53-recovery-cluster-async)
  (libraries awso-route53-recovery-cluster awso-async)
  (preprocess

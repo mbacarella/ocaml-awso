@@ -2,8 +2,7 @@
 
 (library
  (name awso_route53resolver_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-route53resolver-async)
  (libraries awso-route53resolver awso-async)
  (preprocess

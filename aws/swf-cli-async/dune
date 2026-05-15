@@ -3,8 +3,7 @@
 (executable
  (package awso-swf-async)
  (name awso_swf)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-swf)
  (libraries awso-swf-async awso-async core_unix.command_unix)
  (preprocess

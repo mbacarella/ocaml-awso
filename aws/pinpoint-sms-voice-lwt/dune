@@ -2,8 +2,7 @@
 
 (library
  (name awso_pinpoint_sms_voice_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-pinpoint-sms-voice-lwt)
  (libraries awso-pinpoint-sms-voice awso-lwt))
 

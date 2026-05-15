@@ -3,8 +3,7 @@
 (executable
  (package awso-iotevents-async)
  (name awso_iotevents)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-iotevents)
  (libraries awso-iotevents-async awso-async core_unix.command_unix)
  (preprocess

@@ -2,8 +2,7 @@
 
 (library
  (name awso_appstream_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-appstream-async)
  (libraries awso-appstream awso-async)
  (preprocess

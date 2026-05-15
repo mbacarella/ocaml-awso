@@ -3,8 +3,7 @@
 (executable
  (package awso-codestar-connections-async)
  (name awso_codestar_connections)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-codestar-connections)
  (libraries
   awso-codestar-connections-async

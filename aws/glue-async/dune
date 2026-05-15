@@ -2,8 +2,7 @@
 
 (library
  (name awso_glue_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-glue-async)
  (libraries awso-glue awso-async)
  (preprocess

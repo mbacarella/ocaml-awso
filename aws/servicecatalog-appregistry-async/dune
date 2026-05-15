@@ -2,8 +2,7 @@
 
 (library
  (name awso_servicecatalog_appregistry_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-servicecatalog-appregistry-async)
  (libraries awso-servicecatalog-appregistry awso-async)
  (preprocess

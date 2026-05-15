@@ -3,8 +3,7 @@
 (executable
  (package awso-alexaforbusiness-async)
  (name awso_alexaforbusiness)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-alexaforbusiness)
  (libraries awso-alexaforbusiness-async awso-async core_unix.command_unix)
  (preprocess

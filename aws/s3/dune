@@ -4,7 +4,7 @@
  (name awso_s3)
  (public_name awso-s3)
  (libraries awso core_unix core_unix.time_unix)
- (flags :standard -open Core -open Printf)
+ (flags :standard)
  (ocamlopt_flags (-linscan))
  (preprocess
   (pps ppx_expect))

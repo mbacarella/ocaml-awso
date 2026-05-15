@@ -3,8 +3,7 @@
 (executable
  (package awso-iotdeviceadvisor-async)
  (name awso_iotdeviceadvisor)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-iotdeviceadvisor)
  (libraries awso-iotdeviceadvisor-async awso-async core_unix.command_unix)
  (preprocess

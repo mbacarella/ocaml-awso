@@ -3,8 +3,7 @@
 (executable
  (package awso-memorydb-async)
  (name awso_memorydb)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-memorydb)
  (libraries awso-memorydb-async awso-async core_unix.command_unix)
  (preprocess

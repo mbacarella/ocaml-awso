@@ -1,3 +1,6 @@
+open Core
+open Async
+
 module Ec2 = Awso_ec2_async
 
 let ec2_describe_instances () =

@@ -4,7 +4,7 @@
  (name awso_sdb)
  (public_name awso-sdb)
  (libraries awso)
- (flags :standard -open Core -open Printf)
+ (flags :standard)
  (ocamlopt_flags (-linscan))
  (preprocess
   (pps ppx_expect))

@@ -4,7 +4,7 @@
  (name awso_keyspaces)
  (public_name awso-keyspaces)
  (libraries awso)
- (flags :standard -open Core -open Printf)
+ (flags :standard)
  (ocamlopt_flags (-linscan))
  (preprocess
   (pps ppx_expect))

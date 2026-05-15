@@ -2,6 +2,7 @@
     {{:http://docs.aws.amazon.com/general/latest/gr/signature-version-4.html}AWS's
     Signature Version 4} signing process. *)
 
+open! Core
 open! Import
 
 type payload_hash = private string * int

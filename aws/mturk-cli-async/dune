@@ -3,8 +3,7 @@
 (executable
  (package awso-mturk-async)
  (name awso_mturk)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-mturk)
  (libraries awso-mturk-async awso-async core_unix.command_unix)
  (preprocess

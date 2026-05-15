@@ -2,8 +2,7 @@
 
 (library
  (name awso_braket_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-braket-async)
  (libraries awso-braket awso-async)
  (preprocess

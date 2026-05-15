@@ -3,8 +3,7 @@
 (executable
  (package awso-healthlake-async)
  (name awso_healthlake)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-healthlake)
  (libraries awso-healthlake-async awso-async core_unix.command_unix)
  (preprocess

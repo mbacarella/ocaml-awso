@@ -2,8 +2,7 @@
 
 (library
  (name awso_marketplace_catalog_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-marketplace-catalog-async)
  (libraries awso-marketplace-catalog awso-async)
  (preprocess

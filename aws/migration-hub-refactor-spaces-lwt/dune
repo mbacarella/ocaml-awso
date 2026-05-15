@@ -2,8 +2,7 @@
 
 (library
  (name awso_migration_hub_refactor_spaces_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-migration-hub-refactor-spaces-lwt)
  (libraries awso-migration-hub-refactor-spaces awso-lwt))
 

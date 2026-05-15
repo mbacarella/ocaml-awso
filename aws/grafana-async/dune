@@ -2,8 +2,7 @@
 
 (library
  (name awso_grafana_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-grafana-async)
  (libraries awso-grafana awso-async)
  (preprocess

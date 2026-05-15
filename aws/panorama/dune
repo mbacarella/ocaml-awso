@@ -4,7 +4,7 @@
  (name awso_panorama)
  (public_name awso-panorama)
  (libraries awso)
- (flags :standard -open Core -open Printf)
+ (flags :standard)
  (ocamlopt_flags (-linscan))
  (preprocess
   (pps ppx_expect))

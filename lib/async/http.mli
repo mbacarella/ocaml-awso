@@ -1,3 +1,5 @@
+open! Core
+open! Async
 open! Import
 
 module Io : Awso.Http.Io.S with type 'a t := 'a Deferred.t

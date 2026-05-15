@@ -3,8 +3,7 @@
 (executable
  (package awso-autoscaling-plans-async)
  (name awso_autoscaling_plans)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-autoscaling-plans)
  (libraries awso-autoscaling-plans-async awso-async core_unix.command_unix)
  (preprocess

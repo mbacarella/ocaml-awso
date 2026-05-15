@@ -4,7 +4,7 @@
  (name awso_sagemaker_edge)
  (public_name awso-sagemaker-edge)
  (libraries awso)
- (flags :standard -open Core -open Printf)
+ (flags :standard)
  (ocamlopt_flags (-linscan))
  (preprocess
   (pps ppx_expect))

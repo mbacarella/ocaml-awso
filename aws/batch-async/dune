@@ -2,8 +2,7 @@
 
 (library
  (name awso_batch_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-batch-async)
  (libraries awso-batch awso-async)
  (preprocess

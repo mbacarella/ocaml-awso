@@ -2,8 +2,7 @@
 
 (library
  (name awso_kafkaconnect_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-kafkaconnect-lwt)
  (libraries awso-kafkaconnect awso-lwt))
 

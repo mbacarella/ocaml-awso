@@ -3,8 +3,7 @@
 (executable
  (package awso-applicationcostprofiler-async)
  (name awso_applicationcostprofiler)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-applicationcostprofiler)
  (libraries
   awso-applicationcostprofiler-async

@@ -3,8 +3,7 @@
 (executable
  (package awso-meteringmarketplace-async)
  (name awso_meteringmarketplace)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-meteringmarketplace)
  (libraries awso-meteringmarketplace-async awso-async core_unix.command_unix)
  (preprocess

@@ -3,8 +3,7 @@
 (executable
  (package awso-mediaconvert-async)
  (name awso_mediaconvert)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-mediaconvert)
  (libraries awso-mediaconvert-async awso-async core_unix.command_unix)
  (preprocess

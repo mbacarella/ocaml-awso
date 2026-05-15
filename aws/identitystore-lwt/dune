@@ -2,8 +2,7 @@
 
 (library
  (name awso_identitystore_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-identitystore-lwt)
  (libraries awso-identitystore awso-lwt))
 

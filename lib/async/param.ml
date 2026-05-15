@@ -2,6 +2,8 @@
 (* Common app parameters                                                      *)
 (******************************************************************************)
 
+open! Core
+open! Async
 open! Import
 
 let ( %: ) = Command.Param.( %: )

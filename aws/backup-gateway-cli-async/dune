@@ -3,8 +3,7 @@
 (executable
  (package awso-backup-gateway-async)
  (name awso_backup_gateway)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-backup-gateway)
  (libraries awso-backup-gateway-async awso-async core_unix.command_unix)
  (preprocess

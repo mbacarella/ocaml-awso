@@ -3,8 +3,7 @@
 (executable
  (package awso-groundstation-async)
  (name awso_groundstation)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-groundstation)
  (libraries awso-groundstation-async awso-async core_unix.command_unix)
  (preprocess

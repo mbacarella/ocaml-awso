@@ -3,8 +3,7 @@
 (executable
  (package awso-rum-async)
  (name awso_rum)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-rum)
  (libraries awso-rum-async awso-async core_unix.command_unix)
  (preprocess

@@ -3,8 +3,7 @@
 (executable
  (package awso-mediatailor-async)
  (name awso_mediatailor)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-mediatailor)
  (libraries awso-mediatailor-async awso-async core_unix.command_unix)
  (preprocess

@@ -2,8 +2,7 @@
 
 (library
  (name awso_qldb_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-qldb-async)
  (libraries awso-qldb awso-async)
  (preprocess

@@ -3,8 +3,7 @@
 (executable
  (package awso-accessanalyzer-async)
  (name awso_accessanalyzer)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-accessanalyzer)
  (libraries awso-accessanalyzer-async awso-async core_unix.command_unix)
  (preprocess

@@ -3,8 +3,7 @@
 (executable
  (package awso-appstream-async)
  (name awso_appstream)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-appstream)
  (libraries awso-appstream-async awso-async core_unix.command_unix)
  (preprocess

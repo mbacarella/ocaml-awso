@@ -2,8 +2,7 @@
 
 (library
  (name awso_emr_containers_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-emr-containers-lwt)
  (libraries awso-emr-containers awso-lwt))
 

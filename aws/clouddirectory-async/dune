@@ -2,8 +2,7 @@
 
 (library
  (name awso_clouddirectory_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-clouddirectory-async)
  (libraries awso-clouddirectory awso-async)
  (preprocess

@@ -2,8 +2,7 @@
 
 (library
  (name awso_appmesh_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-appmesh-async)
  (libraries awso-appmesh awso-async)
  (preprocess

@@ -1,3 +1,5 @@
+open! Core
+open! Async
 open! Import
 
 (** Get a configuration, following a provider chain as follows:

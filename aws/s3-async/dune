@@ -2,8 +2,7 @@
 
 (library
  (name awso_s3_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-s3-async)
  (libraries awso-s3 awso-async)
  (preprocess

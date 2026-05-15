@@ -3,8 +3,7 @@
 (executable
  (package awso-robomaker-async)
  (name awso_robomaker)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-robomaker)
  (libraries awso-robomaker-async awso-async core_unix.command_unix)
  (preprocess

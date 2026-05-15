@@ -2,8 +2,7 @@
 
 (library
  (name awso_pinpoint_sms_voice_v2_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-pinpoint-sms-voice-v2-async)
  (libraries awso-pinpoint-sms-voice-v2 awso-async)
  (preprocess

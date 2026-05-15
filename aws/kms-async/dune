@@ -2,8 +2,7 @@
 
 (library
  (name awso_kms_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-kms-async)
  (libraries awso-kms awso-async)
  (preprocess

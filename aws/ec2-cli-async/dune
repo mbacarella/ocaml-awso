@@ -3,8 +3,7 @@
 (executable
  (package awso-ec2-async)
  (name awso_ec2)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-ec2)
  (libraries awso-ec2-async awso-async core_unix.command_unix)
  (preprocess

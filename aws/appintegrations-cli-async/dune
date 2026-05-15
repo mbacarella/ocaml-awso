@@ -3,8 +3,7 @@
 (executable
  (package awso-appintegrations-async)
  (name awso_appintegrations)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-appintegrations)
  (libraries awso-appintegrations-async awso-async core_unix.command_unix)
  (preprocess

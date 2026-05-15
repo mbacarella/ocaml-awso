@@ -3,8 +3,7 @@
 (executable
  (package awso-comprehend-async)
  (name awso_comprehend)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-comprehend)
  (libraries awso-comprehend-async awso-async core_unix.command_unix)
  (preprocess

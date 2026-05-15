@@ -2,8 +2,7 @@
 
 (library
  (name awso_comprehend_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-comprehend-lwt)
  (libraries awso-comprehend awso-lwt))
 

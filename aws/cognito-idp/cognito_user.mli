@@ -1,3 +1,5 @@
+open! Core
+
 open! Awso.Import
 
 module Attribute : sig

@@ -1,3 +1,6 @@
+open! Core
+open! Async
+
 module Statement = struct
   type effect_ =
     | Accept

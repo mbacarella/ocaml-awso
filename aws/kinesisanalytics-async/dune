@@ -2,8 +2,7 @@
 
 (library
  (name awso_kinesisanalytics_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-kinesisanalytics-async)
  (libraries awso-kinesisanalytics awso-async)
  (preprocess

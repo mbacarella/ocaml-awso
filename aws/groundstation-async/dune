@@ -2,8 +2,7 @@
 
 (library
  (name awso_groundstation_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-groundstation-async)
  (libraries awso-groundstation awso-async)
  (preprocess

@@ -2,8 +2,7 @@
 
 (library
  (name awso_chime_sdk_meetings_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-chime-sdk-meetings-lwt)
  (libraries awso-chime-sdk-meetings awso-lwt))
 

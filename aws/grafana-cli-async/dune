@@ -3,8 +3,7 @@
 (executable
  (package awso-grafana-async)
  (name awso_grafana)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-grafana)
  (libraries awso-grafana-async awso-async core_unix.command_unix)
  (preprocess

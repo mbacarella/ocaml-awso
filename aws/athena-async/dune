@@ -2,8 +2,7 @@
 
 (library
  (name awso_athena_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-athena-async)
  (libraries awso-athena awso-async)
  (preprocess

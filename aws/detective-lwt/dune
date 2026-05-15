@@ -2,8 +2,7 @@
 
 (library
  (name awso_detective_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-detective-lwt)
  (libraries awso-detective awso-lwt))
 

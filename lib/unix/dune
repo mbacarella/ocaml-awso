@@ -2,7 +2,7 @@
  (name awso_unix)
  (public_name awso-unix)
  (libraries awso)
- (flags :standard -open Core -open Printf)
+ (flags :standard)
  (ocamlopt_flags (-linscan))
  (preprocess
   (pps ppx_jane))

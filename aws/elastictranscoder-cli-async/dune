@@ -3,8 +3,7 @@
 (executable
  (package awso-elastictranscoder-async)
  (name awso_elastictranscoder)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-elastictranscoder)
  (libraries awso-elastictranscoder-async awso-async core_unix.command_unix)
  (preprocess

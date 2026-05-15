@@ -1,3 +1,4 @@
+open Core
 open Awso_route53_async
 
 let () =

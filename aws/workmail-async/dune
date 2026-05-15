@@ -2,8 +2,7 @@
 
 (library
  (name awso_workmail_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-workmail-async)
  (libraries awso-workmail awso-async)
  (preprocess

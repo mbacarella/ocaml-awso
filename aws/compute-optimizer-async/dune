@@ -2,8 +2,7 @@
 
 (library
  (name awso_compute_optimizer_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-compute-optimizer-async)
  (libraries awso-compute-optimizer awso-async)
  (preprocess

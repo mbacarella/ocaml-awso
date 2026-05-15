@@ -4,4 +4,4 @@
  (preprocess
   (pps ppx_jane))
  (flags
-  (:standard -open Core -open Async)))
+  (:standard)))

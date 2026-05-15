@@ -2,8 +2,7 @@
 
 (library
  (name awso_sso_oidc_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-sso-oidc-lwt)
  (libraries awso-sso-oidc awso-lwt))
 

@@ -4,7 +4,7 @@
  (name awso_migration_hub_refactor_spaces)
  (public_name awso-migration-hub-refactor-spaces)
  (libraries awso)
- (flags :standard -open Core -open Printf)
+ (flags :standard)
  (ocamlopt_flags (-linscan))
  (preprocess
   (pps ppx_expect))

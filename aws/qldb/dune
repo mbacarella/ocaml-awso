@@ -4,7 +4,7 @@
  (name awso_qldb)
  (public_name awso-qldb)
  (libraries awso)
- (flags :standard -open Core -open Printf)
+ (flags :standard)
  (ocamlopt_flags (-linscan))
  (preprocess
   (pps ppx_expect))

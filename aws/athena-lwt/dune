@@ -2,8 +2,7 @@
 
 (library
  (name awso_athena_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-athena-lwt)
  (libraries awso-athena awso-lwt))
 

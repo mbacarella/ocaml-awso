@@ -2,8 +2,7 @@
 
 (library
  (name awso_healthlake_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-healthlake-async)
  (libraries awso-healthlake awso-async)
  (preprocess

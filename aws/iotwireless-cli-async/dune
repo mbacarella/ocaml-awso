@@ -3,8 +3,7 @@
 (executable
  (package awso-iotwireless-async)
  (name awso_iotwireless)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-iotwireless)
  (libraries awso-iotwireless-async awso-async core_unix.command_unix)
  (preprocess

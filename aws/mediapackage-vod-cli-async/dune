@@ -3,8 +3,7 @@
 (executable
  (package awso-mediapackage-vod-async)
  (name awso_mediapackage_vod)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-mediapackage-vod)
  (libraries awso-mediapackage-vod-async awso-async core_unix.command_unix)
  (preprocess

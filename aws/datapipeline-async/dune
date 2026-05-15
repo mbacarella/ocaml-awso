@@ -2,8 +2,7 @@
 
 (library
  (name awso_datapipeline_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-datapipeline-async)
  (libraries awso-datapipeline awso-async)
  (preprocess

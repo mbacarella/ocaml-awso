@@ -3,8 +3,7 @@
 (executable
  (package awso-xray-async)
  (name awso_xray)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-xray)
  (libraries awso-xray-async awso-async core_unix.command_unix)
  (preprocess

@@ -2,8 +2,7 @@
 
 (library
  (name awso_pi_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-pi-async)
  (libraries awso-pi awso-async)
  (preprocess

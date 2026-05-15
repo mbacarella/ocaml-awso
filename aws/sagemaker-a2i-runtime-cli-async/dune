@@ -3,8 +3,7 @@
 (executable
  (package awso-sagemaker-a2i-runtime-async)
  (name awso_sagemaker_a2i_runtime)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-sagemaker-a2i-runtime)
  (libraries
   awso-sagemaker-a2i-runtime-async

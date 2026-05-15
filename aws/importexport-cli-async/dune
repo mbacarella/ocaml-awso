@@ -3,8 +3,7 @@
 (executable
  (package awso-importexport-async)
  (name awso_importexport)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-importexport)
  (libraries awso-importexport-async awso-async core_unix.command_unix)
  (preprocess

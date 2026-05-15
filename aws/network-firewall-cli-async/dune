@@ -3,8 +3,7 @@
 (executable
  (package awso-network-firewall-async)
  (name awso_network_firewall)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-network-firewall)
  (libraries awso-network-firewall-async awso-async core_unix.command_unix)
  (preprocess

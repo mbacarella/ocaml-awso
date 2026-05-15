@@ -3,8 +3,7 @@
 (executable
  (package awso-gamelift-async)
  (name awso_gamelift)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-gamelift)
  (libraries awso-gamelift-async awso-async core_unix.command_unix)
  (preprocess

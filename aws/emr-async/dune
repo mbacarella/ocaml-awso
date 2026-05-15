@@ -2,8 +2,7 @@
 
 (library
  (name awso_emr_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-emr-async)
  (libraries awso-emr awso-async)
  (preprocess

@@ -2,8 +2,7 @@
 
 (library
  (name awso_snow_device_management_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-snow-device-management-async)
  (libraries awso-snow-device-management awso-async)
  (preprocess

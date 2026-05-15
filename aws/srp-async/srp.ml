@@ -1,3 +1,6 @@
+open! Core
+open! Async
+
 module Cognito_idp = struct
   module Values = Awso_cognito_idp_async.Values
 

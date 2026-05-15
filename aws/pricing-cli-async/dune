@@ -3,8 +3,7 @@
 (executable
  (package awso-pricing-async)
  (name awso_pricing)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-pricing)
  (libraries awso-pricing-async awso-async core_unix.command_unix)
  (preprocess

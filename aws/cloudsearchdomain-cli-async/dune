@@ -3,8 +3,7 @@
 (executable
  (package awso-cloudsearchdomain-async)
  (name awso_cloudsearchdomain)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-cloudsearchdomain)
  (libraries awso-cloudsearchdomain-async awso-async core_unix.command_unix)
  (preprocess

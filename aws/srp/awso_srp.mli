@@ -1,3 +1,5 @@
+open! Core
+
 (** Implementation of Secure Remote Password (SRP) authenticate protocol for AWS
     cognito authentication flow. Never directly sends the password over the
     internet, but instead cryptographically strong representation verified on

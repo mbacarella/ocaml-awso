@@ -2,8 +2,7 @@
 
 (library
  (name awso_rbin_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-rbin-async)
  (libraries awso-rbin awso-async)
  (preprocess

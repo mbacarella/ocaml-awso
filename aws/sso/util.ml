@@ -1,3 +1,5 @@
+open! Core
+
 (* In sha1_insecure below, [@alert "-crypto"] suppresses the "SHA1 is broken" alert
    from Cryptokit. We know. AWS credential file caching require this for cache lookups still,
    unfortunately. *)

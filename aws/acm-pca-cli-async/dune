@@ -3,8 +3,7 @@
 (executable
  (package awso-acm-pca-async)
  (name awso_acm_pca)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-acm-pca)
  (libraries awso-acm-pca-async awso-async core_unix.command_unix)
  (preprocess

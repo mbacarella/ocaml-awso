@@ -3,8 +3,7 @@
 (executable
  (package awso-iot1click-projects-async)
  (name awso_iot1click_projects)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-iot1click-projects)
  (libraries awso-iot1click-projects-async awso-async core_unix.command_unix)
  (preprocess

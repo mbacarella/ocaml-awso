@@ -3,8 +3,7 @@
 (executable
  (package awso-backup-async)
  (name awso_backup)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-backup)
  (libraries awso-backup-async awso-async core_unix.command_unix)
  (preprocess

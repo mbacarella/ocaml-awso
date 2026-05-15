@@ -2,8 +2,7 @@
 
 (library
  (name awso_resourcegroupstaggingapi_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-resourcegroupstaggingapi-lwt)
  (libraries awso-resourcegroupstaggingapi awso-lwt))
 

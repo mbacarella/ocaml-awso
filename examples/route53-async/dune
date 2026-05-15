@@ -2,4 +2,4 @@
  (name awso_route53)
  (libraries awso-route53-async core_unix.command_unix)
  (flags
-  (:standard -open Core -open Async)))
+  (:standard)))

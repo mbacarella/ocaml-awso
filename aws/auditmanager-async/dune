@@ -2,8 +2,7 @@
 
 (library
  (name awso_auditmanager_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-auditmanager-async)
  (libraries awso-auditmanager awso-async)
  (preprocess

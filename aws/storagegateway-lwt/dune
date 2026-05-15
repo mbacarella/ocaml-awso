@@ -2,8 +2,7 @@
 
 (library
  (name awso_storagegateway_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-storagegateway-lwt)
  (libraries awso-storagegateway awso-lwt))
 

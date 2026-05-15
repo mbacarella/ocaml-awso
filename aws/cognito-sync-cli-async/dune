@@ -3,8 +3,7 @@
 (executable
  (package awso-cognito-sync-async)
  (name awso_cognito_sync)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-cognito-sync)
  (libraries awso-cognito-sync-async awso-async core_unix.command_unix)
  (preprocess

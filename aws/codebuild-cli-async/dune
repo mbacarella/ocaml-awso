@@ -3,8 +3,7 @@
 (executable
  (package awso-codebuild-async)
  (name awso_codebuild)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-codebuild)
  (libraries awso-codebuild-async awso-async core_unix.command_unix)
  (preprocess

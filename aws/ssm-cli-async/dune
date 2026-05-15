@@ -3,8 +3,7 @@
 (executable
  (package awso-ssm-async)
  (name awso_ssm)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-ssm)
  (libraries awso-ssm-async awso-async core_unix.command_unix)
  (preprocess

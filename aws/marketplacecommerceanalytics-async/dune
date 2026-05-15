@@ -2,8 +2,7 @@
 
 (library
  (name awso_marketplacecommerceanalytics_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-marketplacecommerceanalytics-async)
  (libraries awso-marketplacecommerceanalytics awso-async)
  (preprocess

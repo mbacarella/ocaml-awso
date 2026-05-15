@@ -1,3 +1,6 @@
+open! Core
+open! Async
+
 (** [with_retries ?retry_delay ?retry_cnt f] wraps deferred function [f] with
     retry logic. If an exception is raise by [f], and the number of retries has
     not exceeded [retry_cnt], the exception will be logged and [f] will be

@@ -3,8 +3,7 @@
 (executable
  (package awso-amplifyuibuilder-async)
  (name awso_amplifyuibuilder)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-amplifyuibuilder)
  (libraries awso-amplifyuibuilder-async awso-async core_unix.command_unix)
  (preprocess

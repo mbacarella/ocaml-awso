@@ -3,8 +3,7 @@
 (executable
  (package awso-lambda-async)
  (name awso_lambda)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-lambda)
  (libraries awso-lambda-async awso-async core_unix.command_unix)
  (preprocess

@@ -3,8 +3,7 @@
 (executable
  (package awso-databrew-async)
  (name awso_databrew)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-databrew)
  (libraries awso-databrew-async awso-async core_unix.command_unix)
  (preprocess

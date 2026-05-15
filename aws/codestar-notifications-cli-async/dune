@@ -3,8 +3,7 @@
 (executable
  (package awso-codestar-notifications-async)
  (name awso_codestar_notifications)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-codestar-notifications)
  (libraries
   awso-codestar-notifications-async

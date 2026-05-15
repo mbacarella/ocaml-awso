@@ -2,8 +2,7 @@
 
 (library
  (name awso_mediapackage_vod_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-mediapackage-vod-async)
  (libraries awso-mediapackage-vod awso-async)
  (preprocess

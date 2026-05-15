@@ -2,8 +2,7 @@
 
 (library
  (name awso_cur_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-cur-lwt)
  (libraries awso-cur awso-lwt))
 

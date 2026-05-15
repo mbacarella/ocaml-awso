@@ -2,8 +2,7 @@
 
 (library
  (name awso_autoscaling_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-autoscaling-async)
  (libraries awso-autoscaling awso-async)
  (preprocess

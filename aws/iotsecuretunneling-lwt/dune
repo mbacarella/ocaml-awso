@@ -2,8 +2,7 @@
 
 (library
  (name awso_iotsecuretunneling_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-iotsecuretunneling-lwt)
  (libraries awso-iotsecuretunneling awso-lwt))
 

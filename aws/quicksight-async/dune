@@ -2,8 +2,7 @@
 
 (library
  (name awso_quicksight_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-quicksight-async)
  (libraries awso-quicksight awso-async)
  (preprocess

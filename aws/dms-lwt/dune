@@ -2,8 +2,7 @@
 
 (library
  (name awso_dms_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-dms-lwt)
  (libraries awso-dms awso-lwt))
 

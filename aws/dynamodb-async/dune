@@ -2,8 +2,7 @@
 
 (library
  (name awso_dynamodb_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-dynamodb-async)
  (libraries awso-dynamodb awso-async)
  (preprocess

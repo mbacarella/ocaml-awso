@@ -1,3 +1,6 @@
+open! Core
+open! Async
+
 val put_object
   :  Awso.Cfg.t
   -> bucket:Values.BucketName.t

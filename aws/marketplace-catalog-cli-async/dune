@@ -3,8 +3,7 @@
 (executable
  (package awso-marketplace-catalog-async)
  (name awso_marketplace_catalog)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-marketplace-catalog)
  (libraries awso-marketplace-catalog-async awso-async core_unix.command_unix)
  (preprocess

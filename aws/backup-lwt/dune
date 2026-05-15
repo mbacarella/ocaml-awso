@@ -2,8 +2,7 @@
 
 (library
  (name awso_backup_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-backup-lwt)
  (libraries awso-backup awso-lwt))
 

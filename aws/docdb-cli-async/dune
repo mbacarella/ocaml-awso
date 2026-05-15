@@ -3,8 +3,7 @@
 (executable
  (package awso-docdb-async)
  (name awso_docdb)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-docdb)
  (libraries awso-docdb-async awso-async core_unix.command_unix)
  (preprocess

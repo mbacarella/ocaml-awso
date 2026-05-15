@@ -2,8 +2,7 @@
 
 (library
  (name awso_lexv2_models_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-lexv2-models-async)
  (libraries awso-lexv2-models awso-async)
  (preprocess

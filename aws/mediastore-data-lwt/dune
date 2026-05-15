@@ -2,8 +2,7 @@
 
 (library
  (name awso_mediastore_data_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-mediastore-data-lwt)
  (libraries awso-mediastore-data awso-lwt))
 

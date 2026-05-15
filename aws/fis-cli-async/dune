@@ -3,8 +3,7 @@
 (executable
  (package awso-fis-async)
  (name awso_fis)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-fis)
  (libraries awso-fis-async awso-async core_unix.command_unix)
  (preprocess

@@ -3,8 +3,7 @@
 (executable
  (package awso-sagemaker-featurestore-runtime-async)
  (name awso_sagemaker_featurestore_runtime)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-sagemaker-featurestore-runtime)
  (libraries
   awso-sagemaker-featurestore-runtime-async

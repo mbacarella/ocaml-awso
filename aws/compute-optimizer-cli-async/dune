@@ -3,8 +3,7 @@
 (executable
  (package awso-compute-optimizer-async)
  (name awso_compute_optimizer)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-compute-optimizer)
  (libraries awso-compute-optimizer-async awso-async core_unix.command_unix)
  (preprocess

@@ -2,8 +2,7 @@
 
 (library
  (name awso_iotthingsgraph_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-iotthingsgraph-async)
  (libraries awso-iotthingsgraph awso-async)
  (preprocess

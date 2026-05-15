@@ -3,8 +3,7 @@
 (executable
  (package awso-mwaa-async)
  (name awso_mwaa)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-mwaa)
  (libraries awso-mwaa-async awso-async core_unix.command_unix)
  (preprocess

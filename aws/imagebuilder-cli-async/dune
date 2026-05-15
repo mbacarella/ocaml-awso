@@ -3,8 +3,7 @@
 (executable
  (package awso-imagebuilder-async)
  (name awso_imagebuilder)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-imagebuilder)
  (libraries awso-imagebuilder-async awso-async core_unix.command_unix)
  (preprocess

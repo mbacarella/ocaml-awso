@@ -3,8 +3,7 @@
 (executable
  (package awso-lex-models-async)
  (name awso_lex_models)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-lex-models)
  (libraries awso-lex-models-async awso-async core_unix.command_unix)
  (preprocess

@@ -2,8 +2,7 @@
 
 (library
  (name awso_kinesis_video_signaling_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-kinesis-video-signaling-async)
  (libraries awso-kinesis-video-signaling awso-async)
  (preprocess

@@ -3,8 +3,7 @@
 (executable
  (package awso-timestream-write-async)
  (name awso_timestream_write)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-timestream-write)
  (libraries awso-timestream-write-async awso-async core_unix.command_unix)
  (preprocess

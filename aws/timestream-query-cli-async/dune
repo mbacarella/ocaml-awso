@@ -3,8 +3,7 @@
 (executable
  (package awso-timestream-query-async)
  (name awso_timestream_query)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-timestream-query)
  (libraries awso-timestream-query-async awso-async core_unix.command_unix)
  (preprocess

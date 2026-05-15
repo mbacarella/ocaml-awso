@@ -2,8 +2,7 @@
 
 (library
  (name awso_pi_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-pi-lwt)
  (libraries awso-pi awso-lwt))
 

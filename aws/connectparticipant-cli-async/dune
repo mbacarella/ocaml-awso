@@ -3,8 +3,7 @@
 (executable
  (package awso-connectparticipant-async)
  (name awso_connectparticipant)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-connectparticipant)
  (libraries awso-connectparticipant-async awso-async core_unix.command_unix)
  (preprocess

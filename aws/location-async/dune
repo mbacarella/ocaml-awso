@@ -2,8 +2,7 @@
 
 (library
  (name awso_location_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-location-async)
  (libraries awso-location awso-async)
  (preprocess

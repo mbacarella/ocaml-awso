@@ -3,8 +3,7 @@
 (executable
  (package awso-rds-data-async)
  (name awso_rds_data)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-rds-data)
  (libraries awso-rds-data-async awso-async core_unix.command_unix)
  (preprocess

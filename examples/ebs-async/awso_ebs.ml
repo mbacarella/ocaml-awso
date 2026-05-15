@@ -1,3 +1,4 @@
+open Core
 open Awso_ebs_async
 
 let () =

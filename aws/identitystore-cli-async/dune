@@ -3,8 +3,7 @@
 (executable
  (package awso-identitystore-async)
  (name awso_identitystore)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-identitystore)
  (libraries awso-identitystore-async awso-async core_unix.command_unix)
  (preprocess

@@ -3,8 +3,7 @@
 (executable
  (package awso-schemas-async)
  (name awso_schemas)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-schemas)
  (libraries awso-schemas-async awso-async core_unix.command_unix)
  (preprocess

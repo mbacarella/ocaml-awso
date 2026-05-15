@@ -2,8 +2,7 @@
 
 (library
  (name awso_resource_groups_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-resource-groups-async)
  (libraries awso-resource-groups awso-async)
  (preprocess

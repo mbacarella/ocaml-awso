@@ -2,8 +2,7 @@
 
 (library
  (name awso_voice_id_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-voice-id-async)
  (libraries awso-voice-id awso-async)
  (preprocess

@@ -3,8 +3,7 @@
 (executable
  (package awso-cloudhsmv2-async)
  (name awso_cloudhsmv2)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-cloudhsmv2)
  (libraries awso-cloudhsmv2-async awso-async core_unix.command_unix)
  (preprocess

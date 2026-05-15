@@ -2,8 +2,7 @@
 
 (library
  (name awso_ec2_instance_connect_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-ec2-instance-connect-lwt)
  (libraries awso-ec2-instance-connect awso-lwt))
 

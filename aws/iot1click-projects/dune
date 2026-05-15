@@ -4,7 +4,7 @@
  (name awso_iot1click_projects)
  (public_name awso-iot1click-projects)
  (libraries awso)
- (flags :standard -open Core -open Printf)
+ (flags :standard)
  (ocamlopt_flags (-linscan))
  (preprocess
   (pps ppx_expect))

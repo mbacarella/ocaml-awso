@@ -2,8 +2,7 @@
 
 (library
  (name awso_qldb_session_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-qldb-session-lwt)
  (libraries awso-qldb-session awso-lwt))
 

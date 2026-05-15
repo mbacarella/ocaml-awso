@@ -3,8 +3,7 @@
 (executable
  (package awso-finspace-async)
  (name awso_finspace)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-finspace)
  (libraries awso-finspace-async awso-async core_unix.command_unix)
  (preprocess

@@ -4,7 +4,7 @@
  (name awso_chime_sdk_messaging)
  (public_name awso-chime-sdk-messaging)
  (libraries awso)
- (flags :standard -open Core -open Printf)
+ (flags :standard)
  (ocamlopt_flags (-linscan))
  (preprocess
   (pps ppx_expect))

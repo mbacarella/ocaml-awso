@@ -3,8 +3,7 @@
 (executable
  (package awso-budgets-async)
  (name awso_budgets)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-budgets)
  (libraries awso-budgets-async awso-async core_unix.command_unix)
  (preprocess

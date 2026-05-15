@@ -2,8 +2,7 @@
 
 (library
  (name awso_comprehend_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-comprehend-async)
  (libraries awso-comprehend awso-async)
  (preprocess

@@ -3,8 +3,7 @@
 (executable
  (package awso-cloud9-async)
  (name awso_cloud9)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-cloud9)
  (libraries awso-cloud9-async awso-async core_unix.command_unix)
  (preprocess

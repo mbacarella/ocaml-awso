@@ -17,6 +17,7 @@
     requirements for a given service, which these functions may enforce (though
     we don't yet). *)
 
+open! Core
 open! Import
 
 module Error : sig

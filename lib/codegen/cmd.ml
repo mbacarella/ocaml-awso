@@ -171,10 +171,12 @@ let botocore_endpoints : Command.t =
       let file = Param.endpoints_json_file in
       fun () ->
         let endpoints = file |> In_channel.read_all |> Botocore_endpoints.of_json in
+        let loc = !Ast_helper.default_loc in
         let structure =
-          [ Botocore_endpoints.make_lookup_uri endpoints
-          ; Botocore_endpoints.make_lookup_credential_scope endpoints
-          ]
+          [%str open! Core]
+          @ [ Botocore_endpoints.make_lookup_uri endpoints
+            ; Botocore_endpoints.make_lookup_credential_scope endpoints
+            ]
         in
         print_endline (Util.structure_to_string structure)]
 ;;
@@ -198,11 +200,13 @@ module Service = struct
         let service = Param.service_json_file
         and impl = Param.impl in
         fun () ->
+          let loc = !Ast_helper.default_loc in
           let data =
             service
             |> In_channel.read_all
             |> Botocore_service.of_json
             |> Service_endpoints.make
+            |> fun s -> [%str open! Core] @ s
             |> Util.structure_to_string
           in
           Out_channel.write_all impl ~data]

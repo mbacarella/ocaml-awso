@@ -2,8 +2,7 @@
 
 (library
  (name awso_groundstation_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-groundstation-lwt)
  (libraries awso-groundstation awso-lwt))
 

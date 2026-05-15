@@ -3,8 +3,7 @@
 (executable
  (package awso-s3outposts-async)
  (name awso_s3outposts)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-s3outposts)
  (libraries awso-s3outposts-async awso-async core_unix.command_unix)
  (preprocess

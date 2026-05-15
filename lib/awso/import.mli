@@ -1,3 +1,5 @@
+open! Core
+
 (** Extension of Core library. *)
 
 module String : sig

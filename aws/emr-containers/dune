@@ -4,7 +4,7 @@
  (name awso_emr_containers)
  (public_name awso-emr-containers)
  (libraries awso)
- (flags :standard -open Core -open Printf)
+ (flags :standard)
  (ocamlopt_flags (-linscan))
  (preprocess
   (pps ppx_expect))

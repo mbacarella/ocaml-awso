@@ -2,8 +2,7 @@
 
 (library
  (name awso_inspector_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-inspector-async)
  (libraries awso-inspector awso-async)
  (preprocess

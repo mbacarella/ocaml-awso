@@ -1,3 +1,4 @@
+open! Core
 open! Import
 
 module type S = sig

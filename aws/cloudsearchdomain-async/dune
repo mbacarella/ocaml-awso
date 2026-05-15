@@ -2,8 +2,7 @@
 
 (library
  (name awso_cloudsearchdomain_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-cloudsearchdomain-async)
  (libraries awso-cloudsearchdomain awso-async)
  (preprocess

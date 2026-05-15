@@ -3,8 +3,7 @@
 (executable
  (package awso-securityhub-async)
  (name awso_securityhub)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-securityhub)
  (libraries awso-securityhub-async awso-async core_unix.command_unix)
  (preprocess

@@ -2,8 +2,7 @@
 
 (library
  (name awso_customer_profiles_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-customer-profiles-async)
  (libraries awso-customer-profiles awso-async)
  (preprocess

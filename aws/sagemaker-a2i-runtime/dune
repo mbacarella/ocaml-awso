@@ -4,7 +4,7 @@
  (name awso_sagemaker_a2i_runtime)
  (public_name awso-sagemaker-a2i-runtime)
  (libraries awso)
- (flags :standard -open Core -open Printf)
+ (flags :standard)
  (ocamlopt_flags (-linscan))
  (preprocess
   (pps ppx_expect))

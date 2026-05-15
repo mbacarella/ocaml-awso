@@ -3,8 +3,7 @@
 (executable
  (package awso-glue-async)
  (name awso_glue)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-glue)
  (libraries awso-glue-async awso-async core_unix.command_unix)
  (preprocess

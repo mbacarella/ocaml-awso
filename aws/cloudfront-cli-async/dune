@@ -3,8 +3,7 @@
 (executable
  (package awso-cloudfront-async)
  (name awso_cloudfront)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-cloudfront)
  (libraries awso-cloudfront-async awso-async core_unix.command_unix)
  (preprocess

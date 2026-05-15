@@ -3,8 +3,7 @@
 (executable
  (package awso-iam-async)
  (name awso_iam)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-iam)
  (libraries awso-iam-async awso-async core_unix.command_unix)
  (preprocess

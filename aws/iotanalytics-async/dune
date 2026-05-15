@@ -2,8 +2,7 @@
 
 (library
  (name awso_iotanalytics_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-iotanalytics-async)
  (libraries awso-iotanalytics awso-async)
  (preprocess

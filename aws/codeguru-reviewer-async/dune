@@ -2,8 +2,7 @@
 
 (library
  (name awso_codeguru_reviewer_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-codeguru-reviewer-async)
  (libraries awso-codeguru-reviewer awso-async)
  (preprocess

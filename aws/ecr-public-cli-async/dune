@@ -3,8 +3,7 @@
 (executable
  (package awso-ecr-public-async)
  (name awso_ecr_public)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-ecr-public)
  (libraries awso-ecr-public-async awso-async core_unix.command_unix)
  (preprocess

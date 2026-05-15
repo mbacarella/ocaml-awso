@@ -3,8 +3,7 @@
 (executable
  (package awso-marketplace-entitlement-async)
  (name awso_marketplace_entitlement)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-marketplace-entitlement)
  (libraries
   awso-marketplace-entitlement-async

@@ -4,7 +4,7 @@
  (name awso_stepfunctions)
  (public_name awso-stepfunctions)
  (libraries awso)
- (flags :standard -open Core -open Printf)
+ (flags :standard)
  (ocamlopt_flags (-linscan))
  (preprocess
   (pps ppx_expect))

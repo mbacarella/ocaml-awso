@@ -2,8 +2,7 @@
 
 (library
  (name awso_elasticbeanstalk_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-elasticbeanstalk-async)
  (libraries awso-elasticbeanstalk awso-async)
  (preprocess

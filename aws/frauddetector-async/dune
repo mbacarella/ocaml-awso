@@ -2,8 +2,7 @@
 
 (library
  (name awso_frauddetector_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-frauddetector-async)
  (libraries awso-frauddetector awso-async)
  (preprocess

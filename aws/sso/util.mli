@@ -1,3 +1,5 @@
+open! Core
+
 val get_cached_sso_token_file_path : cfg:Awso.Cfg.t -> string
 
 val get_sso_role_request_and_cfg_exn

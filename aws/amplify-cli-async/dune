@@ -3,8 +3,7 @@
 (executable
  (package awso-amplify-async)
  (name awso_amplify)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-amplify)
  (libraries awso-amplify-async awso-async core_unix.command_unix)
  (preprocess

@@ -3,8 +3,7 @@
 (executable
  (package awso-elasticache-async)
  (name awso_elasticache)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-elasticache)
  (libraries awso-elasticache-async awso-async core_unix.command_unix)
  (preprocess

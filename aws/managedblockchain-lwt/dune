@@ -2,8 +2,7 @@
 
 (library
  (name awso_managedblockchain_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-managedblockchain-lwt)
  (libraries awso-managedblockchain awso-lwt))
 

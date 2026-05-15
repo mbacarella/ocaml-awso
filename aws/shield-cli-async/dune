@@ -3,8 +3,7 @@
 (executable
  (package awso-shield-async)
  (name awso_shield)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-shield)
  (libraries awso-shield-async awso-async core_unix.command_unix)
  (preprocess

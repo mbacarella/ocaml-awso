@@ -2,8 +2,7 @@
 
 (library
  (name awso_kafka_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-kafka-async)
  (libraries awso-kafka awso-async)
  (preprocess

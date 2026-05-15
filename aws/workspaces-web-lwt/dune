@@ -2,8 +2,7 @@
 
 (library
  (name awso_workspaces_web_lwt)
- (flags
-  (:standard -open Core -open Lwt))
+ (flags (:standard))
  (public_name awso-workspaces-web-lwt)
  (libraries awso-workspaces-web awso-lwt))
 

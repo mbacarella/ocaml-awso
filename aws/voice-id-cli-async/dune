@@ -3,8 +3,7 @@
 (executable
  (package awso-voice-id-async)
  (name awso_voice_id)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-voice-id)
  (libraries awso-voice-id-async awso-async core_unix.command_unix)
  (preprocess

@@ -2,8 +2,7 @@
 
 (library
  (name awso_lookoutmetrics_async)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-lookoutmetrics-async)
  (libraries awso-lookoutmetrics awso-async)
  (preprocess

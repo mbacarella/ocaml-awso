@@ -1,3 +1,6 @@
+open! Core
+open! Printf
+
 module String = struct
   include String
 

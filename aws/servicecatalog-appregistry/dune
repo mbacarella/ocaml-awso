@@ -4,7 +4,7 @@
  (name awso_servicecatalog_appregistry)
  (public_name awso-servicecatalog-appregistry)
  (libraries awso)
- (flags :standard -open Core -open Printf)
+ (flags :standard)
  (ocamlopt_flags (-linscan))
  (preprocess
   (pps ppx_expect))

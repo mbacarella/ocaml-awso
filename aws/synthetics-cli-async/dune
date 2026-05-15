@@ -3,8 +3,7 @@
 (executable
  (package awso-synthetics-async)
  (name awso_synthetics)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-synthetics)
  (libraries awso-synthetics-async awso-async core_unix.command_unix)
  (preprocess

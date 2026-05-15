@@ -3,8 +3,7 @@
 (executable
  (package awso-panorama-async)
  (name awso_panorama)
- (flags
-  (:standard -open Core -open Async))
+ (flags (:standard))
  (public_name awso-panorama)
  (libraries awso-panorama-async awso-async core_unix.command_unix)
  (preprocess
