@@ -1,5 +1,12 @@
 (executable
- (name awso_build)
+ (name awso_codegen_main)
+ (public_name awso-codegen)
+ (package awso-codegen)
+ (libraries awso-codegen core core_unix.command_unix)
+ (flags :standard -open Core))
+
+(executable
+ (name awso_bootstrap)
  (libraries core core_unix core_unix.command_unix core_unix.sys_unix unix)
  (flags :standard -open Core)
  (preprocess
