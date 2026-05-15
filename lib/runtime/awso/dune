@@ -12,17 +12,8 @@
   xmlm
   yojson
   re.perl)
- (flags :standard)
  (ocamlopt_flags (-linscan))
  (preprocess
   (pps ppx_jane ppx_yojson_conv))
  (synopsis "OCaml AWS general API.")
  (inline_tests))
-
-(rule
- (deps
-  (:endpoints %{project_root}/vendor/botocore/botocore/data/endpoints.json))
- (action
-  (with-stdout-to
-   botocore_endpoints.ml
-   (run %{bin:awso-codegen} botocore-endpoints --endpoints %{endpoints}))))

@@ -2,12 +2,10 @@
  (name awso_codegen_main)
  (public_name awso-codegen)
  (package awso-codegen)
- (libraries awso_codegen)
- (flags :standard))
+ (libraries awso_codegen))
 
 (executable
  (name awso_bootstrap)
  (libraries core core_unix core_unix.command_unix core_unix.sys_unix unix)
- (flags :standard)
  (preprocess
   (pps ppx_jane)))

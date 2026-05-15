@@ -1,91 +1,35 @@
 open! Core
 
-module Process = struct
-  module Output = struct
-    type t =
-      { exit_status : Core_unix.Exit_or_signal.t
-      ; stdout : string
-      ; stderr : string
-      }
-  end
-
-  let run ~prog ~args : (Output.t, exn) result =
-    let res =
-      Result.try_with (fun () ->
-        let read_into_buf =
-          let len = 8192 in
-          let buf = Bytes.create len in
-          fun ~buffer ~fd ->
-            match Core_unix.read ~restart:true fd ~buf ~pos:0 ~len with
-            | -1 ->
-              failwithf
-                "Error while reading %d from %s"
-                (Core_unix.File_descr.to_int fd)
-                (String.concat ~sep:" " (prog :: args))
-                ()
-            | 0 -> `Eof
-            | num_bytes ->
-              Buffer.add_subbytes buffer buf ~pos:0 ~len:num_bytes;
-              `Read num_bytes
-        in
-        let process_fd ~fds ~read ~fd ~buffer =
-          if not (List.mem read ~equal:Core_unix.File_descr.equal fd)
-          then fds
-          else (
-            match read_into_buf ~buffer ~fd with
-            | `Eof ->
-              List.filter fds ~f:(fun fd' -> not @@ Core_unix.File_descr.equal fd fd')
-            | `Read _n -> fds)
-        in
-        let process_info = Core_unix.create_process ~prog ~args in
-        let unix_close = Core_unix.close ~restart:true in
-        let () = unix_close process_info.stdin in
-        let stdout, stderr =
-          let outbuf = Buffer.create 16 in
-          let errbuf = Buffer.create 16 in
-          let rec loop fds =
-            match
-              Core_unix.select
-                ~restart:true
-                ~read:fds
-                ~write:[]
-                ~except:[]
-                ~timeout:`Never
-                ()
-            with
-            | { read; write = []; except = [] } -> (
-              let fds = process_fd ~fds ~read ~fd:process_info.stdout ~buffer:outbuf in
-              let fds = process_fd ~fds ~read ~fd:process_info.stderr ~buffer:errbuf in
-              match fds with
-              | [] -> ()
-              | fds -> loop fds)
-            | _ ->
-              (* This shouldn't happen. We only provide read fds. *)
-              assert false
-          in
-          let () = loop [ process_info.stdout; process_info.stderr ] in
-          let () = unix_close process_info.stdout in
-          let () = unix_close process_info.stderr in
-          Buffer.contents outbuf, Buffer.contents errbuf
-        in
-        let exit_status = Core_unix.waitpid process_info.pid in
-        { Output.exit_status; stdout; stderr })
-    in
-    match res with
-    | Ok c -> Ok c
-    | Error e -> Error e
-  ;;
-end
-
-(** Run [prog] on [args] and print any errors to stderr. If the process exits
-    successfully, return Ok with the captured stdout, else return Error. *)
-let run_and_print_errors ~prog ~args : (string, unit) result =
+let run_and_print_errors ~prog ~args =
   let cmdline = sprintf "%s %s" prog (args |> String.concat ~sep:" ") in
-  let subcommand_result = Process.run ~prog ~args in
-  match subcommand_result with
-  | Ok { Process.Output.exit_status; stdout; stderr } -> (
-    let () = if String.( <> ) stderr "" then eprintf "%s\n" stderr in
-    match exit_status with
+  match
+    Result.try_with (fun () ->
+      let cmd = String.concat ~sep:" " (List.map (prog :: args) ~f:Filename.quote) in
+      let { Core_unix.Process_channels.stdout = stdout_ic
+          ; stdin = stdin_oc
+          ; stderr = stderr_ic
+          }
+        =
+        Core_unix.open_process_full ~env:(Core_unix.environment ()) cmd
+      in
+      Out_channel.close stdin_oc;
+      let stdout = In_channel.input_all stdout_ic in
+      let stderr = In_channel.input_all stderr_ic in
+      let channels =
+        { Core_unix.Process_channels.stdout = stdout_ic
+        ; stdin = stdin_oc
+        ; stderr = stderr_ic
+        }
+      in
+      let status = Core_unix.close_process_full channels in
+      if String.( <> ) stderr "" then eprintf "%s\n" stderr;
+      stdout, status)
+  with
+  | Error exn ->
+    eprintf "Process.run raised an exception: %s: %s\n" cmdline (Exn.to_string exn);
+    Error ()
+  | Ok (stdout, status) -> (
+    match status with
     | Ok () -> Ok stdout
     | Error _ as exit_or_signal ->
       eprintf
@@ -93,16 +37,13 @@ let run_and_print_errors ~prog ~args : (string, unit) result =
         cmdline
         (Core_unix.Exit_or_signal.to_string_hum exit_or_signal);
       Error ())
-  | Error exn ->
-    eprintf "Process.run raised an exception: %s: %s\n" cmdline (Exn.to_string exn);
-    Error ()
 ;;
 
 let ocamlformat ?(prog = "ocamlformat") ~path () =
   run_and_print_errors ~prog ~args:[ "--"; path ]
 ;;
 
-let save_file_and_format ~(path : string) ~(contents : string) : unit =
+let save_file_and_format ~path ~contents =
   Out_channel.write_all path ~data:contents;
   let result = ocamlformat ~path () in
   let contents2 =
@@ -115,20 +56,20 @@ let save_file_and_format ~(path : string) ~(contents : string) : unit =
   | false -> Out_channel.write_all path ~data:contents2
 ;;
 
-let dashes_to_underscores : string -> string =
+let dashes_to_underscores =
   String.map ~f:(function
     | '-' -> '_'
     | c -> c)
 ;;
 
-let get_all_services ~(botocore_data : string) : string list =
+let get_all_services ~botocore_data =
   Sys_unix.ls_dir botocore_data
   |> List.filter ~f:(fun ent -> Sys_unix.is_directory_exn (botocore_data ^/ ent))
   |> List.sort ~compare:String.compare
 ;;
 
 module Param = struct
-  let botocore_data : string Command.Param.t =
+  let botocore_data =
     Command.Param.(
       flag
         "--botocore-data"
@@ -161,7 +102,10 @@ end = struct
     bprintf b ";;\n";
     bprintf b "let to_string (x : t) = x\n";
     bprintf b "let yojson_of_t (x : t) = `String x\n";
-    bprintf b "let t_of_yojson = function `String s -> of_string s | _ -> failwith \"expected string\"\n";
+    bprintf
+      b
+      "let t_of_yojson = function `String s -> of_string s | _ -> failwith \"expected \
+       string\"\n";
     bprintf b "let all : t list = [\n";
     List.iter services ~f:(fun s -> bprintf b " \"%s\";\n" s);
     bprintf b "]\n";
@@ -192,7 +136,7 @@ end = struct
     Buffer.contents b
   ;;
 
-  let main : Command.t =
+  let main =
     let open Command.Let_syntax in
     Command.basic
       ~summary:"generate the Service module"
@@ -207,13 +151,11 @@ end = struct
         fun () ->
           let all_services = get_all_services ~botocore_data in
           save_file_and_format ~path:"service.ml" ~contents:(make_ml all_services);
-          save_file_and_format
-            ~path:"service.mli"
-            ~contents:(make_mli all_services)]
+          save_file_and_format ~path:"service.mli" ~contents:(make_mli all_services)]
   ;;
 end
 
-let main : Command.t =
+let main =
   Command.group
     ~summary:"scripts used to build awso"
     ~readme:(fun () -> "Scripts used internally to build the awso project.")

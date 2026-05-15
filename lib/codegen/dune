@@ -17,14 +17,3 @@
  (inline_tests)
  (preprocess
   (pps ppx_expect ppx_let sedlex.ppx ppxlib.metaquot)))
-
-(rule
- (targets service.ml service.mli)
- (deps
-  (source_tree %{project_root}/vendor/botocore/botocore/data))
- (action
-  (run
-   %{project_root}/bin/awso_bootstrap.exe
-   build-service-module
-   --botocore-data
-   %{project_root}/vendor/botocore/botocore/data)))

@@ -52,7 +52,7 @@ module Arg : sig
   val create : string array -> t
   val flag_required : t -> string -> string
   val flag_optional : t -> string -> string option
-  val flag_listed : t -> string -> string list
+  val flag_listed : t -> string -> string list [@@warning "-32"]
 end = struct
   type t = string list ref
 
@@ -87,255 +87,6 @@ end = struct
       | Some v -> aux (v :: acc)
     in
     aux []
-end
-
-let botocore_endpoints argv =
-  let args = Arg.create argv in
-  let file = Arg.flag_required args "--endpoints" in
-  let endpoints = file |> read_file |> Botocore_endpoints.of_json in
-  let loc = !Ast_helper.default_loc in
-  let structure =
-    [%str open! Import]
-    @ [ Botocore_endpoints.make_lookup_uri endpoints
-      ; Botocore_endpoints.make_lookup_credential_scope endpoints
-      ]
-  in
-  print_endline (Util.structure_to_string structure)
-;;
-
-module Service = struct
-  let dune argv =
-    let args = Arg.create argv in
-    let service = Arg.flag_required args "--service" in
-    let date = Arg.flag_required args "--service-date" in
-    Dune.make ~date ~service |> print_endline
-  ;;
-
-  let endpoints argv =
-    let args = Arg.create argv in
-    let service = Arg.flag_required args "--service" in
-    let impl = Arg.flag_required args "--impl" in
-    let data =
-      service
-      |> read_file
-      |> Botocore_service.of_json
-      |> Service_endpoints.make
-      |> Util.structure_to_string
-    in
-    write_file impl data
-  ;;
-
-  let values argv =
-    let args = Arg.create argv in
-    let awso_service_id = Arg.flag_required args "--service-id" in
-    let service = Arg.flag_required args "--service" in
-    let impl = Arg.flag_required args "--impl" in
-    let submodules = Arg.flag_listed args "--sub" in
-    let service = service |> read_file |> Botocore_service.of_json in
-    let main_module, submodules =
-      Values.make ~awso_service_id ~submodules service
-    in
-    write_file impl (main_module |> Util.structure_to_string);
-    submodules
-    |> List.iter ~f:(fun (filename, struct_) ->
-         write_file filename (struct_ |> Util.structure_to_string))
-  ;;
-
-  let dispatch argv =
-    match argv with
-    | [| |] -> failwith "Usage: service {dune|endpoints|values} [args...]"
-    | _ ->
-      let sub = argv.(0) in
-      let rest = Array.sub argv 1 (Array.length argv - 1) in
-      match sub with
-      | "dune" -> dune rest
-      | "endpoints" -> endpoints rest
-      | "values" -> values rest
-      | s -> failwithf "Unknown service subcommand: %s" s ()
-  ;;
-end
-
-module Service_io = struct
-  let dune argv =
-    let args = Arg.create argv in
-    let service = Arg.flag_required args "--service" in
-    let date = Arg.flag_required args "--service-date" in
-    let io_subsystem = Arg.flag_required args "--io-subsystem" in
-    let io_subsystem =
-      match io_subsystem with
-      | "async" -> `Async
-      | "lwt" -> `Lwt
-      | s -> failwithf "Unknown io-subsystem: %s" s ()
-    in
-    Dune.make_io io_subsystem ~date ~service |> print_endline
-  ;;
-
-  let values argv =
-    let args = Arg.create argv in
-    let service = Arg.flag_required args "--service" in
-    let service =
-      service
-      |> String.map ~f:(function
-           | '-' -> '_'
-           | c -> c)
-    in
-    printf
-      {|(* do not edit! generated module *)
-    include Awso_%s.Values|}
-      service
-  ;;
-
-  let io argv =
-    let args = Arg.create argv in
-    let service = Arg.flag_required args "--service" in
-    let impl = Arg.flag_required args "--impl" in
-    let intf = Arg.flag_required args "--intf" in
-    let base_module = Arg.flag_required args "--base-module" in
-    let io_subsystem = Arg.flag_required args "--io-subsystem" in
-    let io_subsystem =
-      match io_subsystem with
-      | "async" -> `Async
-      | "lwt" -> `Lwt
-      | s -> failwithf "Unknown io-subsystem: %s" s ()
-    in
-    let service = service |> read_file |> Botocore_service.of_json in
-    let endpoints =
-      service.operations |> List.map ~f:(Endpoint.of_botodata ~service)
-    in
-    Io.eval_structure ~base_module ~io_subsystem endpoints
-    |> Util.structure_to_string
-    |> write_file impl;
-    Io.eval_signature
-      ~protocol:service.metadata.protocol
-      ~base_module
-      ~io_subsystem
-      endpoints
-    |> Util.signature_to_string
-    |> write_file intf
-  ;;
-
-  let cli argv =
-    let args = Arg.create argv in
-    let service = Arg.flag_required args "--service" in
-    let impl = Arg.flag_required args "--impl" in
-    let submodules = Arg.flag_listed args "--sub" in
-    let service = service |> read_file |> Botocore_service.of_json in
-    let main_module, submodules = Cli.make ~submodules service in
-    write_file impl (main_module |> Util.structure_to_string);
-    submodules
-    |> List.iter ~f:(fun (filename, struct_) ->
-         write_file filename (struct_ |> Util.structure_to_string))
-  ;;
-
-  let dispatch argv =
-    match argv with
-    | [| |] -> failwith "Usage: service-io {dune|cli|io|values} [args...]"
-    | _ ->
-      let sub = argv.(0) in
-      let rest = Array.sub argv 1 (Array.length argv - 1) in
-      match sub with
-      | "dune" -> dune rest
-      | "cli" -> cli rest
-      | "io" -> io rest
-      | "values" -> values rest
-      | s -> failwithf "Unknown service-io subcommand: %s" s ()
-  ;;
-end
-
-module Cli_cmd = struct
-  let dune argv =
-    let args = Arg.create argv in
-    let service = Arg.flag_required args "--service" in
-    Dune.make_cli_async ~service |> print_endline
-  ;;
-
-  let script argv =
-    let args = Arg.create argv in
-    let service = Arg.flag_required args "--service" in
-    let service =
-      service
-      |> String.map ~f:(function
-           | '-' -> '_'
-           | c -> c)
-    in
-    printf
-      {|(* do not edit! generated module *)
-
-    let () = Command_unix.run Awso_%s_async.Cli.main
-    |}
-      service
-  ;;
-
-  let dispatch argv =
-    match argv with
-    | [| |] -> failwith "Usage: cli {dune|script} [args...]"
-    | _ ->
-      let sub = argv.(0) in
-      let rest = Array.sub argv 1 (Array.length argv - 1) in
-      match sub with
-      | "dune" -> dune rest
-      | "script" -> script rest
-      | s -> failwithf "Unknown cli subcommand: %s" s ()
-  ;;
-end
-
-module Services = struct
-  let main argv =
-    let args = Arg.create argv in
-    let botocore_data = Arg.flag_required args "--botocore-data" in
-    let outdir = Arg.flag_required args "-o" in
-    let services_opt = Arg.flag_optional args "--services" in
-    let services =
-      match services_opt with
-      | Some x -> x |> String.split ~on:',' |> List.map ~f:String.strip
-      | None ->
-        let all = get_all_services ~botocore_data |> String.Set.of_list in
-        let unsupported = unsupported_services in
-        Set.diff all unsupported |> Set.to_list
-    in
-    let temp_file = Filename.temp_file "dune" "" in
-    let print_dune_file ~outdir ~data =
-      write_file temp_file data;
-      let prog = "dune" in
-      let args = [ "format-dune-file"; temp_file ] in
-      match Process.run ~prog ~args with
-      | Error exn ->
-        failwithf
-          "%s %s\n%s"
-          prog
-          (String.concat ~sep:" " args)
-          (Printexc.to_string exn)
-          ()
-      | Ok { exit_result; stdout; stderr = _ } -> (
-        match exit_result with
-        | Signaled n ->
-          failwithf "dune format-dune-file killed by signal %d" n ()
-        | Exited n when n <> 0 ->
-          failwithf "dune format-dune-file exited with code %d" n ()
-        | Exited _ ->
-          Util.mkdir_exn outdir;
-          write_file (outdir ^/ "dune") stdout)
-    in
-    services
-    |> List.iter ~f:(fun service ->
-         match latest_date ~botocore_data ~service with
-         | Error `Unknown_directory ->
-           failwithf "Unknown directory: %s/%s" botocore_data service ()
-         | Ok date ->
-           print_dune_file
-             ~outdir:(outdir ^/ service)
-             ~data:(Dune.make ~date ~service);
-           print_dune_file
-             ~outdir:(outdir ^/ service ^ "-lwt")
-             ~data:(Dune.make_io `Lwt ~date ~service);
-           print_dune_file
-             ~outdir:(outdir ^/ service ^ "-async")
-             ~data:(Dune.make_io `Async ~date ~service);
-           print_dune_file
-             ~outdir:(outdir ^/ service ^ "-cli-async")
-             ~data:(Dune.make_cli_async ~service));
-    Sys_unix.remove temp_file
-  ;;
 end
 
 module Build_service_module = struct
@@ -381,21 +132,190 @@ module Build_service_module = struct
   ;;
 end
 
+module Generate_all = struct
+  let header ~argv =
+    sprintf "(* generated by: awso-codegen generate-all %s *)" (String.concat ~sep:" " argv)
+
+  let write_generated ~argv path data =
+    let content = header ~argv ^ "\n" ^ data in
+    Util.mkdir_exn (Filename.dirname path);
+    write_file path content
+
+  let dune_header ~argv =
+    sprintf ";; generated by: awso-codegen generate-all %s" (String.concat ~sep:" " argv)
+
+  let write_dune_file ~argv ~outdir ~data =
+    let temp_file = Filename.temp_file "dune" "" in
+    write_file temp_file data;
+    let prog = "dune" in
+    let args = [ "format-dune-file"; temp_file ] in
+    match Process.run ~prog ~args with
+    | Error exn ->
+      Sys_unix.remove temp_file;
+      failwithf "dune format-dune-file: %s" (Printexc.to_string exn) ()
+    | Ok { exit_result; stdout; stderr = _ } ->
+      Sys_unix.remove temp_file;
+      match exit_result with
+      | Signaled n ->
+        failwithf "dune format-dune-file killed by signal %d" n ()
+      | Exited n when n <> 0 ->
+        failwithf "dune format-dune-file exited with code %d" n ()
+      | Exited _ ->
+        Util.mkdir_exn outdir;
+        write_file (outdir ^/ "dune") (dune_header ~argv ^ "\n" ^ stdout)
+
+  let main argv =
+    let args = Arg.create argv in
+    let botocore_data = Arg.flag_required args "--botocore-data" in
+    let outdir = Arg.flag_required args "-o" in
+    let services_opt = Arg.flag_optional args "--services" in
+    let endpoints_json = botocore_data ^/ "endpoints.json" in
+    let services =
+      match services_opt with
+      | Some x -> x |> String.split ~on:',' |> List.map ~f:String.strip
+      | None ->
+        let all = get_all_services ~botocore_data |> String.Set.of_list in
+        Set.diff all unsupported_services |> Set.to_list
+    in
+    let runtime_dir = Arg.flag_required args "--runtime-dir" in
+    let argv_strs = Array.to_list argv in
+    (* generate botocore_endpoints.ml for the runtime *)
+    (let endpoints = endpoints_json |> read_file |> Botocore_endpoints.of_json in
+     let loc = !Ast_helper.default_loc in
+     let structure =
+       [%str open! Import]
+       @ [ Botocore_endpoints.make_lookup_uri endpoints
+         ; Botocore_endpoints.make_lookup_credential_scope endpoints
+         ]
+     in
+     write_generated
+       ~argv:argv_strs
+       (runtime_dir ^/ "botocore_endpoints.ml")
+       (Util.structure_to_string structure));
+    (* generate per-service files *)
+    services
+    |> List.iter ~f:(fun service ->
+         match latest_date ~botocore_data ~service with
+         | Error `Unknown_directory ->
+           failwithf "Unknown directory: %s/%s" botocore_data service ()
+         | Ok date ->
+           let service_json =
+             botocore_data ^/ service ^/ date ^/ "service-2.json"
+           in
+           let service_under =
+             String.map service ~f:(function '-' -> '_' | c -> c)
+           in
+           let botoservice = service_json |> read_file |> Botocore_service.of_json in
+           let base_dir = outdir ^/ service in
+           let async_dir = outdir ^/ service ^ "-async" in
+           let lwt_dir = outdir ^/ service ^ "-lwt" in
+           let cli_dir = outdir ^/ service ^ "-cli-async" in
+           eprintf "generating %s ...\n%!" service;
+           (* base service: dune, endpoints.ml, values.ml (+ submodules) *)
+           write_dune_file ~argv:argv_strs ~outdir:base_dir
+             ~data:(Dune.make ~service);
+           let endpoints_data =
+             botoservice
+             |> Service_endpoints.make
+             |> Util.structure_to_string
+           in
+           write_generated ~argv:argv_strs
+             (base_dir ^/ "endpoints.ml") endpoints_data;
+           let num_value_subs = Dune.num_value_submodules service in
+           let submodule_files =
+             List.init num_value_subs ~f:(sprintf "values_%d.ml")
+           in
+           let main_values, sub_values =
+             Values.make ~awso_service_id:service ~submodules:submodule_files botoservice
+           in
+           write_generated ~argv:argv_strs
+             (base_dir ^/ "values.ml")
+             (Util.structure_to_string main_values);
+           sub_values
+           |> List.iter ~f:(fun (filename, struct_) ->
+                write_generated ~argv:argv_strs
+                  (base_dir ^/ filename)
+                  (Util.structure_to_string struct_));
+           (* async io: dune, io.ml, io.mli, cli.ml (+ submodules), values.ml, main module *)
+           write_dune_file ~argv:argv_strs ~outdir:async_dir
+             ~data:(Dune.make_io `Async ~service);
+           let endpoints =
+             botoservice.operations
+             |> List.map ~f:(Endpoint.of_botodata ~service:botoservice)
+           in
+           Io.eval_structure ~base_module:(sprintf "Awso_%s" service_under) ~io_subsystem:`Async endpoints
+           |> Util.structure_to_string
+           |> write_generated ~argv:argv_strs (async_dir ^/ "io.ml");
+           Io.eval_signature
+             ~protocol:botoservice.metadata.protocol
+             ~base_module:(sprintf "Awso_%s" service_under)
+             ~io_subsystem:`Async
+             endpoints
+           |> Util.signature_to_string
+           |> write_generated ~argv:argv_strs (async_dir ^/ "io.mli");
+           let num_cli_subs = Dune.num_cli_submodules service in
+           let cli_submodule_files =
+             List.init num_cli_subs ~f:(sprintf "cli_%d.ml")
+           in
+           let main_cli, sub_clis =
+             Cli.make ~submodules:cli_submodule_files botoservice
+           in
+           write_generated ~argv:argv_strs
+             (async_dir ^/ "cli.ml")
+             (Util.structure_to_string main_cli);
+           sub_clis
+           |> List.iter ~f:(fun (filename, struct_) ->
+                write_generated ~argv:argv_strs
+                  (async_dir ^/ filename)
+                  (Util.structure_to_string struct_));
+           write_generated ~argv:argv_strs
+             (async_dir ^/ "values.ml")
+             (sprintf "include Awso_%s.Values" service_under);
+           if not (Dune.has_addendum ~io_kind:`Async ~service) then
+             write_generated ~argv:argv_strs
+               (async_dir ^/ sprintf "awso_%s_async.ml" service_under)
+               "include Io\ninclude Values\nmodule Cli = Cli";
+           (* lwt io: dune, io.ml, io.mli, values.ml, main module *)
+           write_dune_file ~argv:argv_strs ~outdir:lwt_dir
+             ~data:(Dune.make_io `Lwt ~service);
+           Io.eval_structure ~base_module:(sprintf "Awso_%s" service_under) ~io_subsystem:`Lwt endpoints
+           |> Util.structure_to_string
+           |> write_generated ~argv:argv_strs (lwt_dir ^/ "io.ml");
+           Io.eval_signature
+             ~protocol:botoservice.metadata.protocol
+             ~base_module:(sprintf "Awso_%s" service_under)
+             ~io_subsystem:`Lwt
+             endpoints
+           |> Util.signature_to_string
+           |> write_generated ~argv:argv_strs (lwt_dir ^/ "io.mli");
+           write_generated ~argv:argv_strs
+             (lwt_dir ^/ "values.ml")
+             (sprintf "include Awso_%s.Values" service_under);
+           if not (Dune.has_addendum ~io_kind:`Lwt ~service) then
+             write_generated ~argv:argv_strs
+               (lwt_dir ^/ sprintf "awso_%s_lwt.ml" service_under)
+               "include Io\ninclude Values";
+           (* cli-async: dune, script *)
+           write_dune_file ~argv:argv_strs ~outdir:cli_dir
+             ~data:(Dune.make_cli_async ~service);
+           write_generated ~argv:argv_strs
+             (cli_dir ^/ sprintf "awso_%s.ml" service_under)
+             (sprintf "let () = Command_unix.run Awso_%s_async.Cli.main" service_under));
+    eprintf "done. generated %d services.\n%!" (List.length services)
+  ;;
+end
+
 let main argv =
   match argv with
   | [| |] ->
     eprintf
-      "Usage: awso-codegen {botocore-endpoints|service|service-io|services|cli|build-service-module} [args...]\n";
+      "Usage: awso-codegen {generate-all|build-service-module} [args...]\n";
     exit 1
   | _ ->
     let sub = argv.(0) in
     let rest = Array.sub argv 1 (Array.length argv - 1) in
     match sub with
-    | "botocore-endpoints" -> botocore_endpoints rest
-    | "service" -> Service.dispatch rest
-    | "service-io" -> Service_io.dispatch rest
-    | "services" -> Services.main rest
-    | "cli" -> Cli_cmd.dispatch rest
     | "build-service-module" -> Build_service_module.main rest
+    | "generate-all" -> Generate_all.main rest
     | s -> failwithf "Unknown command: %s" s ()
 ;;

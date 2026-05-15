@@ -1,15 +1,13 @@
 SHELL=/bin/bash
+.PHONY: default install-deps start-ocaml doc format runtest generate-code clean
 
-.PHONY: default
 default: start-ocaml
 
-.PHONY: install-deps
 install-deps:
 	test -d _opam || opam switch create . 5.3.0 --no-install --yes
-	( eval $$(opam env) && opam install . --deps-only --yes )
-	( eval $$(opam env) && opam install ocamlformat ocaml-lsp-server utop --yes )
+	opam install . --deps-only --yes
+	opam install ocamlformat ocaml-lsp-server utop --yes
 
-.PHONY: start-ocaml
 start-ocaml:
 	dune build @all -w
 
@@ -28,24 +26,18 @@ botodata-%:
 	rm -rf botocore-$*
 	git add vendor
 
-.PHONY: doc
 doc:
 	dune build @doc
 
-.PHONY: format
 format:
 	dune fmt
 
-.PHONY: runtest
 runtest:
 	dune build @runtest
 
-.PHONY: build-services
-build-services:
-	dune exec bin/awso_codegen_main.exe -- services --botocore-data vendor/botocore/botocore/data -o aws
+generate-code:
+	dune exec -- bin/awso_bootstrap.exe build-service-module --botocore-data vendor/botocore/botocore/data
+	dune exec -- bin/awso_codegen_main.exe generate-all --botocore-data vendor/botocore/botocore/data -o aws --runtime-dir lib/runtime/awso
 
-.PHONY: clean
 clean:
 	dune clean
-
-FORCE:
