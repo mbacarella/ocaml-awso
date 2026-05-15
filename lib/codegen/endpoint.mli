@@ -1,9 +1,8 @@
-open! Core
 open! Import
 
 (* The abstract representation of an API endpoint. This is an higher level
     abstraction that the raw [Botodata] types. *)
-type t [@@deriving sexp_of]
+type t
 
 (** {2 Constructors} *)
 

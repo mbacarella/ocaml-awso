@@ -9,20 +9,20 @@ module Query : sig
     { execution_id : string
     ; next_token : string option
     }
-  [@@deriving sexp]
+  [@@deriving yojson]
 
   type athena_start =
     { result_configuration : Values.ResultConfiguration.t
     ; query_execution_output : Values.StartQueryExecutionOutput.t
     }
-  [@@deriving sexp]
+  [@@deriving yojson]
 
   type t =
     [ `Athena_execution_id of string
     | `Athena_start of athena_start
     | `Athena_execution of Values.GetQueryExecutionOutput.t
     ]
-  [@@deriving sexp]
+  [@@deriving yojson]
 
   val of_id : string -> [< t > `Athena_execution_id ]
 

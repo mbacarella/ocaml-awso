@@ -5,7 +5,7 @@ open! Async
 
 (** Convenience definition for already_exists_error which is often treated
     differently than other types of errors with aws glue *)
-type already_exists_error = [ `AlreadyExistsException ] [@@deriving sexp]
+type already_exists_error = [ `AlreadyExistsException ] [@@deriving yojson]
 
 (** [create_database ?catalog_id ?description ~name cfg] creates a glue database
     given [name] and optional [catalog_id] and [description] parameters along

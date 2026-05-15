@@ -10,7 +10,7 @@ let dispatch_exn ~name ~f ~error_to_json =
     failwithf
       "%s: transport error: %s"
       name
-      (err |> Awso.Http.Io.Error.sexp_of_call |> Sexp.to_string_hum)
+      (err |> Awso.Http.Io.Error.yojson_of_call |> Yojson.Safe.pretty_to_string)
       ()
 ;;
 

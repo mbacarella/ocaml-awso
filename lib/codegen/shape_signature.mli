@@ -1,4 +1,3 @@
-open! Core
 open! Import
 
 val xml_ty : Botodata.shape -> Parsetree.core_type

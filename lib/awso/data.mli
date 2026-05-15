@@ -1,7 +1,7 @@
 module type S = sig
   type ty
   type 'a io
-  type t = ty [@@deriving sexp]
+  type t = ty [@@deriving yojson]
 
   val make : ty -> t
   val to_value : t -> Botodata.value io

@@ -1,4 +1,3 @@
-open! Core
 open! Import
 
 let x_field fld =

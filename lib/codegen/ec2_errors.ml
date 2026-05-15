@@ -1,4 +1,3 @@
-open! Core
 open! Import
 
 (* Unlike other AWS services, EC2 endpoints can return a much wider set of errors

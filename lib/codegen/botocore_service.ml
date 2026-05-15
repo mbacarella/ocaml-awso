@@ -1,4 +1,3 @@
-open! Core
 open! Import
 
 let to_ocaml x =
@@ -37,11 +36,11 @@ module Location = struct
 end
 
 module Uri = struct
-  type t = Uri.t
+  type t = Uri_json.t
 
   let parser =
     let open Json_parser in
-    string >>| Uri.of_string
+    string >>| Uri_json.of_string
   ;;
 end
 

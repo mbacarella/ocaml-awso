@@ -1,4 +1,3 @@
-open! Core
 open! Import
 
 (** Generate structure items specific to the rest_xml protocol. *)

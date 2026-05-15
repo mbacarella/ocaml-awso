@@ -1,4 +1,3 @@
-open! Core
 open! Import
 
 let to_request data =
@@ -114,7 +113,7 @@ let of_response (service : Botodata.service) data =
              Endpoint.in_result_module endpoint "of_xml"
              |> Option.value_exn
                   ~message:"no result module"
-                  ~error:(Error.create_s [%message (endpoint : Endpoint.t)])
+                  ~error:"no result module for endpoint"
            in
            [%expr
              match resp with
@@ -125,7 +124,7 @@ let of_response (service : Botodata.service) data =
              Endpoint.in_result_module endpoint "of_header_and_body"
              |> Option.value_exn
                   ~message:"no result module"
-                  ~error:(Error.create_s [%message (endpoint : Endpoint.t)])
+                  ~error:"no result module for endpoint"
            in
            match payload_opt with
            | Some payload ->
@@ -235,57 +234,55 @@ let%expect_test "of_response" =
   [%expect
     {|
     let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-      (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) =
-      (let handle_error err error_of_xml =
-         let generic_error () = Error (`Transport err) in
-         match err with
-         | `Too_many_redirects -> generic_error ()
-         | `Bad_response
-             { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-             (match (error_of_xml, ((code >= 400) && (code <= 599))) with
-              | (None, _) | (_, false) -> generic_error ()
-              | (Some error_of_xml, true) ->
-                  (match Awso.Xml.parse_response body with
-                   | `Data _ -> generic_error ()
-                   | `El (((_, "Error"), _), _) as xml ->
-                       (try
-                          let error_code =
-                            match Awso.Xml.child_exn xml "Code" with
-                            | `Data error_code -> error_code
-                            | `El (_, children) ->
-                                (List.map children
-                                   ~f:(function | `Data s -> s | `El _ -> ""))
-                                  |> (String.concat ~sep:"") in
-                          Error
-                            (`AWS (error_of_xml (String.strip error_code) xml))
-                        with | Failure _ -> generic_error ())
-                   | `El _ -> generic_error ())) in
-       let response_to_xml resp =
-         Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-       match endpoint with
-       | Of_header_and_no_body ->
-           (match resp with
-            | Error err -> handle_error err None
-            | Ok resp ->
-                let headers =
-                  Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-                Ok (Result.of_header_and_body (headers, ())))
-       | Direct ->
-           (match resp with
-            | Error err -> handle_error err None
-            | Ok resp -> Ok (DirectResult.of_xml (response_to_xml resp)))
-       | Of_header_and_body ->
-           (match resp with
-            | Error err -> handle_error err None
-            | Ok resp ->
-                let body =
-                  Payload_module.of_string (Awso.Http.Response.body resp) in
-                let headers =
-                  Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-                Ok (Result_of_header_and_body.of_header_and_body (headers, body)))
-       | No_output -> Ok () : (o,
-                                [ `AWS of e
-                                | `Transport of Awso.Http.Io.Error.call ]) result)
+      (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
+      (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
+      let handle_error err error_of_xml =
+        let generic_error () = Error (`Transport err) in
+        match err with
+        | `Too_many_redirects -> generic_error ()
+        | `Bad_response
+            { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
+            (match (error_of_xml, ((code >= 400) && (code <= 599))) with
+             | (None, _) | (_, false) -> generic_error ()
+             | (Some error_of_xml, true) ->
+                 (match Awso.Xml.parse_response body with
+                  | `Data _ -> generic_error ()
+                  | `El (((_, "Error"), _), _) as xml ->
+                      (try
+                         let error_code =
+                           match Awso.Xml.child_exn xml "Code" with
+                           | `Data error_code -> error_code
+                           | `El (_, children) ->
+                               (List.map children
+                                  ~f:(function | `Data s -> s | `El _ -> ""))
+                                 |> (String.concat ~sep:"") in
+                         Error
+                           (`AWS (error_of_xml (String.strip error_code) xml))
+                       with | Failure _ -> generic_error ())
+                  | `El _ -> generic_error ())) in
+      let response_to_xml resp =
+        Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+      match endpoint with
+      | Of_header_and_no_body ->
+          (match resp with
+           | Error err -> handle_error err None
+           | Ok resp ->
+               let headers =
+                 Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+               Ok (Result.of_header_and_body (headers, ())))
+      | Direct ->
+          (match resp with
+           | Error err -> handle_error err None
+           | Ok resp -> Ok (DirectResult.of_xml (response_to_xml resp)))
+      | Of_header_and_body ->
+          (match resp with
+           | Error err -> handle_error err None
+           | Ok resp ->
+               let body = Payload_module.of_string (Awso.Http.Response.body resp) in
+               let headers =
+                 Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+               Ok (Result_of_header_and_body.of_header_and_body (headers, body)))
+      | No_output -> Ok ()
     |}]
 ;;
 

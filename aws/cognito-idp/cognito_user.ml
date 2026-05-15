@@ -1,4 +1,5 @@
 open! Core
+open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 open! Awso.Import
 module Stdlib = Stdlib
 
@@ -7,6 +8,7 @@ module Attribute = struct
     { name : string
     ; value : string option
     }
+  [@@deriving yojson]
 
   type t =
     [ `Unknown of raw_attribute
@@ -25,15 +27,17 @@ module Attribute = struct
     | `Preferred_user_name of string option
     | `Given_name of string
     ]
+  [@@deriving yojson]
 end
 
-type attribute = Attribute.t
+type attribute = Attribute.t [@@deriving yojson]
 
 type t =
   { username : string
   ; attributes : attribute list
   ; access_token : string
   }
+[@@deriving yojson]
 
 type msg = string
 

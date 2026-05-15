@@ -1,7 +1,7 @@
 open! Core
 open! Async
 
-type already_exists_error = [ `AlreadyExistsException ] [@@deriving sexp]
+type already_exists_error = [ `AlreadyExistsException ] [@@deriving yojson]
 
 let create_database ?catalog_id ?description ~name cfg =
   Io.create_database

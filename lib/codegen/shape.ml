@@ -1,4 +1,3 @@
-open! Core
 open! Import
 
 module Graph = struct

@@ -65,7 +65,7 @@ let to_test_name s =
 ;;
 
 let discover_tests ~dir =
-  Sys_unix.readdir dir
+  Stdlib.Sys.readdir dir
   |> Array.to_list
   |> List.sort ~compare:String.compare
   |> List.filter_map ~f:to_test_name

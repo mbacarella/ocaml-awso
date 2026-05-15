@@ -1,4 +1,3 @@
-open! Core
 open! Import
 
 let to_string_converter_of_enum_shape (es : Botodata.enum_shape) =
@@ -802,9 +801,9 @@ let constants_of_service ~awso_service_id (s : Botodata.service) =
     ; opt_item s.metadata.serviceAbbreviation (fun s ->
         [%stri let serviceAbbreviation = [%e Ast_convenience.str s]])
     ; opt_item s.metadata.xmlNamespace (fun uri ->
-        [%stri let xmlNamespace = [%e Ast_convenience.str (Uri.to_string uri)]])
+        [%stri let xmlNamespace = [%e Ast_convenience.str (Uri_json.to_string uri)]])
     ; opt_item s.metadata.targetPrefix (fun uri ->
-        [%stri let targetPrefix = [%e Ast_convenience.str (Uri.to_string uri)]])
+        [%stri let targetPrefix = [%e Ast_convenience.str (Uri_json.to_string uri)]])
     ]
 ;;
 

@@ -7,7 +7,6 @@
     {{:https://github.com/boto/botocore/tree/develop/botocore/data} boto
     library}, and the function {! traversal} can be used to read all the
     specifications from local copy of boto source code. *)
-open! Core
 
 open! Import
 

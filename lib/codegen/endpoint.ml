@@ -1,4 +1,3 @@
-open! Core
 open! Import
 
 type t =
@@ -12,11 +11,17 @@ type t =
   ; payload : Payload.t option
   ; result_decoder : Result_decoder.t option
   }
-[@@deriving fields, sexp_of]
-
-let create = Fields.create
+let create ~name ~op ~request_module ~result_module ~meth ~request_uri ~query_params ~payload ~result_decoder =
+  { name; op; request_module; result_module; meth; request_uri; query_params; payload; result_decoder }
+let name t = t.name
+let op t = t.op
 let request_module t = t.request_module
 let result_module t = t.result_module
+let meth t = t.meth
+let request_uri t = t.request_uri
+let query_params t = t.query_params
+let payload t = t.payload
+let result_decoder t = t.result_decoder
 
 let create_test
   ?(op = None)

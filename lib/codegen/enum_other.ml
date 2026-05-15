@@ -1,4 +1,3 @@
-open! Core
 open! Import
 
 (* Enum_other provides a workaround for unknown enums encountered at runtime from API endpoints. *)

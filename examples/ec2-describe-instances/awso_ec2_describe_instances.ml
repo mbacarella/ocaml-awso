@@ -1,6 +1,5 @@
 open Core
 open Async
-
 module Ec2 = Awso_ec2_async
 
 let ec2_describe_instances () =
@@ -10,7 +9,7 @@ let ec2_describe_instances () =
   let reservations =
     match response with
     | Error (`Transport err) ->
-      let errstr = err |> Awso.Http.Io.Error.sexp_of_call |> Sexp.to_string_hum in
+      let errstr = err |> Awso.Http.Io.Error.yojson_of_call |> Yojson.Safe.pretty_to_string in
       failwithf "Transport error communicating with EC2: %s\n" errstr ()
     | Error (`AWS aws) ->
       let errstr = aws |> Ec2.Values.Ec2_error.to_json |> Awso.Json.to_string in

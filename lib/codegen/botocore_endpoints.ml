@@ -1,4 +1,3 @@
-open! Core
 open! Import
 
 (* Warning 30 complains if we have 'defaults' in multiple fields. *)
@@ -8,7 +7,7 @@ type credentialScope =
   { region : Region.t option
   ; service : string option
   }
-[@@deriving sexp]
+
 
 type uri_token =
   [ `String_token of string
@@ -16,16 +15,16 @@ type uri_token =
   | `Region_token
   | `DnsSuffix_token
   ]
-[@@deriving sexp]
 
-type uri_pattern = uri_token list [@@deriving sexp]
+
+type uri_pattern = uri_token list 
 
 type variant =
   { dnsSuffix : string option
   ; hostname : uri_pattern option
   ; tags : string list
   }
-[@@deriving sexp]
+
 
 type properties =
   { credentialScope : credentialScope option
@@ -36,7 +35,7 @@ type properties =
   ; variants : variant list option
   ; deprecated : bool option
   }
-[@@deriving sexp]
+
 
 type service =
   { defaults : properties option
@@ -44,9 +43,9 @@ type service =
   ; isRegionalized : bool option
   ; partitionEndpoint : string option
   }
-[@@deriving sexp]
 
-type region = { description : string } [@@deriving sexp]
+
+type region = { description : string } 
 
 type partition =
   { defaults : properties option
@@ -57,13 +56,13 @@ type partition =
   ; regions : (string * region) list
   ; services : (string * service) list
   }
-[@@deriving sexp]
+
 
 type t =
   { partitions : partition list
   ; version : int
   }
-[@@deriving sexp]
+
 
 module Json0 = struct
   let uri_token buf : (uri_token option, [ `Invalid ]) result =
@@ -215,7 +214,7 @@ module Endpoint_rules_for_precompute = struct
           let rex = str_regexp partition.regionRegex in
           Option.is_some (Re.exec_opt rex region_s))
       with
-      | None -> failwithf !"no partition found for region: %{Region}" region ()
+      | None -> failwithf "no partition found for region: %s" (Region.to_string region) ()
       | Some partition -> partition)
   ;;
 

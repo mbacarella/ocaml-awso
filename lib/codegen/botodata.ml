@@ -15,26 +15,25 @@
     shape}s, where a shape is basically a standard programming type with some
     optional additional constraints (for instance, integer with bounds).
 *)
-open! Core
 
 open! Import
 
 module Int64 = struct
-  type t = int64 [@@deriving sexp]
+  type t = int64 
 end
 
 type checksumFormat =
   [ `md5
   | `sha256
   ]
-[@@deriving sexp]
+
 
 type timestampFormat =
   [ `unixTimestamp
   | `rfc822
   | `iso8601
   ]
-[@@deriving sexp]
+
 
 type protocol =
   [ `query
@@ -43,7 +42,7 @@ type protocol =
   | `rest_xml
   | `ec2
   ]
-[@@deriving sexp]
+
 
 type location =
   [ `header
@@ -52,13 +51,13 @@ type location =
   | `uri
   | `statusCode
   ]
-[@@deriving sexp]
+
 
 type metadata =
   { apiVersion : string
   ; checksumFormat : checksumFormat option
   ; endpointPrefix : string
-  ; globalEndpoint : Uri_sexp.t option
+  ; globalEndpoint : Uri_json.t option
   ; serviceAbbreviation : string option
   ; serviceFullName : string
   ; serviceId : string option
@@ -66,12 +65,12 @@ type metadata =
   ; timestampFormat : timestampFormat option
   ; protocol : protocol
   ; jsonVersion : string option
-  ; targetPrefix : Uri_sexp.t option
+  ; targetPrefix : Uri_json.t option
   ; signingName : string option
-  ; xmlNamespace : Uri_sexp.t option
+  ; xmlNamespace : Uri_json.t option
   ; uid : string option
   }
-[@@deriving sexp]
+
 
 let empty_metadata_for_tests =
   { apiVersion = ""
@@ -100,7 +99,7 @@ type http_method =
   | `HEAD
   | `PATCH
   ]
-[@@deriving sexp]
+
 
 let http_method_of_string = function
   | "DELETE" -> Ok `DELETE
@@ -120,22 +119,22 @@ type requestUri_token =
   | `Qmark
   | `Equal
   ]
-[@@deriving sexp]
 
-type requestUri = requestUri_token list [@@deriving sexp]
+
+type requestUri = requestUri_token list 
 
 type http =
   { method_ : http_method
   ; requestUri : requestUri
   ; responseCode : int option
   }
-[@@deriving sexp]
+
 
 type xmlNamespace =
-  { uri : Uri_sexp.t
+  { uri : Uri_json.t
   ; prefix : string option
   }
-[@@deriving sexp]
+
 
 type httpChecksum =
   { requestValidationModeMember : string option
@@ -143,7 +142,7 @@ type httpChecksum =
   ; requestChecksumRequired : bool option
   ; responseAlgorithms : string list option
   }
-[@@deriving sexp]
+
 
 type operation_input =
   { shape : string
@@ -152,7 +151,7 @@ type operation_input =
   ; xmlNamespace : xmlNamespace option
   ; locationName : string option
   }
-[@@deriving sexp]
+
 
 type operation_output =
   { shape : string
@@ -163,14 +162,14 @@ type operation_output =
   ; wrapper : bool option
   ; xmlOrder : string list option
   }
-[@@deriving sexp]
+
 
 type error =
   { code : string option
   ; httpStatusCode : int
   ; senderFault : bool option
   }
-[@@deriving sexp]
+
 
 type operation_error =
   { shape : string
@@ -180,10 +179,10 @@ type operation_error =
   ; error : error option
   ; xmlOrder : string list option
   }
-[@@deriving sexp]
 
-type operation_endpoint = { hostPrefix : string } [@@deriving sexp]
-type operation_endpointdiscovery = { required : bool option } [@@deriving sexp]
+
+type operation_endpoint = { hostPrefix : string } 
+type operation_endpointdiscovery = { required : bool option } 
 
 type operation =
   { name : string
@@ -192,7 +191,7 @@ type operation =
   ; output : operation_output option
   ; errors : operation_error list option
   ; documentation : string option
-  ; documentationUrl : Uri_sexp.t option
+  ; documentationUrl : Uri_json.t option
   ; alias : string option
   ; deprecated : bool option
   ; deprecatedMessage : string option
@@ -202,7 +201,7 @@ type operation =
   ; endpoint : operation_endpoint option
   ; endpointdiscovery : operation_endpointdiscovery option
   }
-[@@deriving sexp]
+
 
 type shape_member =
   { shape : string
@@ -222,9 +221,9 @@ type shape_member =
   ; hostLabel : bool option
   ; jsonvalue : bool option
   }
-[@@deriving sexp]
 
-type retryable = { throttling : bool } [@@deriving sexp]
+
+type retryable = { throttling : bool } 
 
 type structure_shape =
   { required : string list option
@@ -248,7 +247,7 @@ type structure_shape =
   ; union : bool option
   ; box : bool option
   }
-[@@deriving sexp]
+
 
 let empty_structure_shape =
   { required = None
@@ -284,7 +283,7 @@ type map_shape =
   ; documentation : string option
   ; sensitive : bool option
   }
-[@@deriving sexp]
+
 
 type string_shape =
   { pattern : string option
@@ -295,7 +294,7 @@ type string_shape =
   ; deprecated : bool option
   ; deprecatedMessage : string option
   }
-[@@deriving sexp]
+
 
 type list_shape =
   { member : shape_member
@@ -307,13 +306,13 @@ type list_shape =
   ; deprecated : bool option
   ; deprecatedMessage : string option
   }
-[@@deriving sexp]
+
 
 type boolean_shape =
   { box : bool option
   ; documentation : string option
   }
-[@@deriving sexp]
+
 
 type integer_shape =
   { box : bool option
@@ -323,7 +322,7 @@ type integer_shape =
   ; deprecated : bool option
   ; deprecatedMessage : string option
   }
-[@@deriving sexp]
+
 
 type long_shape =
   { box : bool option
@@ -331,7 +330,7 @@ type long_shape =
   ; max : Int64.t option
   ; documentation : string option
   }
-[@@deriving sexp]
+
 
 type float_shape =
   { box : bool option
@@ -339,7 +338,7 @@ type float_shape =
   ; max : float option
   ; documentation : string option
   }
-[@@deriving sexp]
+
 
 type double_shape =
   { box : bool option
@@ -347,7 +346,7 @@ type double_shape =
   ; max : float option
   ; documentation : string option
   }
-[@@deriving sexp]
+
 
 type enum_shape =
   { cases : string list
@@ -359,7 +358,7 @@ type enum_shape =
   ; deprecatedMessage : string option
   ; sensitive : bool option
   }
-[@@deriving sexp]
+
 
 type blob_shape =
   { streaming : bool option
@@ -368,13 +367,13 @@ type blob_shape =
   ; max : int option
   ; documentation : string option
   }
-[@@deriving sexp]
+
 
 type timestamp_shape =
   { timestampFormat : timestampFormat option
   ; documentation : string option
   }
-[@@deriving sexp]
+
 
 type shape =
   | Boolean_shape of boolean_shape
@@ -390,7 +389,21 @@ type shape =
   | Structure_shape of structure_shape
   | Timestamp_shape of timestamp_shape
   | Map_shape of map_shape
-[@@deriving sexp]
+
+
+let yojson_of_shape = function
+  | Boolean_shape _ -> `String "Boolean_shape"
+  | Long_shape _ -> `String "Long_shape"
+  | Double_shape _ -> `String "Double_shape"
+  | Float_shape _ -> `String "Float_shape"
+  | Blob_shape _ -> `String "Blob_shape"
+  | Integer_shape _ -> `String "Integer_shape"
+  | String_shape _ -> `String "String_shape"
+  | List_shape _ -> `String "List_shape"
+  | Enum_shape _ -> `String "Enum_shape"
+  | Structure_shape _ -> `String "Structure_shape"
+  | Timestamp_shape _ -> `String "Timestamp_shape"
+  | Map_shape _ -> `String "Map_shape"
 
 let request_id_shape =
   String_shape
@@ -436,7 +449,7 @@ type service =
   ; operations : operation list
   ; shapes : (string * shape) list
   }
-[@@deriving sexp]
+
 
 type value =
   [ `Boolean of bool
@@ -452,4 +465,4 @@ type value =
   | `Timestamp of string
   | `Map of (value * value) list
   ]
-[@@deriving sexp]
+

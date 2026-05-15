@@ -1,4 +1,3 @@
-open! Core
 open! Import
 
 let type_declaration ?kind ?manifest ?priv n =
@@ -20,7 +19,7 @@ let error_cases (op : Botodata.operation) =
   let error_cases =
     op.errors
     |> Option.value ~default:[]
-    |> List.map ~f:(fun { shape; _ } -> shape)
+    |> List.map ~f:(fun (e : Botodata.operation_error) -> e.shape)
     |> List.dedup_and_sort ~compare:String.compare
     |> List.map ~f:(fun shape ->
          case (Shape.capitalized_id shape) (Shape.core_type_of_shape shape))
@@ -45,7 +44,7 @@ let error_to_json_of_errors (op : Botodata.operation) =
   let error_shapes =
     op.errors
     |> Option.value ~default:[]
-    |> List.map ~f:(fun { shape; _ } -> shape)
+    |> List.map ~f:(fun (e : Botodata.operation_error) -> e.shape)
     |> List.dedup_and_sort ~compare:String.compare
   in
   let cases =

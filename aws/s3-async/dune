@@ -6,7 +6,7 @@
  (public_name awso-async.s3)
  (libraries awso.s3 awso-async)
  (preprocess
-  (pps ppx_jane))
+  (pps ppx_jane ppx_yojson_conv))
  (inline_tests))
 
 (rule

@@ -119,7 +119,7 @@ module Source : sig
       ; file_size : int64
       ; partitions : int64
       }
-    [@@deriving sexp]
+    [@@deriving yojson]
 
     val stat : ?chunk_size:Byte_units.t -> string -> stat Deferred.t
     val load_all : string -> string * int64

@@ -13,7 +13,7 @@
  (flags :standard)
  (ocamlopt_flags (-linscan))
  (preprocess
-  (pps ppx_jane))
+  (pps ppx_jane ppx_yojson_conv))
  (synopsis "OCaml AWS general API.")
  (inline_tests))
 

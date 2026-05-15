@@ -1,4 +1,3 @@
-open! Core
 open! Import
 
 val to_request : Endpoint.t list -> Parsetree.structure_item
