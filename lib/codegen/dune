@@ -26,7 +26,7 @@
   (source_tree %{project_root}/vendor/botocore/botocore/data))
  (action
   (run
-   %{project_root}/bin/awso_build.exe
+   %{project_root}/bin/awso_bootstrap.exe
    build-service-module
    --botocore-data
    %{project_root}/vendor/botocore/botocore/data)))

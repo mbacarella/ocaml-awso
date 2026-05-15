@@ -1,6 +1,6 @@
 (lang dune 3.8)
 
-;; dune-project is auto-generated, see bin/awso_build.ml
+;; dune-project is auto-generated, see bin/awso_bootstrap
 
 (name awso)
 
@@ -10,7 +10,7 @@
 
 (license MIT)
 
-(authors "Many")
+(authors "Solvuu Inc.")
 
 (maintainers "Michael Bacarella <m@bacarella.com>")
 

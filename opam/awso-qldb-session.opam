@@ -2,7 +2,7 @@
 opam-version: "2.0"
 synopsis: "AWS API for Qldb-session"
 maintainer: ["Michael Bacarella <m@bacarella.com>"]
-authors: ["Many"]
+authors: ["Solvuu Inc."]
 license: "MIT"
 homepage: "https://github.com/solvuu/awso"
 bug-reports: "https://github.com/mbacarella/awso/issues"

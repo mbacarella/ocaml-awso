@@ -3,12 +3,9 @@ SHELL=/bin/bash
 .PHONY: default
 default: dune-project start-ocaml
 
-################################################################################
-# Developer commands
-
 .PHONY: install-deps
 install-deps:
-	test -d _opam || opam switch create . 4.14.1 --no-install --yes
+	test -d _opam || opam switch create . 5.3.0 --no-install --yes
 	( eval $$(opam env) && opam install . --deps-only --yes )
 	( eval $$(opam env) && opam install ocamlformat ocaml-lsp-server utop --yes )
 
@@ -22,7 +19,7 @@ aws-%:
 	dune build @aws/$*/all -w
 
 dune-project: FORCE
-	dune exec bin/awso_build.exe -- build-dune-project --botocore-data vendor/botocore/botocore/data
+	dune exec bin/awso_bootstrap.exe -- build-dune-project --botocore-data vendor/botocore/botocore/data
 
 botodata-%:
 	wget https://github.com/boto/botocore/archive/$*.tar.gz
@@ -38,31 +35,18 @@ botodata-%:
 doc:
 	dune build @doc
 
-# Build docker image for given library. For example `make
-# docker-async` will build an image called awso-async.
-docker-%:
-	./bin/make_dockerfile.ml $* > Dockerfile.$*
-	docker build -t awso-$* -f Dockerfile.$* .
-	rm -f Dockerfile.$*
-
 .PHONY: format
 format:
 	dune fmt
 
-################################################################################
-# Tests
 .PHONY: runtest
 runtest:
 	dune build @runtest
 
-################################################################################
-# Production build
 .PHONY: build-services
 build-services:
-	dune exec app/codegen/awso_codegen.exe -- services --botocore-data vendor/botocore/botocore/data -o aws
+	dune exec bin/awso_codegen_main.exe -- services --botocore-data vendor/botocore/botocore/data -o aws
 
-################################################################################
-# Cleanup
 .PHONY: clean
 clean:
 	dune clean
