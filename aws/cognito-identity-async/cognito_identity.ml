@@ -16,4 +16,4 @@ let list_identity_pools cfg ?(max_results = default_max_results) ()
 ;;
 
 let identity_pools_to_json t = Values.IdentityPoolsList.to_json t
-let identity_pools_to_string t = t |> identity_pools_to_json |> Awso.Json.to_string
+let identity_pools_to_string t = t |> identity_pools_to_json |> Yojson.Safe.to_string

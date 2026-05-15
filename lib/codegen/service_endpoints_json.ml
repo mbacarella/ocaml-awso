@@ -19,7 +19,7 @@ let to_request ~json_version ~target_prefix endpoints =
       let target = Printf.ksprintf Ast_convenience.str "%s.%s" target_prefix name in
       [%expr
         let json = [%e to_json] req in
-        let body = Awso.Json.to_string json in
+        let body = Yojson.Safe.to_string json in
         let headers =
           Awso.Http.Headers.of_list
             [ "Content-Type", [%e content_type]; "X-Amz-Target", [%e target] ]
@@ -45,7 +45,7 @@ let%expect_test "to_request" =
       match endp with
       | Name1 ->
           let json = Module1.to_json req in
-          let body = Awso.Json.to_string json in
+          let body = Yojson.Safe.to_string json in
           let headers =
             Awso.Http.Headers.of_list
               [("Content-Type", "application/x-amz-json-1.1");
@@ -53,7 +53,7 @@ let%expect_test "to_request" =
           Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
       | Name2 ->
           let json = Module2.to_json req in
-          let body = Awso.Json.to_string json in
+          let body = Yojson.Safe.to_string json in
           let headers =
             Awso.Http.Headers.of_list
               [("Content-Type", "application/x-amz-json-1.1");
@@ -61,7 +61,7 @@ let%expect_test "to_request" =
           Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
       | Name3 ->
           let json = (fun () -> `Assoc []) req in
-          let body = Awso.Json.to_string json in
+          let body = Yojson.Safe.to_string json in
           let headers =
             Awso.Http.Headers.of_list
               [("Content-Type", "application/x-amz-json-1.1");
@@ -86,7 +86,7 @@ let of_response endpoints =
           match resp with
           | Error err -> handle_error err [%e error_of_json]
           | Ok resp ->
-            let json = Awso.Json.from_string (Awso.Http.Response.body resp) in
+            let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
             Ok ([%e of_json] json)])
     |> Ast_helper.Exp.match_ [%expr endpoint]
   in
@@ -104,8 +104,8 @@ let of_response endpoints =
         | `Bad_response { Awso.Http.Io.Error.code; body; x_amzn_error_type = _ } -> (
           match error_of_json, code >= 400 && code <= 599 with
           | Some error_of_json, true -> (
-            let json = Awso.Json.from_string body in
-            match json |> Awso.Json.Util.member_or_null "__type" with
+            let json = Yojson.Safe.from_string body in
+            match json |> Yojson.Safe.Util.member "__type" with
             | `String error_type -> Error (`AWS (error_of_json error_type json))
             | `Null -> generic_error ()
             | _ -> failwith (sprintf "Error '__type' did not have string type: %s" body))
@@ -137,8 +137,8 @@ let%expect_test "of_response" =
             { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
             (match (error_of_json, ((code >= 400) && (code <= 599))) with
              | (Some error_of_json, true) ->
-                 let json = Awso.Json.from_string body in
-                 (match json |> (Awso.Json.Util.member_or_null "__type") with
+                 let json = Yojson.Safe.from_string body in
+                 (match json |> (Yojson.Safe.Util.member "__type") with
                   | `String error_type ->
                       Error (`AWS (error_of_json error_type json))
                   | `Null -> generic_error ()
@@ -152,13 +152,13 @@ let%expect_test "of_response" =
           (match resp with
            | Error err -> handle_error err None
            | Ok resp ->
-               let json = Awso.Json.from_string (Awso.Http.Response.body resp) in
+               let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
                Ok (ResultModule1.of_json json))
       | Name2 ->
           (match resp with
            | Error err -> handle_error err None
            | Ok resp ->
-               let json = Awso.Json.from_string (Awso.Http.Response.body resp) in
+               let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
                Ok (ResultModule2.of_json json))
       | Name3 -> Ok ()
     |}]

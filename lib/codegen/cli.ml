@@ -188,7 +188,7 @@ let preamble ~loc =
     open Core
     open Async
 
-    let json_arg = Command.Arg_type.create Awso_codegen.Json.from_string
+    let json_arg = Command.Arg_type.create Yojson.Safe.from_string
 
     let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
       let region =
@@ -213,13 +213,13 @@ let preamble ~loc =
           match error_to_json with
           | None -> failwithf "endpoint error, but no error values defined in boto" ()
           | Some to_json ->
-            let s = err |> to_json |> Awso_codegen.Json.to_string in
+            let s = err |> to_json |> Yojson.Safe.to_string in
             failwithf "AWS error: %s" s ()))
       | Ok result ->
         (match result_to_json with
          | None -> print_endline "ok response from endpoint"
          | Some to_json ->
-           result |> to_json |> Awso_codegen.Json.to_string |> print_endline);
+           result |> to_json |> Yojson.Safe.to_string |> print_endline);
         return ()
     ;;]
 ;;

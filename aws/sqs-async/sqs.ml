@@ -5,7 +5,7 @@ let dispatch_exn ~name ~f ~error_to_json =
   match%bind f () with
   | Ok v -> return v
   | Error (`AWS aws) ->
-    failwithf "%s: %s" name (aws |> error_to_json |> Awso.Json.to_string) ()
+    failwithf "%s: %s" name (aws |> error_to_json |> Yojson.Safe.to_string) ()
   | Error (`Transport err) ->
     failwithf
       "%s: transport error: %s"

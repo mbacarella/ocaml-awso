@@ -17,7 +17,7 @@ let user_pools_to_json t = Values.UserPoolListType.to_json t
 
 let user_pools_to_string t =
   let x = user_pools_to_json t in
-  Awso.Json.to_string x
+  Yojson.Safe.to_string x
 ;;
 
 module Attribute = struct
@@ -112,7 +112,7 @@ let get_user ?retry_delay ?retry_cnt cfg ~access_token () =
        ; userMFASettingList = _
        } as response) ->
     let x = Values.GetUserResponse.to_json response in
-    let resp_str = Awso.Json.to_string x in
+    let resp_str = Yojson.Safe.to_string x in
     Log.Global.debug "response body is %s" resp_str;
     let username =
       match Values.UsernameType.to_value username with
@@ -148,7 +148,7 @@ let admin_get_user ?retry_delay ?retry_cnt cfg ~user_pool_id ~username () =
        } as response) ->
     let userAttributes = Option.value userAttributes ~default:[] in
     let x = Values.AdminGetUserResponse.to_json response in
-    let resp_str = Awso.Json.to_string x in
+    let resp_str = Yojson.Safe.to_string x in
     Log.Global.debug "response body is %s" resp_str;
     let username =
       match Values.UsernameType.to_value username with

@@ -52,9 +52,9 @@ let get_cached_sso_token_file_path ~cfg =
 ;;
 
 let get_sso_role_request_and_cfg_exn ~cfg ~cached_sso_token_file jsonstr =
-  let json = Awso.Json.from_string jsonstr in
+  let json = Yojson.Safe.from_string jsonstr in
   let member_string member =
-    match Awso.Json.Util.member_or_null member json with
+    match Yojson.Safe.Util.member member json with
     | `Null -> failwithf "No '%s' found in %s" member cached_sso_token_file ()
     | `String access_token -> access_token
     | _ ->
@@ -94,7 +94,7 @@ let parse_role_credentials_response_exn = function
   | Error (`AWS err) ->
     failwithf
       "Sso.get_role_credentials: AWS call: %s"
-      (err |> Values.GetRoleCredentialsResponse.error_to_json |> Awso.Json.to_string)
+      (err |> Values.GetRoleCredentialsResponse.error_to_json |> Yojson.Safe.to_string)
       ()
   | Error (`Transport err) ->
     failwithf

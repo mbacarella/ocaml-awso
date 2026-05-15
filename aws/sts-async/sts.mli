@@ -38,7 +38,7 @@ module Policy : sig
     }
   [@@deriving yojson]
 
-  val to_json : t -> Awso.Json.t
+  val to_json : t -> Yojson.Safe.t
   val create : ?version:string -> Statement.t list -> t
 end
 

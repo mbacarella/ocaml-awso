@@ -14,7 +14,7 @@ let dispatch_exn ~name ~error_to_json ~f =
   | Error (`Transport err) ->
     failwithf "%s: %s" name (Awso.Http.Io.Error.yojson_of_call err |> Yojson.Safe.pretty_to_string) ()
   | Error (`AWS aws) ->
-    failwithf "%s: %s" name (aws |> error_to_json |> Awso.Json.to_string) ()
+    failwithf "%s: %s" name (aws |> error_to_json |> Yojson.Safe.to_string) ()
 ;;
 
 module List_buckets = struct

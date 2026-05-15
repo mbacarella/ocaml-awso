@@ -34,7 +34,7 @@ let dispatch_exn ~name ~error_to_json ~f =
   | Ok v -> return v
   | Error (`Transport err) -> raise_transport_error ~name err
   | Error (`AWS aws) ->
-    failwithf "%s: %s" name (aws |> error_to_json |> Awso.Json.to_string) ()
+    failwithf "%s: %s" name (aws |> error_to_json |> Yojson.Safe.to_string) ()
 ;;
 
 let start_snapshot ~cfg ~volume_size ~description =

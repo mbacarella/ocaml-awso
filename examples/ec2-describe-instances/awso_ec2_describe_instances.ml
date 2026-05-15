@@ -12,7 +12,7 @@ let ec2_describe_instances () =
       let errstr = err |> Awso.Http.Io.Error.yojson_of_call |> Yojson.Safe.pretty_to_string in
       failwithf "Transport error communicating with EC2: %s\n" errstr ()
     | Error (`AWS aws) ->
-      let errstr = aws |> Ec2.Values.Ec2_error.to_json |> Awso.Json.to_string in
+      let errstr = aws |> Ec2.Values.Ec2_error.to_json |> Yojson.Safe.to_string in
       failwithf "AWS says your query had an error: %s\n" errstr ()
     | Ok result -> result.reservations
   in
@@ -23,7 +23,7 @@ let ec2_describe_instances () =
       reservation.Ec2.Values.Reservation.instances
       |> Option.value ~default:[]
       |> List.iter ~f:(fun instance ->
-        let str = instance |> Ec2.Values.Instance.to_json |> Awso.Json.to_string in
+        let str = instance |> Ec2.Values.Instance.to_json |> Yojson.Safe.to_string in
         print_endline str))
   in
   return ()

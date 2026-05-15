@@ -65,7 +65,7 @@ let ec2_error_module () =
       let string_to_code name = [%e string_to_code]
       let code_to_string : code -> string = [%e code_to_string]
 
-      let to_json ((code, message) : t) : Awso.Json.t =
+      let to_json ((code, message) : t) : Yojson.Safe.t =
         `Assoc
           (("code", `String (code_to_string code))
            ::

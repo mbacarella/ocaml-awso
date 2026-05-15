@@ -185,7 +185,7 @@ end
 let of_json x =
   let t =
     x
-    |> Json.from_string
+    |> Yojson.Safe.from_string
     |> Json_parser.run_exn
          (let open Json_parser in
          record

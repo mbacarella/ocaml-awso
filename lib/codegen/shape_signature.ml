@@ -2,13 +2,13 @@ open! Import
 
 let of_json_arg_ty _shape =
   let loc = !Ast_helper.default_loc in
-  let base = [%type: Awso.Json.t] in
+  let base = [%type: Yojson.Safe.t] in
   [%type: [%t base]]
 ;;
 
 let to_json_return_ty _shape =
   let loc = !Ast_helper.default_loc in
-  [%type: Awso.Json.t]
+  [%type: Yojson.Safe.t]
 ;;
 
 let xml_ty shape =

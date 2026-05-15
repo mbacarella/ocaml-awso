@@ -7,16 +7,16 @@ type 'a t
 
 (** Run the parser against a JSON value. The [Error] case contains information
     about where an error occured in the JSON document. *)
-val run : 'a t -> Json.t -> ('a, string) Result.t
+val run : 'a t -> Yojson.Safe.t -> ('a, string) Result.t
 
-val run_exn : 'a t -> Json.t -> 'a
+val run_exn : 'a t -> Yojson.Safe.t -> 'a
 
 (** Low-level way to define a parser. Prefer combining other functions from this
     module, as it will return better error messages.
 
     When returning an error, only include the error message: the location data
     will be added automatically by this module. *)
-val parse_with : (Json.t -> ('a, string) Result.t) -> 'a t
+val parse_with : (Yojson.Safe.t -> ('a, string) Result.t) -> 'a t
 
 (** Map over a parser. *)
 val ( >>| ) : 'a t -> ('a -> 'b) -> 'b t

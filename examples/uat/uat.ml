@@ -14,7 +14,7 @@ let dispatch_exn ~name ~error_to_json ~f =
   | Error (`Transport err) ->
     failwithf "%s: %s" name (Awso.Http.Io.Error.yojson_of_call err |> Yojson.Safe.pretty_to_string) ()
   | Error (`AWS aws) ->
-    failwithf "%s: %s" name (aws |> error_to_json |> Awso.Json.to_string) ()
+    failwithf "%s: %s" name (aws |> error_to_json |> Yojson.Safe.to_string) ()
 ;;
 
 let cfg_ref = ref None
@@ -271,7 +271,7 @@ let retry_forever ?(interval = sec 5.0) ~description f =
   loop ()
 ;;
 
-let json_lower j = j |> Awso.Json.to_string |> String.lowercase
+let json_lower j = j |> Yojson.Safe.to_string |> String.lowercase
 
 let wait_for_instance_state ~instance_id ~state_name ~state =
   retry_forever
@@ -397,7 +397,7 @@ let print_instance_type_offerings () =
   tos.instanceTypeOfferings
   |> Option.value_exn ~here:[%here] ~message:"no instanceTypeOfferings?!"
   |> List.iter ~f:(fun o ->
-    o |> Ec2.Values.InstanceTypeOffering.to_json |> Awso.Json.to_string |> print_endline)
+    o |> Ec2.Values.InstanceTypeOffering.to_json |> Yojson.Safe.to_string |> print_endline)
 ;;
 
 let _print_volumes () =
@@ -554,7 +554,7 @@ let test_network_interface_operations ~instance_id ~availability_zone =
     let () =
       attribute
       |> Ec2.Values.DescribeNetworkInterfaceAttributeResult.to_json
-      |> Awso.Json.to_string
+      |> Yojson.Safe.to_string
       |> print_endline
     in
     return ()
@@ -768,7 +768,7 @@ let modify_and_describe_instance_attribute instance_id =
   let%bind attribute = describe_instance_attribute ~instance_id ~attribute:"userData" in
   printf
     "instance-attribute: %s\n"
-    (attribute |> Ec2.Values.InstanceAttribute.to_json |> Awso.Json.to_string);
+    (attribute |> Ec2.Values.InstanceAttribute.to_json |> Yojson.Safe.to_string);
   return ()
 ;;
 
@@ -848,7 +848,7 @@ let run_all_tests ?image_id ~region () =
     let () =
       meta_modify_result
       |> Ec2.Values.ModifyInstanceMetadataOptionsResult.to_json
-      |> Awso.Json.to_string
+      |> Yojson.Safe.to_string
       |> printf "modify-instance-metadata-options result: %s\n"
     in
     return ()

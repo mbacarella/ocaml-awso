@@ -9,6 +9,7 @@
   core_unix.time_float_unix
   cryptokit
   xmlm
+  yojson
   re.perl)
  (flags :standard)
  (ocamlopt_flags (-linscan))

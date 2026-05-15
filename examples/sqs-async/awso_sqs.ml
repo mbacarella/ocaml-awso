@@ -10,7 +10,7 @@ let main () =
   let%bind res = Sqs.create_queue cfg ~queue_name in
   printf
     "create_queue result: %s\n"
-    (res |> Values.CreateQueueResult.to_json |> Awso.Json.to_string);
+    (res |> Values.CreateQueueResult.to_json |> Yojson.Safe.to_string);
   let queue_url =
     res.Values.CreateQueueResult.createQueueResult.queueUrl
     |> Option.value_exn ~message:"No queueUrl"
@@ -25,12 +25,12 @@ let main () =
   let%bind res = Sqs.send_message cfg ~queue_url ~message_body in
   printf
     "send_message result: %s\n"
-    (res |> Values.SendMessageResult.to_json |> Awso.Json.to_string);
+    (res |> Values.SendMessageResult.to_json |> Yojson.Safe.to_string);
   printf "receive_message: %s\n" queue_url;
   let%bind res = Sqs.receive_message cfg ~queue_url in
   printf
     "receive_message result: %s\n"
-    (res |> Values.ReceiveMessageResult.to_json |> Awso.Json.to_string);
+    (res |> Values.ReceiveMessageResult.to_json |> Yojson.Safe.to_string);
   let%bind () = Sqs.delete_queue cfg ~queue_url in
   printf "queue %s deleted\n" queue_url;
   return ()
