@@ -1,9 +1,5 @@
 module Cfg = Awso_async.Cfg
-
-module Ec2 = struct
-  module Values = Awso_ec2_async.Values
-  module Io = Awso_ec2_async.Io
-end
+module Ec2 = Awso_ec2_async
 
 let default_region = "us-east-2"
 let instance_type = Ec2.Values.InstanceType.T4g_nano
@@ -22,33 +18,34 @@ let cfg_ref = ref None
 
 let ec2 name f r =
   let cfg = Option.value_exn ~message:"need to intialize cfg first" !cfg_ref in
-  dispatch_exn ~name ~sexp_of_error:Ec2.Values.Ec2_error.sexp_of_t ~f:(fun () -> f ?endpoint_url:None ?cfg:(Some cfg) r)
+  dispatch_exn ~name ~sexp_of_error:Ec2.Values.Ec2_error.sexp_of_t ~f:(fun () ->
+    f ?endpoint_url:None ?cfg:(Some cfg) r)
 ;;
 
 let describe_instances_no_terminated () =
   ec2
     "describe-instances"
-    Ec2.Io.describe_instances
+    Ec2.describe_instances
     (Ec2.Values.DescribeInstancesRequest.make ())
   >>| fun result ->
   result.reservations
   |> Option.value_exn ~here:[%here]
   |> List.concat_map ~f:(fun reservation ->
-       reservation.Ec2.Values.Reservation.instances
-       |> Option.value ~default:[]
-       |> List.filter ~f:(fun instance ->
-            match instance.Ec2.Values.Instance.state with
-            | None -> true
-            | Some { Ec2.Values.InstanceState.name; _ } -> (
-              match name with
-              | Some Ec2.Values.InstanceStateName.Terminated -> false
-              | None | Some _ -> true)))
+    reservation.Ec2.Values.Reservation.instances
+    |> Option.value ~default:[]
+    |> List.filter ~f:(fun instance ->
+      match instance.Ec2.Values.Instance.state with
+      | None -> true
+      | Some { Ec2.Values.InstanceState.name; _ } -> (
+        match name with
+        | Some Ec2.Values.InstanceStateName.Terminated -> false
+        | None | Some _ -> true)))
 ;;
 
 let describe_instance_attribute ~instance_id ~attribute =
   ec2
     "describe-instance-attribute"
-    Ec2.Io.describe_instance_attribute
+    Ec2.describe_instance_attribute
     (Ec2.Values.DescribeInstanceAttributeRequest.make
        ~instanceId:instance_id
        ~attribute:(Ec2.Values.InstanceAttributeName.of_string attribute)
@@ -63,14 +60,14 @@ let modify_instance_attribute_userdata ~instance_id ~user_data =
   in
   ec2
     "modify-instance-attribute"
-    Ec2.Io.modify_instance_attribute
+    Ec2.modify_instance_attribute
     (Ec2.Values.ModifyInstanceAttributeRequest.make ~instanceId:instance_id ~userData ())
 ;;
 
 let modify_instance_metadata_options ~instance_id ~http_endpoint:httpEndpoint =
   ec2
     "modify-instance-metadata-options"
-    Ec2.Io.modify_instance_metadata_options
+    Ec2.modify_instance_metadata_options
     (Ec2.Values.ModifyInstanceMetadataOptionsRequest.make
        ~instanceId:instance_id
        ~httpEndpoint
@@ -80,7 +77,7 @@ let modify_instance_metadata_options ~instance_id ~http_endpoint:httpEndpoint =
 let describe_instances_status ~instance_id =
   ec2
     "describe-instances-status"
-    Ec2.Io.describe_instance_status
+    Ec2.describe_instance_status
     (Ec2.Values.DescribeInstanceStatusRequest.make
        ~includeAllInstances:true
        ~instanceIds:[ instance_id ]
@@ -98,7 +95,7 @@ let describe_instances_status ~instance_id =
 let describe_instance_type_offerings ~instance_type () =
   ec2
     "describe-instance-type-offerings"
-    Ec2.Io.describe_instance_type_offerings
+    Ec2.describe_instance_type_offerings
     (Ec2.Values.DescribeInstanceTypeOfferingsRequest.make
        ~filters:
          [ { Ec2.Values.Filter.name = Some "instance-type"
@@ -111,7 +108,7 @@ let describe_instance_type_offerings ~instance_type () =
 let describe_addresses () =
   ec2
     "describe-addresses"
-    Ec2.Io.describe_addresses
+    Ec2.describe_addresses
     (Ec2.Values.DescribeAddressesRequest.make ())
   >>| fun { Ec2.Values.DescribeAddressesResult.addresses; _ } ->
   Option.value_exn ~here:[%here] addresses
@@ -120,7 +117,7 @@ let describe_addresses () =
 let describe_images ?filters ?owners () =
   ec2
     "describe-images"
-    Ec2.Io.describe_images
+    Ec2.describe_images
     (Ec2.Values.DescribeImagesRequest.make ?filters ?owners ())
   >>| fun { Ec2.Values.DescribeImagesResult.images; _ } ->
   Option.value_exn ~here:[%here] images
@@ -131,16 +128,16 @@ let describe_instance_types () =
     let%bind { instanceTypes; nextToken; _ } =
       ec2
         "describe-instances-types"
-        Ec2.Io.describe_instance_types
+        Ec2.describe_instance_types
         (Ec2.Values.DescribeInstanceTypesRequest.make ?nextToken ())
     in
     let results =
       Option.value_exn ~here:[%here] instanceTypes
       |> List.map ~f:(fun { instanceType; _ } ->
-           instanceType
-           |> Option.value_exn ~here:[%here]
-           |> Ec2.Values.InstanceType.sexp_of_t
-           |> Sexp.to_string)
+        instanceType
+        |> Option.value_exn ~here:[%here]
+        |> Ec2.Values.InstanceType.sexp_of_t
+        |> Sexp.to_string)
     in
     match nextToken with
     | None -> return acc
@@ -154,7 +151,7 @@ let describe_instance_types () =
 let describe_network_interfaces () =
   ec2
     "describe-network-interfaces"
-    Ec2.Io.describe_network_interfaces
+    Ec2.describe_network_interfaces
     (Ec2.Values.DescribeNetworkInterfacesRequest.make ())
   >>| fun nis -> Option.value_exn ~here:[%here] nis.networkInterfaces
 ;;
@@ -162,7 +159,7 @@ let describe_network_interfaces () =
 let describe_network_interface_attribute ~network_interface_id:networkInterfaceId () =
   ec2
     "describe-network-interface-attribute"
-    Ec2.Io.describe_network_interface_attribute
+    Ec2.describe_network_interface_attribute
     (Ec2.Values.DescribeNetworkInterfaceAttributeRequest.make
        ~networkInterfaceId
        ~attribute:Ec2.Values.NetworkInterfaceAttribute.Description
@@ -170,13 +167,13 @@ let describe_network_interface_attribute ~network_interface_id:networkInterfaceI
 ;;
 
 let modify_network_interface_attribute
-  ~network_interface_id:networkInterfaceId
-  ~description
-  ()
+      ~network_interface_id:networkInterfaceId
+      ~description
+      ()
   =
   ec2
     "modify-network-interface-attribute"
-    Ec2.Io.modify_network_interface_attribute
+    Ec2.modify_network_interface_attribute
     (Ec2.Values.ModifyNetworkInterfaceAttributeRequest.make
        ~networkInterfaceId
        ~description:(Ec2.Values.AttributeValue.make ~value:description ())
@@ -186,7 +183,7 @@ let modify_network_interface_attribute
 let assign_private_ip_address ~network_interface_id:networkInterfaceId ~ip_address =
   ec2
     "assign-private-ip-address"
-    Ec2.Io.assign_private_ip_addresses
+    Ec2.assign_private_ip_addresses
     (Ec2.Values.AssignPrivateIpAddressesRequest.make
        ~networkInterfaceId
        ~privateIpAddresses:[ ip_address ]
@@ -196,7 +193,7 @@ let assign_private_ip_address ~network_interface_id:networkInterfaceId ~ip_addre
 let describe_security_groups () =
   ec2
     "describe-security-groups"
-    Ec2.Io.describe_security_groups
+    Ec2.describe_security_groups
     (Ec2.Values.DescribeSecurityGroupsRequest.make ())
   >>| fun sg -> Option.value_exn ~here:[%here] sg.securityGroups
 ;;
@@ -204,26 +201,20 @@ let describe_security_groups () =
 let describe_snapshots () =
   ec2
     "describe-snapshots"
-    Ec2.Io.describe_snapshots
+    Ec2.describe_snapshots
     (Ec2.Values.DescribeSnapshotsRequest.make ~ownerIds:[ "self" ] ())
   >>| fun sns -> Option.value_exn ~here:[%here] sns.snapshots
 ;;
 
 let describe_subnets () =
-  ec2
-    "describe-subnets"
-    Ec2.Io.describe_subnets
-    (Ec2.Values.DescribeSubnetsRequest.make ())
+  ec2 "describe-subnets" Ec2.describe_subnets (Ec2.Values.DescribeSubnetsRequest.make ())
   >>| fun sns ->
   assert (Option.is_none sns.nextToken);
   Option.value_exn ~here:[%here] sns.subnets
 ;;
 
 let describe_volumes () =
-  ec2
-    "describe-volumes"
-    Ec2.Io.describe_volumes
-    (Ec2.Values.DescribeVolumesRequest.make ())
+  ec2 "describe-volumes" Ec2.describe_volumes (Ec2.Values.DescribeVolumesRequest.make ())
   >>| fun v ->
   assert (Option.is_none v.nextToken);
   Option.value_exn ~here:[%here] v.volumes
@@ -232,7 +223,7 @@ let describe_volumes () =
 let describe_volumes_modifications () =
   ec2
     "describe-volumes"
-    Ec2.Io.describe_volumes_modifications
+    Ec2.describe_volumes_modifications
     (Ec2.Values.DescribeVolumesModificationsRequest.make ())
   >>| fun v ->
   assert (Option.is_none v.nextToken);
@@ -240,7 +231,7 @@ let describe_volumes_modifications () =
 ;;
 
 let describe_vpcs () =
-  ec2 "describe-vpcs" Ec2.Io.describe_vpcs (Ec2.Values.DescribeVpcsRequest.make ())
+  ec2 "describe-vpcs" Ec2.describe_vpcs (Ec2.Values.DescribeVpcsRequest.make ())
   >>| fun v ->
   assert (Option.is_none v.nextToken);
   Option.value_exn ~here:[%here] v.vpcs
@@ -284,13 +275,13 @@ let wait_for_instance_state ~instance_id ~state_name ~state =
   retry_forever
     ~description:(sprintf "instance %s to enter state '%s'" state_name instance_id)
     (fun () ->
-    match%map describe_instances_status ~instance_id with
-    | None ->
-      printf ". <no instance status yet>\n";
-      None
-    | Some name ->
-      printf ". %s\n" (name |> Ec2.Values.InstanceStateName.sexp_of_t |> sexp_lower);
-      if Stdlib.( = ) name state then Some () else None)
+       match%map describe_instances_status ~instance_id with
+       | None ->
+         printf ". <no instance status yet>\n";
+         None
+       | Some name ->
+         printf ". %s\n" (name |> Ec2.Values.InstanceStateName.sexp_of_t |> sexp_lower);
+         if Stdlib.( = ) name state then Some () else None)
 ;;
 
 let wait_for_instance_running_state =
@@ -309,20 +300,20 @@ let wait_for_volume_available ~volume_id =
   retry_forever
     ~description:(sprintf "volume %s to enter state 'available'" volume_id)
     (fun () ->
-    let%map volumes = describe_volumes () in
-    let volume =
-      List.find volumes ~f:(function
-        | { volumeId = None; _ } -> false
-        | { volumeId = Some volumeId; _ } -> String.( = ) volume_id volumeId)
-      |> Option.value_exn ~message:(sprintf "volume %s not found?!" volume_id)
-    in
-    match
-      volume.Ec2.Values.Volume.state |> Option.value_exn ~message:"no volume.state?!"
-    with
-    | Ec2.Values.VolumeState.Available -> Some volume
-    | other_state ->
-      printf !". %s\n" (other_state |> Ec2.Values.VolumeState.sexp_of_t |> sexp_lower);
-      None)
+       let%map volumes = describe_volumes () in
+       let volume =
+         List.find volumes ~f:(function
+           | { volumeId = None; _ } -> false
+           | { volumeId = Some volumeId; _ } -> String.( = ) volume_id volumeId)
+         |> Option.value_exn ~message:(sprintf "volume %s not found?!" volume_id)
+       in
+       match
+         volume.Ec2.Values.Volume.state |> Option.value_exn ~message:"no volume.state?!"
+       with
+       | Ec2.Values.VolumeState.Available -> Some volume
+       | other_state ->
+         printf !". %s\n" (other_state |> Ec2.Values.VolumeState.sexp_of_t |> sexp_lower);
+         None)
 ;;
 
 let wait_for_volume_modification_completed ~volume_id =
@@ -332,21 +323,23 @@ let wait_for_volume_modification_completed ~volume_id =
          "waiting for volume %s to enter state 'completed' or 'optimizing'"
          volume_id)
     (fun () ->
-    let%map modifications = describe_volumes_modifications () in
-    let mod_ =
-      List.find modifications ~f:(function
-        | { volumeId = None; _ } -> false
-        | { volumeId = Some volumeId; _ } -> String.( = ) volume_id volumeId)
-      |> Option.value_exn ~message:(sprintf "volume %s not found?!" volume_id)
-    in
-    let state =
-      mod_.Ec2.Values.VolumeModification.modificationState
-      |> Option.value_exn ~message:"no modificationState?!"
-    in
-    printf !". %s\n" (state |> Ec2.Values.VolumeModificationState.sexp_of_t |> sexp_lower);
-    match state with
-    | Ec2.Values.VolumeModificationState.(Completed | Optimizing) -> Some mod_
-    | _ -> None)
+       let%map modifications = describe_volumes_modifications () in
+       let mod_ =
+         List.find modifications ~f:(function
+           | { volumeId = None; _ } -> false
+           | { volumeId = Some volumeId; _ } -> String.( = ) volume_id volumeId)
+         |> Option.value_exn ~message:(sprintf "volume %s not found?!" volume_id)
+       in
+       let state =
+         mod_.Ec2.Values.VolumeModification.modificationState
+         |> Option.value_exn ~message:"no modificationState?!"
+       in
+       printf
+         !". %s\n"
+         (state |> Ec2.Values.VolumeModificationState.sexp_of_t |> sexp_lower);
+       match state with
+       | Ec2.Values.VolumeModificationState.(Completed | Optimizing) -> Some mod_
+       | _ -> None)
 ;;
 
 let wait_for_network_interface_available ~network_interface_id =
@@ -356,38 +349,38 @@ let wait_for_network_interface_available ~network_interface_id =
          "waiting for network interface %s to enter state 'available'"
          network_interface_id)
     (fun () ->
-    let%map interfaces = describe_network_interfaces () in
-    let interface =
-      List.find interfaces ~f:(function
-        | { networkInterfaceId = None; _ } -> false
-        | { networkInterfaceId = Some networkInterfaceId; _ } ->
-          String.( = ) network_interface_id networkInterfaceId)
-      |> Option.value_exn
-           ~message:(sprintf "network_interface %s not found?!" network_interface_id)
-    in
-    match
-      interface.Ec2.Values.NetworkInterface.status
-      |> Option.value_exn ~message:"no networkinterface.status?!"
-    with
-    | Ec2.Values.NetworkInterfaceStatus.Available -> Some interface
-    | other_state ->
-      printf
-        !". %s\n"
-        (other_state |> Ec2.Values.NetworkInterfaceStatus.sexp_of_t |> sexp_lower);
-      None)
+       let%map interfaces = describe_network_interfaces () in
+       let interface =
+         List.find interfaces ~f:(function
+           | { networkInterfaceId = None; _ } -> false
+           | { networkInterfaceId = Some networkInterfaceId; _ } ->
+             String.( = ) network_interface_id networkInterfaceId)
+         |> Option.value_exn
+              ~message:(sprintf "network_interface %s not found?!" network_interface_id)
+       in
+       match
+         interface.Ec2.Values.NetworkInterface.status
+         |> Option.value_exn ~message:"no networkinterface.status?!"
+       with
+       | Ec2.Values.NetworkInterfaceStatus.Available -> Some interface
+       | other_state ->
+         printf
+           !". %s\n"
+           (other_state |> Ec2.Values.NetworkInterfaceStatus.sexp_of_t |> sexp_lower);
+         None)
 ;;
 
 let print_azs () =
   printf "describe-availability-zones...\n";
   ec2
     "describe-availability-zones"
-    Ec2.Io.describe_availability_zones
+    Ec2.describe_availability_zones
     (Ec2.Values.DescribeAvailabilityZonesRequest.make ())
   >>| fun { availabilityZones; _ } ->
   availabilityZones
   |> Option.value_exn ~here:[%here]
   |> List.iter ~f:(fun az ->
-       Option.value_exn ~here:[%here] az.zoneName |> printf ". %s\n")
+    Option.value_exn ~here:[%here] az.zoneName |> printf ". %s\n")
 ;;
 
 let _print_instance_types () =
@@ -402,17 +395,14 @@ let print_instance_type_offerings () =
   tos.instanceTypeOfferings
   |> Option.value_exn ~here:[%here] ~message:"no instanceTypeOfferings?!"
   |> List.iter ~f:(fun o ->
-       o
-       |> Ec2.Values.InstanceTypeOffering.sexp_of_t
-       |> Sexp.to_string_hum
-       |> print_endline)
+    o |> Ec2.Values.InstanceTypeOffering.sexp_of_t |> Sexp.to_string_hum |> print_endline)
 ;;
 
 let _print_volumes () =
   printf "describe-volumes...\n";
   describe_volumes ()
   >>| List.iter ~f:(fun { Ec2.Values.Volume.volumeId; _ } ->
-        Option.value_exn ~here:[%here] volumeId |> printf ". %s\n")
+    Option.value_exn ~here:[%here] volumeId |> printf ". %s\n")
 ;;
 
 let print_security_groups () =
@@ -471,7 +461,7 @@ let test_address_operations ~instance_id =
   let%bind address_alloc =
     ec2
       "allocate_address"
-      Ec2.Io.allocate_address
+      Ec2.allocate_address
       (Ec2.Values.AllocateAddressRequest.make ())
   in
   let public_ip = address_alloc.publicIp |> Option.value_exn ~message:"no publicIp" in
@@ -479,7 +469,7 @@ let test_address_operations ~instance_id =
   let%bind associate_addr =
     ec2
       "associate-address"
-      Ec2.Io.associate_address
+      Ec2.associate_address
       (Ec2.Values.AssociateAddressRequest.make
          ~publicIp:public_ip
          ~instanceId:instance_id
@@ -493,14 +483,14 @@ let test_address_operations ~instance_id =
   let%bind () =
     ec2
       "disassociate-address"
-      Ec2.Io.disassociate_address
+      Ec2.disassociate_address
       (Ec2.Values.DisassociateAddressRequest.make ~associationId:association_id ())
   in
   printf "release-address %s...\n" public_ip;
   let%bind () =
     ec2
       "release-address"
-      Ec2.Io.release_address
+      Ec2.release_address
       (Ec2.Values.ReleaseAddressRequest.make
          ~allocationId:
            (Option.value_exn address_alloc.allocationId ~message:"no allocationId?!")
@@ -533,7 +523,7 @@ let test_network_interface_operations ~instance_id ~availability_zone =
   let%bind interface_result =
     ec2
       "create-network-interface"
-      Ec2.Io.create_network_interface
+      Ec2.create_network_interface
       (Ec2.Values.CreateNetworkInterfaceRequest.make ~subnetId:subnet_id ())
   in
   let network_interface_id =
@@ -571,7 +561,7 @@ let test_network_interface_operations ~instance_id ~availability_zone =
   let%bind attach_result =
     ec2
       "attach-network-interface"
-      Ec2.Io.attach_network_interface
+      Ec2.attach_network_interface
       (Ec2.Values.AttachNetworkInterfaceRequest.make
          ~instanceId:instance_id
          ~networkInterfaceId:network_interface_id
@@ -590,7 +580,7 @@ let test_network_interface_operations ~instance_id ~availability_zone =
   let%bind () =
     ec2
       "detach-network-interface"
-      Ec2.Io.detach_network_interface
+      Ec2.detach_network_interface
       (Ec2.Values.DetachNetworkInterfaceRequest.make
          ~force:true
          ~attachmentId:attachment_id
@@ -622,11 +612,11 @@ let test_network_interface_operations ~instance_id ~availability_zone =
     printf
       "assigned private ip addresses: %s\n"
       (assign_result.assignedPrivateIpAddresses
-      |> Option.value_exn ~message:"no assignedPrivateIpAddresses?!"
-      |> List.map ~f:(function
+       |> Option.value_exn ~message:"no assignedPrivateIpAddresses?!"
+       |> List.map ~f:(function
            | { Ec2.Values.AssignedPrivateIpAddress.privateIpAddress; _ } ->
            privateIpAddress |> Option.value_exn ~message:"no privateIpAddress?!")
-      |> String.concat ~sep:",");
+       |> String.concat ~sep:",");
     return ()
   in
   let%bind _ = wait_for_network_interface_available ~network_interface_id in
@@ -634,7 +624,7 @@ let test_network_interface_operations ~instance_id ~availability_zone =
   let%bind () =
     ec2
       "delete-network-interface"
-      Ec2.Io.delete_network_interface
+      Ec2.delete_network_interface
       (Ec2.Values.DeleteNetworkInterfaceRequest.make
          ~networkInterfaceId:network_interface_id
          ())
@@ -647,7 +637,7 @@ let test_volume_operations ~instance_id ~availability_zone =
   let%bind volume =
     ec2
       "create-volume"
-      Ec2.Io.create_volume
+      Ec2.create_volume
       (Ec2.Values.CreateVolumeRequest.make ~size:1 ~availabilityZone:availability_zone ())
   in
   let volume_id =
@@ -659,7 +649,7 @@ let test_volume_operations ~instance_id ~availability_zone =
   let%bind modify_result =
     ec2
       "modify-volume"
-      Ec2.Io.modify_volume
+      Ec2.modify_volume
       (Ec2.Values.ModifyVolumeRequest.make ~size:2 ~volumeId:volume_id ())
   in
   let _volume_modfiication =
@@ -671,7 +661,7 @@ let test_volume_operations ~instance_id ~availability_zone =
   let%bind _volume_attachment =
     ec2
       "attach-volume"
-      Ec2.Io.attach_volume
+      Ec2.attach_volume
       (Ec2.Values.AttachVolumeRequest.make
          ~volumeId:volume_id
          ~instanceId:instance_id
@@ -682,7 +672,7 @@ let test_volume_operations ~instance_id ~availability_zone =
   let%bind _volume_detachment =
     ec2
       "detach-volume"
-      Ec2.Io.detach_volume
+      Ec2.detach_volume
       (Ec2.Values.DetachVolumeRequest.make ~volumeId:volume_id ())
   in
   printf "detach initiated. wait for it to become available before delete...\n";
@@ -691,7 +681,7 @@ let test_volume_operations ~instance_id ~availability_zone =
   let%bind () =
     ec2
       "delete-volume"
-      Ec2.Io.delete_volume
+      Ec2.delete_volume
       (Ec2.Values.DeleteVolumeRequest.make ~volumeId:volume_id ())
   in
   return ()
@@ -722,9 +712,9 @@ let find_ami () =
     | Some Ec2.Values.PlatformValues.Windows -> false
     | _ -> true)
   |> List.sort ~compare:(fun a b ->
-       match a.creationDate, b.creationDate with
-       | None, _ | _, None -> failwithf "find_ami: AMIs have no creation date!?" ()
-       | Some ad, Some bd -> String.compare bd ad)
+    match a.creationDate, b.creationDate with
+    | None, _ | _, None -> failwithf "find_ami: AMIs have no creation date!?" ()
+    | Some ad, Some bd -> String.compare bd ad)
   |> List.hd_exn
   |> fun (ami : Ec2.Values.Image.t) ->
   ami.imageId |> Option.value_exn ~message:"no imageId?!"
@@ -733,7 +723,7 @@ let find_ami () =
 let create_tag ~resource_id ~key ~value =
   ec2
     "create-tag"
-    Ec2.Io.create_tags
+    Ec2.create_tags
     (Ec2.Values.CreateTagsRequest.make
        ~resources:[ resource_id ]
        ~tags:[ { Ec2.Values.Tag.key = Some key; value = Some value } ]
@@ -743,7 +733,7 @@ let create_tag ~resource_id ~key ~value =
 let delete_tag ~resource_id ~key ~value =
   ec2
     "delete-tag"
-    Ec2.Io.delete_tags
+    Ec2.delete_tags
     (Ec2.Values.DeleteTagsRequest.make
        ~resources:[ resource_id ]
        ~tags:[ { Ec2.Values.Tag.key = Some key; value = Some value } ]
@@ -801,7 +791,7 @@ let run_all_tests ?image_id ~region () =
   let%bind run_result =
     ec2
       "run-instance"
-      Ec2.Io.run_instances
+      Ec2.run_instances
       (Ec2.Values.RunInstancesRequest.make
          ~instanceType:instance_type
          ~imageId:ami_id
@@ -830,7 +820,7 @@ let run_all_tests ?image_id ~region () =
   let%bind () =
     ec2
       "reboot-instances"
-      Ec2.Io.reboot_instances
+      Ec2.reboot_instances
       (Ec2.Values.RebootInstancesRequest.make ~instanceIds:[ instance_id ] ())
   in
   let%bind _ = wait_for_instance_running_state ~instance_id in
@@ -838,7 +828,7 @@ let run_all_tests ?image_id ~region () =
   let%bind stop_result =
     ec2
       "stop-instances"
-      Ec2.Io.stop_instances
+      Ec2.stop_instances
       (Ec2.Values.StopInstancesRequest.make ~instanceIds:[ instance_id ] ())
   in
   let _ = require_singleton_list "stop-instances result" stop_result.stoppingInstances in
@@ -865,7 +855,7 @@ let run_all_tests ?image_id ~region () =
   let%bind terminate_result =
     ec2
       "terminate-instances"
-      Ec2.Io.terminate_instances
+      Ec2.terminate_instances
       (Ec2.Values.TerminateInstancesRequest.make ~instanceIds:[ instance_id ] ())
   in
   let _ =
@@ -889,19 +879,19 @@ let () =
     Command.async
       ~summary:"Test script: we suggest selecting a region you have nothing in"
       (let open Command.Let_syntax in
-      let%map_open profile = flag "-profile" (optional string) ~doc:"NAME profile name"
-      and image_id =
-        flag
-          "-image-id"
-          (optional string)
-          ~doc:"AMI-ID override AMI to use (default: search for Amazon Linux)"
-      and region =
-        flag
-          "-region"
-          (optional_with_default "us-east-2" string)
-          ~doc:(sprintf "REGION region to run tests in (default: %s)" default_region)
-      in
-      fun () -> main ?profile ?image_id ~region ())
+       let%map_open profile = flag "-profile" (optional string) ~doc:"NAME profile name"
+       and image_id =
+         flag
+           "-image-id"
+           (optional string)
+           ~doc:"AMI-ID override AMI to use (default: search for Amazon Linux)"
+       and region =
+         flag
+           "-region"
+           (optional_with_default "us-east-2" string)
+           ~doc:(sprintf "REGION region to run tests in (default: %s)" default_region)
+       in
+       fun () -> main ?profile ?image_id ~region ())
   in
   Command_unix.run cmd
 ;;

@@ -40,6 +40,13 @@
    async)))
 
 (rule
+ (targets awso_connect_contact_lens_async.ml)
+ (action
+  (with-stdout-to
+   awso_connect_contact_lens_async.ml
+   (echo "include Io\nmodule Values = Values\nmodule Cli = Cli"))))
+
+(rule
  (targets values.ml)
  (action
   (with-stdout-to

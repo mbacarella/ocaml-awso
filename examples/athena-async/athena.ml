@@ -1,5 +1,5 @@
+open Awso_athena_async
 module Values = Awso_athena_async.Values
-module Io = Awso_athena_async.Io
 
 
 let dispatch_exn ~name ~sexp_of_error ~f =
@@ -51,7 +51,7 @@ module Query = struct
       ~name:"athena.start_query_execution"
       ~sexp_of_error:Values.StartQueryExecutionOutput.sexp_of_error
       ~f:(fun () ->
-      Io.start_query_execution
+      start_query_execution
         ~cfg
         (Values.StartQueryExecutionInput.make
            ~clientRequestToken
@@ -112,7 +112,7 @@ module Query = struct
         ~name:"athena.get_query_execution"
         ~sexp_of_error:Values.GetQueryExecutionOutput.sexp_of_error
         ~f:(fun () ->
-        Io.get_query_execution
+        get_query_execution
           ~cfg
           (Values.GetQueryExecutionInput.make ~queryExecutionId:execution_id ()))
       >>| fun x -> `Ok (`Athena_execution x)
@@ -129,7 +129,7 @@ module Query = struct
       ~name:"athena.get_query_results"
       ~sexp_of_error:Values.GetQueryResultsOutput.sexp_of_error
       ~f:(fun () ->
-      Io.get_query_results
+      get_query_results
         ~cfg
         (Values.GetQueryResultsInput.make
            ?nextToken:next_token
@@ -260,7 +260,7 @@ module Query = struct
         ~name:"athena.list_query_executions"
         ~sexp_of_error:Values.ListQueryExecutionsOutput.sexp_of_error
         ~f:(fun () ->
-        Io.list_query_executions
+        list_query_executions
           ~cfg
           (Values.ListQueryExecutionsInput.make
              ?maxResults:(Option.map max_results ~f:Values.MaxQueryExecutionsCount.make)

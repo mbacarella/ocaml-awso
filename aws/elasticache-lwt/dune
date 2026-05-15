@@ -32,6 +32,13 @@
    lwt)))
 
 (rule
+ (targets awso_elasticache_lwt.ml)
+ (action
+  (with-stdout-to
+   awso_elasticache_lwt.ml
+   (echo "include Io\nmodule Values = Values"))))
+
+(rule
  (targets values.ml)
  (action
   (with-stdout-to

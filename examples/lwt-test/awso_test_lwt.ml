@@ -1,29 +1,10 @@
 open Lwt.Infix
 module Cfg = Awso_lwt.Cfg
 
-module Ec2 = struct
-  include Awso_ec2_lwt.Import
-  module Values = Awso_ec2_lwt.Values
-  module Io = Awso_ec2_lwt.Io
-end
-
-module Ecs = struct
-  include Awso_ecs_lwt.Import
-  module Values = Awso_ecs_lwt.Values
-  module Io = Awso_ecs_lwt.Io
-end
-
-module Ecr = struct
-  include Awso_ecr_lwt.Import
-  module Values = Awso_ecr_lwt.Values
-  module Io = Awso_ecr_lwt.Io
-end
-
-module S3 = struct
-  include Awso_s3_lwt.Import
-  module Values = Awso_s3_lwt.Values
-  module Io = Awso_s3_lwt.Io
-end
+module Ec2 = Awso_ec2_lwt
+module Ecs = Awso_ecs_lwt
+module Ecr = Awso_ecr_lwt
+module S3 = Awso_s3_lwt
 
 let pr = Caml.print_endline
 
@@ -48,7 +29,7 @@ let suite_main ~sso bucket () =
       ~name:"ec2.describe_instances"
       ~sexp_of_error:Ec2.Values.Ec2_error.sexp_of_t
       ~f:(fun () ->
-      Ec2.Io.describe_instances
+      Ec2.describe_instances
         ~cfg
         (Ec2.Values.DescribeInstancesRequest.make ()))
     >|= fun v ->
@@ -62,7 +43,7 @@ let suite_main ~sso bucket () =
       ~name:"ecs.describe_clusters"
       ~sexp_of_error:Ecs.Values.DescribeClustersResponse.sexp_of_error
       ~f:(fun () ->
-      Ecs.Io.describe_clusters
+      Ecs.describe_clusters
         ~cfg
         (Ecs.Values.DescribeClustersRequest.make ()))
     >|= fun v ->
@@ -78,7 +59,7 @@ let suite_main ~sso bucket () =
         ~name:"ecr.get_authorization_token"
         ~sexp_of_error:Ecr.Values.GetAuthorizationTokenResponse.sexp_of_error
         ~f:(fun () ->
-        Ecr.Io.get_authorization_token
+        Ecr.get_authorization_token
           ~cfg
           (Ecr.Values.GetAuthorizationTokenRequest.make ()))
       >|= fun v ->
@@ -95,7 +76,7 @@ let suite_main ~sso bucket () =
         ~name:"ecr.create_repository"
         ~sexp_of_error:Ecr.Values.CreateRepositoryResponse.sexp_of_error
         ~f:(fun () ->
-        Ecr.Io.create_repository
+        Ecr.create_repository
           ~cfg
           (Ecr.Values.CreateRepositoryRequest.make ~repositoryName ()))
       >|= fun _v -> ()
@@ -105,7 +86,7 @@ let suite_main ~sso bucket () =
         ~name:"ecr.describe_repositories"
         ~sexp_of_error:Ecr.Values.DescribeRepositoriesResponse.sexp_of_error
         ~f:(fun () ->
-        Ecr.Io.describe_repositories
+        Ecr.describe_repositories
           ~cfg
           (Ecr.Values.DescribeRepositoriesRequest.make ()))
       >>= fun v ->
@@ -123,7 +104,7 @@ let suite_main ~sso bucket () =
               ~name:"ecr.list_images"
               ~sexp_of_error:Ecr.Values.ListImagesResponse.sexp_of_error
               ~f:(fun () ->
-              Ecr.Io.list_images
+              Ecr.list_images
                 ~cfg
                 (Ecr.Values.ListImagesRequest.make ~repositoryName ()))
             >|= fun images ->
@@ -145,7 +126,7 @@ let suite_main ~sso bucket () =
         ~name:"ecr.delete_repository"
         ~sexp_of_error:Ecr.Values.DeleteRepositoryResponse.sexp_of_error
         ~f:(fun () ->
-        Ecr.Io.delete_repository
+        Ecr.delete_repository
           ~cfg
           (Ecr.Values.DeleteRepositoryRequest.make ~repositoryName ()))
       >|= fun _v -> ()
@@ -158,14 +139,14 @@ let suite_main ~sso bucket () =
       dispatch_exn
         ~name:"s3.list_buckets"
         ~sexp_of_error:S3.Values.ListBucketsOutput.sexp_of_error
-        ~f:(fun () -> S3.Io.list_buckets ~cfg ())
+        ~f:(fun () -> S3.list_buckets ~cfg ())
       >|= fun _ -> ()
     in
     dispatch_exn
       ~name:"s3.list_objects"
       ~sexp_of_error:S3.Values.ListObjectsOutput.sexp_of_error
       ~f:(fun () ->
-      S3.Io.list_objects ~cfg (S3.Values.ListObjectsRequest.make ~bucket ()))
+      S3.list_objects ~cfg (S3.Values.ListObjectsRequest.make ~bucket ()))
     >|= fun v ->
     Option.iter v.S3.Values.ListObjectsOutput.name ~f:pr;
     let contents = Option.value ~default:[] v.S3.Values.ListObjectsOutput.contents in
@@ -212,7 +193,7 @@ let multipart_main ~sso bucket key file () =
       ~name:"s3.create_multipart"
       ~sexp_of_error:S3.Values.CreateMultipartUploadOutput.sexp_of_error
       ~f:(fun () ->
-      S3.Io.create_multipart_upload
+      S3.create_multipart_upload
         ~cfg
         (S3.Values.CreateMultipartUploadRequest.make
            ~bucket
@@ -229,7 +210,7 @@ let multipart_main ~sso bucket key file () =
       ~name:"s3.upload_part_request"
       ~sexp_of_error:S3.Values.UploadPartOutput.sexp_of_error
       ~f:(fun () ->
-      S3.Io.upload_part
+      S3.upload_part
         ~cfg
         (S3.Values.UploadPartRequest.make
            ~bucket
@@ -262,7 +243,7 @@ let multipart_main ~sso bucket key file () =
         ~uploadId
         ()
     in
-    S3.Io.complete_multipart_upload ~cfg req)
+    S3.complete_multipart_upload ~cfg req)
   >|= fun _ -> ()
 ;;
 

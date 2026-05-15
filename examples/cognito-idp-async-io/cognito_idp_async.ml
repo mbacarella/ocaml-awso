@@ -1,5 +1,5 @@
 open Core
-open Awso_cognito_idp_async.Io
+open Awso_cognito_idp_async
 open Awso_cognito_idp.Values
 
 let failwithf fmt = Format.kasprintf failwith fmt
