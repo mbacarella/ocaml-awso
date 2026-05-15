@@ -145,7 +145,7 @@ let%expect_test "canonical_uri_query" =
 let canonical_headers headers : (string * string list) list =
   Cohttp.Header.to_list headers
   |> String.Caseless.Map.of_alist_multi
-  |> Map.to_alist
+  |> String.Caseless.Map.bindings
   |> List.map ~f:(fun (x, y) -> String.lowercase x, List.map y ~f:String.strip)
   |> List.sort ~compare:(fun (x1, _) (x2, _) -> String.compare x1 x2)
 ;;

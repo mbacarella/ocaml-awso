@@ -21,10 +21,10 @@ let apply_query_params query_params e =
         then
           Ast_convenience.some
             (Ast_convenience.pair param_s (Ast_convenience.app convert [ value ]))
-        else [%expr Core.Option.map ~f:(fun v -> [%e param_s], [%e convert] v) [%e value]])
+        else [%expr Option.map ~f:(fun v -> [%e param_s], [%e convert] v) [%e value]])
       |> Ast_convenience.list
     in
-    [%expr Uri.add_query_params' [%e e] (Core.List.filter_opt [%e params_expr])]
+    [%expr Uri.add_query_params' [%e e] (List.filter_opt [%e params_expr])]
 ;;
 
 let get_field_for_query_variable ~service ~(input : Botodata.operation_input) v =
@@ -242,10 +242,10 @@ let%expect_test "uri_of_endpoint" =
           | Bucket_query_params ->
               Uri.add_query_params'
                 ((Format.kasprintf Uri.of_string) "/%s" x.bucket)
-                (Core.List.filter_opt
+                (List.filter_opt
                    [Some ("param1", (Shape1.to_header x.param1));
                    Some ("param2", (Shape2.to_header x.param2));
-                   Core.Option.map ~f:(fun v -> ("param3", (Shape3.to_header v)))
+                   Option.map ~f:(fun v -> ("param3", (Shape3.to_header v)))
                      x.param3]))
     [@ocaml.warning "-27"]) |}]
 ;;
@@ -335,6 +335,7 @@ let make_structure_for_protocol service (metadata : Botodata.metadata) data =
 let full_structure service metadata data =
   let loc = !Ast_helper.default_loc in
   [%str
+    open! Awso_common.Jane_compat
     open Values
 
     [%%i type_decl data]

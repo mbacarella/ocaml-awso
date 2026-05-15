@@ -3,6 +3,7 @@
  (public_name awso)
  (libraries
   awso-codegen
+  awso_common
   base64
   cohttp
   core

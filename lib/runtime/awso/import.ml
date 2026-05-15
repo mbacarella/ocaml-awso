@@ -1,5 +1,4 @@
-open! Core
-open! Printf
+include Awso_common.Jane_compat
 
 module String = struct
   include String

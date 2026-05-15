@@ -1,10 +1,11 @@
-open! Core
 open! Import
 open Lwt.Infix
 
 let get ?profile ?aws_access_key_id ?aws_secret_access_key ?region ?output () =
   let profile : string option =
-    List.reduce_exn ~f:Option.first_some [ profile; Sys.getenv "AWS_DEFAULT_PROFILE" ]
+    List.reduce_exn
+      ~f:Option.first_some
+      [ profile; Stdlib.Sys.getenv_opt "AWS_DEFAULT_PROFILE" ]
   in
   let file path of_string =
     match path () with
@@ -16,14 +17,14 @@ let get ?profile ?aws_access_key_id ?aws_secret_access_key ?region ?output () =
       | Error e -> Lwt.return (Error e)
       | Ok r -> Lwt.return (Ok (Some (file, r))))
   in
-  match%bind file Awso.Cfg.Config_file.path Awso.Cfg.Config_file.of_string with
+  file Awso.Cfg.Config_file.path Awso.Cfg.Config_file.of_string
+  >>= function
   | Error e -> Lwt.return (Error e)
   | Ok config_file -> (
-    match%map
-      file
-        Awso.Cfg.Shared_credentials_file.path
-        Awso.Cfg.Shared_credentials_file.of_string
-    with
+    file
+      Awso.Cfg.Shared_credentials_file.path
+      Awso.Cfg.Shared_credentials_file.of_string
+    >|= function
     | Error e -> Error e
     | Ok shared_credentials_file ->
       Awso.Cfg.make
@@ -38,7 +39,8 @@ let get ?profile ?aws_access_key_id ?aws_secret_access_key ?region ?output () =
 ;;
 
 let get_exn ?profile ?aws_access_key_id ?aws_secret_access_key ?region ?output () =
-  match%map get ?profile ?aws_access_key_id ?aws_secret_access_key ?region ?output () with
+  get ?profile ?aws_access_key_id ?aws_secret_access_key ?region ?output ()
+  >|= function
   | Ok r -> r
   | Error e -> failwithf "Cfg.get_exn: %s" e ()
 ;;

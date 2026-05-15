@@ -1,4 +1,3 @@
-open! Core
 open! Import
 open Lwt.Infix
 
@@ -112,7 +111,7 @@ module Io : Awso.Http.Io.S with type 'a t := 'a Lwt.t = struct
         Uri.with_uri ~scheme:(Uri.scheme endpoint) ~host:(Uri.host endpoint) uri
       in
       let host =
-        Core.Option.value_exn
+        Option.value_exn
           (Uri.host endpoint)
           ~message:
             (sprintf "could not extract 'host' from url %s" (Uri.to_string endpoint))

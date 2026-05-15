@@ -57,17 +57,17 @@ module Source = struct
         print_endline (Yojson.Safe.to_string (yojson_of_stat r))
       in
       test 1024L;
-      [%expect {| ((chunk_size 1024) (file_size 1024) (partitions 1)) |}];
+      [%expect {| {"chunk_size":1024,"file_size":1024,"partitions":1} |}];
       test 2048L;
-      [%expect {| ((chunk_size 2048) (file_size 2048) (partitions 1)) |}];
+      [%expect {| {"chunk_size":2048,"file_size":2048,"partitions":1} |}];
       test Int64.(3L * min_part_size / 2L);
-      [%expect {| ((chunk_size 7864320) (file_size 15728640) (partitions 2)) |}];
+      [%expect {| {"chunk_size":7864320,"file_size":15728640,"partitions":2} |}];
       test ~chunk_size:(Byte_units.of_bytes_int 1) Int64.(2L * min_part_size);
-      [%expect {| ((chunk_size 2098) (file_size 20971520) (partitions 10000)) |}];
+      [%expect {| {"chunk_size":2098,"file_size":20971520,"partitions":10000} |}];
       test 0L;
-      [%expect {| ((chunk_size 1) (file_size 0) (partitions 1)) |}];
+      [%expect {| {"chunk_size":1,"file_size":0,"partitions":1} |}];
       test ~chunk_size:(Byte_units.of_bytes_int 0) 0L;
-      [%expect {| ((chunk_size 1) (file_size 0) (partitions 1)) |}];
+      [%expect {| {"chunk_size":1,"file_size":0,"partitions":1} |}];
       return ()
     ;;
 
