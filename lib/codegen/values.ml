@@ -1,4 +1,3 @@
-open! Core
 open! Import
 
 let ec2_error_module () =
@@ -10,7 +9,7 @@ let ec2_error_module () =
         (Ast_convenience.pstr name)
         (Ast_convenience.variant (Shape.capitalized_id name) None)
     in
-    (all_errors |> List.map ~f:(fun { name; description = _ } -> name) |> List.map ~f:case)
+    (all_errors |> List.map ~f:(fun (e : Ec2_errors.t) -> e.name) |> List.map ~f:case)
     @ [ Ast_helper.Exp.case (Ast_convenience.pvar "name") [%expr `Unknown_code name] ]
     |> Ast_helper.Exp.match_ [%expr name]
   in
@@ -20,7 +19,7 @@ let ec2_error_module () =
         (Ast_helper.Pat.variant (Shape.capitalized_id name) None)
         (Ast_convenience.str name)
     in
-    (all_errors |> List.map ~f:(fun { name; description = _ } -> name) |> List.map ~f:case)
+    (all_errors |> List.map ~f:(fun (e : Ec2_errors.t) -> e.name) |> List.map ~f:case)
     @ [ Ast_helper.Exp.case
           (Ast_helper.Pat.variant "Unknown_code" (Some (Ast_convenience.pvar "s")))
           (Ast_convenience.evar "s")
@@ -36,7 +35,7 @@ let ec2_error_module () =
     in
     let cases =
       enumeration
-      |> List.map ~f:(fun { Ec2_errors.name; description = _ } -> name)
+      |> List.map ~f:(fun (e : Ec2_errors.t) -> e.name)
       |> List.map ~f:(fun name -> case (Shape.capitalized_id name) [])
     in
     let catch_all_error_case = case "Unknown_code" [ [%type: string] ] in

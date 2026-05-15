@@ -1,12 +1,13 @@
 open! Core
 open! Import
+open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 
 module Error = struct
   type make =
     [ `Invalid_qualifier of string
     | `Invalid_account_id of string
     ]
-  [@@deriving sexp]
+  [@@deriving yojson]
 end
 
 module Default = struct
@@ -18,14 +19,14 @@ type resource_type =
   | `Colon_delimited of string
   | `None
   ]
-[@@deriving sexp, compare]
+[@@deriving yojson, compare]
 
 type qualifier =
   [ `Slash_delimited of string
   | `Colon_delimited of string
   | `None
   ]
-[@@deriving sexp, compare]
+[@@deriving yojson, compare]
 
 type t =
   { partition : string
@@ -36,7 +37,7 @@ type t =
   ; resource_type : resource_type
   ; qualifier : qualifier
   }
-[@@deriving sexp, compare]
+[@@deriving yojson, compare]
 
 let make
   ?(partition = Default.partition)
@@ -81,7 +82,10 @@ let make_exn
     make ?partition ?region ?account_id ?resource_type ?qualifier ~service ~resource ()
   with
   | `Ok x -> x
-  | #Error.make as e -> failwithf !"Invalid ARN %{sexp:Error.make}" e ()
+  | #Error.make as e ->
+    failwith
+      ("Invalid ARN "
+       ^ Yojson.Safe.to_string (Error.yojson_of_make (e :> Error.make)))
 ;;
 
 let of_string s =
@@ -225,7 +229,7 @@ let%expect_test "of_string" =
     | x ->
       Test.fail
         "Input unexpected to parse as ARN but did."
-        [ "input", input; "arn", sprintf !"%{sexp:t}" x ]
+        [ "input", input; "arn", Yojson.Safe.to_string (yojson_of_t x) ]
     | exception e ->
       Test.pass
         "Correctly failed to parse input as an ARN."
@@ -234,7 +238,7 @@ let%expect_test "of_string" =
   let test_good input =
     match of_string input with
     | x ->
-      Test.pass "Input parsed as ARN." [ "input", input; "arn", sprintf !"%{sexp:t}" x ]
+      Test.pass "Input parsed as ARN." [ "input", input; "arn", Yojson.Safe.to_string (yojson_of_t x) ]
     | exception e ->
       Test.fail
         "Input failed to parse as ARN."
@@ -250,54 +254,35 @@ let%expect_test "of_string" =
     {|
     [OK] Input parsed as ARN.
     input: arn:partition:sqs:us-east-2:account-id:resource
-    arn: ((partition partition) (service sqs) (region (us-east-2))
-     (account_id (account-id)) (resource resource) (resource_type None)
-     (qualifier None))
+    arn: {"partition":"partition","service":"sqs","region":"us-east-2","account_id":"account-id","resource":"resource","resource_type":["None"],"qualifier":["None"]}
 
     [OK] Input parsed as ARN.
     input: arn:partition:sqs:us-east-2:account-id:resourcetype/resource
-    arn: ((partition partition) (service sqs) (region (us-east-2))
-     (account_id (account-id)) (resource resource)
-     (resource_type (Slash_delimited resourcetype)) (qualifier None))
+    arn: {"partition":"partition","service":"sqs","region":"us-east-2","account_id":"account-id","resource":"resource","resource_type":["Slash_delimited","resourcetype"],"qualifier":["None"]}
 
     [OK] Input parsed as ARN.
     input: arn:partition:sqs:us-east-2:account-id:resourcetype/resource/qualifier
-    arn: ((partition partition) (service sqs) (region (us-east-2))
-     (account_id (account-id)) (resource resource)
-     (resource_type (Slash_delimited resourcetype))
-     (qualifier (Slash_delimited qualifier)))
+    arn: {"partition":"partition","service":"sqs","region":"us-east-2","account_id":"account-id","resource":"resource","resource_type":["Slash_delimited","resourcetype"],"qualifier":["Slash_delimited","qualifier"]}
 
     [OK] Input parsed as ARN.
     input: arn:partition:sqs:us-east-2:account-id:resourcetype/resource:qualifier
-    arn: ((partition partition) (service sqs) (region (us-east-2))
-     (account_id (account-id)) (resource resource)
-     (resource_type (Slash_delimited resourcetype))
-     (qualifier (Colon_delimited qualifier)))
+    arn: {"partition":"partition","service":"sqs","region":"us-east-2","account_id":"account-id","resource":"resource","resource_type":["Slash_delimited","resourcetype"],"qualifier":["Colon_delimited","qualifier"]}
 
     [OK] Input parsed as ARN.
     input: arn:partition:sqs:us-east-2:account-id:resourcetype:resource
-    arn: ((partition partition) (service sqs) (region (us-east-2))
-     (account_id (account-id)) (resource resource)
-     (resource_type (Colon_delimited resourcetype)) (qualifier None))
+    arn: {"partition":"partition","service":"sqs","region":"us-east-2","account_id":"account-id","resource":"resource","resource_type":["Colon_delimited","resourcetype"],"qualifier":["None"]}
 
     [OK] Input parsed as ARN.
     input: arn:partition:sqs::account-id:resourcetype:resource
-    arn: ((partition partition) (service sqs) (region ()) (account_id (account-id))
-     (resource resource) (resource_type (Colon_delimited resourcetype))
-     (qualifier None))
+    arn: {"partition":"partition","service":"sqs","region":null,"account_id":"account-id","resource":"resource","resource_type":["Colon_delimited","resourcetype"],"qualifier":["None"]}
 
     [OK] Input parsed as ARN.
     input: arn:partition:sqs:us-east-2::resourcetype:resource
-    arn: ((partition partition) (service sqs) (region (us-east-2)) (account_id ())
-     (resource resource) (resource_type (Colon_delimited resourcetype))
-     (qualifier None))
+    arn: {"partition":"partition","service":"sqs","region":"us-east-2","account_id":null,"resource":"resource","resource_type":["Colon_delimited","resourcetype"],"qualifier":["None"]}
 
     [OK] Input parsed as ARN.
     input: arn:partition:sqs:us-east-2:account-id:resourcetype:resource:qualifier
-    arn: ((partition partition) (service sqs) (region (us-east-2))
-     (account_id (account-id)) (resource resource)
-     (resource_type (Colon_delimited resourcetype))
-     (qualifier (Colon_delimited qualifier)))
+    arn: {"partition":"partition","service":"sqs","region":"us-east-2","account_id":"account-id","resource":"resource","resource_type":["Colon_delimited","resourcetype"],"qualifier":["Colon_delimited","qualifier"]}
 
     [OK] Correctly failed to parse input as an ARN.
     input:
@@ -309,22 +294,16 @@ let%expect_test "of_string" =
 
     [FIXME] Input unexpected to parse as ARN but did.
     input: arn:partition:sqs:us-east-2:account-id:resourcetype:resource/qualifier
-    arn: ((partition partition) (service sqs) (region (us-east-2))
-     (account_id (account-id)) (resource resource/qualifier)
-     (resource_type (Colon_delimited resourcetype)) (qualifier None))
+    arn: {"partition":"partition","service":"sqs","region":"us-east-2","account_id":"account-id","resource":"resource/qualifier","resource_type":["Colon_delimited","resourcetype"],"qualifier":["None"]}
 
     [FIXME] Input unexpected to parse as ARN but did.
     input: arn:partition:sqs:us-east-2:account-id::resource:qualifier
-    arn: ((partition partition) (service sqs) (region (us-east-2))
-     (account_id (account-id)) (resource resource)
-     (resource_type (Colon_delimited ""))
-     (qualifier (Colon_delimited qualifier)))
+    arn: {"partition":"partition","service":"sqs","region":"us-east-2","account_id":"account-id","resource":"resource","resource_type":["Colon_delimited",""],"qualifier":["Colon_delimited","qualifier"]}
 
     [FIXME] Input unexpected to parse as ARN but did.
     input: arn:partition:sqs:us-east-2:account-id::resource/qualifier
-    arn: ((partition partition) (service sqs) (region (us-east-2))
-     (account_id (account-id)) (resource resource/qualifier)
-     (resource_type (Colon_delimited "")) (qualifier None)) |}]
+    arn: {"partition":"partition","service":"sqs","region":"us-east-2","account_id":"account-id","resource":"resource/qualifier","resource_type":["Colon_delimited",""],"qualifier":["None"]}
+    |}]
 ;;
 
 let to_string
@@ -420,13 +399,10 @@ let s3 ?(partition = Default.partition) ~bucket ~key () =
 ;;
 
 let s3_exn ?partition ~bucket ~key () : t =
-  let sexp_of_error =
-    [%sexp_of: [ `Invalid_bucket of string | `Invalid_key of string ]]
-  in
   match s3 ?partition ~bucket ~key () with
   | `Ok x -> x
-  | (`Invalid_bucket _ | `Invalid_key _) as x ->
-    failwith (sexp_of_error x |> Sexp.to_string)
+  | `Invalid_bucket b -> failwithf "Invalid_bucket %s" b ()
+  | `Invalid_key k -> failwithf "Invalid_key %s" k ()
 ;;
 
 module Exn = struct

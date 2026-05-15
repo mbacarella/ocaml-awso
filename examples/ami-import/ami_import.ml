@@ -26,7 +26,7 @@ let detect_architecture image =
 ;;
 
 let raise_transport_error ~name err =
-  failwithf "%s: %s" name (Awso.Http.Io.Error.sexp_of_call err |> Sexp.to_string_hum) ()
+  failwithf "%s: %s" name (Awso.Http.Io.Error.yojson_of_call err |> Yojson.Safe.pretty_to_string) ()
 ;;
 
 let dispatch_exn ~name ~error_to_json ~f =

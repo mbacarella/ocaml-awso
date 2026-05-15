@@ -1,4 +1,3 @@
-open! Core
 open! Import
 
 type t =
@@ -7,9 +6,8 @@ type t =
   ; field_name : string
   ; is_required : bool
   }
-[@@deriving fields, sexp_of]
-
-let create = Fields.create
+let create ~is_blob ~payload_module ~field_name ~is_required =
+  { is_blob; payload_module; field_name; is_required }
 
 let convert_rest_json
   { is_blob; payload_module; field_name; is_required }
@@ -39,11 +37,11 @@ let convert_rest_json
       | Enum_shape _
       | Map_shape _
       | Timestamp_shape _ ->
-        failwiths
-          ~here:[%here]
+        failwithj
+          ~here:()
           "Expected a Structure_shape"
           input_shape
-          Botodata.sexp_of_shape
+          Botodata.yojson_of_shape
       | Structure_shape ss ->
         let header_members =
           List.filter ss.members ~f:(fun (_field_name, member) ->
@@ -151,7 +149,10 @@ let of_botodata (op : Botodata.operation) ~shapes =
           | Structure_shape _ -> false
           | Blob_shape _ -> true
           | String_shape _ -> true
-          | shape -> raise_s [%message (op : Botodata.operation) (shape : Botodata.shape)]
+          | shape ->
+            failwithf "Unexpected payload shape %s for op %s"
+              (Yojson.Safe.to_string (Botodata.yojson_of_shape shape))
+              op.name ()
         in
         let field_name = String.uncapitalize name in
         let is_required =

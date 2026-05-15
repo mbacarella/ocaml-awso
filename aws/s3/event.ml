@@ -1,4 +1,5 @@
 open! Core
+open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 open Awso
 open! Import
 
@@ -8,25 +9,35 @@ type s3_event_notification_event_name =
   | `Reduced_redundancy_lost_object
   | `Unknown of string
   ]
-[@@deriving sexp_of]
+[@@deriving yojson_of]
 
-type request_parameters_entity = { source_ip_address : Core_unix.Inet_addr.t }
-[@@deriving sexp_of]
+type inet_addr = Core_unix.Inet_addr.t
+
+let yojson_of_inet_addr (a : inet_addr) =
+  `String (Core_unix.Inet_addr.to_string a)
+
+type time_float_unix = Time_float_unix.t
+
+let yojson_of_time_float_unix (t : time_float_unix) =
+  `String (Time_float_unix.to_string_utc t)
+
+type request_parameters_entity = { source_ip_address : inet_addr }
+[@@deriving yojson_of]
 
 type response_elements_entity =
   { x_amz_id_2 : string
   ; x_amz_request_id : string
   }
-[@@deriving sexp_of]
+[@@deriving yojson_of]
 
-type user_identity_entity = { principal_id : string } [@@deriving sexp_of]
+type user_identity_entity = { principal_id : string } [@@deriving yojson_of]
 
 type s3_bucket_entity =
   { name : string
   ; owner_identity : user_identity_entity
   ; arn : string
   }
-[@@deriving sexp_of]
+[@@deriving yojson_of]
 
 type s3_object_entity =
   { key : string
@@ -35,7 +46,7 @@ type s3_object_entity =
   ; version_id : string option
   ; sequencer : string
   }
-[@@deriving sexp_of]
+[@@deriving yojson_of]
 
 type s3_entity =
   { configuration_id : string
@@ -43,25 +54,25 @@ type s3_entity =
   ; object_ : s3_object_entity
   ; s3_schema_version : string
   }
-[@@deriving sexp_of]
+[@@deriving yojson_of]
 
 type s3_event_notification_record =
   { aws_region : Region.t
   ; event_name : s3_event_notification_event_name
   ; event_source : string
-  ; event_time : Time_float_unix.t option
+  ; event_time : time_float_unix option
   ; event_version : string
   ; request_parameters : request_parameters_entity
   ; response_elements : response_elements_entity
   ; s3 : s3_entity
   ; user_identity : user_identity_entity
   }
-[@@deriving sexp_of]
+[@@deriving yojson_of]
 
 type s3_event_notification = { records : s3_event_notification_record list }
-[@@deriving sexp_of]
+[@@deriving yojson_of]
 
-type t = s3_event_notification [@@deriving sexp_of]
+type t = s3_event_notification [@@deriving yojson_of]
 
 let request_parameters_entity_fields = [ "sourceIPAddress" ]
 let response_elements_entity_fields = [ "x-amz-id-2"; "x-amz-request-id" ]

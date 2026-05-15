@@ -29,7 +29,6 @@
 
     </code> *)
 
-open! Core
 open! Import
 
-val main : Command.t
+val main : string array -> unit

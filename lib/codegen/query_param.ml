@@ -1,4 +1,3 @@
-open! Core
 open! Import
 
 type t =
@@ -7,10 +6,11 @@ type t =
   ; shape : string
   ; is_required : bool
   }
-[@@deriving fields, sexp_of]
-
-let create = Fields.create
-let param_name = name
+let create ~name ~field_name ~shape ~is_required =
+  { name; field_name; shape; is_required }
+let is_required t = t.is_required
+let param_name t = t.name
+let field_name t = t.field_name
 
 let convert p =
   Printf.ksprintf Ast_convenience.evar "%s.to_header" (Shape.capitalized_id p.shape)

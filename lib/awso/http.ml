@@ -1,5 +1,6 @@
 open! Core
 open! Import
+open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 
 module type S = sig
   module Deferred : sig
@@ -79,24 +80,27 @@ module Meth = struct
     | `TRACE
     | `PATCH
     ]
-  [@@deriving sexp_of]
+  [@@deriving yojson_of]
 
   type t =
     [ standard
     | `Other of string
     ]
-  [@@deriving sexp_of]
+  [@@deriving yojson_of]
 
-  let pp ppf x = Sexp.pp_hum ppf (sexp_of_t x)
+  let pp ppf x = Format.pp_print_string ppf (Yojson.Safe.to_string (yojson_of_t x))
 end
 
 module Headers = struct
-  type t = (string, string) List.Assoc.t [@@deriving sexp_of]
+  type t = (string * string) list
+
+  let yojson_of_t l =
+    `List (List.map l ~f:(fun (k, v) -> `List [ `String k; `String v ]))
 
   let empty = []
   let of_list x = x
   let to_list x = x
-  let pp ppf l = Sexp.pp_hum ppf (sexp_of_t l)
+  let pp ppf l = Format.pp_print_string ppf (Yojson.Safe.to_string (yojson_of_t l))
 end
 
 module Monad = struct
@@ -142,7 +146,7 @@ module Range = struct
     | `From_start of int64
     | `From_end of int64
     ]
-  [@@deriving sexp]
+  [@@deriving yojson]
 
   let of_range start stop =
     if Int64.compare stop start < 0
@@ -153,23 +157,27 @@ module Range = struct
   ;;
 
   let%expect_test "of_range" =
+    let yojson_of_byte_range_spec_list l =
+      `List (List.map l ~f:yojson_of_byte_range_spec)
+    in
     let test x y =
       of_range x y
-      |> Result.sexp_of_t (List.sexp_of_t sexp_of_byte_range_spec) sexp_of_string
-      |> Sexp.to_string
+      |> (function
+            | Ok v -> `List [ `String "Ok"; yojson_of_byte_range_spec_list v ]
+            | Error s -> `List [ `String "Error"; `String s ])
+      |> Yojson.Safe.to_string
       |> print_endline
     in
     (* Test 1: first argument < second argument *)
     test Int64.min_value Int64.max_value;
-    [%expect {| (Ok((Range(-9223372036854775808 9223372036854775807)))) |}];
+    [%expect {| ["Ok",[["Range",-9223372036854775808,9223372036854775807]]] |}];
     (* Test 2: first argument = second argument *)
     test Int64.min_value Int64.min_value;
-    [%expect {| (Ok((Range(-9223372036854775808 -9223372036854775808)))) |}];
+    [%expect {| ["Ok",[["Range",-9223372036854775808,-9223372036854775808]]] |}];
     (* Test 3: first argument > second argument, invalid range *)
     test Int64.max_value Int64.min_value;
     [%expect
-      {|
-      (Error"Not a valid byte range specification: start=9223372036854775807, stop=-9223372036854775808") |}]
+      {| ["Error","Not a valid byte range specification: start=9223372036854775807, stop=-9223372036854775808"] |}]
   ;;
 
   let from_end start = [ `From_end start ]
@@ -204,7 +212,10 @@ module Range = struct
   ;;
 
   let%expect_test "to_header" =
-    let test x = printf !"%{sexp: (string * string)}" (to_header x) in
+    let test x =
+      let k, v = to_header x in
+      printf "(%s %s)" k v
+    in
     (* Test 1: empty list *)
     test [];
     [%expect {| (Range bytes=) |}];
@@ -246,7 +257,7 @@ module Status = struct
     [ `Continue
     | `Switching_protocols
     ]
-  [@@deriving sexp_of]
+  [@@deriving yojson_of]
 
   type successful =
     [ `OK
@@ -257,7 +268,7 @@ module Status = struct
     | `Reset_content
     | `Partial_content
     ]
-  [@@deriving sexp_of]
+  [@@deriving yojson_of]
 
   type redirection =
     [ `Multiple_choices
@@ -268,7 +279,7 @@ module Status = struct
     | `Use_proxy
     | `Temporary_redirect
     ]
-  [@@deriving sexp_of]
+  [@@deriving yojson_of]
 
   type client_error =
     [ `Bad_request
@@ -290,7 +301,7 @@ module Status = struct
     | `Enhance_your_calm
     | `Upgrade_required
     ]
-  [@@deriving sexp_of]
+  [@@deriving yojson_of]
 
   type server_error =
     [ `Internal_server_error
@@ -300,7 +311,7 @@ module Status = struct
     | `Gateway_timeout
     | `Http_version_not_supported
     ]
-  [@@deriving sexp_of]
+  [@@deriving yojson_of]
 
   type standard =
     [ informational
@@ -309,13 +320,13 @@ module Status = struct
     | client_error
     | server_error
     ]
-  [@@deriving sexp_of]
+  [@@deriving yojson_of]
 
   type t =
     [ standard
     | `Code of int
     ]
-  [@@deriving sexp_of]
+  [@@deriving yojson_of]
 end
 
 module Request = struct
@@ -325,13 +336,13 @@ module Request = struct
     ; headers : Headers.t
     ; body : string
     }
-  [@@deriving fields, sexp_of]
+  [@@deriving fields, yojson_of]
 
   let make ?(version = 1, 1) ?(headers = Headers.empty) ?(body = "") meth =
     { meth; version; headers; body }
   ;;
 
-  let pp ppf t = Sexp.pp_hum ppf (sexp_of_t t)
+  let pp ppf t = Format.pp_print_string ppf (Yojson.Safe.to_string (yojson_of_t t))
 end
 
 module Response = struct
@@ -361,13 +372,13 @@ module Io = struct
       ; body : string
       ; x_amzn_error_type : string option
       }
-    [@@deriving sexp]
+    [@@deriving yojson]
 
     type call =
       [ `Bad_response of bad_response
       | `Too_many_redirects
       ]
-    [@@deriving sexp]
+    [@@deriving yojson]
   end
 
   module type S = sig

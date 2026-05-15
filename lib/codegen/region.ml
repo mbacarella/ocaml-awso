@@ -1,8 +1,7 @@
-open! Core
 open! Import
 (* module Stdlib = Caml *)
 
-type t = string [@@deriving sexp, compare]
+type t = string
 
 let of_string (x : string) =
   match x with
@@ -39,6 +38,9 @@ let of_string (x : string) =
 ;;
 
 let to_string (x : t) = x
+let compare = String.compare
+let yojson_of_t (x : t) = `String x
+let t_of_yojson = function `String s -> of_string s | _ -> failwith "expected string"
 
 (* Asia Pacific *)
 let ap_northeast_1 = "ap-northeast-1"
@@ -82,7 +84,7 @@ let test_error call x =
 ;;
 
 let%expect_test "of_string" =
-  let test x = printf !"%s" (of_string x) in
+  let test x = printf "%s" (of_string x) in
   (* Test 1: empty string, error raided *)
   test_error of_string "";
   [%expect {|Failure("invalid region: ")|}];
@@ -95,7 +97,7 @@ let%expect_test "of_string" =
 ;;
 
 let%expect_test "to_string" =
-  let test x = printf !"%s" (to_string x) in
+  let test x = printf "%s" (to_string x) in
   test sa_east_1;
   [%expect {|sa-east-1|}]
 ;;

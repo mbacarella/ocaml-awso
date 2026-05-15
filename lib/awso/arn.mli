@@ -25,7 +25,7 @@ module Error : sig
     [ `Invalid_qualifier of string
     | `Invalid_account_id of string
     ]
-  [@@deriving sexp]
+  [@@deriving yojson]
 end
 
 type resource_type =
@@ -33,14 +33,14 @@ type resource_type =
   | `Colon_delimited of string
   | `None
   ]
-[@@deriving sexp]
+[@@deriving yojson]
 
 type qualifier =
   [ `Slash_delimited of string
   | `Colon_delimited of string
   | `None
   ]
-[@@deriving sexp]
+[@@deriving yojson]
 
 type t =
   { partition : string
@@ -51,7 +51,7 @@ type t =
   ; resource_type : resource_type
   ; qualifier : qualifier
   }
-[@@deriving sexp, compare]
+[@@deriving yojson, compare]
 
 (** Make an ARN. Defaults: - partition: {!Default.partition} - region: None -
     account_id: None - resource_type: `None - qualifier: `None *)

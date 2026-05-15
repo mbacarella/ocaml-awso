@@ -2,6 +2,6 @@
  (name awso_athena)
  (libraries awso-async.athena core_unix.command_unix)
  (preprocess
-  (pps ppx_jane))
+  (pps ppx_jane ppx_yojson_conv))
  (flags
   (:standard)))

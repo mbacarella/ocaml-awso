@@ -89,13 +89,13 @@ module Meth : sig
     [ standard
     | `Other of string
     ]
-  [@@deriving sexp_of]
+  [@@deriving yojson_of]
 
   val pp : Format.formatter -> t -> unit
 end
 
 module Headers : sig
-  type t [@@deriving sexp_of]
+  type t [@@deriving yojson_of]
 
   val pp : Format.formatter -> t -> unit
   val empty : t
@@ -156,7 +156,7 @@ module Status : sig
     [ `Continue
     | `Switching_protocols
     ]
-  [@@deriving sexp_of]
+  [@@deriving yojson_of]
 
   type successful =
     [ `OK
@@ -167,7 +167,7 @@ module Status : sig
     | `Reset_content
     | `Partial_content
     ]
-  [@@deriving sexp_of]
+  [@@deriving yojson_of]
 
   type redirection =
     [ `Multiple_choices
@@ -178,7 +178,7 @@ module Status : sig
     | `Use_proxy
     | `Temporary_redirect
     ]
-  [@@deriving sexp_of]
+  [@@deriving yojson_of]
 
   type client_error =
     [ `Bad_request
@@ -200,7 +200,7 @@ module Status : sig
     | `Enhance_your_calm
     | `Upgrade_required
     ]
-  [@@deriving sexp_of]
+  [@@deriving yojson_of]
 
   type server_error =
     [ `Internal_server_error
@@ -210,7 +210,7 @@ module Status : sig
     | `Gateway_timeout
     | `Http_version_not_supported
     ]
-  [@@deriving sexp_of]
+  [@@deriving yojson_of]
 
   type standard =
     [ informational
@@ -219,13 +219,13 @@ module Status : sig
     | client_error
     | server_error
     ]
-  [@@deriving sexp_of]
+  [@@deriving yojson_of]
 
   type t =
     [ standard
     | `Code of int
     ]
-  [@@deriving sexp_of]
+  [@@deriving yojson_of]
 end
 
 module Request : sig
@@ -270,13 +270,13 @@ module Io : sig
       ; body : string
       ; x_amzn_error_type : string option
       }
-    [@@deriving sexp]
+    [@@deriving yojson]
 
     type call =
       [ `Bad_response of bad_response
       | `Too_many_redirects
       ]
-    [@@deriving sexp]
+    [@@deriving yojson]
   end
 
   module type S = sig

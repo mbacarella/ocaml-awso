@@ -1,4 +1,3 @@
-open! Core
 open! Import
 
 (* Make a type declaration corresponding to the name and type returned by

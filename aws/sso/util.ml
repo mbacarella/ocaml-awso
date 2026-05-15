@@ -99,7 +99,7 @@ let parse_role_credentials_response_exn = function
   | Error (`Transport err) ->
     failwithf
       "Sso.get_role_credentials: transport: %s"
-      (err |> Awso.Http.Io.Error.sexp_of_call |> Sexp.to_string_hum)
+      (err |> Awso.Http.Io.Error.yojson_of_call |> Yojson.Safe.pretty_to_string)
       ()
 ;;
 

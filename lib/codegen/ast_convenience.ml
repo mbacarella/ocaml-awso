@@ -1,7 +1,6 @@
 (* TODO: Is this module needed. We adapted this from ppx_tools_versioned's
    Ast_convenience_404 in support of porting our code from ppx_tools_versioned to
    ppxlib. Does ppxlib already provide all of this? Also, is all of this being used? *)
-open! Core
 open! Import
 
 module Label = struct

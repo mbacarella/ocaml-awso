@@ -1,4 +1,3 @@
-open! Core
 open! Import
 
 val shape_is_header_structure : Botodata.service -> Botodata.shape -> bool

@@ -1,4 +1,3 @@
-open! Core
 open! Import
 
 (** A parser returning a value of type ['a].

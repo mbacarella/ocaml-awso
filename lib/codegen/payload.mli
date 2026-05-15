@@ -1,8 +1,7 @@
-open! Core
 open! Import
 
 (** The abstract representation of how to interact with a HTTP body. *)
-type t [@@deriving sexp_of]
+type t
 
 (** {2 Constructors} *)
 

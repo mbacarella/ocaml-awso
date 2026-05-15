@@ -28,7 +28,7 @@ module S3_custom_command_settings : sig
     ; use_dualstack_endpoint : string option
     ; addressing_style : string option
     }
-  [@@deriving fields, sexp]
+  [@@deriving fields, yojson]
 end
 
 type t =
@@ -62,7 +62,7 @@ type t =
   ; tcp_keepalive : string option
   ; s3_custom_command_settings : S3_custom_command_settings.t option
   }
-[@@deriving sexp]
+[@@deriving yojson]
 
 val empty : t
 

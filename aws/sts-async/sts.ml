@@ -1,14 +1,15 @@
 open! Core
+open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 open! Async
 
 module Statement = struct
   type effect_ =
     | Accept
     | Deny
-  [@@deriving sexp]
+  [@@deriving yojson]
 
-  type action = string list [@@deriving sexp]
-  type resource = string list [@@deriving sexp]
+  type action = string list [@@deriving yojson]
+  type resource = string list [@@deriving yojson]
 
   let effect_to_string = function
     | Accept -> "Allow"
@@ -25,7 +26,7 @@ module Statement = struct
     ; action : action
     ; resource : resource
     }
-  [@@deriving sexp]
+  [@@deriving yojson]
 
   let create ?(effect_ = default_effect) ?(sid = default_sid) ~action ~resource () =
     { sid; effect_; action; resource }
@@ -52,7 +53,7 @@ module Policy = struct
     { version : string
     ; statement : Statement.t list
     }
-  [@@deriving sexp]
+  [@@deriving yojson]
 
   let to_json t =
     `Assoc

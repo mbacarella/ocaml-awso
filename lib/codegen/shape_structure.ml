@@ -1,4 +1,3 @@
-open! Core
 open! Import
 
 type constr =
@@ -13,7 +12,18 @@ type constr =
   | Pattern of string
   | List_min of int
   | List_max of int
-[@@deriving variants, sexp_of]
+
+let int_min x = Int_min x
+let int_max x = Int_max x
+let int64_min x = Int64_min x
+let int64_max x = Int64_max x
+let string_min x = String_min x
+let string_max x = String_max x
+let float_min x = Float_min x
+let float_max x = Float_max x
+let pattern x = Pattern x
+let list_min x = List_min x
+let list_max x = List_max x
 
 let apply_constraint cons =
   let loc = !Ast_helper.default_loc in
@@ -177,7 +187,18 @@ let%expect_test "make_of_structure_shape" =
 
 type core_type = Parsetree.core_type
 
-let sexp_of_core_type t = t |> Util.core_type_to_string |> [%sexp_of: string]
+let yojson_of_constr = function
+  | Int_min x -> `List [ `String "Int_min"; `Int x ]
+  | Int_max x -> `List [ `String "Int_max"; `Int x ]
+  | Int64_min x -> `List [ `String "Int64_min"; `Intlit (Int64.to_string x) ]
+  | Int64_max x -> `List [ `String "Int64_max"; `Intlit (Int64.to_string x) ]
+  | String_min x -> `List [ `String "String_min"; `Int x ]
+  | String_max x -> `List [ `String "String_max"; `Int x ]
+  | Float_min x -> `List [ `String "Float_min"; `Float x ]
+  | Float_max x -> `List [ `String "Float_max"; `Float x ]
+  | Pattern x -> `List [ `String "Pattern"; `String x ]
+  | List_min x -> `List [ `String "List_min"; `Int x ]
+  | List_max x -> `List [ `String "List_max"; `Int x ]
 
 type kind =
   | Constraints of
@@ -185,7 +206,17 @@ type kind =
       ; base_type : core_type
       }
   | Build of Botodata.structure_shape
-[@@deriving sexp_of]
+
+let yojson_of_kind = function
+  | Constraints { constraints; base_type } ->
+    `Assoc
+      [ "Constraints",
+        `Assoc
+          [ "constraints", `List (Stdlib.List.map yojson_of_constr constraints)
+          ; "base_type", `String (Util.core_type_to_string base_type)
+          ]
+      ]
+  | Build _ -> `String "Build"
 
 let constraints base_type l = Constraints { constraints = List.filter_opt l; base_type }
 
@@ -224,7 +255,7 @@ let kind shape =
 ;;
 
 let%expect_test "kind" =
-  let test shape = Format.printf !"%{sexp:kind}%!" (kind shape) in
+  let test shape = print_string (Yojson.Safe.to_string (yojson_of_kind (kind shape))) in
   let integer_shape ?min ?max () =
     Botodata.Integer_shape
       { box = None
@@ -236,21 +267,21 @@ let%expect_test "kind" =
       }
   in
   test (integer_shape ());
-  [%expect {| (Constraints (constraints ()) (base_type int)) |}];
+  [%expect {| {"Constraints":{"constraints":[],"base_type":"int"}} |}];
   test (integer_shape ~min:3 ());
-  [%expect {| (Constraints (constraints ((Int_min 3))) (base_type int)) |}];
+  [%expect {| {"Constraints":{"constraints":[["Int_min",3]],"base_type":"int"}} |}];
   test (integer_shape ~max:5 ());
-  [%expect {| (Constraints (constraints ((Int_max 5))) (base_type int)) |}];
+  [%expect {| {"Constraints":{"constraints":[["Int_max",5]],"base_type":"int"}} |}];
   test (integer_shape ~min:3 ~max:5 ());
-  [%expect {| (Constraints (constraints ((Int_min 3) (Int_max 5))) (base_type int)) |}];
+  [%expect {| {"Constraints":{"constraints":[["Int_min",3],["Int_max",5]],"base_type":"int"}} |}];
   let long_shape ?min ?max () =
     Botodata.Long_shape { box = None; min; max; documentation = None }
   in
   test (long_shape ());
-  [%expect {| (Constraints (constraints ()) (base_type int64)) |}];
+  [%expect {| {"Constraints":{"constraints":[],"base_type":"int64"}} |}];
   test (long_shape ~min:3L ~max:5L ());
   [%expect
-    {| (Constraints (constraints ((Int64_min 3) (Int64_max 5))) (base_type int64)) |}];
+    {| {"Constraints":{"constraints":[["Int64_min",3],["Int64_max",5]],"base_type":"int64"}} |}];
   let string_shape ?min ?max ?pattern () =
     Botodata.String_shape
       { pattern
@@ -263,23 +294,19 @@ let%expect_test "kind" =
       }
   in
   test (string_shape ());
-  [%expect {| (Constraints (constraints ()) (base_type string)) |}];
+  [%expect {| {"Constraints":{"constraints":[],"base_type":"string"}} |}];
   test (string_shape ~min:3 ~max:5 ~pattern:"PATTERN" ());
   [%expect
-    {|
-      (Constraints (constraints ((Pattern PATTERN) (String_min 3) (String_max 5)))
-       (base_type string)) |}];
+    {| {"Constraints":{"constraints":[["Pattern","PATTERN"],["String_min",3],["String_max",5]],"base_type":"string"}} |}];
   let blob_shape ?min ?max () =
     Botodata.Blob_shape
       { min; max; sensitive = None; streaming = None; documentation = None }
   in
   test (blob_shape ());
-  [%expect {| (Constraints (constraints ()) (base_type string)) |}];
+  [%expect {| {"Constraints":{"constraints":[],"base_type":"string"}} |}];
   test (blob_shape ~min:3 ~max:5 ());
   [%expect
-    {|
-      (Constraints (constraints ((String_min 3) (String_max 5)))
-       (base_type string)) |}];
+    {| {"Constraints":{"constraints":[["String_min",3],["String_max",5]],"base_type":"string"}} |}];
   let list_shape ?min ?max () =
     Botodata.List_shape
       { min
@@ -293,12 +320,10 @@ let%expect_test "kind" =
       }
   in
   test (list_shape ());
-  [%expect {| (Constraints (constraints ()) (base_type "Shape.t list")) |}];
+  [%expect {| {"Constraints":{"constraints":[],"base_type":"Shape.t list"}} |}];
   test (list_shape ~min:3 ~max:5 ());
   [%expect
-    {|
-    (Constraints (constraints ((List_min 3) (List_max 5)))
-     (base_type "Shape.t list")) |}];
+    {| {"Constraints":{"constraints":[["List_min",3],["List_max",5]],"base_type":"Shape.t list"}} |}];
   let map_shape ?min ?max () =
     Botodata.Map_shape
       { min
@@ -312,12 +337,10 @@ let%expect_test "kind" =
       }
   in
   test (map_shape ());
-  [%expect {| (Constraints (constraints ()) (base_type "(Key.t * Value.t) list")) |}];
+  [%expect {| {"Constraints":{"constraints":[],"base_type":"(Key.t * Value.t) list"}} |}];
   test (map_shape ~min:3 ~max:5 ());
   [%expect
-    {|
-      (Constraints (constraints ((List_min 3) (List_max 5)))
-       (base_type "(Key.t * Value.t) list")) |}]
+    {| {"Constraints":{"constraints":[["List_min",3],["List_max",5]],"base_type":"(Key.t * Value.t) list"}} |}]
 ;;
 
 let body ?result_wrapper shape =

@@ -1,5 +1,4 @@
 open! Core
-
 open! Awso.Import
 
 module Attribute : sig
@@ -7,7 +6,7 @@ module Attribute : sig
     { name : string
     ; value : string option
     }
-  [@@deriving sexp]
+  [@@deriving yojson]
 
   type t =
     [ `Unknown of raw_attribute
@@ -26,17 +25,17 @@ module Attribute : sig
     | `Preferred_user_name of string option
     | `Given_name of string
     ]
-  [@@deriving sexp]
+  [@@deriving yojson]
 end
 
-type attribute = Attribute.t [@@deriving sexp]
+type attribute = Attribute.t [@@deriving yojson]
 
 type t =
   { username : string
   ; attributes : attribute list
   ; access_token : string
   }
-[@@deriving sexp]
+[@@deriving yojson]
 
 type msg = string
 

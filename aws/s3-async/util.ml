@@ -1,4 +1,5 @@
 open! Core
+open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 open! Async
 
 module Source = struct
@@ -31,7 +32,7 @@ module Source = struct
       ; file_size : int64
       ; partitions : int64
       }
-    [@@deriving sexp]
+    [@@deriving yojson]
 
     let params_of_file_size ~chunk_size ~file_size =
       let open Int64 in
@@ -53,7 +54,7 @@ module Source = struct
     let%expect_test "params_of_file_size" =
       let test ?(chunk_size = default_chunk_size) file_size =
         let r = params_of_file_size ~chunk_size ~file_size in
-        printf !"%{sexp:stat}\n" r
+        print_endline (Yojson.Safe.to_string (yojson_of_stat r))
       in
       test 1024L;
       [%expect {| ((chunk_size 1024) (file_size 1024) (partitions 1)) |}];

@@ -5,10 +5,10 @@ module Statement : sig
   type effect_ =
     | Accept
     | Deny
-  [@@deriving sexp]
+  [@@deriving yojson]
 
-  type action = string list [@@deriving sexp]
-  type resource = string list [@@deriving sexp]
+  type action = string list [@@deriving yojson]
+  type resource = string list [@@deriving yojson]
 
   val effect_to_string : effect_ -> string
 
@@ -18,7 +18,7 @@ module Statement : sig
     ; action : action
     ; resource : resource
     }
-  [@@deriving sexp]
+  [@@deriving yojson]
 
   val create
     :  ?effect_:effect_
@@ -36,7 +36,7 @@ module Policy : sig
     { version : string
     ; statement : Statement.t list
     }
-  [@@deriving sexp]
+  [@@deriving yojson]
 
   val to_json : t -> Awso.Json.t
   val create : ?version:string -> Statement.t list -> t

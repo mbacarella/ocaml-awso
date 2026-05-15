@@ -1,4 +1,3 @@
-open! Core
 open! Import
 
 val to_string : case

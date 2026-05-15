@@ -1,11 +1,9 @@
-open! Core
 open! Import
 
 type t =
   | Xml
   | Json
   | Of_header_and_body of string option
-[@@deriving sexp_of]
 
 let of_botodata ~default (op : Botodata.operation) ~shapes =
   Option.map op.output ~f:(fun { shape = output_shape_name; _ } ->

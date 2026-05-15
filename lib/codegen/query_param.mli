@@ -1,8 +1,7 @@
-open! Core
 open! Import
 
 (** An abstract representation of a URL query parameter. *)
-type t [@@deriving sexp_of]
+type t
 
 (** {2 Constructors} *)
 

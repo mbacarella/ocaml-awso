@@ -1,4 +1,3 @@
-open! Core
 open! Import
 
 (* This is a copy/paste of Yojson.Safe.t with `Tuple and `Variant removed.
@@ -13,7 +12,7 @@ type t =
   | `Assoc of (string * t) list
   | `List of t list
   ]
-[@@deriving sexp]
+
 
 exception Json_error of string
 

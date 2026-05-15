@@ -1,8 +1,9 @@
 open! Core
 open! Import
+open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 
 module type Stanza_spec = sig
-  type t [@@deriving sexp]
+  type t [@@deriving yojson]
 
   val empty : t
 
@@ -33,7 +34,7 @@ module S3_custom_command_settings = struct
     ; use_dualstack_endpoint : string option
     ; addressing_style : string option
     }
-  [@@deriving fields, sexp]
+  [@@deriving fields, yojson]
 
   let empty =
     { max_concurrent_requests = None
@@ -134,7 +135,16 @@ module Ini_file_parser (Stanza : Stanza_spec) (File_env : File_env_spec) = struc
     ;;
   end
 
-  type t = Stanza.t String.Map.t [@@deriving sexp]
+  type t = Stanza.t String.Map.t
+
+  let yojson_of_t m =
+    `Assoc (Map.to_alist m |> List.map ~f:(fun (k, v) -> k, Stanza.yojson_of_t v))
+
+  let _t_of_yojson = function
+    | `Assoc l ->
+      String.Map.of_alist_exn
+        (List.map l ~f:(fun (k, v) -> k, Stanza.t_of_yojson v))
+    | _ -> failwith "expected object"
 
   let of_string s =
     s
@@ -166,11 +176,15 @@ module Ini_file_parser (Stanza : Stanza_spec) (File_env : File_env_spec) = struc
 end
 
 module Config_file_stanza = struct
-  (* The [@sexp.opaque]s below are to avoid serializing secrets. *)
+  type redacted = string option
+
+  let yojson_of_redacted (_ : redacted) = `String "<redacted>"
+  let redacted_of_yojson j = option_of_yojson string_of_yojson j
+
   type t =
     { aws_access_key_id : string option
-    ; aws_secret_access_key : (string option[@sexp.opaque])
-    ; aws_session_token : (string option[@sexp.opaque])
+    ; aws_secret_access_key : redacted
+    ; aws_session_token : redacted
     ; region : Region.t option
     ; output : string option
     ; ca_bundle : string option
@@ -198,7 +212,7 @@ module Config_file_stanza = struct
     ; tcp_keepalive : string option
     ; s3_custom_command_settings : S3_custom_command_settings.t option
     }
-  [@@deriving fields, sexp]
+  [@@deriving fields, yojson]
 
   let empty =
     { aws_access_key_id = None
@@ -326,7 +340,7 @@ let%expect_test "File.of_string" =
   let test s =
     match Config_file.of_string s with
     | Error s -> printf "Failed with: %s\n" s
-    | Ok r -> r |> Config_file.sexp_of_t |> Sexp.to_string_hum |> print_endline
+    | Ok r -> r |> Config_file.yojson_of_t |> Yojson.Safe.pretty_to_string |> print_endline
   in
   test
     {|
@@ -340,32 +354,73 @@ region=us-east-1
 |};
   [%expect
     {|
-    ((default
-      ((aws_access_key_id (AKIAIOSFODNN7EXAMPLE))
-       (aws_secret_access_key <opaque>) (aws_session_token <opaque>)
-       (region (us-west-2)) (output (json)) (ca_bundle ()) (cli_auto_prompt ())
-       (cli_binary_format ()) (cli_history ()) (cli_pager ())
-       (cli_timestamp_format ()) (credential_process ()) (credential_source ())
-       (duration_seconds ()) (external_id ()) (max_attempts ()) (mfa_serial ())
-       (parameter_validation ()) (retry_mode ()) (role_arn ())
-       (role_session_name ()) (source_profile ()) (sso_account_id ())
-       (sso_region ()) (sso_role_name ()) (sso_start_url ())
-       (web_identity_token_file ()) (tcp_keepalive ())
-       (s3_custom_command_settings ())))
-     ("profile other_profile"
-      ((aws_access_key_id ()) (aws_secret_access_key <opaque>)
-       (aws_session_token <opaque>) (region (us-east-1)) (output ())
-       (ca_bundle ()) (cli_auto_prompt ()) (cli_binary_format ())
-       (cli_history ()) (cli_pager ()) (cli_timestamp_format ())
-       (credential_process ()) (credential_source ()) (duration_seconds ())
-       (external_id ()) (max_attempts ()) (mfa_serial ())
-       (parameter_validation ()) (retry_mode ()) (role_arn ())
-       (role_session_name ()) (source_profile ()) (sso_account_id ())
-       (sso_region ()) (sso_role_name ()) (sso_start_url ())
-       (web_identity_token_file ()) (tcp_keepalive ())
-       (s3_custom_command_settings ())))) |}];
+    {
+      "default": {
+        "aws_access_key_id": "AKIAIOSFODNN7EXAMPLE",
+        "aws_secret_access_key": "<redacted>",
+        "aws_session_token": "<redacted>",
+        "region": "us-west-2",
+        "output": "json",
+        "ca_bundle": null,
+        "cli_auto_prompt": null,
+        "cli_binary_format": null,
+        "cli_history": null,
+        "cli_pager": null,
+        "cli_timestamp_format": null,
+        "credential_process": null,
+        "credential_source": null,
+        "duration_seconds": null,
+        "external_id": null,
+        "max_attempts": null,
+        "mfa_serial": null,
+        "parameter_validation": null,
+        "retry_mode": null,
+        "role_arn": null,
+        "role_session_name": null,
+        "source_profile": null,
+        "sso_account_id": null,
+        "sso_region": null,
+        "sso_role_name": null,
+        "sso_start_url": null,
+        "web_identity_token_file": null,
+        "tcp_keepalive": null,
+        "s3_custom_command_settings": null
+      },
+      "profile other_profile": {
+        "aws_access_key_id": null,
+        "aws_secret_access_key": "<redacted>",
+        "aws_session_token": "<redacted>",
+        "region": "us-east-1",
+        "output": null,
+        "ca_bundle": null,
+        "cli_auto_prompt": null,
+        "cli_binary_format": null,
+        "cli_history": null,
+        "cli_pager": null,
+        "cli_timestamp_format": null,
+        "credential_process": null,
+        "credential_source": null,
+        "duration_seconds": null,
+        "external_id": null,
+        "max_attempts": null,
+        "mfa_serial": null,
+        "parameter_validation": null,
+        "retry_mode": null,
+        "role_arn": null,
+        "role_session_name": null,
+        "source_profile": null,
+        "sso_account_id": null,
+        "sso_region": null,
+        "sso_role_name": null,
+        "sso_start_url": null,
+        "web_identity_token_file": null,
+        "tcp_keepalive": null,
+        "s3_custom_command_settings": null
+      }
+    }
+    |}];
   test "";
-  [%expect {| () |}];
+  [%expect {| {} |}];
   test "[";
   [%expect {| Failed with: line missing closing ]: "[" |}];
   test "output=json";
@@ -408,7 +463,7 @@ module Shared_credentials_file_stanza = struct
     { aws_access_key_id : string option
     ; aws_secret_access_key : string option
     }
-  [@@deriving fields, sexp]
+  [@@deriving fields, yojson]
 
   let empty = { aws_access_key_id = None; aws_secret_access_key = None }
 
@@ -507,11 +562,11 @@ let make_internal
         match Map.find config_profiles (sprintf "profile %s" profile) with
         | Some x -> Some x
         | None ->
-          failwiths
-            ~here:[%here]
-            "config file doesn't contain requested profile"
-            (config_file, profile)
-            [%sexp_of: string option * string])
+          failwithf
+            "config file %s doesn't contain requested profile %s"
+            (Option.value config_file ~default:"<none>")
+            profile
+            ())
     in
     (* inherit all of the non-None fields from default, if any *)
     match default, config_profile with
@@ -616,7 +671,7 @@ type t =
   ; tcp_keepalive : string option
   ; s3_custom_command_settings : S3_custom_command_settings.t option
   }
-[@@deriving sexp]
+[@@deriving yojson]
 
 let empty =
   { aws_access_key_id = None
@@ -717,7 +772,7 @@ let%test_module "Cfg tests" =
         let run shared_credentials_file =
           match make ?shared_credentials_file ~config_file ?profile () with
           | Error s -> printf "Error: %s\n" s
-          | Ok r -> r |> sexp_of_t |> Sexp.to_string_hum |> print_endline
+          | Ok r -> r |> yojson_of_t |> Yojson.Safe.pretty_to_string |> print_endline
         in
         match shared_credentials_file with
         | None -> run None
@@ -775,62 +830,146 @@ aws_secret_access_key=bbbbbbbbbbbbbbbbbbbbbbb
       test ~config_file ();
       [%expect
         {|
-    ((aws_access_key_id (AKIAIOSFODNN7EXAMPLE))
-     (aws_secret_access_key (wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY))
-     (aws_session_token ()) (region (us-west-2)) (output (json)) (ca_bundle ())
-     (cli_auto_prompt ()) (cli_binary_format ()) (cli_history ()) (cli_pager ())
-     (cli_timestamp_format ()) (credential_process ()) (credential_source ())
-     (duration_seconds ()) (external_id ()) (max_attempts ()) (mfa_serial ())
-     (parameter_validation ()) (retry_mode ()) (role_arn ())
-     (role_session_name ()) (source_profile ()) (sso_account_id ())
-     (sso_region ()) (sso_role_name ()) (sso_start_url ())
-     (web_identity_token_file ()) (tcp_keepalive ())
-     (s3_custom_command_settings ())) |}];
+        {
+          "aws_access_key_id": "AKIAIOSFODNN7EXAMPLE",
+          "aws_secret_access_key": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+          "aws_session_token": null,
+          "region": "us-west-2",
+          "output": "json",
+          "ca_bundle": null,
+          "cli_auto_prompt": null,
+          "cli_binary_format": null,
+          "cli_history": null,
+          "cli_pager": null,
+          "cli_timestamp_format": null,
+          "credential_process": null,
+          "credential_source": null,
+          "duration_seconds": null,
+          "external_id": null,
+          "max_attempts": null,
+          "mfa_serial": null,
+          "parameter_validation": null,
+          "retry_mode": null,
+          "role_arn": null,
+          "role_session_name": null,
+          "source_profile": null,
+          "sso_account_id": null,
+          "sso_region": null,
+          "sso_role_name": null,
+          "sso_start_url": null,
+          "web_identity_token_file": null,
+          "tcp_keepalive": null,
+          "s3_custom_command_settings": null
+        }
+        |}];
       test ~profile:"other_profile" ~config_file ();
       [%expect
         {|
-    ((aws_access_key_id (AKIAIOSFODNN7EXAMPLE))
-     (aws_secret_access_key (wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY))
-     (aws_session_token ()) (region (us-east-1)) (output (json)) (ca_bundle ())
-     (cli_auto_prompt ()) (cli_binary_format ()) (cli_history ()) (cli_pager ())
-     (cli_timestamp_format ()) (credential_process ()) (credential_source ())
-     (duration_seconds ()) (external_id ()) (max_attempts ()) (mfa_serial ())
-     (parameter_validation ()) (retry_mode ()) (role_arn ())
-     (role_session_name ()) (source_profile ()) (sso_account_id ())
-     (sso_region ()) (sso_role_name ()) (sso_start_url ())
-     (web_identity_token_file ()) (tcp_keepalive ())
-     (s3_custom_command_settings ())) |}]
+        {
+          "aws_access_key_id": "AKIAIOSFODNN7EXAMPLE",
+          "aws_secret_access_key": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+          "aws_session_token": null,
+          "region": "us-east-1",
+          "output": "json",
+          "ca_bundle": null,
+          "cli_auto_prompt": null,
+          "cli_binary_format": null,
+          "cli_history": null,
+          "cli_pager": null,
+          "cli_timestamp_format": null,
+          "credential_process": null,
+          "credential_source": null,
+          "duration_seconds": null,
+          "external_id": null,
+          "max_attempts": null,
+          "mfa_serial": null,
+          "parameter_validation": null,
+          "retry_mode": null,
+          "role_arn": null,
+          "role_session_name": null,
+          "source_profile": null,
+          "sso_account_id": null,
+          "sso_region": null,
+          "sso_role_name": null,
+          "sso_start_url": null,
+          "web_identity_token_file": null,
+          "tcp_keepalive": null,
+          "s3_custom_command_settings": null
+        }
+        |}]
     ;;
 
     let%expect_test "File.of_string with creds" =
       test ~shared_credentials_file ~config_file ();
       [%expect
         {|
-        ((aws_access_key_id (aaaaaaaaaaaaaaaaaaaaaaaaa))
-         (aws_secret_access_key (aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa))
-         (aws_session_token ()) (region (us-west-2)) (output (json)) (ca_bundle ())
-         (cli_auto_prompt ()) (cli_binary_format ()) (cli_history ()) (cli_pager ())
-         (cli_timestamp_format ()) (credential_process ()) (credential_source ())
-         (duration_seconds ()) (external_id ()) (max_attempts ()) (mfa_serial ())
-         (parameter_validation ()) (retry_mode ()) (role_arn ())
-         (role_session_name ()) (source_profile ()) (sso_account_id ())
-         (sso_region ()) (sso_role_name ()) (sso_start_url ())
-         (web_identity_token_file ()) (tcp_keepalive ())
-         (s3_custom_command_settings ())) |}];
+        {
+          "aws_access_key_id": "aaaaaaaaaaaaaaaaaaaaaaaaa",
+          "aws_secret_access_key": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "aws_session_token": null,
+          "region": "us-west-2",
+          "output": "json",
+          "ca_bundle": null,
+          "cli_auto_prompt": null,
+          "cli_binary_format": null,
+          "cli_history": null,
+          "cli_pager": null,
+          "cli_timestamp_format": null,
+          "credential_process": null,
+          "credential_source": null,
+          "duration_seconds": null,
+          "external_id": null,
+          "max_attempts": null,
+          "mfa_serial": null,
+          "parameter_validation": null,
+          "retry_mode": null,
+          "role_arn": null,
+          "role_session_name": null,
+          "source_profile": null,
+          "sso_account_id": null,
+          "sso_region": null,
+          "sso_role_name": null,
+          "sso_start_url": null,
+          "web_identity_token_file": null,
+          "tcp_keepalive": null,
+          "s3_custom_command_settings": null
+        }
+        |}];
       test ~profile:"other_profile" ~shared_credentials_file ~config_file ();
       [%expect
         {|
-        ((aws_access_key_id (bbbbbbbbbbbbbbbbbbbbbbbbbb))
-         (aws_secret_access_key (bbbbbbbbbbbbbbbbbbbbbbb)) (aws_session_token ())
-         (region (us-east-1)) (output (json)) (ca_bundle ()) (cli_auto_prompt ())
-         (cli_binary_format ()) (cli_history ()) (cli_pager ())
-         (cli_timestamp_format ()) (credential_process ()) (credential_source ())
-         (duration_seconds ()) (external_id ()) (max_attempts ()) (mfa_serial ())
-         (parameter_validation ()) (retry_mode ()) (role_arn ())
-         (role_session_name ()) (source_profile ()) (sso_account_id ())
-         (sso_region ()) (sso_role_name ()) (sso_start_url ())
-         (web_identity_token_file ()) (tcp_keepalive ())
-         (s3_custom_command_settings ())) |}];
+        {
+          "aws_access_key_id": "bbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "aws_secret_access_key": "bbbbbbbbbbbbbbbbbbbbbbb",
+          "aws_session_token": null,
+          "region": "us-east-1",
+          "output": "json",
+          "ca_bundle": null,
+          "cli_auto_prompt": null,
+          "cli_binary_format": null,
+          "cli_history": null,
+          "cli_pager": null,
+          "cli_timestamp_format": null,
+          "credential_process": null,
+          "credential_source": null,
+          "duration_seconds": null,
+          "external_id": null,
+          "max_attempts": null,
+          "mfa_serial": null,
+          "parameter_validation": null,
+          "retry_mode": null,
+          "role_arn": null,
+          "role_session_name": null,
+          "source_profile": null,
+          "sso_account_id": null,
+          "sso_region": null,
+          "sso_role_name": null,
+          "sso_start_url": null,
+          "web_identity_token_file": null,
+          "tcp_keepalive": null,
+          "s3_custom_command_settings": null
+        }
+        |}];
       test
         ~profile:"development"
         ~shared_credentials_file
@@ -838,21 +977,47 @@ aws_secret_access_key=bbbbbbbbbbbbbbbbbbbbbbb
         ();
       [%expect
         {|
-        ((aws_access_key_id (aaaaaaaaaaaaaaaaaaaaaaaaa))
-         (aws_secret_access_key (aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa))
-         (aws_session_token ()) (region (us-west-2)) (output (json)) (ca_bundle ())
-         (cli_auto_prompt ()) (cli_binary_format ()) (cli_history ()) (cli_pager ())
-         (cli_timestamp_format ()) (credential_process ()) (credential_source ())
-         (duration_seconds ()) (external_id ()) (max_attempts ()) (mfa_serial ())
-         (parameter_validation ()) (retry_mode ()) (role_arn ())
-         (role_session_name ()) (source_profile ()) (sso_account_id ())
-         (sso_region ()) (sso_role_name ()) (sso_start_url ())
-         (web_identity_token_file ()) (tcp_keepalive ())
-         (s3_custom_command_settings
-          (((max_concurrent_requests (20)) (max_queue_size (10000))
-            (multipart_threshold (64MB)) (multipart_chunksize (16MB))
-            (max_bandwidth (50MB/s)) (use_accelerate_endpoint (true))
-            (use_dualstack_endpoint ()) (addressing_style (path)))))) |}]
+        {
+          "aws_access_key_id": "aaaaaaaaaaaaaaaaaaaaaaaaa",
+          "aws_secret_access_key": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "aws_session_token": null,
+          "region": "us-west-2",
+          "output": "json",
+          "ca_bundle": null,
+          "cli_auto_prompt": null,
+          "cli_binary_format": null,
+          "cli_history": null,
+          "cli_pager": null,
+          "cli_timestamp_format": null,
+          "credential_process": null,
+          "credential_source": null,
+          "duration_seconds": null,
+          "external_id": null,
+          "max_attempts": null,
+          "mfa_serial": null,
+          "parameter_validation": null,
+          "retry_mode": null,
+          "role_arn": null,
+          "role_session_name": null,
+          "source_profile": null,
+          "sso_account_id": null,
+          "sso_region": null,
+          "sso_role_name": null,
+          "sso_start_url": null,
+          "web_identity_token_file": null,
+          "tcp_keepalive": null,
+          "s3_custom_command_settings": {
+            "max_concurrent_requests": "20",
+            "max_queue_size": "10000",
+            "multipart_threshold": "64MB",
+            "multipart_chunksize": "16MB",
+            "max_bandwidth": "50MB/s",
+            "use_accelerate_endpoint": "true",
+            "use_dualstack_endpoint": null,
+            "addressing_style": "path"
+          }
+        }
+        |}]
     ;;
   end)
 ;;

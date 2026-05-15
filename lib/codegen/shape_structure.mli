@@ -1,4 +1,3 @@
-open! Core
 open! Import
 
 val structure_item_of_shape

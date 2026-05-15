@@ -2,10 +2,7 @@
  (name awso_codegen)
  (public_name awso-codegen)
  (libraries
-  core
-  core_unix
-  core_unix.filename_unix
-  core_unix.sys_unix
+  unix
   yojson
   xmlm
   ocamlgraph
@@ -14,11 +11,11 @@
   ppxlib.astlib
   sedlex
   re.pcre
-  uri-sexp)
+  uri)
  (flags :standard -open Ppxlib)
  (inline_tests)
  (preprocess
-  (pps ppx_jane sedlex.ppx ppxlib.metaquot)))
+  (pps ppx_expect ppx_let sedlex.ppx ppxlib.metaquot)))
 
 (rule
  (targets service.ml service.mli)

@@ -1,12 +1,14 @@
 (** AWS regions. *)
-open! Core
 
 open! Import
 
-type t = private string [@@deriving sexp, compare]
+type t = private string
 
 val of_string : string -> t
 val to_string : t -> string
+val compare : t -> t -> int
+val yojson_of_t : t -> Yojson.Safe.t
+val t_of_yojson : Yojson.Safe.t -> t
 
 (* Asia Pacific *)
 val ap_northeast_1 : t

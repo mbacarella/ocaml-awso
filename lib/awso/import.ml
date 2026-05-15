@@ -25,13 +25,17 @@ end
 
 let ensure b fmt = Format.kasprintf (fun s -> if b then Ok () else Error s) fmt
 
+let print_unit_or_error = function
+  | Ok () -> print_endline "(Ok ())"
+  | Error s -> printf "(Error %S)\n" s
+
 let check_string_min s ~min =
   ensure (Stdlib.String.length s >= min) "Expected string of length greater than %d" min
 ;;
 
 let%expect_test "check_string_min" =
   let test s =
-    check_string_min s ~min:3 |> [%sexp_of: (unit, string) Result.t] |> print_s
+    check_string_min s ~min:3 |> print_unit_or_error
   in
   test "ab";
   [%expect {| (Error "Expected string of length greater than 3") |}];
@@ -47,7 +51,7 @@ let check_string_max s ~max =
 
 let%expect_test "check_string_max" =
   let test s =
-    check_string_max s ~max:3 |> [%sexp_of: (unit, string) Result.t] |> print_s
+    check_string_max s ~max:3 |> print_unit_or_error
   in
   test "ab";
   [%expect {| (Ok ()) |}];
@@ -101,7 +105,7 @@ let check_pattern s ~pattern =
 
 let%expect_test "check_pattern" =
   let test s =
-    check_pattern s ~pattern:{|\d|} |> [%sexp_of: (unit, string) Result.t] |> print_s
+    check_pattern s ~pattern:{|\d|} |> print_unit_or_error
   in
   test "abc";
   [%expect {| (Error "String abc doesn't match expected regex \\d") |}];
@@ -115,7 +119,7 @@ let check_list_min l ~min =
 
 let%expect_test "check_list_min" =
   let test l =
-    check_list_min l ~min:3 |> [%sexp_of: (unit, string) Result.t] |> print_s
+    check_list_min l ~min:3 |> print_unit_or_error
   in
   test [ 1; 2 ];
   [%expect {| (Error "Expected list of length greater than 3") |}];
@@ -131,7 +135,7 @@ let check_list_max l ~max =
 
 let%expect_test "check_list_max" =
   let test l =
-    check_list_max l ~max:3 |> [%sexp_of: (unit, string) Result.t] |> print_s
+    check_list_max l ~max:3 |> print_unit_or_error
   in
   test [ 1; 2 ];
   [%expect {| (Ok ()) |}];
@@ -144,7 +148,7 @@ let%expect_test "check_list_max" =
 let check_int_min m ~min = ensure (m >= min) "Expected integer greater than %d" min
 
 let%expect_test "check_int_min" =
-  let test n = check_int_min n ~min:3 |> [%sexp_of: (unit, string) Result.t] |> print_s in
+  let test n = check_int_min n ~min:3 |> print_unit_or_error in
   test 2;
   [%expect {| (Error "Expected integer greater than 3") |}];
   test 3;
@@ -156,7 +160,7 @@ let%expect_test "check_int_min" =
 let check_int_max m ~max = ensure (m <= max) "Expected less than %d" max
 
 let%expect_test "check_int_max" =
-  let test n = check_int_max n ~max:3 |> [%sexp_of: (unit, string) Result.t] |> print_s in
+  let test n = check_int_max n ~max:3 |> print_unit_or_error in
   test 2;
   [%expect {| (Ok ()) |}];
   test 3;
@@ -175,7 +179,7 @@ let check_float_min m ~min:fmin =
 
 let%expect_test "check_float_min" =
   let test n =
-    check_float_min n ~min:3. |> [%sexp_of: (unit, string) Result.t] |> print_s
+    check_float_min n ~min:3. |> print_unit_or_error
   in
   test 2.;
   [%expect {| (Error "Expected float greater than or equal to 3.000000") |}];
@@ -189,7 +193,7 @@ let check_float_max m ~max:fmax = ensure Float.(m <= fmax) "Expected less than %
 
 let%expect_test "check_float_max" =
   let test n =
-    check_float_max n ~max:3. |> [%sexp_of: (unit, string) Result.t] |> print_s
+    check_float_max n ~max:3. |> print_unit_or_error
   in
   test 2.;
   [%expect {| (Ok ()) |}];
@@ -201,7 +205,7 @@ let%expect_test "check_float_max" =
 
 let%expect_test "check_int64_min" =
   let test n =
-    check_int64_min n ~min:3L |> [%sexp_of: (unit, string) Result.t] |> print_s
+    check_int64_min n ~min:3L |> print_unit_or_error
   in
   test 2L;
   [%expect {| (Error "Expected long greater than 3") |}];
@@ -215,7 +219,7 @@ let check_int64_max i ~max = ensure (Int64.( <= ) i max) "Expected long less tha
 
 let%expect_test "check_int64_max" =
   let test n =
-    check_int64_max n ~max:3L |> [%sexp_of: (unit, string) Result.t] |> print_s
+    check_int64_max n ~max:3L |> print_unit_or_error
   in
   test 2L;
   [%expect {| (Ok ()) |}];

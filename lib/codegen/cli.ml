@@ -1,4 +1,3 @@
-open! Core
 open! Import
 
 type member_info =
@@ -205,7 +204,11 @@ let preamble ~loc =
       | Error err -> (
         match err with
         | `Transport err ->
-          failwiths ~here:[%here] "Transport error" err Awso.Http.Io.Error.sexp_of_call
+          let msg = match err with
+            | `Bad_response (r : Awso.Http.Io.Error.bad_response) -> sprintf "Bad response: code=%d body=%s" r.code r.body
+            | `Too_many_redirects -> "Too many redirects"
+          in
+          failwithf "Transport error: %s" msg ()
         | `AWS err -> (
           match error_to_json with
           | None -> failwithf "endpoint error, but no error values defined in boto" ()

@@ -1,4 +1,3 @@
-open! Core
 open! Import
 
 let request_args (service : Botodata.service) (op : Botodata.operation option) =
@@ -23,11 +22,11 @@ let request_args (service : Botodata.service) (op : Botodata.operation option) =
       | Enum_shape _
       | Map_shape _
       | Timestamp_shape _ ->
-        failwiths
-          ~here:[%here]
+        failwithj
+          ~here:()
           "Expected a Structure_shape"
           input_shape
-          Botodata.sexp_of_shape
+          Botodata.yojson_of_shape
       | Structure_shape ss -> (
         let streaming_members =
           List.filter ss.members ~f:(fun (_, member) ->
@@ -237,7 +236,7 @@ let of_response data =
              Endpoint.in_result_module endpoint "of_json"
              |> Option.value_exn
                   ~message:"no result module"
-                  ~error:(Error.create_s [%message (endpoint : Endpoint.t)])
+                  ~error:"no result module for endpoint"
            in
            [%expr
              match resp with
@@ -248,7 +247,7 @@ let of_response data =
              Endpoint.in_result_module endpoint "of_header_and_body"
              |> Option.value_exn
                   ~message:"no result module"
-                  ~error:(Error.create_s [%message (endpoint : Endpoint.t)])
+                  ~error:"no result module for endpoint"
            in
            match payload_opt with
            | Some payload ->
@@ -352,69 +351,66 @@ let%expect_test "of_response" =
   [%expect
     {|
     let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-      (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) =
-      (let handle_error err error_of_json =
-         match err with
-         | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-         | `Bad_response
-             { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-             let generic_error () =
-               Error
-                 (`Transport
-                    (`Bad_response
-                       { Awso.Http.Io.Error.code = code; body; x_amzn_error_type
-                       })) in
-             (match (x_amzn_error_type, error_of_json,
-                      ((code >= 400) && (code <= 599)))
-              with
-              | (Some error_type, Some error_of_json, true) ->
-                  let json = Awso.Json.from_string body in
-                  Error (`AWS (error_of_json error_type json))
-              | (None, Some error_of_json, true) ->
-                  (try
-                     let json = Awso.Json.from_string body in
-                     match json |> (Awso.Json.Util.member_or_null "__type") with
-                     | `String error_type ->
-                         let error_type =
-                           match String.lsplit2 error_type ~on:'#' with
-                           | Some (_, s) -> s
-                           | None -> error_type in
-                         Error (`AWS (error_of_json error_type json))
-                     | `Null -> generic_error ()
-                     | _ ->
-                         failwithf "Error '__type' did not have string type: %s"
-                           body ()
-                   with | _ -> generic_error ())
-              | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
-       let response_to_json resp =
-         Awso.Json.from_string (Awso.Http.Response.body resp) in
-       let _ = resp in
-       let _ = handle_error in
-       let _ = response_to_json in
-       match endpoint with
-       | Of_header_and_no_body ->
-           (match resp with
-            | Error err -> handle_error err None
-            | Ok resp ->
-                let headers =
-                  Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-                Ok (Result.of_header_and_body (headers, ())))
-       | Direct ->
-           (match resp with
-            | Error err -> handle_error err None
-            | Ok resp -> Ok (DirectResult.of_json (response_to_json resp)))
-       | Of_header_and_body ->
-           (match resp with
-            | Error err -> handle_error err None
-            | Ok resp ->
-                let body =
-                  Payload_module.of_string (Awso.Http.Response.body resp) in
-                let headers =
-                  Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-                Ok (Result_of_header_and_body.of_header_and_body (headers, body)))
-       | No_output -> Ok () : (o,
-                                [ `AWS of e
-                                | `Transport of Awso.Http.Io.Error.call ]) result)
+      (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
+      (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
+      let handle_error err error_of_json =
+        match err with
+        | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
+        | `Bad_response
+            { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
+            let generic_error () =
+              Error
+                (`Transport
+                   (`Bad_response
+                      { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
+            (match (x_amzn_error_type, error_of_json,
+                     ((code >= 400) && (code <= 599)))
+             with
+             | (Some error_type, Some error_of_json, true) ->
+                 let json = Awso.Json.from_string body in
+                 Error (`AWS (error_of_json error_type json))
+             | (None, Some error_of_json, true) ->
+                 (try
+                    let json = Awso.Json.from_string body in
+                    match json |> (Awso.Json.Util.member_or_null "__type") with
+                    | `String error_type ->
+                        let error_type =
+                          match String.lsplit2 error_type ~on:'#' with
+                          | Some (_, s) -> s
+                          | None -> error_type in
+                        Error (`AWS (error_of_json error_type json))
+                    | `Null -> generic_error ()
+                    | _ ->
+                        failwithf "Error '__type' did not have string type: %s"
+                          body ()
+                  with | _ -> generic_error ())
+             | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+      let response_to_json resp =
+        Awso.Json.from_string (Awso.Http.Response.body resp) in
+      let _ = resp in
+      let _ = handle_error in
+      let _ = response_to_json in
+      match endpoint with
+      | Of_header_and_no_body ->
+          (match resp with
+           | Error err -> handle_error err None
+           | Ok resp ->
+               let headers =
+                 Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+               Ok (Result.of_header_and_body (headers, ())))
+      | Direct ->
+          (match resp with
+           | Error err -> handle_error err None
+           | Ok resp -> Ok (DirectResult.of_json (response_to_json resp)))
+      | Of_header_and_body ->
+          (match resp with
+           | Error err -> handle_error err None
+           | Ok resp ->
+               let body = Payload_module.of_string (Awso.Http.Response.body resp) in
+               let headers =
+                 Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+               Ok (Result_of_header_and_body.of_header_and_body (headers, body)))
+      | No_output -> Ok ()
     |}]
 ;;
 

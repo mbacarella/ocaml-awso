@@ -1,6 +1,5 @@
 (** This module was adapted from ppx_tools_versioned's Ast_convenience_404 in support
    of porting our code from ppx_tools_versioned to ppxlib. *)
-open! Core
 
 open! Import
 
@@ -109,5 +108,5 @@ val http_method : ?loc:location -> Botodata.http_method -> expression
 val structure_items_to_module_structure
   :  ?loc:location
   -> label
-  -> Astlib.Ast_500.Parsetree.structure
+  -> structure
   -> structure_item

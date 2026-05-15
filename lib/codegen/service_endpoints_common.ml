@@ -1,4 +1,3 @@
-open! Core
 open! Import
 
 let request_body_arg (op : Botodata.operation option) =
@@ -132,7 +131,7 @@ let make_error_expression ~loc ~label endpoint =
         Endpoint.in_result_module endpoint label
         |> Option.value_exn
              ~message:"no result module"
-             ~error:(Error.create_s [%message (endpoint : Endpoint.t)])
+             ~error:"no result module for endpoint"
       in
       [%expr Some [%e to_error]])
 ;;

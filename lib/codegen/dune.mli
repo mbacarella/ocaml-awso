@@ -1,4 +1,3 @@
-open! Core
 open! Import
 
 val make : date:string -> service:string -> string
