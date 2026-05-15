@@ -4,10 +4,12 @@ synopsis: "AWS API base library Unix"
 maintainer: ["Michael Bacarella <m@bacarella.com>"]
 authors: ["Solvuu Inc."]
 license: "MIT"
-homepage: "https://github.com/solvuu/awso"
+homepage: "https://github.com/mbacarella/awso"
 bug-reports: "https://github.com/mbacarella/awso/issues"
 depends: [
   "dune" {>= "3.8"}
+  "awso"
+  "ppx_jane"
   "odoc" {with-doc}
 ]
 build: [

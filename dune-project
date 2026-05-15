@@ -26,7 +26,13 @@
    (>= 3.1.0))
   (cohttp
    (>= 0.21.0))
+  core
+  core_unix
   cryptokit
+  ppx_expect
+  ppx_jane
+  (re
+   (>= 1.7.2))
   xmlm
   zarith))
 
@@ -36,6 +42,8 @@
  (depends
   awso
   cohttp-async
+  core_unix
+  ppx_jane
   (async
    (>= v0.11.0))
   async_ssl))
@@ -43,22 +51,27 @@
 (package
  (name awso-lwt)
  (synopsis "AWS API base library Lwt")
- (depends awso lwt cohttp-lwt-unix))
+ (depends awso core_unix lwt lwt_ppx cohttp-lwt-unix))
 
 (package
  (name awso-codegen)
  (synopsis "AWS botocore code generator")
  (depends
   cohttp
+  core
+  core_unix
   ocamlgraph
   ppxlib
+  ppx_jane
   (re
    (>= 1.7.2))
   (sedlex
    (>= 2.3))
+  uri-sexp
   xmlm
   yojson))
 
 (package
  (name awso-unix)
- (synopsis "AWS API base library Unix"))
+ (synopsis "AWS API base library Unix")
+ (depends awso ppx_jane))

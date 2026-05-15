@@ -4,15 +4,19 @@ synopsis: "AWS botocore code generator"
 maintainer: ["Michael Bacarella <m@bacarella.com>"]
 authors: ["Solvuu Inc."]
 license: "MIT"
-homepage: "https://github.com/solvuu/awso"
+homepage: "https://github.com/mbacarella/awso"
 bug-reports: "https://github.com/mbacarella/awso/issues"
 depends: [
   "dune" {>= "3.8"}
   "cohttp"
+  "core"
+  "core_unix"
   "ocamlgraph"
   "ppxlib"
+  "ppx_jane"
   "re" {>= "1.7.2"}
   "sedlex" {>= "2.3"}
+  "uri-sexp"
   "xmlm"
   "yojson"
   "odoc" {with-doc}
