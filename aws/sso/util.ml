@@ -1,3 +1,4 @@
+open! Values
 open! Core
 
 (* In sha1_insecure below, [@alert "-crypto"] suppresses the "SHA1 is broken" alert
@@ -65,7 +66,7 @@ let get_sso_role_request_and_cfg_exn ~cfg ~cached_sso_token_file jsonstr =
         ()
   in
   let request =
-    Values.GetRoleCredentialsRequest.make
+    GetRoleCredentialsRequest.make
       ~accountId:
         (cfg.Awso.Cfg.sso_account_id
         |> Option.value_exn ~message:"No 'sso_account_id' set in credentials")
@@ -86,15 +87,15 @@ let get_sso_role_request_and_cfg ~cfg ~cached_sso_token_file jsonstr =
 ;;
 
 let parse_role_credentials_response_exn = function
-  | Ok ({ roleCredentials } : Values.GetRoleCredentialsResponse.t) -> roleCredentials
-  | Error (`AWS (`UnauthorizedException (ue : Values.UnauthorizedException.t))) ->
+  | Ok ({ roleCredentials } : GetRoleCredentialsResponse.t) -> roleCredentials
+  | Error (`AWS (`UnauthorizedException (ue : UnauthorizedException.t))) ->
     eprintf "Unauthorized: %s\n" (Option.value ~default:"<no message given>" ue.message);
     eprintf "Maybe you need to re-run `aws sso login`?\n";
     exit 1
   | Error (`AWS err) ->
     failwithf
       "Sso.get_role_credentials: AWS call: %s"
-      (err |> Values.GetRoleCredentialsResponse.error_to_json |> Yojson.Safe.to_string)
+      (err |> GetRoleCredentialsResponse.error_to_json |> Yojson.Safe.to_string)
       ()
   | Error (`Transport err) ->
     failwithf
@@ -105,7 +106,7 @@ let parse_role_credentials_response_exn = function
 
 let update_cfg_with_role_credentials_exn ~(cfg : Awso.Cfg.t) role_credentials =
   let ({ accessKeyId; secretAccessKey; sessionToken; expiration }
-        : Values.RoleCredentials.t)
+        : RoleCredentials.t)
     =
     role_credentials
     |> Option.value_exn

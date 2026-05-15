@@ -24,13 +24,13 @@ val authenticate
   -> client_id:string
   -> username:string
   -> password:string
-  -> ( Awso_cognito_idp_async.Values.RespondToAuthChallengeResponse.t
+  -> ( Awso_cognito_idp_async.RespondToAuthChallengeResponse.t
      , [ `Initiate_auth of
-         [ `AWS of Awso_cognito_idp_async.Values.InitiateAuthResponse.error
+         [ `AWS of Awso_cognito_idp_async.InitiateAuthResponse.error
          | `Transport of Awso.Http.Io.Error.call
          ]
        | `Respond_to_auth_challenge of
-         [ `AWS of Awso_cognito_idp_async.Values.RespondToAuthChallengeResponse.error
+         [ `AWS of Awso_cognito_idp_async.RespondToAuthChallengeResponse.error
          | `Transport of Awso.Http.Io.Error.call
          ]
        ] )

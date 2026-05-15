@@ -2,8 +2,7 @@ open! Core
 open! Async
 
 module Cognito_idp = struct
-  module Values = Awso_cognito_idp_async.Values
-
+  include Awso_cognito_idp_async
   include Awso_cognito_idp_async.Util
 end
 
@@ -12,7 +11,7 @@ let amzdate (timestamp : Time_float_unix.t) : string =
 ;;
 
 (*let authFlow = Cognito_idp.Api.AuthFlowType.USER_SRP_AUTH*)
-let authFlow = Cognito_idp.Values.AuthFlowType.USER_SRP_AUTH
+let authFlow = Cognito_idp.AuthFlowType.USER_SRP_AUTH
 
 (* TODO move to test module let default_clientId =
    Cognito_idp.Api.ClientIdType.make "nvgta6tlkbnt9s73uasceds5"
@@ -28,11 +27,11 @@ let authenticate ~user_pool_id ~client_id ~username ~password =
     Awso_srp.ephemeral_a ()
   in
   let authParameters =
-    Cognito_idp.Values.AuthParametersType.make [ "USERNAME", username; "SRP_A", srp_a ]
+    Cognito_idp.AuthParametersType.make [ "USERNAME", username; "SRP_A", srp_a ]
   in
-  let clientId = Cognito_idp.Values.ClientIdType.make client_id in
+  let clientId = Cognito_idp.ClientIdType.make client_id in
   let initiate_auth_request =
-    Cognito_idp.Values.InitiateAuthRequest.make ~authParameters ~authFlow ~clientId ()
+    Cognito_idp.InitiateAuthRequest.make ~authParameters ~authFlow ~clientId ()
   in
   let cfg : Awso.Cfg.t =
     { Awso.Cfg.empty with
@@ -48,7 +47,7 @@ let authenticate ~user_pool_id ~client_id ~username ~password =
   match resp with
   | Error err -> return (Error (`Initiate_auth err))
   | Ok
-      { Cognito_idp.Values.InitiateAuthResponse.challengeParameters
+      { Cognito_idp.InitiateAuthResponse.challengeParameters
       ; challengeName
       ; authenticationResult = _
       ; session = _
@@ -97,7 +96,7 @@ let authenticate ~user_pool_id ~client_id ~username ~password =
         ()
     in
     let challengeResponses =
-      Cognito_idp.Values.ChallengeResponsesType.make
+      Cognito_idp.ChallengeResponsesType.make
         [ "TIMESTAMP", timestamp
         ; "USERNAME", user_id_for_srp
         ; "PASSWORD_CLAIM_SECRET_BLOCK", secret_block_bytes
@@ -105,7 +104,7 @@ let authenticate ~user_pool_id ~client_id ~username ~password =
         ]
     in
     let challenge_request =
-      Cognito_idp.Values.RespondToAuthChallengeRequest.make
+      Cognito_idp.RespondToAuthChallengeRequest.make
         ~clientId
         ~challengeName
         ~challengeResponses

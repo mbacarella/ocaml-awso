@@ -32,7 +32,7 @@
  (action
   (with-stdout-to
    awso_pinpoint_email_lwt.ml
-   (echo "include Io\nmodule Values = Values"))))
+   (echo "include Io\ninclude Values"))))
 
 (rule
  (targets values.ml)

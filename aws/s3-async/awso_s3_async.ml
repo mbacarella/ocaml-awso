@@ -1,5 +1,5 @@
 include Io
-module Values = Values
+include Values
 module Util = Util
 module Cli_manual = Cli_manual
 module Cli = Cli

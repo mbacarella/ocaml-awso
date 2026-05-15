@@ -1,3 +1,4 @@
+open! Values
 open! Core
 open! Async
 
@@ -50,7 +51,7 @@ val assume_role
   -> session_name:string
   -> role:string
   -> Awso.Cfg.t
-  -> Values.AssumeRoleResponse.t Deferred.t
+  -> AssumeRoleResponse.t Deferred.t
 
 val assume_role_with_saml
   :  ?policy:Policy.t
@@ -61,4 +62,4 @@ val assume_role_with_saml
   -> saml_assertion:string
   -> role:string
   -> Awso.Cfg.t
-  -> Values.AssumeRoleWithSAMLResponse.t Deferred.t
+  -> AssumeRoleWithSAMLResponse.t Deferred.t

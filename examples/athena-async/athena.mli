@@ -1,9 +1,8 @@
 open! Core
 open! Async
+open Awso_athena_async
 
 (** AWS Athena Async API *)
-
-module Values = Awso_athena_async.Values
 
 module Query : sig
   type query_id_params =
@@ -12,14 +11,14 @@ module Query : sig
     }
   
   type athena_start =
-    { result_configuration : Values.ResultConfiguration.t
-    ; query_execution_output : Values.StartQueryExecutionOutput.t
+    { result_configuration : ResultConfiguration.t
+    ; query_execution_output : StartQueryExecutionOutput.t
     }
   
   type t =
     [ `Athena_execution_id of string
     | `Athena_start of athena_start
-    | `Athena_execution of Values.GetQueryExecutionOutput.t
+    | `Athena_execution of GetQueryExecutionOutput.t
     ]
   
   val of_id : string -> [< t > `Athena_execution_id ]
@@ -34,9 +33,9 @@ module Query : sig
 
   val execution_id : [< t ] -> string option
   val output_location : [< t ] -> string option
-  val status : [< t ] -> Values.QueryExecutionStatus.t option
-  val state : [< t ] -> Values.QueryExecutionState.t option
-  val is_state : [< t ] -> Values.QueryExecutionState.t -> bool
+  val status : [< t ] -> QueryExecutionStatus.t option
+  val state : [< t ] -> QueryExecutionState.t option
+  val is_state : [< t ] -> QueryExecutionState.t -> bool
   val succeeded : [< t ] -> bool
   val canceled : [< t ] -> bool
   val running : [< t ] -> bool
@@ -52,7 +51,7 @@ module Query : sig
     -> [< t ]
     -> [ `Missing_execution_id
        | `Missing_result_set_metadata of query_id_params
-       | `Ok of Values.ColumnInfo.t list * Values.Row.t Pipe.Reader.t
+       | `Ok of ColumnInfo.t list * Row.t Pipe.Reader.t
        ]
        Deferred.t
 

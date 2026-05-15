@@ -1,3 +1,4 @@
+open! Values
 open! Core
 open! Async
 open Awso_async
@@ -8,7 +9,7 @@ let cognito_list_user_pools' cfg ?max_results () =
   >>= fun l ->
   let s =
     Util.user_pools_to_string
-      (Option.value ~default:[] l.Values.ListUserPoolsResponse.userPools)
+      (Option.value ~default:[] l.ListUserPoolsResponse.userPools)
   in
   Writer.write (force Writer.stdout) s;
   return ()

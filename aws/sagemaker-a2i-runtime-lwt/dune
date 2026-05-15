@@ -32,7 +32,7 @@
  (action
   (with-stdout-to
    awso_sagemaker_a2i_runtime_lwt.ml
-   (echo "include Io\nmodule Values = Values"))))
+   (echo "include Io\ninclude Values"))))
 
 (rule
  (targets values.ml)

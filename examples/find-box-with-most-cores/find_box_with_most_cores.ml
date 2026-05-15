@@ -8,20 +8,20 @@ let or_die = function
     let s = err |> Awso.Http.Io.Error.yojson_of_call |> Yojson.Safe.pretty_to_string in
     failwithf "transport error: %s" s ()
   | Error (`AWS aws) ->
-    let s = aws |> Ec2.Values.Ec2_error.to_json |> Yojson.Safe.to_string in
+    let s = aws |> Ec2.Ec2_error.to_json |> Yojson.Safe.to_string in
     failwithf "aws error: %s" s ()
 ;;
 
 let fetch_instance_types ~min_vcpus =
   let filter =
-    Ec2.Values.Filter.make
+    Ec2.Filter.make
       ~name:"processor-info.supported-architecture"
       ~values:[ "x86_64" ]
       ()
   in
   let rec fetch_all ?next_token acc =
     let req =
-      Ec2.Values.DescribeInstanceTypesRequest.make
+      Ec2.DescribeInstanceTypesRequest.make
         ~filters:[ filter ]
         ~maxResults:100
         ?nextToken:next_token
@@ -37,7 +37,7 @@ let fetch_instance_types ~min_vcpus =
   let%bind all_types = fetch_all [] in
   let rows =
     List.filter_map all_types ~f:(fun info ->
-      let open Ec2.Values in
+      let open Ec2 in
       let vcpus = Option.bind info.vCpuInfo ~f:(fun v -> v.VCpuInfo.defaultVCpus) in
       let mem_mib =
         Option.bind info.memoryInfo ~f:(fun m ->
@@ -56,7 +56,7 @@ let fetch_instance_types ~min_vcpus =
 ;;
 
 let fetch_spot_prices ~instance_types =
-  let open Ec2.Values in
+  let open Ec2 in
   let instance_type_values =
     List.filter_map instance_types ~f:(fun name ->
       Option.try_with (fun () -> InstanceType.of_string name))

@@ -1,3 +1,4 @@
+open! Values
 open! Core
 open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 open! Async
@@ -80,17 +81,17 @@ let assume_role
     match%bind
       Io.assume_role
         ~cfg
-        (Values.AssumeRoleRequest.make
-           ~roleArn:(Values.ArnType.make role)
-           ~roleSessionName:(Values.RoleSessionNameType.make session_name)
+        (AssumeRoleRequest.make
+           ~roleArn:(ArnType.make role)
+           ~roleSessionName:(RoleSessionNameType.make session_name)
            ?durationSeconds:
-             (Option.map duration_sec ~f:Values.RoleDurationSecondsType.make)
+             (Option.map duration_sec ~f:RoleDurationSecondsType.make)
            ?policy:
              (Option.map
                 ~f:(fun x ->
                   Policy.to_json x
                   |> Yojson.Safe.to_string
-                  |> Values.SessionPolicyDocumentType.make)
+                  |> SessionPolicyDocumentType.make)
                 policy)
            ())
     with
@@ -112,18 +113,18 @@ let assume_role_with_saml
     match%bind
       Io.assume_role_with_s_a_m_l
         ~cfg
-        (Values.AssumeRoleWithSAMLRequest.make
+        (AssumeRoleWithSAMLRequest.make
            ~principalArn:principal_arn
            ~sAMLAssertion:saml_assertion
-           ~roleArn:(Values.ArnType.make role)
+           ~roleArn:(ArnType.make role)
            ?durationSeconds:
-             (Option.map duration_sec ~f:Values.RoleDurationSecondsType.make)
+             (Option.map duration_sec ~f:RoleDurationSecondsType.make)
            ?policy:
              (Option.map
                 ~f:(fun x ->
                   Policy.to_json x
                   |> Yojson.Safe.to_string
-                  |> Values.SessionPolicyDocumentType.make)
+                  |> SessionPolicyDocumentType.make)
                 policy)
            ())
     with

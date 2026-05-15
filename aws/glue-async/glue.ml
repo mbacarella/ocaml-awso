@@ -1,3 +1,4 @@
+open! Values
 open! Core
 open! Async
 
@@ -6,12 +7,12 @@ type already_exists_error = [ `AlreadyExistsException ] [@@deriving yojson]
 let create_database ?catalog_id ?description ~name cfg =
   Io.create_database
     ~cfg
-    (Values.CreateDatabaseRequest.make
-       ?catalogId:(Option.map ~f:Values.CatalogIdString.make catalog_id)
+    (CreateDatabaseRequest.make
+       ?catalogId:(Option.map ~f:CatalogIdString.make catalog_id)
        ~databaseInput:
-         (Values.DatabaseInput.make
-            ?description:(Option.map ~f:Values.DescriptionString.make description)
-            ~name:(Values.NameString.make name)
+         (DatabaseInput.make
+            ?description:(Option.map ~f:DescriptionString.make description)
+            ~name:(NameString.make name)
             ())
        ())
   >>= function

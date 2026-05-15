@@ -1,3 +1,4 @@
+open! Values
 open! Core
 open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 open! Async
@@ -87,9 +88,9 @@ module Source = struct
 end
 
 let put_object cfg ~bucket ~key body =
-  let key = Values.ObjectKey.make key in
-  let body = Values.Body.of_string body in
-  let request = Values.PutObjectRequest.make ~body ~bucket ~key () in
+  let key = ObjectKey.make key in
+  let body = Body.of_string body in
+  let request = PutObjectRequest.make ~body ~bucket ~key () in
   Io.put_object ~cfg request
   >>| function
   | Error e -> Error (`Put_object e)
@@ -102,7 +103,7 @@ let put_object cfg ~bucket ~key body =
 let delete_object cfg ~bucket ~key =
   Io.delete_object
     ~cfg
-    (Values.DeleteObjectRequest.make ~bucket ~key:(Values.ObjectKey.make key) ())
+    (DeleteObjectRequest.make ~bucket ~key:(ObjectKey.make key) ())
 ;;
 
 let put_file cfg ~bucket ~key file =
@@ -112,9 +113,9 @@ let put_file cfg ~bucket ~key file =
 ;;
 
 let get_object cfg ?(range : Awso.Http.Range.t option) ~bucket ~key () =
-  let key = Values.ObjectKey.make key in
+  let key = ObjectKey.make key in
   let range = Option.map ~f:Awso.Http.Range.to_header_value range in
-  let request = Values.GetObjectRequest.make ?range ~bucket ~key () in
+  let request = GetObjectRequest.make ?range ~bucket ~key () in
   Io.get_object ~cfg request
 ;;
 
@@ -125,22 +126,22 @@ type ('acc, 'error) callback =
   -> key:string
   -> part:int64
   -> num_parts:int64
-  -> [ `Complete of Values.ETag.t
-     | `Initial of Values.MultipartUploadId.t
-     | `Partition of Values.ETag.t
+  -> [ `Complete of ETag.t
+     | `Initial of MultipartUploadId.t
+     | `Partition of ETag.t
      ]
   -> ('acc, 'error) Deferred.Result.t
 
 let initialize_multipart cfg ~bucket ~key =
-  let key_obj = Values.ObjectKey.make key in
-  let req = Values.CreateMultipartUploadRequest.make ~bucket ~key:key_obj () in
+  let key_obj = ObjectKey.make key in
+  let req = CreateMultipartUploadRequest.make ~bucket ~key:key_obj () in
   Awso_async.Import.with_retries
   @@ fun () ->
   Io.create_multipart_upload ~cfg req
   >>| function
-  | Ok { Values.CreateMultipartUploadOutput.uploadId = Some uploadId; _ } ->
+  | Ok { CreateMultipartUploadOutput.uploadId = Some uploadId; _ } ->
     Ok (`Upload_id uploadId)
-  | Ok { Values.CreateMultipartUploadOutput.uploadId = None; _ } ->
+  | Ok { CreateMultipartUploadOutput.uploadId = None; _ } ->
     Error `Missing_upload_id
   | Error e -> Error (`Create_multipart_upload e)
 ;;
@@ -159,7 +160,7 @@ let multipart
   =
   Source.File.stat ?chunk_size file
   >>= fun { chunk_size; file_size; partitions = rem_parts } ->
-  let key_obj = Values.ObjectKey.make key in
+  let key_obj = ObjectKey.make key in
   let total = Int64.(file_size + file_offset) in
   let loaded = Int64.(of_int part * chunk_size) in
   let part = Int64.of_int part in
@@ -179,11 +180,11 @@ let multipart
       let contentLength = String.length part |> Int64.of_int in
       let contentMD5 = Awso.Client.content_md5 part in
       let upload_part_request =
-        Values.UploadPartRequest.make
+        UploadPartRequest.make
           ~bucket
           ~uploadId:upload_id
           ~partNumber:(to_int_exn i')
-          ~body:(Values.Body.of_string part)
+          ~body:(Body.of_string part)
           ~contentLength
           ~key:key_obj
           ~contentMD5
@@ -193,7 +194,7 @@ let multipart
       >>= function
       | Error e -> return (Error (`Upload_part e))
       | Ok uploadPartResp -> (
-        let eTag = Option.value_exn uploadPartResp.Values.UploadPartOutput.eTag in
+        let eTag = Option.value_exn uploadPartResp.UploadPartOutput.eTag in
         cb
           acc
           ~total
@@ -206,7 +207,7 @@ let multipart
         | Result.Error e -> return (Error (`Callback_error e))
         | Result.Ok acc ->
           return
-          @@ Ok (acc, Values.CompletedPart.make ~eTag ~partNumber:(to_int_exn i') ()))
+          @@ Ok (acc, CompletedPart.make ~eTag ~partNumber:(to_int_exn i') ()))
     in
     num_parts
     |> Int64.to_int_exn
@@ -228,10 +229,10 @@ let multipart
     | Error e -> return (Error e)
     | Ok (acc, rev_etags) -> (
       let multipartUpload =
-        Values.CompletedMultipartUpload.make ~parts:(List.rev rev_etags) ()
+        CompletedMultipartUpload.make ~parts:(List.rev rev_etags) ()
       in
       let req =
-        Values.CompleteMultipartUploadRequest.make
+        CompleteMultipartUploadRequest.make
           ~multipartUpload
           ~bucket
           ~key:key_obj
@@ -260,7 +261,7 @@ let map_bucket cfg ~bucket ~f =
     match%bind
       Io.list_objects_v2
         ~cfg
-        (Values.ListObjectsV2Request.make
+        (ListObjectsV2Request.make
            ?delimiter:None
            ?encodingType:None
            ?maxKeys:None

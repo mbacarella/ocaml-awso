@@ -1,3 +1,4 @@
+open! Values
 open! Core
 open! Async
 
@@ -20,7 +21,7 @@ let add_permission cfg ~queue_url ~label ~aws_account_ids ~actions =
   dispatch_exn ~name:"sqs.add_permission" ~error_to_json:unit_json ~f:(fun () ->
     Io.add_permission
       ~cfg
-      (Values.AddPermissionRequest.make
+      (AddPermissionRequest.make
          ~queueUrl:queue_url
          ~label
          ~aWSAccountIds:aws_account_ids
@@ -35,7 +36,7 @@ let change_message_visibility cfg ~queue_url ~receipt_handle ~visibility_timeout
     ~f:(fun () ->
     Io.change_message_visibility
       ~cfg
-      (Values.ChangeMessageVisibilityRequest.make
+      (ChangeMessageVisibilityRequest.make
          ~queueUrl:queue_url
          ~receiptHandle:receipt_handle
          ~visibilityTimeout:visibility_timeout
@@ -45,28 +46,28 @@ let change_message_visibility cfg ~queue_url ~receipt_handle ~visibility_timeout
 let change_message_visibility_batch cfg ~queue_url ~entries =
   dispatch_exn
     ~name:"sqs.message_visibility_batch"
-    ~error_to_json:Values.ChangeMessageVisibilityBatchResult.error_to_json
+    ~error_to_json:ChangeMessageVisibilityBatchResult.error_to_json
     ~f:(fun () ->
     Io.change_message_visibility_batch
       ~cfg
-      (Values.ChangeMessageVisibilityBatchRequest.make ~queueUrl:queue_url ~entries ()))
+      (ChangeMessageVisibilityBatchRequest.make ~queueUrl:queue_url ~entries ()))
 ;;
 
 let create_queue ?attributes cfg ~queue_name =
   dispatch_exn
     ~name:"sqs.create_queue"
-    ~error_to_json:Values.CreateQueueResult.error_to_json
+    ~error_to_json:CreateQueueResult.error_to_json
     ~f:(fun () ->
     Io.create_queue
       ~cfg
-      (Values.CreateQueueRequest.make ?attributes ~queueName:queue_name ()))
+      (CreateQueueRequest.make ?attributes ~queueName:queue_name ()))
 ;;
 
 let delete_message cfg ~queue_url ~receipt_handle =
   dispatch_exn ~name:"sqs.delete_message" ~error_to_json:unit_json ~f:(fun () ->
     Io.delete_message
       ~cfg
-      (Values.DeleteMessageRequest.make
+      (DeleteMessageRequest.make
          ~queueUrl:queue_url
          ~receiptHandle:receipt_handle
          ()))
@@ -75,26 +76,26 @@ let delete_message cfg ~queue_url ~receipt_handle =
 let delete_message_batch cfg ~queue_url ~entries =
   dispatch_exn
     ~name:"sqs.delete_message_batch"
-    ~error_to_json:Values.DeleteMessageBatchResult.error_to_json
+    ~error_to_json:DeleteMessageBatchResult.error_to_json
     ~f:(fun () ->
     Io.delete_message_batch
       ~cfg
-      (Values.DeleteMessageBatchRequest.make ~queueUrl:queue_url ~entries ()))
+      (DeleteMessageBatchRequest.make ~queueUrl:queue_url ~entries ()))
 ;;
 
 let delete_queue cfg ~queue_url =
   dispatch_exn ~name:"sqs.delete_queue" ~error_to_json:unit_json ~f:(fun () ->
-    Io.delete_queue ~cfg (Values.DeleteQueueRequest.make ~queueUrl:queue_url ()))
+    Io.delete_queue ~cfg (DeleteQueueRequest.make ~queueUrl:queue_url ()))
 ;;
 
 let get_queue_attributes ?attribute_names cfg ~queue_url =
   dispatch_exn
     ~name:"sqs.get_queue_attributes"
-    ~error_to_json:Values.GetQueueAttributesResult.error_to_json
+    ~error_to_json:GetQueueAttributesResult.error_to_json
     ~f:(fun () ->
     Io.get_queue_attributes
       ~cfg
-      (Values.GetQueueAttributesRequest.make
+      (GetQueueAttributesRequest.make
          ?attributeNames:attribute_names
          ~queueUrl:queue_url
          ()))
@@ -103,11 +104,11 @@ let get_queue_attributes ?attribute_names cfg ~queue_url =
 let get_queue_url ?queue_owner_aws_account_id cfg ~queue_name =
   dispatch_exn
     ~name:"sqs.get_queue_url"
-    ~error_to_json:Values.GetQueueUrlResult.error_to_json
+    ~error_to_json:GetQueueUrlResult.error_to_json
     ~f:(fun () ->
     Io.get_queue_url
       ~cfg
-      (Values.GetQueueUrlRequest.make
+      (GetQueueUrlRequest.make
          ?queueOwnerAWSAccountId:queue_owner_aws_account_id
          ~queueName:queue_name
          ()))
@@ -116,36 +117,36 @@ let get_queue_url ?queue_owner_aws_account_id cfg ~queue_name =
 let list_dead_letter_source_queues cfg ~queue_url =
   dispatch_exn
     ~name:"sqs.list_dead_letter_source_queues"
-    ~error_to_json:Values.ListDeadLetterSourceQueuesResult.error_to_json
+    ~error_to_json:ListDeadLetterSourceQueuesResult.error_to_json
     ~f:(fun () ->
     Io.list_dead_letter_source_queues
       ~cfg
-      (Values.ListDeadLetterSourceQueuesRequest.make ~queueUrl:queue_url ()))
+      (ListDeadLetterSourceQueuesRequest.make ~queueUrl:queue_url ()))
 ;;
 
 let list_queue_tags cfg ~queue_url =
   dispatch_exn
     ~name:"sqs.list_queue_tags"
-    ~error_to_json:Values.ListQueueTagsResult.error_to_json
+    ~error_to_json:ListQueueTagsResult.error_to_json
     ~f:(fun () ->
     Io.list_queue_tags
       ~cfg
-      (Values.ListQueueTagsRequest.make ~queueUrl:queue_url ()))
+      (ListQueueTagsRequest.make ~queueUrl:queue_url ()))
 ;;
 
 let list_queues ?queue_name_prefix cfg =
   dispatch_exn
     ~name:"sqs.list_queues"
-    ~error_to_json:Values.ListQueuesResult.error_to_json
+    ~error_to_json:ListQueuesResult.error_to_json
     ~f:(fun () ->
     Io.list_queues
       ~cfg
-      (Values.ListQueuesRequest.make ?queueNamePrefix:queue_name_prefix ()))
+      (ListQueuesRequest.make ?queueNamePrefix:queue_name_prefix ()))
 ;;
 
 let purge_queue cfg ~queue_url =
   dispatch_exn ~name:"sqs.purge_queue" ~error_to_json:unit_json ~f:(fun () ->
-    Io.purge_queue ~cfg (Values.PurgeQueueRequest.make ~queueUrl:queue_url ()))
+    Io.purge_queue ~cfg (PurgeQueueRequest.make ~queueUrl:queue_url ()))
 ;;
 
 let receive_message
@@ -160,11 +161,11 @@ let receive_message
   =
   dispatch_exn
     ~name:"sqs.receive_message"
-    ~error_to_json:Values.ReceiveMessageResult.error_to_json
+    ~error_to_json:ReceiveMessageResult.error_to_json
     ~f:(fun () ->
     Io.receive_message
       ~cfg
-      (Values.ReceiveMessageRequest.make
+      (ReceiveMessageRequest.make
          ?attributeNames:attribute_names
          ?messageAttributeNames:message_attribute_names
          ?maxNumberOfMessages:max_number_of_messages
@@ -179,7 +180,7 @@ let remove_permission cfg ~queue_url ~label =
   dispatch_exn ~name:"sqs.remove_permission" ~error_to_json:unit_json ~f:(fun () ->
     Io.remove_permission
       ~cfg
-      (Values.RemovePermissionRequest.make ~queueUrl:queue_url ~label ()))
+      (RemovePermissionRequest.make ~queueUrl:queue_url ~label ()))
 ;;
 
 let send_message
@@ -193,11 +194,11 @@ let send_message
   =
   dispatch_exn
     ~name:"sqs.send_message"
-    ~error_to_json:Values.SendMessageResult.error_to_json
+    ~error_to_json:SendMessageResult.error_to_json
     ~f:(fun () ->
     Io.send_message
       ~cfg
-      (Values.SendMessageRequest.make
+      (SendMessageRequest.make
          ?delaySeconds:delay_seconds
          ?messageAttributes:message_attributes
          ?messageDeduplicationId:message_deduplication_id
@@ -210,28 +211,28 @@ let send_message
 let send_message_batch cfg ~queue_url ~entries =
   dispatch_exn
     ~name:"sqs.send_message_batch"
-    ~error_to_json:Values.SendMessageBatchResult.error_to_json
+    ~error_to_json:SendMessageBatchResult.error_to_json
     ~f:(fun () ->
     Io.send_message_batch
       ~cfg
-      (Values.SendMessageBatchRequest.make ~queueUrl:queue_url ~entries ()))
+      (SendMessageBatchRequest.make ~queueUrl:queue_url ~entries ()))
 ;;
 
 let set_queue_attributes cfg ~queue_url ~attributes =
   dispatch_exn ~name:"sqs.set_queue_attributes" ~error_to_json:unit_json ~f:(fun () ->
     Io.set_queue_attributes
       ~cfg
-      (Values.SetQueueAttributesRequest.make ~queueUrl:queue_url ~attributes ()))
+      (SetQueueAttributesRequest.make ~queueUrl:queue_url ~attributes ()))
 ;;
 
 let tag_queue cfg ~queue_url ~tags =
   dispatch_exn ~name:"sqs.tag_queue" ~error_to_json:unit_json ~f:(fun () ->
-    Io.tag_queue ~cfg (Values.TagQueueRequest.make ~queueUrl:queue_url ~tags ()))
+    Io.tag_queue ~cfg (TagQueueRequest.make ~queueUrl:queue_url ~tags ()))
 ;;
 
 let untag_queue cfg ~queue_url ~tag_keys =
   dispatch_exn ~name:"sqs.untag_queue" ~error_to_json:unit_json ~f:(fun () ->
     Io.untag_queue
       ~cfg
-      (Values.UntagQueueRequest.make ~queueUrl:queue_url ~tagKeys:tag_keys ()))
+      (UntagQueueRequest.make ~queueUrl:queue_url ~tagKeys:tag_keys ()))
 ;;

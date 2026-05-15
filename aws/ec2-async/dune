@@ -56,7 +56,7 @@
  (action
   (with-stdout-to
    awso_ec2_async.ml
-   (echo "include Io\nmodule Values = Values\nmodule Cli = Cli"))))
+   (echo "include Io\ninclude Values\nmodule Cli = Cli"))))
 
 (rule
  (targets values.ml)

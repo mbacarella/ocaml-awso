@@ -40,57 +40,57 @@ let dispatch_exn ~name ~error_to_json ~f =
 let start_snapshot ~cfg ~volume_size ~description =
   dispatch_exn
     ~name:"start_snapshot"
-    ~error_to_json:Ebs.Values.StartSnapshotResponse.error_to_json
+    ~error_to_json:Ebs.StartSnapshotResponse.error_to_json
     ~f:(fun () ->
     Ebs.start_snapshot
       ~cfg
-      (Ebs.Values.StartSnapshotRequest.make
+      (Ebs.StartSnapshotRequest.make
          ~description
          ~volumeSize:(Int64.of_int volume_size)
          ()))
   >>| fun v ->
   Option.value_exn
     ~message:"snapshotId is None"
-    v.Ebs.Values.StartSnapshotResponse.snapshotId
+    v.Ebs.StartSnapshotResponse.snapshotId
 ;;
 
 let put_snapshot_block ~cfg request =
   dispatch_exn
     ~name:"put_snapshot_block"
-    ~error_to_json:Ebs.Values.PutSnapshotBlockResponse.error_to_json
+    ~error_to_json:Ebs.PutSnapshotBlockResponse.error_to_json
     ~f:(fun () -> Ebs.put_snapshot_block ~cfg request)
   >>| fun v ->
-  let _checksum = v.Ebs.Values.PutSnapshotBlockResponse.checksum in
+  let _checksum = v.Ebs.PutSnapshotBlockResponse.checksum in
   ()
 ;;
 
 let complete_snapshot ~cfg ~snapshot_id ~changed_blocks_count =
   dispatch_exn
     ~name:"complete_snapshot"
-    ~error_to_json:Ebs.Values.CompleteSnapshotResponse.error_to_json
+    ~error_to_json:Ebs.CompleteSnapshotResponse.error_to_json
     ~f:(fun () ->
     Ebs.complete_snapshot
       ~cfg
-      (Ebs.Values.CompleteSnapshotRequest.make
+      (Ebs.CompleteSnapshotRequest.make
          ~snapshotId:snapshot_id
          ~changedBlocksCount:changed_blocks_count
          ()))
   >>| fun v ->
   Option.value_exn
     ~message:"No completeSnapshotResponse.status"
-    v.Ebs.Values.CompleteSnapshotResponse.status
+    v.Ebs.CompleteSnapshotResponse.status
 ;;
 
 let describe_snapshots ~cfg ~snapshot_id =
   dispatch_exn
     ~name:"describe_snapshots"
-    ~error_to_json:Ec2.Values.Ec2_error.to_json
+    ~error_to_json:Ec2.Ec2_error.to_json
     ~f:(fun () ->
     Ec2.describe_snapshots
       ~cfg
-      (Ec2.Values.DescribeSnapshotsRequest.make ~snapshotIds:[ snapshot_id ] ()))
+      (Ec2.DescribeSnapshotsRequest.make ~snapshotIds:[ snapshot_id ] ()))
   >>| fun v ->
-  match v.Ec2.Values.DescribeSnapshotsResult.snapshots with
+  match v.Ec2.DescribeSnapshotsResult.snapshots with
   | None -> failwithf "No snapshots for %s at all" snapshot_id ()
   | Some [ { state; _ } ] -> Option.value_exn ~message:"No snapshot state" state
   | Some lst ->
@@ -104,13 +104,13 @@ let describe_snapshots ~cfg ~snapshot_id =
 let describe_images ~cfg ~image_id =
   dispatch_exn
     ~name:"describe_images"
-    ~error_to_json:Ec2.Values.Ec2_error.to_json
+    ~error_to_json:Ec2.Ec2_error.to_json
     ~f:(fun () ->
     Ec2.describe_images
       ~cfg
-      (Ec2.Values.DescribeImagesRequest.make ~imageIds:[ image_id ] ()))
+      (Ec2.DescribeImagesRequest.make ~imageIds:[ image_id ] ()))
   >>| fun v ->
-  match v.Ec2.Values.DescribeImagesResult.images with
+  match v.Ec2.DescribeImagesResult.images with
   | None -> failwithf "No images for %s at all" image_id ()
   | Some [ { state; _ } ] -> Option.value_exn ~message:"No image state" state
   | Some lst ->
@@ -142,7 +142,7 @@ let waiter_retry_logic ~f ~max_attempts ~delay =
 let snapshot_completed_waiter ~cfg ~snapshot_id =
   waiter_retry_logic ~delay:(sec 15.) ~max_attempts:40 ~f:(fun () ->
     match%map describe_snapshots ~cfg ~snapshot_id with
-    | Ec2.Values.SnapshotState.Completed -> `ok
+    | Ec2.SnapshotState.Completed -> `ok
     | Error -> failwithf "snapshot state for %s settled to error" snapshot_id ()
     | _ -> `retry)
 ;;
@@ -150,7 +150,7 @@ let snapshot_completed_waiter ~cfg ~snapshot_id =
 let image_available_waiter ~cfg ~image_id =
   waiter_retry_logic ~delay:(sec 15.) ~max_attempts:40 ~f:(fun () ->
     match%map describe_images ~cfg ~image_id with
-    | Ec2.Values.ImageState.Available -> `ok
+    | Ec2.ImageState.Available -> `ok
     | Failed -> failwithf "iamge state for %s settled to error" image_id ()
     | _ -> `retry)
 ;;
@@ -158,11 +158,11 @@ let image_available_waiter ~cfg ~image_id =
 let all_regions ~cfg =
   dispatch_exn
     ~name:"describe_regions"
-    ~error_to_json:Ec2.Values.Ec2_error.to_json
+    ~error_to_json:Ec2.Ec2_error.to_json
     ~f:(fun () ->
-    Ec2.describe_regions ~cfg (Ec2.Values.DescribeRegionsRequest.make ()))
+    Ec2.describe_regions ~cfg (Ec2.DescribeRegionsRequest.make ()))
   >>| fun v ->
-  Option.value_exn ~message:"regions is None" v.Ec2.Values.DescribeRegionsResult.regions
+  Option.value_exn ~message:"regions is None" v.Ec2.DescribeRegionsResult.regions
 ;;
 
 let create_snapshot ~cfg ~description ~image =
@@ -188,14 +188,14 @@ let create_snapshot ~cfg ~description ~image =
       let%bind () =
         put_snapshot_block
           ~cfg
-          (Ebs.Values.PutSnapshotBlockRequest.make
+          (Ebs.PutSnapshotBlockRequest.make
              ~snapshotId:snapshot_id
              ~blockIndex:block_index
-             ~blockData:(Ebs.Values.BlockData.of_string block_data)
+             ~blockData:(Ebs.BlockData.of_string block_data)
              ~dataLength:block_size
              ~checksum
              ~checksumAlgorithm:
-               (Ebs.Values.ChecksumAlgorithm.of_string checksum_algorithm)
+               (Ebs.ChecksumAlgorithm.of_string checksum_algorithm)
              ())
       in
       put_block_loop (Int.succ block_index)
@@ -211,11 +211,11 @@ let register_image ~cfg request =
   dispatch_exn
     ~name:"register_image"
     ~f:(fun () -> Ec2.register_image ~cfg request)
-    ~error_to_json:Ec2.Values.Ec2_error.to_json
+    ~error_to_json:Ec2.Ec2_error.to_json
   >>| fun v ->
   Option.value_exn
     ~message:"No registerImageResult.imageId"
-    v.Ec2.Values.RegisterImageResult.imageId
+    v.Ec2.RegisterImageResult.imageId
 ;;
 
 let import_image ~cfg ~name ~architecture ~image =
@@ -228,29 +228,29 @@ let import_image ~cfg ~name ~architecture ~image =
   let%bind image_id =
     let device_name = "/dev/sda1" in
     let ebs =
-      Ec2.Values.EbsBlockDevice.make
+      Ec2.EbsBlockDevice.make
         ~snapshotId:snapshot_id
-        ~volumeType:Ec2.Values.VolumeType.Standard
+        ~volumeType:Ec2.VolumeType.Standard
         ()
     in
     let req =
-      Ec2.Values.RegisterImageRequest.make
+      Ec2.RegisterImageRequest.make
         ~name:description
         ~rootDeviceName:device_name
-        ~architecture:(Ec2.Values.ArchitectureValues.of_string architecture)
+        ~architecture:(Ec2.ArchitectureValues.of_string architecture)
           (* FIXME: I couldn't boot an AMI instance with serial console support (nitro)
               until I enabled ENA. *)
         ~enaSupport:true
         ~sriovNetSupport:"simple"
         ~virtualizationType:"hvm"
         ~blockDeviceMappings:
-          [ Ec2.Values.BlockDeviceMapping.make ~ebs ~deviceName:device_name () ]
+          [ Ec2.BlockDeviceMapping.make ~ebs ~deviceName:device_name () ]
         ()
     in
     (*
     eprintf
       "debug: register image request: %s\n"
-      (req |> Ec2.Values.RegisterImageRequest.sexp_of_t |> Sexp.to_string_hum); *)
+      (req |> Ec2.RegisterImageRequest.sexp_of_t |> Sexp.to_string_hum); *)
     register_image ~cfg req
   in
   let%bind () = image_available_waiter ~cfg ~image_id in
@@ -265,7 +265,7 @@ let main ~name ~regions ~images =
     | _ :: _ -> return regions
     | [] ->
       let%bind rs = all_regions ~cfg in
-      return (List.filter_map rs ~f:(fun r -> r.Ec2.Values.Region.regionName))
+      return (List.filter_map rs ~f:(fun r -> r.Ec2.Region.regionName))
   in
   Deferred.List.iter images ~how:`Sequential ~f:(fun image ->
     let%bind architecture = detect_architecture image in

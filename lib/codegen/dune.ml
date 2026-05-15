@@ -193,8 +193,8 @@ let make_io (io_kind : [ `Async | `Lwt ]) ~date ~service =
     else
       let content =
         match io_kind with
-        | `Async -> "include Io\\nmodule Values = Values\\nmodule Cli = Cli"
-        | `Lwt -> "include Io\\nmodule Values = Values"
+        | `Async -> "include Io\\ninclude Values\\nmodule Cli = Cli"
+        | `Lwt -> "include Io\\ninclude Values"
       in
       sprintf
         {|

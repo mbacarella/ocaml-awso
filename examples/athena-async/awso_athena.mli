@@ -2,8 +2,6 @@
 (*
 open Awso_async
 open! Import
-module Values = Awso_athena_async.Values
-
 module Query : sig
   type query_id_params =
     { execution_id : string
@@ -12,15 +10,15 @@ module Query : sig
   [@@deriving yojson]
 
   type athena_start =
-    { result_configuration : Values.ResultConfiguration.t
-    ; query_execution_output : Values.StartQueryExecutionOutput.t
+    { result_configuration : ResultConfiguration.t
+    ; query_execution_output : StartQueryExecutionOutput.t
     }
   [@@deriving yojson]
 
   type t =
     [ `Athena_execution_id of string
     | `Athena_start of athena_start
-    | `Athena_execution of Values.GetQueryExecutionOutput.t
+    | `Athena_execution of GetQueryExecutionOutput.t
     ]
   [@@deriving yojson]
 

@@ -1,4 +1,4 @@
 include Io
-module Values = Values
+include Values
 module Sqs = Sqs
 module Cli = Cli

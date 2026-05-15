@@ -1,15 +1,16 @@
+open! Values
 open! Core
 open! Async
 
 val put_object
   :  Awso.Cfg.t
-  -> bucket:Values.BucketName.t
+  -> bucket:BucketName.t
   -> key:string
   -> string
-  -> ( Values.ETag.t
+  -> ( ETag.t
      , [ `Missing_etag
        | `Put_object of
-         [ `AWS of Values.PutObjectOutput.error | `Transport of Awso.Http.Io.Error.call ]
+         [ `AWS of PutObjectOutput.error | `Transport of Awso.Http.Io.Error.call ]
        ] )
      Result.t
      Deferred.t
@@ -18,8 +19,8 @@ val delete_object
   :  Awso.Cfg.t
   -> bucket:string
   -> key:string
-  -> ( Values.DeleteObjectOutput.t
-     , [ `AWS of Values.DeleteObjectOutput.error | `Transport of Awso.Http.Io.Error.call ]
+  -> ( DeleteObjectOutput.t
+     , [ `AWS of DeleteObjectOutput.error | `Transport of Awso.Http.Io.Error.call ]
      )
      Result.t
      Deferred.t
@@ -31,7 +32,7 @@ val put_file
   -> string
   -> ( string
      , [> `Put_object of
-          [ `AWS of Values.PutObjectOutput.error | `Transport of Awso.Http.Io.Error.call ]
+          [ `AWS of PutObjectOutput.error | `Transport of Awso.Http.Io.Error.call ]
        | `Missing_etag
        ] )
      result
@@ -44,9 +45,9 @@ type ('acc, 'error) callback =
   -> key:string
   -> part:int64
   -> num_parts:int64
-  -> [ `Complete of Values.ETag.t
-     | `Initial of Values.MultipartUploadId.t
-     | `Partition of Values.ETag.t
+  -> [ `Complete of ETag.t
+     | `Initial of MultipartUploadId.t
+     | `Partition of ETag.t
      ]
   -> ('acc, 'error) Deferred.Result.t
 
@@ -56,7 +57,7 @@ val initialize_multipart
   -> key:string
   -> ( [> `Upload_id of string ]
      , [> `Create_multipart_upload of
-          [ `AWS of Values.CreateMultipartUploadOutput.error
+          [ `AWS of CreateMultipartUploadOutput.error
           | `Transport of Awso.Http.Io.Error.call
           ]
        | `Missing_upload_id
@@ -76,14 +77,14 @@ val multipart
   -> cb:('acc, 'error) callback
   -> upload_id:string
   -> string
-  -> ( 'acc * Values.CompletedPart.t list
-     , [> `Callback_error of 'acc * Values.CompletedPart.t list * 'error
+  -> ( 'acc * CompletedPart.t list
+     , [> `Callback_error of 'acc * CompletedPart.t list * 'error
        | `Complete_multipart_upload of
-         [ `AWS of Values.CompleteMultipartUploadOutput.error
+         [ `AWS of CompleteMultipartUploadOutput.error
          | `Transport of Awso.Http.Io.Error.call
          ]
        | `Upload_part of
-         [ `AWS of Values.UploadPartOutput.error | `Transport of Awso.Http.Io.Error.call ]
+         [ `AWS of UploadPartOutput.error | `Transport of Awso.Http.Io.Error.call ]
        ] )
      result
      Deferred.t
@@ -94,8 +95,8 @@ val get_object
   -> bucket:string
   -> key:string
   -> unit
-  -> ( Values.GetObjectOutput.t
-     , [ `AWS of Values.GetObjectOutput.error | `Transport of Awso.Http.Io.Error.call ]
+  -> ( GetObjectOutput.t
+     , [ `AWS of GetObjectOutput.error | `Transport of Awso.Http.Io.Error.call ]
      )
      result
      Deferred.t
@@ -129,9 +130,9 @@ end
 val map_bucket
   :  Awso.Cfg.t
   -> bucket:string
-  -> f:(Values.Object.t -> 'a Deferred.t)
+  -> f:(Object.t -> 'a Deferred.t)
   -> ( 'a list
-     , [ `AWS of Values.ListObjectsV2Output.error
+     , [ `AWS of ListObjectsV2Output.error
        | `Transport of Awso.Http.Io.Error.call
        ] )
      result
@@ -140,9 +141,9 @@ val map_bucket
 val iter_bucket
   :  Awso.Cfg.t
   -> bucket:string
-  -> f:(Values.Object.t -> unit Deferred.t)
+  -> f:(Object.t -> unit Deferred.t)
   -> ( unit
-     , [ `AWS of Values.ListObjectsV2Output.error
+     , [ `AWS of ListObjectsV2Output.error
        | `Transport of Awso.Http.Io.Error.call
        ] )
      result

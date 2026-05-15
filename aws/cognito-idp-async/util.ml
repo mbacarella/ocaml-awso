@@ -1,3 +1,4 @@
+open! Values
 open! Core
 open! Async
 
@@ -5,15 +6,15 @@ let default_max_results = 20
 
 let list_user_pools cfg ?(max_results = default_max_results) () =
   Log.Global.debug "list-user-pools" ~tags:[ "max_results", Int.to_string max_results ];
-  let maxResults = Values.PoolQueryLimitType.make max_results in
+  let maxResults = PoolQueryLimitType.make max_results in
   match%bind
-    Io.list_user_pools ~cfg (Values.ListUserPoolsRequest.make ~maxResults ())
+    Io.list_user_pools ~cfg (ListUserPoolsRequest.make ~maxResults ())
   with
   | Error _ -> failwithf "idp.list_user_pools" ()
   | Ok x -> return x
 ;;
 
-let user_pools_to_json t = Values.UserPoolListType.to_json t
+let user_pools_to_json t = UserPoolListType.to_json t
 
 let user_pools_to_string t =
   let x = user_pools_to_json t in
@@ -22,9 +23,9 @@ let user_pools_to_string t =
 
 module Attribute = struct
   module Unsafe = struct
-    include Values.AttributeType
-    module Name = Values.AttributeNameType
-    module Value = Values.AttributeValueType
+    include AttributeType
+    module Name = AttributeNameType
+    module Value = AttributeValueType
   end
 
   module Safe = struct
@@ -83,7 +84,7 @@ end
 module User = Awso_cognito_idp.User
 
 type get_user_error =
-  [ `AWS of Values.GetUserResponse.error
+  [ `AWS of GetUserResponse.error
   | `Transport of Awso.Http.Io.Error.call
   ]
 
@@ -100,22 +101,22 @@ let get_user_failwith ?message cause = raise (Get_user_error { message; cause })
 let get_user ?retry_delay ?retry_cnt cfg ~access_token () =
   Awso_async.Import.with_retries ?retry_delay ?retry_cnt
   @@ fun () ->
-  let accessToken = Values.TokenModelType.make access_token in
-  let request = Values.GetUserRequest.make ~accessToken () in
+  let accessToken = TokenModelType.make access_token in
+  let request = GetUserRequest.make ~accessToken () in
   match%map Io.get_user ~cfg request with
   | Error e -> Error e
   | Ok
-      ({ Values.GetUserResponse.username
+      ({ GetUserResponse.username
        ; userAttributes
        ; mFAOptions = _
        ; preferredMfaSetting = _
        ; userMFASettingList = _
        } as response) ->
-    let x = Values.GetUserResponse.to_json response in
+    let x = GetUserResponse.to_json response in
     let resp_str = Yojson.Safe.to_string x in
     Log.Global.debug "response body is %s" resp_str;
     let username =
-      match Values.UsernameType.to_value username with
+      match UsernameType.to_value username with
       | `String username -> username
       | _ -> failwith "username shape not a string"
     in
@@ -128,15 +129,15 @@ let admin_get_user ?retry_delay ?retry_cnt cfg ~user_pool_id ~username () =
   @@ fun () ->
   Io.admin_get_user
     ~cfg
-    (Values.AdminGetUserRequest.make
-       ~userPoolId:(Values.UserPoolIdType.make user_pool_id)
-       ~username:(Values.UsernameType.make username)
+    (AdminGetUserRequest.make
+       ~userPoolId:(UserPoolIdType.make user_pool_id)
+       ~username:(UsernameType.make username)
        ())
   >>= fun response ->
   match response with
   | Error response -> return (Error response)
   | Ok
-      ({ Values.AdminGetUserResponse.username
+      ({ AdminGetUserResponse.username
        ; userAttributes
        ; mFAOptions = _
        ; userCreateDate = _
@@ -147,11 +148,11 @@ let admin_get_user ?retry_delay ?retry_cnt cfg ~user_pool_id ~username () =
        ; userMFASettingList = _
        } as response) ->
     let userAttributes = Option.value userAttributes ~default:[] in
-    let x = Values.AdminGetUserResponse.to_json response in
+    let x = AdminGetUserResponse.to_json response in
     let resp_str = Yojson.Safe.to_string x in
     Log.Global.debug "response body is %s" resp_str;
     let username =
-      match Values.UsernameType.to_value username with
+      match UsernameType.to_value username with
       | `String username -> username
       | _ -> failwith "username shape not a string"
     in

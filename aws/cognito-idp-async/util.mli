@@ -1,3 +1,4 @@
+open! Values
 (** A high level Cognito IDP API. Simplifies some of the complexity of the
     native AWS types and provides a more natural ocaml style interface to some
     commonly used AWS functions which are otherhwise just code generated
@@ -22,17 +23,17 @@ val list_user_pools
   :  Awso.Cfg.t
   -> ?max_results:int
   -> unit
-  -> Values.ListUserPoolsResponse.t Deferred.t
+  -> ListUserPoolsResponse.t Deferred.t
 
 (*
   -> [ `Ok of Api.ListUserPoolsResponse.t | Api.listUserPools_error ] Deferred.t
   *)
 
 (** Produces a json string representation give an AWS user pools type. *)
-val user_pools_to_string : Values.UserPoolListType.t -> string
+val user_pools_to_string : UserPoolListType.t -> string
 
 type get_user_error =
-  [ `AWS of Values.GetUserResponse.error
+  [ `AWS of GetUserResponse.error
   | `Transport of Awso.Http.Io.Error.call
   ]
 
@@ -69,7 +70,7 @@ val admin_get_user
   -> username:string
   -> unit
   -> ( User.t
-     , [ `AWS of Values.AdminGetUserResponse.error
+     , [ `AWS of AdminGetUserResponse.error
        | `Transport of Awso.Http.Io.Error.call
        ] )
      result

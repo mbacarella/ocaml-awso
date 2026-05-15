@@ -32,7 +32,7 @@
  (action
   (with-stdout-to
    awso_snow_device_management_lwt.ml
-   (echo "include Io\nmodule Values = Values"))))
+   (echo "include Io\ninclude Values"))))
 
 (rule
  (targets values.ml)

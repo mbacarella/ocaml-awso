@@ -10,27 +10,27 @@ let main () =
   let%bind res = Sqs.create_queue cfg ~queue_name in
   printf
     "create_queue result: %s\n"
-    (res |> Values.CreateQueueResult.to_json |> Yojson.Safe.to_string);
+    (res |> CreateQueueResult.to_json |> Yojson.Safe.to_string);
   let queue_url =
-    res.Values.CreateQueueResult.createQueueResult.queueUrl
+    res.CreateQueueResult.createQueueResult.queueUrl
     |> Option.value_exn ~message:"No queueUrl"
   in
   printf "listing queues\n";
   let%bind res = Sqs.list_queues cfg in
-  let lqr = res.Values.ListQueuesResult.listQueuesResult in
-  Option.iter lqr.Values.ListQueuesResult.queueUrls ~f:(fun queue_urls ->
+  let lqr = res.ListQueuesResult.listQueuesResult in
+  Option.iter lqr.ListQueuesResult.queueUrls ~f:(fun queue_urls ->
     List.iter queue_urls ~f:(fun url -> printf "- %s\n" url));
   let message_body = sprintf !"Test message body %{Time_float_unix}" (Time_float_unix.now ()) in
   printf "sending message '%s' to queue %s\n" message_body queue_url;
   let%bind res = Sqs.send_message cfg ~queue_url ~message_body in
   printf
     "send_message result: %s\n"
-    (res |> Values.SendMessageResult.to_json |> Yojson.Safe.to_string);
+    (res |> SendMessageResult.to_json |> Yojson.Safe.to_string);
   printf "receive_message: %s\n" queue_url;
   let%bind res = Sqs.receive_message cfg ~queue_url in
   printf
     "receive_message result: %s\n"
-    (res |> Values.ReceiveMessageResult.to_json |> Yojson.Safe.to_string);
+    (res |> ReceiveMessageResult.to_json |> Yojson.Safe.to_string);
   let%bind () = Sqs.delete_queue cfg ~queue_url in
   printf "queue %s deleted\n" queue_url;
   return ()

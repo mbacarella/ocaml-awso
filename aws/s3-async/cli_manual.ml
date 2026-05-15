@@ -1,3 +1,5 @@
+module S3_part = Part
+open! Values
 open! Core
 open! Async
 
@@ -20,7 +22,7 @@ let dispatch_exn ~name ~error_to_json ~f =
 module List_buckets = struct
   let pp_created_at ppf s = Format.fprintf ppf " (created at %s)" s
 
-  let pp_bucket_line ppf { Values.Bucket.name; creationDate } =
+  let pp_bucket_line ppf { Bucket.name; creationDate } =
     Format.fprintf
       ppf
       "- %a%a\n"
@@ -32,11 +34,11 @@ module List_buckets = struct
 
   let owner_opt_to_string = function
     | None -> "<no owner>"
-    | Some (owner : Values.Owner.t) ->
+    | Some (owner : Owner.t) ->
       Option.value owner.displayName ~default:"<no displayname>"
   ;;
 
-  let pp_out ppf { Values.ListBucketsOutput.owner; buckets } =
+  let pp_out ppf { ListBucketsOutput.owner; buckets } =
     let owner = owner_opt_to_string owner in
     Format.fprintf
       ppf
@@ -51,7 +53,7 @@ module List_buckets = struct
     >>= fun cfg ->
     dispatch_exn
       ~name:"list_buckets"
-      ~error_to_json:Values.ListBucketsOutput.error_to_json
+      ~error_to_json:ListBucketsOutput.error_to_json
       ~f:(fun () ->
       Io.list_buckets ~cfg ())
     >>| fun v -> Format.printf "%a" pp_out v
@@ -69,7 +71,7 @@ module List_objects = struct
   let pp_size ppf n = Format.fprintf ppf ", %d bytes" n
   let pp_last_modified ppf s = Format.fprintf ppf ", last modified %s" s
 
-  let pp_object ppf { Values.Object.key; size; lastModified; _ } =
+  let pp_object ppf { Object.key; size; lastModified; _ } =
     Format.fprintf
       ppf
       "- %a%a%a\n"
@@ -81,7 +83,7 @@ module List_objects = struct
       lastModified
   ;;
 
-  let pp_out ppf { Values.ListObjectsOutput.contents; _ } =
+  let pp_out ppf { ListObjectsOutput.contents; _ } =
     Format.fprintf ppf "%a" (Fmt.option (Fmt.list pp_object)) contents
   ;;
 
@@ -90,11 +92,11 @@ module List_objects = struct
     >>= fun cfg ->
     dispatch_exn
       ~name:"list_objects"
-      ~error_to_json:Values.ListObjectsOutput.error_to_json
+      ~error_to_json:ListObjectsOutput.error_to_json
       ~f:(fun () ->
       Io.list_objects
         ~cfg
-        (Values.ListObjectsRequest.make ~bucket ~prefix:"" ()))
+        (ListObjectsRequest.make ~bucket ~prefix:"" ()))
     >>| fun v -> Format.printf "%a" pp_out v
   ;;
 
@@ -107,7 +109,7 @@ module List_objects = struct
 end
 
 module Get_object = struct
-  let save { Values.GetObjectOutput.body; _ } ~to_:dest =
+  let save { GetObjectOutput.body; _ } ~to_:dest =
     let data = Option.value_exn body in
     Out_channel.write_all dest ~data
   ;;
@@ -121,7 +123,7 @@ module Get_object = struct
 
   let pp_metadata
     ppf
-    { Values.GetObjectOutput.lastModified; contentLength; eTag; contentType; metadata; _ }
+    { GetObjectOutput.lastModified; contentLength; eTag; contentType; metadata; _ }
     =
     Format.fprintf
       ppf
@@ -143,11 +145,11 @@ module Get_object = struct
     >>= fun cfg ->
     dispatch_exn
       ~name:"get_object"
-      ~error_to_json:Values.GetObjectOutput.error_to_json
+      ~error_to_json:GetObjectOutput.error_to_json
       ~f:(fun () ->
       Io.get_object
         ~cfg
-        (Values.GetObjectRequest.make ~bucket ~key ()))
+        (GetObjectRequest.make ~bucket ~key ()))
     >>| fun out ->
     match dest_opt with
     | None -> Format.printf "%a" pp_metadata out
@@ -168,22 +170,22 @@ module Get_object = struct
 end
 
 module Put_object = struct
-  let pp_out ppf { Values.PutObjectOutput.eTag; _ } =
+  let pp_out ppf { PutObjectOutput.eTag; _ } =
     Format.fprintf ppf "ETag: %a\n" (pp_opt String.pp) eTag
   ;;
 
   let run bucket key infile () =
     let body_s = In_channel.read_all infile in
-    let body = Values.Body.of_string body_s in
+    let body = Body.of_string body_s in
     Awso_async.Cfg.get_exn ()
     >>= fun cfg ->
     dispatch_exn
       ~name:"put_object"
-      ~error_to_json:Values.PutObjectOutput.error_to_json
+      ~error_to_json:PutObjectOutput.error_to_json
       ~f:(fun () ->
       Io.put_object
         ~cfg
-        (Values.PutObjectRequest.make ~bucket ~key ~body ()))
+        (PutObjectRequest.make ~bucket ~key ~body ()))
     >>| fun v -> Format.printf "%a" pp_out v
   ;;
 
@@ -204,34 +206,34 @@ module Put_multipart = struct
     >>= fun cfg ->
     dispatch_exn
       ~name:"create_multipart_upload"
-      ~error_to_json:Values.CreateMultipartUploadOutput.error_to_json
+      ~error_to_json:CreateMultipartUploadOutput.error_to_json
       ~f:(fun () ->
       Io.create_multipart_upload
         ~cfg
-        (Values.CreateMultipartUploadRequest.make ~bucket ~key ()))
+        (CreateMultipartUploadRequest.make ~bucket ~key ()))
     >>= fun creation ->
     let upload_part ~nparts i part =
-      let req = Part.upload_request ~creation ~path:infile part in
+      let req = S3_part.upload_request ~creation ~path:infile part in
       let progress = 100. *. float i /. float nparts in
       printf "%d/%d (%.1f%%)\n%!" i nparts progress;
       dispatch_exn
         ~name:"upload_part"
-        ~error_to_json:Values.UploadPartOutput.error_to_json
+        ~error_to_json:UploadPartOutput.error_to_json
         ~f:(fun () ->
         Io.upload_part ~cfg req)
-      >>| fun v -> Part.completed_part part v
+      >>| fun v -> S3_part.completed_part part v
     in
-    let parts = Part.build_parts infile in
+    let parts = S3_part.build_parts infile in
     let nparts = Core.List.length parts in
     Deferred.List.mapi parts ~how:`Sequential ~f:(upload_part ~nparts)
     >>= fun parts ->
     dispatch_exn
       ~name:"complete_multipart_upload"
-      ~error_to_json:Values.CompleteMultipartUploadOutput.error_to_json
+      ~error_to_json:CompleteMultipartUploadOutput.error_to_json
       ~f:(fun () ->
       Io.complete_multipart_upload
         ~cfg
-        (Part.complete_request ~creation ~parts))
+        (S3_part.complete_request ~creation ~parts))
     >>| fun { location; _ } ->
     Format.printf
       "Successful upload, location: %a\n"
