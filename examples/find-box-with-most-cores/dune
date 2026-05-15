@@ -1,5 +1,5 @@
 (executable
- (name awso_ec2_describe_instance_types)
+ (name find_box_with_most_cores)
  (libraries awso-async.ec2 core_unix.command_unix)
  (flags
   (:standard))
