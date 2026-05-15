@@ -49,9 +49,7 @@ Here is a short example that lists all EC2 instances:
 ; dune
 (executable
  (name awso_ec2_describe_instances)
- (libraries awso-ec2-async core_unix.command_unix)
- (flags
-  (:standard -open Core -open Async))
+ (libraries awso-async.ec2 core_unix.command_unix)
  (preprocess
   (pps ppx_jane)))
 ```
