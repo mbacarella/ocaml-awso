@@ -3,8 +3,8 @@
 (library
  (name awso_kinesis_lwt)
  (flags (:standard))
- (public_name awso-kinesis-lwt)
- (libraries awso-kinesis awso-lwt))
+ (public_name awso-lwt.kinesis)
+ (libraries awso.kinesis awso-lwt))
 
 (rule
  (targets io.ml io.mli)

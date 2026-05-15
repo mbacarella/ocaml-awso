@@ -3,8 +3,8 @@
 (library
  (name awso_workspaces_web_async)
  (flags (:standard))
- (public_name awso-workspaces-web-async)
- (libraries awso-workspaces-web awso-async)
+ (public_name awso-async.workspaces-web)
+ (libraries awso.workspaces-web awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

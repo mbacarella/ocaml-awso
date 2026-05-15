@@ -2,7 +2,7 @@
 
 (library
  (name awso_honeycode)
- (public_name awso-honeycode)
+ (public_name awso.honeycode)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

@@ -2,7 +2,7 @@
 
 (library
  (name awso_iotthingsgraph)
- (public_name awso-iotthingsgraph)
+ (public_name awso.iotthingsgraph)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

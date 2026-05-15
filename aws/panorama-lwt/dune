@@ -3,8 +3,8 @@
 (library
  (name awso_panorama_lwt)
  (flags (:standard))
- (public_name awso-panorama-lwt)
- (libraries awso-panorama awso-lwt))
+ (public_name awso-lwt.panorama)
+ (libraries awso.panorama awso-lwt))
 
 (rule
  (targets io.ml io.mli)

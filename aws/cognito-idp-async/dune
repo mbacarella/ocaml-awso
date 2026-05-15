@@ -3,8 +3,8 @@
 (library
  (name awso_cognito_idp_async)
  (flags (:standard))
- (public_name awso-cognito-idp-async)
- (libraries awso-cognito-idp awso-async)
+ (public_name awso-async.cognito-idp)
+ (libraries awso.cognito-idp awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

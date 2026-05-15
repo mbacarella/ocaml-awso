@@ -3,8 +3,8 @@
 (library
  (name awso_lex_models_async)
  (flags (:standard))
- (public_name awso-lex-models-async)
- (libraries awso-lex-models awso-async)
+ (public_name awso-async.lex-models)
+ (libraries awso.lex-models awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

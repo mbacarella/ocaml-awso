@@ -2,7 +2,7 @@
 
 (library
  (name awso_resourcegroupstaggingapi)
- (public_name awso-resourcegroupstaggingapi)
+ (public_name awso.resourcegroupstaggingapi)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

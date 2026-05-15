@@ -3,8 +3,8 @@
 (library
  (name awso_pi_async)
  (flags (:standard))
- (public_name awso-pi-async)
- (libraries awso-pi awso-async)
+ (public_name awso-async.pi)
+ (libraries awso.pi awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

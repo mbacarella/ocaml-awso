@@ -3,8 +3,8 @@
 (library
  (name awso_ssm_contacts_async)
  (flags (:standard))
- (public_name awso-ssm-contacts-async)
- (libraries awso-ssm-contacts awso-async)
+ (public_name awso-async.ssm-contacts)
+ (libraries awso.ssm-contacts awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

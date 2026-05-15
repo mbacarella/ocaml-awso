@@ -3,8 +3,8 @@
 (library
  (name awso_discovery_async)
  (flags (:standard))
- (public_name awso-discovery-async)
- (libraries awso-discovery awso-async)
+ (public_name awso-async.discovery)
+ (libraries awso.discovery awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

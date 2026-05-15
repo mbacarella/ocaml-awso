@@ -2,7 +2,7 @@
 
 (library
  (name awso_codedeploy)
- (public_name awso-codedeploy)
+ (public_name awso.codedeploy)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

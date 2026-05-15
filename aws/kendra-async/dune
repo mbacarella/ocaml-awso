@@ -3,8 +3,8 @@
 (library
  (name awso_kendra_async)
  (flags (:standard))
- (public_name awso-kendra-async)
- (libraries awso-kendra awso-async)
+ (public_name awso-async.kendra)
+ (libraries awso.kendra awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

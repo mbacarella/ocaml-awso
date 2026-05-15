@@ -3,8 +3,8 @@
 (library
  (name awso_ecr_async)
  (flags (:standard))
- (public_name awso-ecr-async)
- (libraries awso-ecr awso-async)
+ (public_name awso-async.ecr)
+ (libraries awso.ecr awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

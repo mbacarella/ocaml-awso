@@ -3,8 +3,8 @@
 (library
  (name awso_elastic_inference_async)
  (flags (:standard))
- (public_name awso-elastic-inference-async)
- (libraries awso-elastic-inference awso-async)
+ (public_name awso-async.elastic-inference)
+ (libraries awso.elastic-inference awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

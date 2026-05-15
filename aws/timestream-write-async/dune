@@ -3,8 +3,8 @@
 (library
  (name awso_timestream_write_async)
  (flags (:standard))
- (public_name awso-timestream-write-async)
- (libraries awso-timestream-write awso-async)
+ (public_name awso-async.timestream-write)
+ (libraries awso.timestream-write awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

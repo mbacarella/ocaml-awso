@@ -3,8 +3,8 @@
 (library
  (name awso_mediatailor_async)
  (flags (:standard))
- (public_name awso-mediatailor-async)
- (libraries awso-mediatailor awso-async)
+ (public_name awso-async.mediatailor)
+ (libraries awso.mediatailor awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

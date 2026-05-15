@@ -3,8 +3,8 @@
 (library
  (name awso_pinpoint_email_lwt)
  (flags (:standard))
- (public_name awso-pinpoint-email-lwt)
- (libraries awso-pinpoint-email awso-lwt))
+ (public_name awso-lwt.pinpoint-email)
+ (libraries awso.pinpoint-email awso-lwt))
 
 (rule
  (targets io.ml io.mli)

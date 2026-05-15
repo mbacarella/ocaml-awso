@@ -2,7 +2,7 @@
 
 (library
  (name awso_cloudcontrol)
- (public_name awso-cloudcontrol)
+ (public_name awso.cloudcontrol)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

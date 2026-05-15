@@ -3,8 +3,8 @@
 (library
  (name awso_service_quotas_lwt)
  (flags (:standard))
- (public_name awso-service-quotas-lwt)
- (libraries awso-service-quotas awso-lwt))
+ (public_name awso-lwt.service-quotas)
+ (libraries awso.service-quotas awso-lwt))
 
 (rule
  (targets io.ml io.mli)

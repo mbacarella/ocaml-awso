@@ -2,7 +2,7 @@
 
 (library
  (name awso_appflow)
- (public_name awso-appflow)
+ (public_name awso.appflow)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

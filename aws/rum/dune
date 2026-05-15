@@ -2,7 +2,7 @@
 
 (library
  (name awso_rum)
- (public_name awso-rum)
+ (public_name awso.rum)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

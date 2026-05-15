@@ -2,7 +2,7 @@
 
 (library
  (name awso_rds)
- (public_name awso-rds)
+ (public_name awso.rds)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

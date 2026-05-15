@@ -3,8 +3,8 @@
 (library
  (name awso_codebuild_lwt)
  (flags (:standard))
- (public_name awso-codebuild-lwt)
- (libraries awso-codebuild awso-lwt))
+ (public_name awso-lwt.codebuild)
+ (libraries awso.codebuild awso-lwt))
 
 (rule
  (targets io.ml io.mli)

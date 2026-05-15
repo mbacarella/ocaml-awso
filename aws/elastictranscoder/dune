@@ -2,7 +2,7 @@
 
 (library
  (name awso_elastictranscoder)
- (public_name awso-elastictranscoder)
+ (public_name awso.elastictranscoder)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

@@ -2,7 +2,7 @@
 
 (library
  (name awso_detective)
- (public_name awso-detective)
+ (public_name awso.detective)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

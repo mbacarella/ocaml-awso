@@ -3,8 +3,8 @@
 (library
  (name awso_accessanalyzer_lwt)
  (flags (:standard))
- (public_name awso-accessanalyzer-lwt)
- (libraries awso-accessanalyzer awso-lwt))
+ (public_name awso-lwt.accessanalyzer)
+ (libraries awso.accessanalyzer awso-lwt))
 
 (rule
  (targets io.ml io.mli)

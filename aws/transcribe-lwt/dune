@@ -3,8 +3,8 @@
 (library
  (name awso_transcribe_lwt)
  (flags (:standard))
- (public_name awso-transcribe-lwt)
- (libraries awso-transcribe awso-lwt))
+ (public_name awso-lwt.transcribe)
+ (libraries awso.transcribe awso-lwt))
 
 (rule
  (targets io.ml io.mli)

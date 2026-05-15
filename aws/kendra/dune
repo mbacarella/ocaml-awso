@@ -2,7 +2,7 @@
 
 (library
  (name awso_kendra)
- (public_name awso-kendra)
+ (public_name awso.kendra)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

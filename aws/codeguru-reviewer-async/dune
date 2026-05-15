@@ -3,8 +3,8 @@
 (library
  (name awso_codeguru_reviewer_async)
  (flags (:standard))
- (public_name awso-codeguru-reviewer-async)
- (libraries awso-codeguru-reviewer awso-async)
+ (public_name awso-async.codeguru-reviewer)
+ (libraries awso.codeguru-reviewer awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

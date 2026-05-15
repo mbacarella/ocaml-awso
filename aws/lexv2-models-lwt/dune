@@ -3,8 +3,8 @@
 (library
  (name awso_lexv2_models_lwt)
  (flags (:standard))
- (public_name awso-lexv2-models-lwt)
- (libraries awso-lexv2-models awso-lwt))
+ (public_name awso-lwt.lexv2-models)
+ (libraries awso.lexv2-models awso-lwt))
 
 (rule
  (targets io.ml io.mli)

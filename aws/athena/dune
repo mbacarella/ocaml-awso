@@ -2,7 +2,7 @@
 
 (library
  (name awso_athena)
- (public_name awso-athena)
+ (public_name awso.athena)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

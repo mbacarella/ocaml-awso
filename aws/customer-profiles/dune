@@ -2,7 +2,7 @@
 
 (library
  (name awso_customer_profiles)
- (public_name awso-customer-profiles)
+ (public_name awso.customer-profiles)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

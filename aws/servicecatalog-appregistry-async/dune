@@ -3,8 +3,8 @@
 (library
  (name awso_servicecatalog_appregistry_async)
  (flags (:standard))
- (public_name awso-servicecatalog-appregistry-async)
- (libraries awso-servicecatalog-appregistry awso-async)
+ (public_name awso-async.servicecatalog-appregistry)
+ (libraries awso.servicecatalog-appregistry awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

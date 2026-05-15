@@ -2,7 +2,7 @@
 
 (library
  (name awso_auditmanager)
- (public_name awso-auditmanager)
+ (public_name awso.auditmanager)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

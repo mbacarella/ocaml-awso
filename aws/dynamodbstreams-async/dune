@@ -3,8 +3,8 @@
 (library
  (name awso_dynamodbstreams_async)
  (flags (:standard))
- (public_name awso-dynamodbstreams-async)
- (libraries awso-dynamodbstreams awso-async)
+ (public_name awso-async.dynamodbstreams)
+ (libraries awso.dynamodbstreams awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

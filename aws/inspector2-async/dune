@@ -3,8 +3,8 @@
 (library
  (name awso_inspector2_async)
  (flags (:standard))
- (public_name awso-inspector2-async)
- (libraries awso-inspector2 awso-async)
+ (public_name awso-async.inspector2)
+ (libraries awso.inspector2 awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

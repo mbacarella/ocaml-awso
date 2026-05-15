@@ -2,7 +2,7 @@
 
 (library
  (name awso_cloudsearchdomain)
- (public_name awso-cloudsearchdomain)
+ (public_name awso.cloudsearchdomain)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

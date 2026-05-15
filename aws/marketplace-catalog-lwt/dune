@@ -3,8 +3,8 @@
 (library
  (name awso_marketplace_catalog_lwt)
  (flags (:standard))
- (public_name awso-marketplace-catalog-lwt)
- (libraries awso-marketplace-catalog awso-lwt))
+ (public_name awso-lwt.marketplace-catalog)
+ (libraries awso.marketplace-catalog awso-lwt))
 
 (rule
  (targets io.ml io.mli)

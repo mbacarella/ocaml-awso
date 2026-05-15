@@ -3,8 +3,8 @@
 (library
  (name awso_iotdeviceadvisor_async)
  (flags (:standard))
- (public_name awso-iotdeviceadvisor-async)
- (libraries awso-iotdeviceadvisor awso-async)
+ (public_name awso-async.iotdeviceadvisor)
+ (libraries awso.iotdeviceadvisor awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

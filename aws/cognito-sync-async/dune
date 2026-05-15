@@ -3,8 +3,8 @@
 (library
  (name awso_cognito_sync_async)
  (flags (:standard))
- (public_name awso-cognito-sync-async)
- (libraries awso-cognito-sync awso-async)
+ (public_name awso-async.cognito-sync)
+ (libraries awso.cognito-sync awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

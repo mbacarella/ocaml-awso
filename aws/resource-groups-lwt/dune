@@ -3,8 +3,8 @@
 (library
  (name awso_resource_groups_lwt)
  (flags (:standard))
- (public_name awso-resource-groups-lwt)
- (libraries awso-resource-groups awso-lwt))
+ (public_name awso-lwt.resource-groups)
+ (libraries awso.resource-groups awso-lwt))
 
 (rule
  (targets io.ml io.mli)

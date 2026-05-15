@@ -3,8 +3,8 @@
 (library
  (name awso_iotdeviceadvisor_lwt)
  (flags (:standard))
- (public_name awso-iotdeviceadvisor-lwt)
- (libraries awso-iotdeviceadvisor awso-lwt))
+ (public_name awso-lwt.iotdeviceadvisor)
+ (libraries awso.iotdeviceadvisor awso-lwt))
 
 (rule
  (targets io.ml io.mli)

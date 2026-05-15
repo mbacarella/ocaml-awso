@@ -3,8 +3,8 @@
 (library
  (name awso_autoscaling_async)
  (flags (:standard))
- (public_name awso-autoscaling-async)
- (libraries awso-autoscaling awso-async)
+ (public_name awso-async.autoscaling)
+ (libraries awso.autoscaling awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

@@ -3,8 +3,8 @@
 (library
  (name awso_serverlessrepo_async)
  (flags (:standard))
- (public_name awso-serverlessrepo-async)
- (libraries awso-serverlessrepo awso-async)
+ (public_name awso-async.serverlessrepo)
+ (libraries awso.serverlessrepo awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

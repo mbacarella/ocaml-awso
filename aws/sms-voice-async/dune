@@ -3,8 +3,8 @@
 (library
  (name awso_sms_voice_async)
  (flags (:standard))
- (public_name awso-sms-voice-async)
- (libraries awso-sms-voice awso-async)
+ (public_name awso-async.sms-voice)
+ (libraries awso.sms-voice awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

@@ -3,8 +3,8 @@
 (library
  (name awso_mediatailor_lwt)
  (flags (:standard))
- (public_name awso-mediatailor-lwt)
- (libraries awso-mediatailor awso-lwt))
+ (public_name awso-lwt.mediatailor)
+ (libraries awso.mediatailor awso-lwt))
 
 (rule
  (targets io.ml io.mli)

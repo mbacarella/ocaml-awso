@@ -3,8 +3,8 @@
 (library
  (name awso_detective_async)
  (flags (:standard))
- (public_name awso-detective-async)
- (libraries awso-detective awso-async)
+ (public_name awso-async.detective)
+ (libraries awso.detective awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

@@ -3,8 +3,8 @@
 (library
  (name awso_lambda_async)
  (flags (:standard))
- (public_name awso-lambda-async)
- (libraries awso-lambda awso-async)
+ (public_name awso-async.lambda)
+ (libraries awso.lambda awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

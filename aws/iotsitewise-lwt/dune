@@ -3,8 +3,8 @@
 (library
  (name awso_iotsitewise_lwt)
  (flags (:standard))
- (public_name awso-iotsitewise-lwt)
- (libraries awso-iotsitewise awso-lwt))
+ (public_name awso-lwt.iotsitewise)
+ (libraries awso.iotsitewise awso-lwt))
 
 (rule
  (targets io.ml io.mli)

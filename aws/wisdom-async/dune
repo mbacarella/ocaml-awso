@@ -3,8 +3,8 @@
 (library
  (name awso_wisdom_async)
  (flags (:standard))
- (public_name awso-wisdom-async)
- (libraries awso-wisdom awso-async)
+ (public_name awso-async.wisdom)
+ (libraries awso.wisdom awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

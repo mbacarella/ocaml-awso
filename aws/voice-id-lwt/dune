@@ -3,8 +3,8 @@
 (library
  (name awso_voice_id_lwt)
  (flags (:standard))
- (public_name awso-voice-id-lwt)
- (libraries awso-voice-id awso-lwt))
+ (public_name awso-lwt.voice-id)
+ (libraries awso.voice-id awso-lwt))
 
 (rule
  (targets io.ml io.mli)

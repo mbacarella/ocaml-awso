@@ -3,8 +3,8 @@
 (library
  (name awso_devicefarm_async)
  (flags (:standard))
- (public_name awso-devicefarm-async)
- (libraries awso-devicefarm awso-async)
+ (public_name awso-async.devicefarm)
+ (libraries awso.devicefarm awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

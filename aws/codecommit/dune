@@ -2,7 +2,7 @@
 
 (library
  (name awso_codecommit)
- (public_name awso-codecommit)
+ (public_name awso.codecommit)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

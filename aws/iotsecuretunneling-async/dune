@@ -3,8 +3,8 @@
 (library
  (name awso_iotsecuretunneling_async)
  (flags (:standard))
- (public_name awso-iotsecuretunneling-async)
- (libraries awso-iotsecuretunneling awso-async)
+ (public_name awso-async.iotsecuretunneling)
+ (libraries awso.iotsecuretunneling awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

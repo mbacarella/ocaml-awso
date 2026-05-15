@@ -3,8 +3,8 @@
 (library
  (name awso_savingsplans_async)
  (flags (:standard))
- (public_name awso-savingsplans-async)
- (libraries awso-savingsplans awso-async)
+ (public_name awso-async.savingsplans)
+ (libraries awso.savingsplans awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

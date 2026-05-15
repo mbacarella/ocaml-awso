@@ -3,8 +3,8 @@
 (library
  (name awso_autoscaling_plans_lwt)
  (flags (:standard))
- (public_name awso-autoscaling-plans-lwt)
- (libraries awso-autoscaling-plans awso-lwt))
+ (public_name awso-lwt.autoscaling-plans)
+ (libraries awso.autoscaling-plans awso-lwt))
 
 (rule
  (targets io.ml io.mli)

@@ -2,7 +2,7 @@
 
 (library
  (name awso_lookoutmetrics)
- (public_name awso-lookoutmetrics)
+ (public_name awso.lookoutmetrics)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

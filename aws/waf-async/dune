@@ -3,8 +3,8 @@
 (library
  (name awso_waf_async)
  (flags (:standard))
- (public_name awso-waf-async)
- (libraries awso-waf awso-async)
+ (public_name awso-async.waf)
+ (libraries awso.waf awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

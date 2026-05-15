@@ -2,7 +2,7 @@
 
 (library
  (name awso_amplify)
- (public_name awso-amplify)
+ (public_name awso.amplify)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

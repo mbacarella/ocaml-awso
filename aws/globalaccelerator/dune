@@ -2,7 +2,7 @@
 
 (library
  (name awso_globalaccelerator)
- (public_name awso-globalaccelerator)
+ (public_name awso.globalaccelerator)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

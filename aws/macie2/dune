@@ -2,7 +2,7 @@
 
 (library
  (name awso_macie2)
- (public_name awso-macie2)
+ (public_name awso.macie2)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

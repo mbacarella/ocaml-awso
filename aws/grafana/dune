@@ -2,7 +2,7 @@
 
 (library
  (name awso_grafana)
- (public_name awso-grafana)
+ (public_name awso.grafana)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

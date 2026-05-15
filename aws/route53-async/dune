@@ -3,8 +3,8 @@
 (library
  (name awso_route53_async)
  (flags (:standard))
- (public_name awso-route53-async)
- (libraries awso-route53 awso-async)
+ (public_name awso-async.route53)
+ (libraries awso.route53 awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

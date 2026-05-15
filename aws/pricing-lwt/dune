@@ -3,8 +3,8 @@
 (library
  (name awso_pricing_lwt)
  (flags (:standard))
- (public_name awso-pricing-lwt)
- (libraries awso-pricing awso-lwt))
+ (public_name awso-lwt.pricing)
+ (libraries awso.pricing awso-lwt))
 
 (rule
  (targets io.ml io.mli)

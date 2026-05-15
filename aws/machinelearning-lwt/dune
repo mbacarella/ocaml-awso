@@ -3,8 +3,8 @@
 (library
  (name awso_machinelearning_lwt)
  (flags (:standard))
- (public_name awso-machinelearning-lwt)
- (libraries awso-machinelearning awso-lwt))
+ (public_name awso-lwt.machinelearning)
+ (libraries awso.machinelearning awso-lwt))
 
 (rule
  (targets io.ml io.mli)

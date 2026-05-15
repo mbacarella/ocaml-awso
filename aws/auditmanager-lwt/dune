@@ -3,8 +3,8 @@
 (library
  (name awso_auditmanager_lwt)
  (flags (:standard))
- (public_name awso-auditmanager-lwt)
- (libraries awso-auditmanager awso-lwt))
+ (public_name awso-lwt.auditmanager)
+ (libraries awso.auditmanager awso-lwt))
 
 (rule
  (targets io.ml io.mli)

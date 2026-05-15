@@ -3,8 +3,8 @@
 (library
  (name awso_applicationcostprofiler_async)
  (flags (:standard))
- (public_name awso-applicationcostprofiler-async)
- (libraries awso-applicationcostprofiler awso-async)
+ (public_name awso-async.applicationcostprofiler)
+ (libraries awso.applicationcostprofiler awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

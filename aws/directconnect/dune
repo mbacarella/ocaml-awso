@@ -2,7 +2,7 @@
 
 (library
  (name awso_directconnect)
- (public_name awso-directconnect)
+ (public_name awso.directconnect)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

@@ -3,8 +3,8 @@
 (library
  (name awso_marketplace_catalog_async)
  (flags (:standard))
- (public_name awso-marketplace-catalog-async)
- (libraries awso-marketplace-catalog awso-async)
+ (public_name awso-async.marketplace-catalog)
+ (libraries awso.marketplace-catalog awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

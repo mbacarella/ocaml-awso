@@ -3,8 +3,8 @@
 (library
  (name awso_chime_lwt)
  (flags (:standard))
- (public_name awso-chime-lwt)
- (libraries awso-chime awso-lwt))
+ (public_name awso-lwt.chime)
+ (libraries awso.chime awso-lwt))
 
 (rule
  (targets io.ml io.mli)

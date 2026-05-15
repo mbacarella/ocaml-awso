@@ -25,7 +25,7 @@ let make ~date ~service =
       {|
   (library
     (name awso_%{service_unders})
-    (public_name awso-%{service})
+    (public_name awso.%{service})
     (libraries awso %{extra_deps})
     (flags :standard)
     (ocamlopt_flags (-linscan))
@@ -117,8 +117,8 @@ let make_io (io_kind : [ `Async | `Lwt ]) ~date ~service =
 (library
   (name awso_%{service_under}_%{io})
   (flags (:standard))
-  (public_name awso-%{service}-%{io})
-  (libraries awso-%{service} awso-%{io})%{preprocess})
+  (public_name awso-%{io}.%{service})
+  (libraries awso.%{service} awso-%{io})%{preprocess})
       |}]
   in
   let num_submodules =
@@ -206,14 +206,13 @@ let make_cli_async ~service =
     sprintf
       {|
   (executable
-    (package awso-%s-async)
+    (package awso-async)
     (name awso_%s)
     (flags (:standard))
     (public_name awso-%s)
-    (libraries awso-%s-async awso-async core_unix.command_unix)
+    (libraries awso-async.%s awso-async core_unix.command_unix)
     (preprocess (pps ppx_jane)))
   |}
-      service
       service_
       service
       service

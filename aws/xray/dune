@@ -2,7 +2,7 @@
 
 (library
  (name awso_xray)
- (public_name awso-xray)
+ (public_name awso.xray)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

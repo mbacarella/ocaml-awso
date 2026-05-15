@@ -3,8 +3,8 @@
 (library
  (name awso_inspector_lwt)
  (flags (:standard))
- (public_name awso-inspector-lwt)
- (libraries awso-inspector awso-lwt))
+ (public_name awso-lwt.inspector)
+ (libraries awso.inspector awso-lwt))
 
 (rule
  (targets io.ml io.mli)

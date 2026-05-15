@@ -3,8 +3,8 @@
 (library
  (name awso_fms_async)
  (flags (:standard))
- (public_name awso-fms-async)
- (libraries awso-fms awso-async)
+ (public_name awso-async.fms)
+ (libraries awso.fms awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

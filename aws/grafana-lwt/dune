@@ -3,8 +3,8 @@
 (library
  (name awso_grafana_lwt)
  (flags (:standard))
- (public_name awso-grafana-lwt)
- (libraries awso-grafana awso-lwt))
+ (public_name awso-lwt.grafana)
+ (libraries awso.grafana awso-lwt))
 
 (rule
  (targets io.ml io.mli)

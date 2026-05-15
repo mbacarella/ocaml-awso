@@ -2,7 +2,7 @@
 
 (library
  (name awso_synthetics)
- (public_name awso-synthetics)
+ (public_name awso.synthetics)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

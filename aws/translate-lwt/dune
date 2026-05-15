@@ -3,8 +3,8 @@
 (library
  (name awso_translate_lwt)
  (flags (:standard))
- (public_name awso-translate-lwt)
- (libraries awso-translate awso-lwt))
+ (public_name awso-lwt.translate)
+ (libraries awso.translate awso-lwt))
 
 (rule
  (targets io.ml io.mli)

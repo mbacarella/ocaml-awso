@@ -3,8 +3,8 @@
 (library
  (name awso_ec2_instance_connect_async)
  (flags (:standard))
- (public_name awso-ec2-instance-connect-async)
- (libraries awso-ec2-instance-connect awso-async)
+ (public_name awso-async.ec2-instance-connect)
+ (libraries awso.ec2-instance-connect awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

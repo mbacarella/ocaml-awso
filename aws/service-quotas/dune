@@ -2,7 +2,7 @@
 
 (library
  (name awso_service_quotas)
- (public_name awso-service-quotas)
+ (public_name awso.service-quotas)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

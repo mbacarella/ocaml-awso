@@ -2,7 +2,7 @@
 
 (library
  (name awso_dax)
- (public_name awso-dax)
+ (public_name awso.dax)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

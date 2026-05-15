@@ -2,7 +2,7 @@
 
 (library
  (name awso_opensearch)
- (public_name awso-opensearch)
+ (public_name awso.opensearch)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

@@ -3,8 +3,8 @@
 (library
  (name awso_sns_async)
  (flags (:standard))
- (public_name awso-sns-async)
- (libraries awso-sns awso-async)
+ (public_name awso-async.sns)
+ (libraries awso.sns awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

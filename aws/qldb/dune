@@ -2,7 +2,7 @@
 
 (library
  (name awso_qldb)
- (public_name awso-qldb)
+ (public_name awso.qldb)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

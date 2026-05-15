@@ -3,8 +3,8 @@
 (library
  (name awso_gamesparks_lwt)
  (flags (:standard))
- (public_name awso-gamesparks-lwt)
- (libraries awso-gamesparks awso-lwt))
+ (public_name awso-lwt.gamesparks)
+ (libraries awso.gamesparks awso-lwt))
 
 (rule
  (targets io.ml io.mli)

@@ -3,8 +3,8 @@
 (library
  (name awso_personalize_async)
  (flags (:standard))
- (public_name awso-personalize-async)
- (libraries awso-personalize awso-async)
+ (public_name awso-async.personalize)
+ (libraries awso.personalize awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

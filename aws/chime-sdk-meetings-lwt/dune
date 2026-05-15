@@ -3,8 +3,8 @@
 (library
  (name awso_chime_sdk_meetings_lwt)
  (flags (:standard))
- (public_name awso-chime-sdk-meetings-lwt)
- (libraries awso-chime-sdk-meetings awso-lwt))
+ (public_name awso-lwt.chime-sdk-meetings)
+ (libraries awso.chime-sdk-meetings awso-lwt))
 
 (rule
  (targets io.ml io.mli)

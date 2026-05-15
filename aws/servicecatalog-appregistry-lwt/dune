@@ -3,8 +3,8 @@
 (library
  (name awso_servicecatalog_appregistry_lwt)
  (flags (:standard))
- (public_name awso-servicecatalog-appregistry-lwt)
- (libraries awso-servicecatalog-appregistry awso-lwt))
+ (public_name awso-lwt.servicecatalog-appregistry)
+ (libraries awso.servicecatalog-appregistry awso-lwt))
 
 (rule
  (targets io.ml io.mli)

@@ -3,8 +3,8 @@
 (library
  (name awso_memorydb_lwt)
  (flags (:standard))
- (public_name awso-memorydb-lwt)
- (libraries awso-memorydb awso-lwt))
+ (public_name awso-lwt.memorydb)
+ (libraries awso.memorydb awso-lwt))
 
 (rule
  (targets io.ml io.mli)

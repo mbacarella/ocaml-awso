@@ -3,8 +3,8 @@
 (library
  (name awso_transfer_lwt)
  (flags (:standard))
- (public_name awso-transfer-lwt)
- (libraries awso-transfer awso-lwt))
+ (public_name awso-lwt.transfer)
+ (libraries awso.transfer awso-lwt))
 
 (rule
  (targets io.ml io.mli)

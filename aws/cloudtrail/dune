@@ -2,7 +2,7 @@
 
 (library
  (name awso_cloudtrail)
- (public_name awso-cloudtrail)
+ (public_name awso.cloudtrail)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

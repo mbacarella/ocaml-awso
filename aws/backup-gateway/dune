@@ -2,7 +2,7 @@
 
 (library
  (name awso_backup_gateway)
- (public_name awso-backup-gateway)
+ (public_name awso.backup-gateway)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

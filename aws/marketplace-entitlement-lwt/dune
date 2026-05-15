@@ -3,8 +3,8 @@
 (library
  (name awso_marketplace_entitlement_lwt)
  (flags (:standard))
- (public_name awso-marketplace-entitlement-lwt)
- (libraries awso-marketplace-entitlement awso-lwt))
+ (public_name awso-lwt.marketplace-entitlement)
+ (libraries awso.marketplace-entitlement awso-lwt))
 
 (rule
  (targets io.ml io.mli)

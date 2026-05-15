@@ -3,8 +3,8 @@
 (library
  (name awso_importexport_lwt)
  (flags (:standard))
- (public_name awso-importexport-lwt)
- (libraries awso-importexport awso-lwt))
+ (public_name awso-lwt.importexport)
+ (libraries awso.importexport awso-lwt))
 
 (rule
  (targets io.ml io.mli)

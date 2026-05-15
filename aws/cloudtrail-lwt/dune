@@ -3,8 +3,8 @@
 (library
  (name awso_cloudtrail_lwt)
  (flags (:standard))
- (public_name awso-cloudtrail-lwt)
- (libraries awso-cloudtrail awso-lwt))
+ (public_name awso-lwt.cloudtrail)
+ (libraries awso.cloudtrail awso-lwt))
 
 (rule
  (targets io.ml io.mli)

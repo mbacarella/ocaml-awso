@@ -3,8 +3,8 @@
 (library
  (name awso_apprunner_async)
  (flags (:standard))
- (public_name awso-apprunner-async)
- (libraries awso-apprunner awso-async)
+ (public_name awso-async.apprunner)
+ (libraries awso.apprunner awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

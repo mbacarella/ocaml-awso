@@ -3,8 +3,8 @@
 (library
  (name awso_kafka_lwt)
  (flags (:standard))
- (public_name awso-kafka-lwt)
- (libraries awso-kafka awso-lwt))
+ (public_name awso-lwt.kafka)
+ (libraries awso.kafka awso-lwt))
 
 (rule
  (targets io.ml io.mli)

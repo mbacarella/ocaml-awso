@@ -3,8 +3,8 @@
 (library
  (name awso_clouddirectory_async)
  (flags (:standard))
- (public_name awso-clouddirectory-async)
- (libraries awso-clouddirectory awso-async)
+ (public_name awso-async.clouddirectory)
+ (libraries awso.clouddirectory awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

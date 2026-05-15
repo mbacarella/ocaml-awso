@@ -1,6 +1,6 @@
 (executable
  (name uat)
- (libraries awso-ec2-async core_unix.filename_unix core_unix.command_unix)
+ (libraries awso-async.ec2 core_unix.filename_unix core_unix.command_unix)
  (flags
   (:standard))
  (preprocess

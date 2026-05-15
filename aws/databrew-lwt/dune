@@ -3,8 +3,8 @@
 (library
  (name awso_databrew_lwt)
  (flags (:standard))
- (public_name awso-databrew-lwt)
- (libraries awso-databrew awso-lwt))
+ (public_name awso-lwt.databrew)
+ (libraries awso.databrew awso-lwt))
 
 (rule
  (targets io.ml io.mli)

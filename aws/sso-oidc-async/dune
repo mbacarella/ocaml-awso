@@ -3,8 +3,8 @@
 (library
  (name awso_sso_oidc_async)
  (flags (:standard))
- (public_name awso-sso-oidc-async)
- (libraries awso-sso-oidc awso-async)
+ (public_name awso-async.sso-oidc)
+ (libraries awso.sso-oidc awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

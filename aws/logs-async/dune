@@ -3,8 +3,8 @@
 (library
  (name awso_logs_async)
  (flags (:standard))
- (public_name awso-logs-async)
- (libraries awso-logs awso-async)
+ (public_name awso-async.logs)
+ (libraries awso.logs awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

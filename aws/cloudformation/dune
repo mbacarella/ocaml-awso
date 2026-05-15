@@ -2,7 +2,7 @@
 
 (library
  (name awso_cloudformation)
- (public_name awso-cloudformation)
+ (public_name awso.cloudformation)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

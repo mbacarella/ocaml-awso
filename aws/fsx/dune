@@ -2,7 +2,7 @@
 
 (library
  (name awso_fsx)
- (public_name awso-fsx)
+ (public_name awso.fsx)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

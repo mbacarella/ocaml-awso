@@ -3,8 +3,8 @@
 (library
  (name awso_backup_gateway_async)
  (flags (:standard))
- (public_name awso-backup-gateway-async)
- (libraries awso-backup-gateway awso-async)
+ (public_name awso-async.backup-gateway)
+ (libraries awso.backup-gateway awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

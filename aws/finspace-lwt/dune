@@ -3,8 +3,8 @@
 (library
  (name awso_finspace_lwt)
  (flags (:standard))
- (public_name awso-finspace-lwt)
- (libraries awso-finspace awso-lwt))
+ (public_name awso-lwt.finspace)
+ (libraries awso.finspace awso-lwt))
 
 (rule
  (targets io.ml io.mli)

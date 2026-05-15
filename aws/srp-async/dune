@@ -1,8 +1,8 @@
 (library
  (name awso_srp_async)
  (flags :standard)
- (public_name awso-srp-async)
- (libraries awso-srp awso-async awso-cognito-idp-async core_unix.time_unix)
+ (public_name awso-async.srp)
+ (libraries awso.srp awso-async awso-async.cognito-idp core_unix.time_unix)
  (preprocess
   (pps ppx_jane))
  (synopsis "OCaml AWS SRP client.")

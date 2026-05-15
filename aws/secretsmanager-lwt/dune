@@ -3,8 +3,8 @@
 (library
  (name awso_secretsmanager_lwt)
  (flags (:standard))
- (public_name awso-secretsmanager-lwt)
- (libraries awso-secretsmanager awso-lwt))
+ (public_name awso-lwt.secretsmanager)
+ (libraries awso.secretsmanager awso-lwt))
 
 (rule
  (targets io.ml io.mli)

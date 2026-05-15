@@ -3,8 +3,8 @@
 (library
  (name awso_sagemaker_featurestore_runtime_lwt)
  (flags (:standard))
- (public_name awso-sagemaker-featurestore-runtime-lwt)
- (libraries awso-sagemaker-featurestore-runtime awso-lwt))
+ (public_name awso-lwt.sagemaker-featurestore-runtime)
+ (libraries awso.sagemaker-featurestore-runtime awso-lwt))
 
 (rule
  (targets io.ml io.mli)

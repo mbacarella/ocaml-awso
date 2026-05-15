@@ -2,7 +2,7 @@
 
 (library
  (name awso_ecr_public)
- (public_name awso-ecr-public)
+ (public_name awso.ecr-public)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

@@ -3,8 +3,8 @@
 (library
  (name awso_elasticbeanstalk_lwt)
  (flags (:standard))
- (public_name awso-elasticbeanstalk-lwt)
- (libraries awso-elasticbeanstalk awso-lwt))
+ (public_name awso-lwt.elasticbeanstalk)
+ (libraries awso.elasticbeanstalk awso-lwt))
 
 (rule
  (targets io.ml io.mli)

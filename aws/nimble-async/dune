@@ -3,8 +3,8 @@
 (library
  (name awso_nimble_async)
  (flags (:standard))
- (public_name awso-nimble-async)
- (libraries awso-nimble awso-async)
+ (public_name awso-async.nimble)
+ (libraries awso.nimble awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

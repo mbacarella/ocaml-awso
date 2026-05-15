@@ -3,8 +3,8 @@
 (library
  (name awso_managedblockchain_async)
  (flags (:standard))
- (public_name awso-managedblockchain-async)
- (libraries awso-managedblockchain awso-async)
+ (public_name awso-async.managedblockchain)
+ (libraries awso.managedblockchain awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

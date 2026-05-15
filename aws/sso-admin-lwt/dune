@@ -3,8 +3,8 @@
 (library
  (name awso_sso_admin_lwt)
  (flags (:standard))
- (public_name awso-sso-admin-lwt)
- (libraries awso-sso-admin awso-lwt))
+ (public_name awso-lwt.sso-admin)
+ (libraries awso.sso-admin awso-lwt))
 
 (rule
  (targets io.ml io.mli)

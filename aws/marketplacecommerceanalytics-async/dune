@@ -3,8 +3,8 @@
 (library
  (name awso_marketplacecommerceanalytics_async)
  (flags (:standard))
- (public_name awso-marketplacecommerceanalytics-async)
- (libraries awso-marketplacecommerceanalytics awso-async)
+ (public_name awso-async.marketplacecommerceanalytics)
+ (libraries awso.marketplacecommerceanalytics awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

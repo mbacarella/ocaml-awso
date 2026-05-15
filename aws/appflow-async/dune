@@ -3,8 +3,8 @@
 (library
  (name awso_appflow_async)
  (flags (:standard))
- (public_name awso-appflow-async)
- (libraries awso-appflow awso-async)
+ (public_name awso-async.appflow)
+ (libraries awso.appflow awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

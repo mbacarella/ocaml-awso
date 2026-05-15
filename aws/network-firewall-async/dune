@@ -3,8 +3,8 @@
 (library
  (name awso_network_firewall_async)
  (flags (:standard))
- (public_name awso-network-firewall-async)
- (libraries awso-network-firewall awso-async)
+ (public_name awso-async.network-firewall)
+ (libraries awso.network-firewall awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

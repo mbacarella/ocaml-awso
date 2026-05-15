@@ -3,8 +3,8 @@
 (library
  (name awso_cognito_sync_lwt)
  (flags (:standard))
- (public_name awso-cognito-sync-lwt)
- (libraries awso-cognito-sync awso-lwt))
+ (public_name awso-lwt.cognito-sync)
+ (libraries awso.cognito-sync awso-lwt))
 
 (rule
  (targets io.ml io.mli)

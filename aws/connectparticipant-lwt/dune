@@ -3,8 +3,8 @@
 (library
  (name awso_connectparticipant_lwt)
  (flags (:standard))
- (public_name awso-connectparticipant-lwt)
- (libraries awso-connectparticipant awso-lwt))
+ (public_name awso-lwt.connectparticipant)
+ (libraries awso.connectparticipant awso-lwt))
 
 (rule
  (targets io.ml io.mli)

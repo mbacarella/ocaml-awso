@@ -2,7 +2,7 @@
 
 (library
  (name awso_swf)
- (public_name awso-swf)
+ (public_name awso.swf)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

@@ -2,7 +2,7 @@
 
 (library
  (name awso_cloudfront)
- (public_name awso-cloudfront)
+ (public_name awso.cloudfront)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

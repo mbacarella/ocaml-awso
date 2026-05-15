@@ -2,7 +2,7 @@
 
 (library
  (name awso_finspace)
- (public_name awso-finspace)
+ (public_name awso.finspace)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

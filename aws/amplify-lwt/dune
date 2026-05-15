@@ -3,8 +3,8 @@
 (library
  (name awso_amplify_lwt)
  (flags (:standard))
- (public_name awso-amplify-lwt)
- (libraries awso-amplify awso-lwt))
+ (public_name awso-lwt.amplify)
+ (libraries awso.amplify awso-lwt))
 
 (rule
  (targets io.ml io.mli)

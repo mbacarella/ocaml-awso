@@ -3,8 +3,8 @@
 (library
  (name awso_qldb_async)
  (flags (:standard))
- (public_name awso-qldb-async)
- (libraries awso-qldb awso-async)
+ (public_name awso-async.qldb)
+ (libraries awso.qldb awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

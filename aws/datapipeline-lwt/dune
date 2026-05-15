@@ -3,8 +3,8 @@
 (library
  (name awso_datapipeline_lwt)
  (flags (:standard))
- (public_name awso-datapipeline-lwt)
- (libraries awso-datapipeline awso-lwt))
+ (public_name awso-lwt.datapipeline)
+ (libraries awso.datapipeline awso-lwt))
 
 (rule
  (targets io.ml io.mli)

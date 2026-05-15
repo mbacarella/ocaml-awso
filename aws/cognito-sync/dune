@@ -2,7 +2,7 @@
 
 (library
  (name awso_cognito_sync)
- (public_name awso-cognito-sync)
+ (public_name awso.cognito-sync)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

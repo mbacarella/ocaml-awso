@@ -3,8 +3,8 @@
 (library
  (name awso_route53resolver_lwt)
  (flags (:standard))
- (public_name awso-route53resolver-lwt)
- (libraries awso-route53resolver awso-lwt))
+ (public_name awso-lwt.route53resolver)
+ (libraries awso.route53resolver awso-lwt))
 
 (rule
  (targets io.ml io.mli)

@@ -3,8 +3,8 @@
 (library
  (name awso_batch_lwt)
  (flags (:standard))
- (public_name awso-batch-lwt)
- (libraries awso-batch awso-lwt))
+ (public_name awso-lwt.batch)
+ (libraries awso.batch awso-lwt))
 
 (rule
  (targets io.ml io.mli)

@@ -3,8 +3,8 @@
 (library
  (name awso_marketplace_entitlement_async)
  (flags (:standard))
- (public_name awso-marketplace-entitlement-async)
- (libraries awso-marketplace-entitlement awso-async)
+ (public_name awso-async.marketplace-entitlement)
+ (libraries awso.marketplace-entitlement awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

@@ -2,7 +2,7 @@
 
 (library
  (name awso_imagebuilder)
- (public_name awso-imagebuilder)
+ (public_name awso.imagebuilder)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

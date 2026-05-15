@@ -3,8 +3,8 @@
 (library
  (name awso_codeartifact_lwt)
  (flags (:standard))
- (public_name awso-codeartifact-lwt)
- (libraries awso-codeartifact awso-lwt))
+ (public_name awso-lwt.codeartifact)
+ (libraries awso.codeartifact awso-lwt))
 
 (rule
  (targets io.ml io.mli)

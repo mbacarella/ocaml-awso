@@ -3,8 +3,8 @@
 (library
  (name awso_iotsecuretunneling_lwt)
  (flags (:standard))
- (public_name awso-iotsecuretunneling-lwt)
- (libraries awso-iotsecuretunneling awso-lwt))
+ (public_name awso-lwt.iotsecuretunneling)
+ (libraries awso.iotsecuretunneling awso-lwt))
 
 (rule
  (targets io.ml io.mli)

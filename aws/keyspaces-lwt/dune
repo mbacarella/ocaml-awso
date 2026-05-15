@@ -3,8 +3,8 @@
 (library
  (name awso_keyspaces_lwt)
  (flags (:standard))
- (public_name awso-keyspaces-lwt)
- (libraries awso-keyspaces awso-lwt))
+ (public_name awso-lwt.keyspaces)
+ (libraries awso.keyspaces awso-lwt))
 
 (rule
  (targets io.ml io.mli)

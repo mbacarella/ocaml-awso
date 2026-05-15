@@ -3,8 +3,8 @@
 (library
  (name awso_cloudtrail_async)
  (flags (:standard))
- (public_name awso-cloudtrail-async)
- (libraries awso-cloudtrail awso-async)
+ (public_name awso-async.cloudtrail)
+ (libraries awso.cloudtrail awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

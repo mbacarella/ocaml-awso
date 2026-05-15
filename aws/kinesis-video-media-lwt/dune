@@ -3,8 +3,8 @@
 (library
  (name awso_kinesis_video_media_lwt)
  (flags (:standard))
- (public_name awso-kinesis-video-media-lwt)
- (libraries awso-kinesis-video-media awso-lwt))
+ (public_name awso-lwt.kinesis-video-media)
+ (libraries awso.kinesis-video-media awso-lwt))
 
 (rule
  (targets io.ml io.mli)

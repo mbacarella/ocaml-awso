@@ -2,7 +2,7 @@
 
 (library
  (name awso_iot)
- (public_name awso-iot)
+ (public_name awso.iot)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

@@ -3,8 +3,8 @@
 (library
  (name awso_customer_profiles_lwt)
  (flags (:standard))
- (public_name awso-customer-profiles-lwt)
- (libraries awso-customer-profiles awso-lwt))
+ (public_name awso-lwt.customer-profiles)
+ (libraries awso.customer-profiles awso-lwt))
 
 (rule
  (targets io.ml io.mli)

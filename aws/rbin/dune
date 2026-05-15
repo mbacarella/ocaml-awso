@@ -2,7 +2,7 @@
 
 (library
  (name awso_rbin)
- (public_name awso-rbin)
+ (public_name awso.rbin)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

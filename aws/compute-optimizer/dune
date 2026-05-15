@@ -2,7 +2,7 @@
 
 (library
  (name awso_compute_optimizer)
- (public_name awso-compute-optimizer)
+ (public_name awso.compute-optimizer)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

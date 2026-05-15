@@ -1,11 +1,11 @@
 (executable
  (name awso_test)
  (libraries
-  awso-s3-async
-  awso-ec2-async
-  awso-ecr-async
-  awso-ecs-async
-  awso-sso-async
+  awso-async.s3
+  awso-async.ec2
+  awso-async.ecr
+  awso-async.ecs
+  awso-async.sso
   core_unix.filename_unix
   core_unix.command_unix)
  (flags

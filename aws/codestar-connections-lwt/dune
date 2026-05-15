@@ -3,8 +3,8 @@
 (library
  (name awso_codestar_connections_lwt)
  (flags (:standard))
- (public_name awso-codestar-connections-lwt)
- (libraries awso-codestar-connections awso-lwt))
+ (public_name awso-lwt.codestar-connections)
+ (libraries awso.codestar-connections awso-lwt))
 
 (rule
  (targets io.ml io.mli)

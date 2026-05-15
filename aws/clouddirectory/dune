@@ -2,7 +2,7 @@
 
 (library
  (name awso_clouddirectory)
- (public_name awso-clouddirectory)
+ (public_name awso.clouddirectory)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

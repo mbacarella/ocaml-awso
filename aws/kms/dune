@@ -2,7 +2,7 @@
 
 (library
  (name awso_kms)
- (public_name awso-kms)
+ (public_name awso.kms)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

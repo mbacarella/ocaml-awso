@@ -2,7 +2,7 @@
 
 (library
  (name awso_meteringmarketplace)
- (public_name awso-meteringmarketplace)
+ (public_name awso.meteringmarketplace)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

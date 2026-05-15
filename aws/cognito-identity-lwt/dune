@@ -3,8 +3,8 @@
 (library
  (name awso_cognito_identity_lwt)
  (flags (:standard))
- (public_name awso-cognito-identity-lwt)
- (libraries awso-cognito-identity awso-lwt))
+ (public_name awso-lwt.cognito-identity)
+ (libraries awso.cognito-identity awso-lwt))
 
 (rule
  (targets io.ml io.mli)

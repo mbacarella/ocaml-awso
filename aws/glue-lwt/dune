@@ -3,8 +3,8 @@
 (library
  (name awso_glue_lwt)
  (flags (:standard))
- (public_name awso-glue-lwt)
- (libraries awso-glue awso-lwt))
+ (public_name awso-lwt.glue)
+ (libraries awso.glue awso-lwt))
 
 (rule
  (targets io.ml io.mli)

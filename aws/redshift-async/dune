@@ -3,8 +3,8 @@
 (library
  (name awso_redshift_async)
  (flags (:standard))
- (public_name awso-redshift-async)
- (libraries awso-redshift awso-async)
+ (public_name awso-async.redshift)
+ (libraries awso.redshift awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

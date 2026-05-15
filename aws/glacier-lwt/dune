@@ -3,8 +3,8 @@
 (library
  (name awso_glacier_lwt)
  (flags (:standard))
- (public_name awso-glacier-lwt)
- (libraries awso-glacier awso-lwt))
+ (public_name awso-lwt.glacier)
+ (libraries awso.glacier awso-lwt))
 
 (rule
  (targets io.ml io.mli)

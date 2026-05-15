@@ -2,7 +2,7 @@
 
 (library
  (name awso_accessanalyzer)
- (public_name awso-accessanalyzer)
+ (public_name awso.accessanalyzer)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

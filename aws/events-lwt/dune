@@ -3,8 +3,8 @@
 (library
  (name awso_events_lwt)
  (flags (:standard))
- (public_name awso-events-lwt)
- (libraries awso-events awso-lwt))
+ (public_name awso-lwt.events)
+ (libraries awso.events awso-lwt))
 
 (rule
  (targets io.ml io.mli)

@@ -2,7 +2,7 @@
 
 (library
  (name awso_importexport)
- (public_name awso-importexport)
+ (public_name awso.importexport)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

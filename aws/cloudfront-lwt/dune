@@ -3,8 +3,8 @@
 (library
  (name awso_cloudfront_lwt)
  (flags (:standard))
- (public_name awso-cloudfront-lwt)
- (libraries awso-cloudfront awso-lwt))
+ (public_name awso-lwt.cloudfront)
+ (libraries awso.cloudfront awso-lwt))
 
 (rule
  (targets io.ml io.mli)

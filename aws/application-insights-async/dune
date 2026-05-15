@@ -3,8 +3,8 @@
 (library
  (name awso_application_insights_async)
  (flags (:standard))
- (public_name awso-application-insights-async)
- (libraries awso-application-insights awso-async)
+ (public_name awso-async.application-insights)
+ (libraries awso.application-insights awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

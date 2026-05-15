@@ -3,8 +3,8 @@
 (library
  (name awso_ssm_incidents_lwt)
  (flags (:standard))
- (public_name awso-ssm-incidents-lwt)
- (libraries awso-ssm-incidents awso-lwt))
+ (public_name awso-lwt.ssm-incidents)
+ (libraries awso.ssm-incidents awso-lwt))
 
 (rule
  (targets io.ml io.mli)

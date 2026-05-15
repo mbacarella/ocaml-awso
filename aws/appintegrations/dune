@@ -2,7 +2,7 @@
 
 (library
  (name awso_appintegrations)
- (public_name awso-appintegrations)
+ (public_name awso.appintegrations)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

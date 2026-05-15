@@ -3,8 +3,8 @@
 (library
  (name awso_rekognition_async)
  (flags (:standard))
- (public_name awso-rekognition-async)
- (libraries awso-rekognition awso-async)
+ (public_name awso-async.rekognition)
+ (libraries awso.rekognition awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

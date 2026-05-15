@@ -3,8 +3,8 @@
 (library
  (name awso_mediastore_lwt)
  (flags (:standard))
- (public_name awso-mediastore-lwt)
- (libraries awso-mediastore awso-lwt))
+ (public_name awso-lwt.mediastore)
+ (libraries awso.mediastore awso-lwt))
 
 (rule
  (targets io.ml io.mli)

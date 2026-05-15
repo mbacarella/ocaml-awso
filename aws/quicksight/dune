@@ -2,7 +2,7 @@
 
 (library
  (name awso_quicksight)
- (public_name awso-quicksight)
+ (public_name awso.quicksight)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

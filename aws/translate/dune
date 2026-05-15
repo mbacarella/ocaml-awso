@@ -2,7 +2,7 @@
 
 (library
  (name awso_translate)
- (public_name awso-translate)
+ (public_name awso.translate)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

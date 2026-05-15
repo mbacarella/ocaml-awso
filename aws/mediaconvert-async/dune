@@ -3,8 +3,8 @@
 (library
  (name awso_mediaconvert_async)
  (flags (:standard))
- (public_name awso-mediaconvert-async)
- (libraries awso-mediaconvert awso-async)
+ (public_name awso-async.mediaconvert)
+ (libraries awso.mediaconvert awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

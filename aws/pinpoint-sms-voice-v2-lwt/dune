@@ -3,8 +3,8 @@
 (library
  (name awso_pinpoint_sms_voice_v2_lwt)
  (flags (:standard))
- (public_name awso-pinpoint-sms-voice-v2-lwt)
- (libraries awso-pinpoint-sms-voice-v2 awso-lwt))
+ (public_name awso-lwt.pinpoint-sms-voice-v2)
+ (libraries awso.pinpoint-sms-voice-v2 awso-lwt))
 
 (rule
  (targets io.ml io.mli)

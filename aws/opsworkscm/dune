@@ -2,7 +2,7 @@
 
 (library
  (name awso_opsworkscm)
- (public_name awso-opsworkscm)
+ (public_name awso.opsworkscm)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

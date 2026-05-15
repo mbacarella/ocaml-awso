@@ -3,8 +3,8 @@
 (library
  (name awso_chime_sdk_messaging_lwt)
  (flags (:standard))
- (public_name awso-chime-sdk-messaging-lwt)
- (libraries awso-chime-sdk-messaging awso-lwt))
+ (public_name awso-lwt.chime-sdk-messaging)
+ (libraries awso.chime-sdk-messaging awso-lwt))
 
 (rule
  (targets io.ml io.mli)

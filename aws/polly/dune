@@ -2,7 +2,7 @@
 
 (library
  (name awso_polly)
- (public_name awso-polly)
+ (public_name awso.polly)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

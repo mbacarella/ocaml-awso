@@ -3,8 +3,8 @@
 (library
  (name awso_wisdom_lwt)
  (flags (:standard))
- (public_name awso-wisdom-lwt)
- (libraries awso-wisdom awso-lwt))
+ (public_name awso-lwt.wisdom)
+ (libraries awso.wisdom awso-lwt))
 
 (rule
  (targets io.ml io.mli)

@@ -3,8 +3,8 @@
 (library
  (name awso_ds_async)
  (flags (:standard))
- (public_name awso-ds-async)
- (libraries awso-ds awso-async)
+ (public_name awso-async.ds)
+ (libraries awso.ds awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

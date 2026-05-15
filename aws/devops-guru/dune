@@ -2,7 +2,7 @@
 
 (library
  (name awso_devops_guru)
- (public_name awso-devops-guru)
+ (public_name awso.devops-guru)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

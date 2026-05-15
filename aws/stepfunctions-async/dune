@@ -3,8 +3,8 @@
 (library
  (name awso_stepfunctions_async)
  (flags (:standard))
- (public_name awso-stepfunctions-async)
- (libraries awso-stepfunctions awso-async)
+ (public_name awso-async.stepfunctions)
+ (libraries awso.stepfunctions awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

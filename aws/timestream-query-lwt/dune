@@ -3,8 +3,8 @@
 (library
  (name awso_timestream_query_lwt)
  (flags (:standard))
- (public_name awso-timestream-query-lwt)
- (libraries awso-timestream-query awso-lwt))
+ (public_name awso-lwt.timestream-query)
+ (libraries awso.timestream-query awso-lwt))
 
 (rule
  (targets io.ml io.mli)

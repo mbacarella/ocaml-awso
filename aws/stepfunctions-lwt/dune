@@ -3,8 +3,8 @@
 (library
  (name awso_stepfunctions_lwt)
  (flags (:standard))
- (public_name awso-stepfunctions-lwt)
- (libraries awso-stepfunctions awso-lwt))
+ (public_name awso-lwt.stepfunctions)
+ (libraries awso.stepfunctions awso-lwt))
 
 (rule
  (targets io.ml io.mli)

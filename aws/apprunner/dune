@@ -2,7 +2,7 @@
 
 (library
  (name awso_apprunner)
- (public_name awso-apprunner)
+ (public_name awso.apprunner)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

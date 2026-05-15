@@ -3,8 +3,8 @@
 (library
  (name awso_elastic_inference_lwt)
  (flags (:standard))
- (public_name awso-elastic-inference-lwt)
- (libraries awso-elastic-inference awso-lwt))
+ (public_name awso-lwt.elastic-inference)
+ (libraries awso.elastic-inference awso-lwt))
 
 (rule
  (targets io.ml io.mli)

@@ -3,8 +3,8 @@
 (library
  (name awso_elastictranscoder_async)
  (flags (:standard))
- (public_name awso-elastictranscoder-async)
- (libraries awso-elastictranscoder awso-async)
+ (public_name awso-async.elastictranscoder)
+ (libraries awso.elastictranscoder awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

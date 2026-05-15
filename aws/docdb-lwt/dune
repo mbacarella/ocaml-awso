@@ -3,8 +3,8 @@
 (library
  (name awso_docdb_lwt)
  (flags (:standard))
- (public_name awso-docdb-lwt)
- (libraries awso-docdb awso-lwt))
+ (public_name awso-lwt.docdb)
+ (libraries awso.docdb awso-lwt))
 
 (rule
  (targets io.ml io.mli)

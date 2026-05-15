@@ -2,7 +2,7 @@
 
 (library
  (name awso_secretsmanager)
- (public_name awso-secretsmanager)
+ (public_name awso.secretsmanager)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

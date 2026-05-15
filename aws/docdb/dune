@@ -2,7 +2,7 @@
 
 (library
  (name awso_docdb)
- (public_name awso-docdb)
+ (public_name awso.docdb)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

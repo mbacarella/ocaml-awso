@@ -3,8 +3,8 @@
 (library
  (name awso_groundstation_async)
  (flags (:standard))
- (public_name awso-groundstation-async)
- (libraries awso-groundstation awso-async)
+ (public_name awso-async.groundstation)
+ (libraries awso.groundstation awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

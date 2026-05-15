@@ -3,8 +3,8 @@
 (library
  (name awso_elasticache_lwt)
  (flags (:standard))
- (public_name awso-elasticache-lwt)
- (libraries awso-elasticache awso-lwt))
+ (public_name awso-lwt.elasticache)
+ (libraries awso.elasticache awso-lwt))
 
 (rule
  (targets io.ml io.mli)

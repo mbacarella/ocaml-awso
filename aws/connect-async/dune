@@ -3,8 +3,8 @@
 (library
  (name awso_connect_async)
  (flags (:standard))
- (public_name awso-connect-async)
- (libraries awso-connect awso-async)
+ (public_name awso-async.connect)
+ (libraries awso.connect awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

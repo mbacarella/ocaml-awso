@@ -1,6 +1,6 @@
 (library
  (name awso_srp)
- (public_name awso-srp)
+ (public_name awso.srp)
  (libraries awso zarith)
  (flags :standard)
  (ocamlopt_flags (-linscan))

@@ -3,8 +3,8 @@
 (library
  (name awso_globalaccelerator_async)
  (flags (:standard))
- (public_name awso-globalaccelerator-async)
- (libraries awso-globalaccelerator awso-async)
+ (public_name awso-async.globalaccelerator)
+ (libraries awso.globalaccelerator awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

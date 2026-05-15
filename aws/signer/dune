@@ -2,7 +2,7 @@
 
 (library
  (name awso_signer)
- (public_name awso-signer)
+ (public_name awso.signer)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

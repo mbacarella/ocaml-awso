@@ -3,8 +3,8 @@
 (library
  (name awso_connectparticipant_async)
  (flags (:standard))
- (public_name awso-connectparticipant-async)
- (libraries awso-connectparticipant awso-async)
+ (public_name awso-async.connectparticipant)
+ (libraries awso.connectparticipant awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

@@ -3,8 +3,8 @@
 (library
  (name awso_managedblockchain_lwt)
  (flags (:standard))
- (public_name awso-managedblockchain-lwt)
- (libraries awso-managedblockchain awso-lwt))
+ (public_name awso-lwt.managedblockchain)
+ (libraries awso.managedblockchain awso-lwt))
 
 (rule
  (targets io.ml io.mli)

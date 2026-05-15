@@ -3,8 +3,8 @@
 (library
  (name awso_backup_lwt)
  (flags (:standard))
- (public_name awso-backup-lwt)
- (libraries awso-backup awso-lwt))
+ (public_name awso-lwt.backup)
+ (libraries awso.backup awso-lwt))
 
 (rule
  (targets io.ml io.mli)

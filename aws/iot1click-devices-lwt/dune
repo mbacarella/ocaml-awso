@@ -3,8 +3,8 @@
 (library
  (name awso_iot1click_devices_lwt)
  (flags (:standard))
- (public_name awso-iot1click-devices-lwt)
- (libraries awso-iot1click-devices awso-lwt))
+ (public_name awso-lwt.iot1click-devices)
+ (libraries awso.iot1click-devices awso-lwt))
 
 (rule
  (targets io.ml io.mli)

@@ -3,8 +3,8 @@
 (library
  (name awso_budgets_async)
  (flags (:standard))
- (public_name awso-budgets-async)
- (libraries awso-budgets awso-async)
+ (public_name awso-async.budgets)
+ (libraries awso.budgets awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

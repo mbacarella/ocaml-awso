@@ -2,7 +2,7 @@
 
 (library
  (name awso_route53domains)
- (public_name awso-route53domains)
+ (public_name awso.route53domains)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

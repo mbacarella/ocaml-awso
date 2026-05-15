@@ -3,8 +3,8 @@
 (library
  (name awso_kinesisanalytics_async)
  (flags (:standard))
- (public_name awso-kinesisanalytics-async)
- (libraries awso-kinesisanalytics awso-async)
+ (public_name awso-async.kinesisanalytics)
+ (libraries awso.kinesisanalytics awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

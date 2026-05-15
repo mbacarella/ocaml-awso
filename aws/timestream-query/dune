@@ -2,7 +2,7 @@
 
 (library
  (name awso_timestream_query)
- (public_name awso-timestream-query)
+ (public_name awso.timestream-query)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

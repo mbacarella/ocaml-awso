@@ -3,8 +3,8 @@
 (library
  (name awso_braket_lwt)
  (flags (:standard))
- (public_name awso-braket-lwt)
- (libraries awso-braket awso-lwt))
+ (public_name awso-lwt.braket)
+ (libraries awso.braket awso-lwt))
 
 (rule
  (targets io.ml io.mli)

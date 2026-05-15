@@ -3,8 +3,8 @@
 (library
  (name awso_lookoutmetrics_async)
  (flags (:standard))
- (public_name awso-lookoutmetrics-async)
- (libraries awso-lookoutmetrics awso-async)
+ (public_name awso-async.lookoutmetrics)
+ (libraries awso.lookoutmetrics awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

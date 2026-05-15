@@ -3,8 +3,8 @@
 (library
  (name awso_emr_containers_lwt)
  (flags (:standard))
- (public_name awso-emr-containers-lwt)
- (libraries awso-emr-containers awso-lwt))
+ (public_name awso-lwt.emr-containers)
+ (libraries awso.emr-containers awso-lwt))
 
 (rule
  (targets io.ml io.mli)

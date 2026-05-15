@@ -3,8 +3,8 @@
 (library
  (name awso_cur_async)
  (flags (:standard))
- (public_name awso-cur-async)
- (libraries awso-cur awso-async)
+ (public_name awso-async.cur)
+ (libraries awso.cur awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

@@ -3,8 +3,8 @@
 (library
  (name awso_fis_async)
  (flags (:standard))
- (public_name awso-fis-async)
- (libraries awso-fis awso-async)
+ (public_name awso-async.fis)
+ (libraries awso.fis awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

@@ -3,8 +3,8 @@
 (library
  (name awso_applicationcostprofiler_lwt)
  (flags (:standard))
- (public_name awso-applicationcostprofiler-lwt)
- (libraries awso-applicationcostprofiler awso-lwt))
+ (public_name awso-lwt.applicationcostprofiler)
+ (libraries awso.applicationcostprofiler awso-lwt))
 
 (rule
  (targets io.ml io.mli)

@@ -3,8 +3,8 @@
 (library
  (name awso_panorama_async)
  (flags (:standard))
- (public_name awso-panorama-async)
- (libraries awso-panorama awso-async)
+ (public_name awso-async.panorama)
+ (libraries awso.panorama awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

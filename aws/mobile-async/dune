@@ -3,8 +3,8 @@
 (library
  (name awso_mobile_async)
  (flags (:standard))
- (public_name awso-mobile-async)
- (libraries awso-mobile awso-async)
+ (public_name awso-async.mobile)
+ (libraries awso.mobile awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

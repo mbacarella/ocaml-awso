@@ -3,8 +3,8 @@
 (library
  (name awso_resiliencehub_lwt)
  (flags (:standard))
- (public_name awso-resiliencehub-lwt)
- (libraries awso-resiliencehub awso-lwt))
+ (public_name awso-lwt.resiliencehub)
+ (libraries awso.resiliencehub awso-lwt))
 
 (rule
  (targets io.ml io.mli)

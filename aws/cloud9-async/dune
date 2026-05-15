@@ -3,8 +3,8 @@
 (library
  (name awso_cloud9_async)
  (flags (:standard))
- (public_name awso-cloud9-async)
- (libraries awso-cloud9 awso-async)
+ (public_name awso-async.cloud9)
+ (libraries awso.cloud9 awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

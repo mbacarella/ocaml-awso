@@ -2,7 +2,7 @@
 
 (library
  (name awso_comprehendmedical)
- (public_name awso-comprehendmedical)
+ (public_name awso.comprehendmedical)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

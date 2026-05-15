@@ -2,7 +2,7 @@
 
 (library
  (name awso_iot1click_devices)
- (public_name awso-iot1click-devices)
+ (public_name awso.iot1click-devices)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

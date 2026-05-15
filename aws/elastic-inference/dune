@@ -2,7 +2,7 @@
 
 (library
  (name awso_elastic_inference)
- (public_name awso-elastic-inference)
+ (public_name awso.elastic-inference)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

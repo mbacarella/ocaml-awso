@@ -2,7 +2,7 @@
 
 (library
  (name awso_config)
- (public_name awso-config)
+ (public_name awso.config)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

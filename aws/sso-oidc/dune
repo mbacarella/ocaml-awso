@@ -2,7 +2,7 @@
 
 (library
  (name awso_sso_oidc)
- (public_name awso-sso-oidc)
+ (public_name awso.sso-oidc)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

@@ -3,8 +3,8 @@
 (library
  (name awso_cloudsearchdomain_async)
  (flags (:standard))
- (public_name awso-cloudsearchdomain-async)
- (libraries awso-cloudsearchdomain awso-async)
+ (public_name awso-async.cloudsearchdomain)
+ (libraries awso.cloudsearchdomain awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

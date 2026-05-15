@@ -3,8 +3,8 @@
 (library
  (name awso_cloudfront_async)
  (flags (:standard))
- (public_name awso-cloudfront-async)
- (libraries awso-cloudfront awso-async)
+ (public_name awso-async.cloudfront)
+ (libraries awso.cloudfront awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

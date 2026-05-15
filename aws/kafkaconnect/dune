@@ -2,7 +2,7 @@
 
 (library
  (name awso_kafkaconnect)
- (public_name awso-kafkaconnect)
+ (public_name awso.kafkaconnect)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

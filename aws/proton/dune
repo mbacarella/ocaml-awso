@@ -2,7 +2,7 @@
 
 (library
  (name awso_proton)
- (public_name awso-proton)
+ (public_name awso.proton)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

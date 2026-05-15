@@ -3,8 +3,8 @@
 (library
  (name awso_appstream_lwt)
  (flags (:standard))
- (public_name awso-appstream-lwt)
- (libraries awso-appstream awso-lwt))
+ (public_name awso-lwt.appstream)
+ (libraries awso.appstream awso-lwt))
 
 (rule
  (targets io.ml io.mli)

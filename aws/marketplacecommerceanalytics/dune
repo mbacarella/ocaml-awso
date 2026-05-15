@@ -2,7 +2,7 @@
 
 (library
  (name awso_marketplacecommerceanalytics)
- (public_name awso-marketplacecommerceanalytics)
+ (public_name awso.marketplacecommerceanalytics)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

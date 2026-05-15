@@ -3,8 +3,8 @@
 (library
  (name awso_meteringmarketplace_lwt)
  (flags (:standard))
- (public_name awso-meteringmarketplace-lwt)
- (libraries awso-meteringmarketplace awso-lwt))
+ (public_name awso-lwt.meteringmarketplace)
+ (libraries awso.meteringmarketplace awso-lwt))
 
 (rule
  (targets io.ml io.mli)

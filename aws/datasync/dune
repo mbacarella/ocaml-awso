@@ -2,7 +2,7 @@
 
 (library
  (name awso_datasync)
- (public_name awso-datasync)
+ (public_name awso.datasync)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

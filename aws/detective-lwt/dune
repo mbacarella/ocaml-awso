@@ -3,8 +3,8 @@
 (library
  (name awso_detective_lwt)
  (flags (:standard))
- (public_name awso-detective-lwt)
- (libraries awso-detective awso-lwt))
+ (public_name awso-lwt.detective)
+ (libraries awso.detective awso-lwt))
 
 (rule
  (targets io.ml io.mli)

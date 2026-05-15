@@ -3,8 +3,8 @@
 (library
  (name awso_imagebuilder_lwt)
  (flags (:standard))
- (public_name awso-imagebuilder-lwt)
- (libraries awso-imagebuilder awso-lwt))
+ (public_name awso-lwt.imagebuilder)
+ (libraries awso.imagebuilder awso-lwt))
 
 (rule
  (targets io.ml io.mli)

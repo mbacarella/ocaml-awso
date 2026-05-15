@@ -3,8 +3,8 @@
 (library
  (name awso_cloudsearchdomain_lwt)
  (flags (:standard))
- (public_name awso-cloudsearchdomain-lwt)
- (libraries awso-cloudsearchdomain awso-lwt))
+ (public_name awso-lwt.cloudsearchdomain)
+ (libraries awso.cloudsearchdomain awso-lwt))
 
 (rule
  (targets io.ml io.mli)

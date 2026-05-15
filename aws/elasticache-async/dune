@@ -3,8 +3,8 @@
 (library
  (name awso_elasticache_async)
  (flags (:standard))
- (public_name awso-elasticache-async)
- (libraries awso-elasticache awso-async)
+ (public_name awso-async.elasticache)
+ (libraries awso.elasticache awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

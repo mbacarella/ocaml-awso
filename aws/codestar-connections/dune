@@ -2,7 +2,7 @@
 
 (library
  (name awso_codestar_connections)
- (public_name awso-codestar-connections)
+ (public_name awso.codestar-connections)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

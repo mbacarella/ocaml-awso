@@ -2,7 +2,7 @@
 
 (library
  (name awso_mediapackage)
- (public_name awso-mediapackage)
+ (public_name awso.mediapackage)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

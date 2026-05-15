@@ -2,7 +2,7 @@
 
 (library
  (name awso_healthlake)
- (public_name awso-healthlake)
+ (public_name awso.healthlake)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

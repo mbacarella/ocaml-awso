@@ -3,8 +3,8 @@
 (library
  (name awso_securityhub_async)
  (flags (:standard))
- (public_name awso-securityhub-async)
- (libraries awso-securityhub awso-async)
+ (public_name awso-async.securityhub)
+ (libraries awso.securityhub awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

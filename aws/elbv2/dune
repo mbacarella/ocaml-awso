@@ -2,7 +2,7 @@
 
 (library
  (name awso_elbv2)
- (public_name awso-elbv2)
+ (public_name awso.elbv2)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

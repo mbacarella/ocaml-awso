@@ -3,8 +3,8 @@
 (library
  (name awso_comprehend_lwt)
  (flags (:standard))
- (public_name awso-comprehend-lwt)
- (libraries awso-comprehend awso-lwt))
+ (public_name awso-lwt.comprehend)
+ (libraries awso.comprehend awso-lwt))
 
 (rule
  (targets io.ml io.mli)

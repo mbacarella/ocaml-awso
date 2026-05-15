@@ -2,7 +2,7 @@
 
 (library
  (name awso_lakeformation)
- (public_name awso-lakeformation)
+ (public_name awso.lakeformation)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

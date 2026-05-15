@@ -3,8 +3,8 @@
 (library
  (name awso_healthlake_lwt)
  (flags (:standard))
- (public_name awso-healthlake-lwt)
- (libraries awso-healthlake awso-lwt))
+ (public_name awso-lwt.healthlake)
+ (libraries awso.healthlake awso-lwt))
 
 (rule
  (targets io.ml io.mli)

@@ -3,8 +3,8 @@
 (library
  (name awso_backup_async)
  (flags (:standard))
- (public_name awso-backup-async)
- (libraries awso-backup awso-async)
+ (public_name awso-async.backup)
+ (libraries awso.backup awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

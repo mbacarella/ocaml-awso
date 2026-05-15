@@ -3,8 +3,8 @@
 (library
  (name awso_location_async)
  (flags (:standard))
- (public_name awso-location-async)
- (libraries awso-location awso-async)
+ (public_name awso-async.location)
+ (libraries awso.location awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

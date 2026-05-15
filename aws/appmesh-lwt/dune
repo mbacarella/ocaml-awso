@@ -3,8 +3,8 @@
 (library
  (name awso_appmesh_lwt)
  (flags (:standard))
- (public_name awso-appmesh-lwt)
- (libraries awso-appmesh awso-lwt))
+ (public_name awso-lwt.appmesh)
+ (libraries awso.appmesh awso-lwt))
 
 (rule
  (targets io.ml io.mli)

@@ -3,8 +3,8 @@
 (library
  (name awso_fsx_lwt)
  (flags (:standard))
- (public_name awso-fsx-lwt)
- (libraries awso-fsx awso-lwt))
+ (public_name awso-lwt.fsx)
+ (libraries awso.fsx awso-lwt))
 
 (rule
  (targets io.ml io.mli)

@@ -3,8 +3,8 @@
 (library
  (name awso_gamelift_lwt)
  (flags (:standard))
- (public_name awso-gamelift-lwt)
- (libraries awso-gamelift awso-lwt))
+ (public_name awso-lwt.gamelift)
+ (libraries awso.gamelift awso-lwt))
 
 (rule
  (targets io.ml io.mli)

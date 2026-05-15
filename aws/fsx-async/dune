@@ -3,8 +3,8 @@
 (library
  (name awso_fsx_async)
  (flags (:standard))
- (public_name awso-fsx-async)
- (libraries awso-fsx awso-async)
+ (public_name awso-async.fsx)
+ (libraries awso.fsx awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

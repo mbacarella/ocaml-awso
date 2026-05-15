@@ -2,7 +2,7 @@
 
 (library
  (name awso_apigatewaymanagementapi)
- (public_name awso-apigatewaymanagementapi)
+ (public_name awso.apigatewaymanagementapi)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

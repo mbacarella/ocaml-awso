@@ -3,8 +3,8 @@
 (library
  (name awso_cloudcontrol_lwt)
  (flags (:standard))
- (public_name awso-cloudcontrol-lwt)
- (libraries awso-cloudcontrol awso-lwt))
+ (public_name awso-lwt.cloudcontrol)
+ (libraries awso.cloudcontrol awso-lwt))
 
 (rule
  (targets io.ml io.mli)

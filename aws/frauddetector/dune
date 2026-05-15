@@ -2,7 +2,7 @@
 
 (library
  (name awso_frauddetector)
- (public_name awso-frauddetector)
+ (public_name awso.frauddetector)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

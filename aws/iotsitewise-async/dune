@@ -3,8 +3,8 @@
 (library
  (name awso_iotsitewise_async)
  (flags (:standard))
- (public_name awso-iotsitewise-async)
- (libraries awso-iotsitewise awso-async)
+ (public_name awso-async.iotsitewise)
+ (libraries awso.iotsitewise awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

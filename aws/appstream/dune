@@ -2,7 +2,7 @@
 
 (library
  (name awso_appstream)
- (public_name awso-appstream)
+ (public_name awso.appstream)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

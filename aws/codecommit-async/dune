@@ -3,8 +3,8 @@
 (library
  (name awso_codecommit_async)
  (flags (:standard))
- (public_name awso-codecommit-async)
- (libraries awso-codecommit awso-async)
+ (public_name awso-async.codecommit)
+ (libraries awso.codecommit awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

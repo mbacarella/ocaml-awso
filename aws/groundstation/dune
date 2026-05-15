@@ -2,7 +2,7 @@
 
 (library
  (name awso_groundstation)
- (public_name awso-groundstation)
+ (public_name awso.groundstation)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

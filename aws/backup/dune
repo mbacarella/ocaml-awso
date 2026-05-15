@@ -2,7 +2,7 @@
 
 (library
  (name awso_backup)
- (public_name awso-backup)
+ (public_name awso.backup)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

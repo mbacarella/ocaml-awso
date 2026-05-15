@@ -3,8 +3,8 @@
 (library
  (name awso_ds_lwt)
  (flags (:standard))
- (public_name awso-ds-lwt)
- (libraries awso-ds awso-lwt))
+ (public_name awso-lwt.ds)
+ (libraries awso.ds awso-lwt))
 
 (rule
  (targets io.ml io.mli)

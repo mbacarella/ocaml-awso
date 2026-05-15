@@ -2,7 +2,7 @@
 
 (library
  (name awso_pi)
- (public_name awso-pi)
+ (public_name awso.pi)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

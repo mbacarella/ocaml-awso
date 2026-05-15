@@ -2,7 +2,7 @@
 
 (library
  (name awso_securityhub)
- (public_name awso-securityhub)
+ (public_name awso.securityhub)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

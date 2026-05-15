@@ -3,8 +3,8 @@
 (library
  (name awso_migrationhub_config_async)
  (flags (:standard))
- (public_name awso-migrationhub-config-async)
- (libraries awso-migrationhub-config awso-async)
+ (public_name awso-async.migrationhub-config)
+ (libraries awso.migrationhub-config awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

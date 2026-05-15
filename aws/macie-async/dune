@@ -3,8 +3,8 @@
 (library
  (name awso_macie_async)
  (flags (:standard))
- (public_name awso-macie-async)
- (libraries awso-macie awso-async)
+ (public_name awso-async.macie)
+ (libraries awso.macie awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

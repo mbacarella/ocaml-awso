@@ -3,8 +3,8 @@
 (library
  (name awso_workmail_lwt)
  (flags (:standard))
- (public_name awso-workmail-lwt)
- (libraries awso-workmail awso-lwt))
+ (public_name awso-lwt.workmail)
+ (libraries awso.workmail awso-lwt))
 
 (rule
  (targets io.ml io.mli)

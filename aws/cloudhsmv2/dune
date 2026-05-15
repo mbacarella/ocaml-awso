@@ -2,7 +2,7 @@
 
 (library
  (name awso_cloudhsmv2)
- (public_name awso-cloudhsmv2)
+ (public_name awso.cloudhsmv2)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

@@ -2,7 +2,7 @@
 
 (library
  (name awso_textract)
- (public_name awso-textract)
+ (public_name awso.textract)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

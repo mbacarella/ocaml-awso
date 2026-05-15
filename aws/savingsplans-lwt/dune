@@ -3,8 +3,8 @@
 (library
  (name awso_savingsplans_lwt)
  (flags (:standard))
- (public_name awso-savingsplans-lwt)
- (libraries awso-savingsplans awso-lwt))
+ (public_name awso-lwt.savingsplans)
+ (libraries awso.savingsplans awso-lwt))
 
 (rule
  (targets io.ml io.mli)

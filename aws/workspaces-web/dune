@@ -2,7 +2,7 @@
 
 (library
  (name awso_workspaces_web)
- (public_name awso-workspaces-web)
+ (public_name awso.workspaces-web)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

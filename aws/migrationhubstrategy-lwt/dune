@@ -3,8 +3,8 @@
 (library
  (name awso_migrationhubstrategy_lwt)
  (flags (:standard))
- (public_name awso-migrationhubstrategy-lwt)
- (libraries awso-migrationhubstrategy awso-lwt))
+ (public_name awso-lwt.migrationhubstrategy)
+ (libraries awso.migrationhubstrategy awso-lwt))
 
 (rule
  (targets io.ml io.mli)

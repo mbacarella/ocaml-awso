@@ -3,8 +3,8 @@
 (library
  (name awso_emr_containers_async)
  (flags (:standard))
- (public_name awso-emr-containers-async)
- (libraries awso-emr-containers awso-async)
+ (public_name awso-async.emr-containers)
+ (libraries awso.emr-containers awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

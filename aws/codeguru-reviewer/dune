@@ -2,7 +2,7 @@
 
 (library
  (name awso_codeguru_reviewer)
- (public_name awso-codeguru-reviewer)
+ (public_name awso.codeguru-reviewer)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

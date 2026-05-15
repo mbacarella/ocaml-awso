@@ -3,8 +3,8 @@
 (library
  (name awso_outposts_async)
  (flags (:standard))
- (public_name awso-outposts-async)
- (libraries awso-outposts awso-async)
+ (public_name awso-async.outposts)
+ (libraries awso.outposts awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

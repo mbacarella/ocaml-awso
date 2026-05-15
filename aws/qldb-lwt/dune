@@ -3,8 +3,8 @@
 (library
  (name awso_qldb_lwt)
  (flags (:standard))
- (public_name awso-qldb-lwt)
- (libraries awso-qldb awso-lwt))
+ (public_name awso-lwt.qldb)
+ (libraries awso.qldb awso-lwt))
 
 (rule
  (targets io.ml io.mli)

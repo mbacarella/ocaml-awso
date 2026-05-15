@@ -3,8 +3,8 @@
 (library
  (name awso_apprunner_lwt)
  (flags (:standard))
- (public_name awso-apprunner-lwt)
- (libraries awso-apprunner awso-lwt))
+ (public_name awso-lwt.apprunner)
+ (libraries awso.apprunner awso-lwt))
 
 (rule
  (targets io.ml io.mli)

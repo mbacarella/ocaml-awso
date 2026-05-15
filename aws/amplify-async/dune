@@ -3,8 +3,8 @@
 (library
  (name awso_amplify_async)
  (flags (:standard))
- (public_name awso-amplify-async)
- (libraries awso-amplify awso-async)
+ (public_name awso-async.amplify)
+ (libraries awso.amplify awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

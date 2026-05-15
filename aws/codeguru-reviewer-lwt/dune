@@ -3,8 +3,8 @@
 (library
  (name awso_codeguru_reviewer_lwt)
  (flags (:standard))
- (public_name awso-codeguru-reviewer-lwt)
- (libraries awso-codeguru-reviewer awso-lwt))
+ (public_name awso-lwt.codeguru-reviewer)
+ (libraries awso.codeguru-reviewer awso-lwt))
 
 (rule
  (targets io.ml io.mli)

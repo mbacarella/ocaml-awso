@@ -3,8 +3,8 @@
 (library
  (name awso_iotwireless_async)
  (flags (:standard))
- (public_name awso-iotwireless-async)
- (libraries awso-iotwireless awso-async)
+ (public_name awso-async.iotwireless)
+ (libraries awso.iotwireless awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

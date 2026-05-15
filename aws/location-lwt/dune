@@ -3,8 +3,8 @@
 (library
  (name awso_location_lwt)
  (flags (:standard))
- (public_name awso-location-lwt)
- (libraries awso-location awso-lwt))
+ (public_name awso-lwt.location)
+ (libraries awso.location awso-lwt))
 
 (rule
  (targets io.ml io.mli)

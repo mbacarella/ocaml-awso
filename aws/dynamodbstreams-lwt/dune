@@ -3,8 +3,8 @@
 (library
  (name awso_dynamodbstreams_lwt)
  (flags (:standard))
- (public_name awso-dynamodbstreams-lwt)
- (libraries awso-dynamodbstreams awso-lwt))
+ (public_name awso-lwt.dynamodbstreams)
+ (libraries awso.dynamodbstreams awso-lwt))
 
 (rule
  (targets io.ml io.mli)

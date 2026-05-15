@@ -3,8 +3,8 @@
 (library
  (name awso_resiliencehub_async)
  (flags (:standard))
- (public_name awso-resiliencehub-async)
- (libraries awso-resiliencehub awso-async)
+ (public_name awso-async.resiliencehub)
+ (libraries awso.resiliencehub awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

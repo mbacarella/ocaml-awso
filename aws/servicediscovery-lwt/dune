@@ -3,8 +3,8 @@
 (library
  (name awso_servicediscovery_lwt)
  (flags (:standard))
- (public_name awso-servicediscovery-lwt)
- (libraries awso-servicediscovery awso-lwt))
+ (public_name awso-lwt.servicediscovery)
+ (libraries awso.servicediscovery awso-lwt))
 
 (rule
  (targets io.ml io.mli)

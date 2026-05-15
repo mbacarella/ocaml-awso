@@ -3,8 +3,8 @@
 (library
  (name awso_outposts_lwt)
  (flags (:standard))
- (public_name awso-outposts-lwt)
- (libraries awso-outposts awso-lwt))
+ (public_name awso-lwt.outposts)
+ (libraries awso.outposts awso-lwt))
 
 (rule
  (targets io.ml io.mli)
