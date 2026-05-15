@@ -248,15 +248,15 @@ module Config_file_stanza = struct
   ;;
 
   let set_field ~is_s3_field ~name ~value ~line_num (completed, name_settings) =
-    let error =
-      Error.createf
+    let message =
+      sprintf
         "Line %d: attempting to set field outside of any profile: %S"
         line_num
         name
     in
     match is_s3_field with
     | true ->
-      let profile_name, profile = Option.value_exn ~error name_settings in
+      let profile_name, profile = Option.value_exn ~message name_settings in
       let s3_custom_command_settings =
         match profile.s3_custom_command_settings with
         | Some x -> x
@@ -285,7 +285,7 @@ module Config_file_stanza = struct
       in
       completed, Some (profile_name, new_profile)
     | false ->
-      let profile_name, profile = Option.value_exn ~error name_settings in
+      let profile_name, profile = Option.value_exn ~message name_settings in
       let set field v = Field.fset field profile (Some v) in
       let really_set =
         match name with
@@ -425,8 +425,7 @@ region=us-east-1
   [%expect {| Failed with: line missing closing ]: "[" |}];
   test "output=json";
   [%expect
-    {|
-    Failed with: "Line 1: attempting to set field outside of any profile: \"output\"" |}];
+    {| Failed with: Line 1: attempting to set field outside of any profile: "output" |}];
   test {|
 [default]
 unknown_field=1
@@ -469,13 +468,13 @@ module Shared_credentials_file_stanza = struct
 
   let set_field ~is_s3_field ~name ~value ~line_num (completed, name_settings) =
     assert (not is_s3_field);
-    let error =
-      Error.createf
+    let message =
+      sprintf
         "Line %d: attempting to set field outside of any profile: %S"
         line_num
         name
     in
-    let profile_name, profile = Option.value_exn ~error name_settings in
+    let profile_name, profile = Option.value_exn ~message name_settings in
     let set field v = Field.fset field profile (Some v) in
     let really_set =
       match name with

@@ -47,9 +47,9 @@ let of_response endpoints =
                     List.map children ~f:(function
                       | `Data s -> s
                       | `El _ -> "")
-                    |> Core.String.concat ~sep:""
+                    |> String.concat ~sep:""
                 in
-                Error (`AWS (error_of_xml (Core.String.strip error_code) error_xml))
+                Error (`AWS (error_of_xml (String.strip error_code) error_xml))
               with
               | Failure _ -> generic_error ())
             | `El _ -> generic_error ()))
@@ -93,11 +93,10 @@ let%expect_test "of_response" =
                            | `El (_, children) ->
                                (List.map children
                                   ~f:(function | `Data s -> s | `El _ -> ""))
-                                 |> (Core.String.concat ~sep:"") in
+                                 |> (String.concat ~sep:"") in
                          Error
                            (`AWS
-                              (error_of_xml (Core.String.strip error_code)
-                                 error_xml))
+                              (error_of_xml (String.strip error_code) error_xml))
                        with | Failure _ -> generic_error ())
                   | `El _ -> generic_error ())) in
       match endpoint with

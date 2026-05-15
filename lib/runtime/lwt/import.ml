@@ -1,4 +1,4 @@
-open! Core
+include Awso_common.Jane_compat
 open Lwt.Infix
 
 let file_contents file =

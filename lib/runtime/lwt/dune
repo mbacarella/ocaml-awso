@@ -1,8 +1,8 @@
 (library
  (name awso_lwt)
  (public_name awso-lwt)
- (libraries awso core_unix core_unix.sys_unix cohttp-lwt-unix lwt lwt.unix)
+ (libraries awso awso_common cohttp-lwt-unix lwt lwt.unix)
  (flags :standard)
  (preprocess
-  (pps lwt_ppx ppx_let))
+  (pps lwt_ppx))
  (synopsis "OCaml lwt library for AWS clients."))

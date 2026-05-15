@@ -115,7 +115,6 @@ let ec2_error_module () =
 
 let preamble ~loc () =
   [%str
-    open! Core
     open Awso
     open! Import]
 ;;

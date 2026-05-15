@@ -95,7 +95,7 @@ let botocore_endpoints argv =
   let endpoints = file |> read_file |> Botocore_endpoints.of_json in
   let loc = !Ast_helper.default_loc in
   let structure =
-    [%str open! Core]
+    [%str open! Import]
     @ [ Botocore_endpoints.make_lookup_uri endpoints
       ; Botocore_endpoints.make_lookup_credential_scope endpoints
       ]
@@ -115,13 +115,11 @@ module Service = struct
     let args = Arg.create argv in
     let service = Arg.flag_required args "--service" in
     let impl = Arg.flag_required args "--impl" in
-    let loc = !Ast_helper.default_loc in
     let data =
       service
       |> read_file
       |> Botocore_service.of_json
       |> Service_endpoints.make
-      |> fun s -> [%str open! Core] @ s
       |> Util.structure_to_string
     in
     write_file impl data

@@ -29,17 +29,30 @@ let compare (a : int) (b : int) = Stdlib.compare a b
 let equal (a : int) (b : int) = a = b
 let phys_equal (a : 'a) (b : 'a) = a == b
 
+type ('a, 'b) continue_or_stop =
+  | Continue of 'a
+  | Stop of 'b
+
 module Char = struct
   include Stdlib.Char
 
   let equal (a : char) (b : char) = Stdlib.( = ) a b
   let is_uppercase c = Stdlib.( >= ) c 'A' && Stdlib.( <= ) c 'Z'
   let is_lowercase c = Stdlib.( >= ) c 'a' && Stdlib.( <= ) c 'z'
+  let to_string c = Stdlib.String.make 1 c
+  let to_int = Stdlib.Char.code
+
+  let is_whitespace = function
+    | ' ' | '\t' | '\n' | '\r' | '\x0C' -> true
+    | _ -> false
+  ;;
 end
 
 module Fn = struct
   let id x = x
   let compose f g x = f (g x)
+  let non f x = not (f x)
+  let const c _ = c
 end
 
 module List = struct
@@ -50,6 +63,12 @@ module List = struct
   let filter l ~f = Stdlib.List.filter f l
   let filter_map l ~f = Stdlib.List.filter_map f l
   let find l ~f = Stdlib.List.find_opt f l
+
+  let find_exn l ~f =
+    match Stdlib.List.find_opt f l with
+    | Some x -> x
+    | None -> failwith "List.find_exn: not found"
+  ;;
   let find_map l ~f = Stdlib.List.find_map f l
   let for_all l ~f = Stdlib.List.for_all f l
   let concat_map l ~f = Stdlib.List.concat_map f l
@@ -59,6 +78,7 @@ module List = struct
   let fold_left l ~init ~f = Stdlib.List.fold_left f init l
   let stable_sort l ~compare = Stdlib.List.stable_sort compare l
   let sort l ~compare = Stdlib.List.sort compare l
+  let exists l ~f = Stdlib.List.exists f l
   let mem l x ~equal = Stdlib.List.exists (equal x) l
   let dedup_and_sort ~compare l = Stdlib.List.sort_uniq compare l
   let filter_opt l = Stdlib.List.filter_map Fn.id l
@@ -110,6 +130,36 @@ module List = struct
     aux [] [] 0 l
   ;;
 
+  let reduce_exn l ~f =
+    match l with
+    | [] -> failwith "List.reduce_exn: empty list"
+    | x :: xs -> Stdlib.List.fold_left f x xs
+  ;;
+
+  let zip_exn l1 l2 =
+    if Stdlib.List.length l1 <> Stdlib.List.length l2
+    then failwith "List.zip_exn: lists have different lengths"
+    else Stdlib.List.combine l1 l2
+  ;;
+
+  let fold_until l ~init ~f ~finish =
+    let rec aux acc = function
+      | [] -> finish acc
+      | x :: rest -> (
+        match f acc x with
+        | Continue acc -> aux acc rest
+        | Stop result -> result)
+    in
+    aux init l
+  ;;
+
+  let range ?(start = `inclusive) ?(stop = `exclusive) a b =
+    let lo = match start with `inclusive -> a | `exclusive -> a + 1 in
+    let hi = match stop with `exclusive -> b | `inclusive -> b + 1 in
+    let rec aux acc i = if i < lo then acc else aux (i :: acc) (i - 1) in
+    aux [] (hi - 1)
+  ;;
+
   module Assoc = struct
     type ('k, 'v) t = ('k * 'v) list
 
@@ -127,6 +177,15 @@ module List = struct
       | Some v -> v
       | None -> failwith "List.Assoc.find_exn: key not found"
     ;;
+
+    let mem l key ~equal =
+      let rec aux = function
+        | [] -> false
+        | (k, _) :: _ when equal k key -> true
+        | _ :: rest -> aux rest
+      in
+      aux l
+    ;;
   end
 end
 
@@ -142,6 +201,43 @@ module String = struct
   let is_prefix s ~prefix = Stdlib.String.starts_with ~prefix s
   let is_suffix s ~suffix = Stdlib.String.ends_with ~suffix s
   let of_char c = Stdlib.String.make 1 c
+
+  let init n ~f = Stdlib.String.init n f
+
+  let is_empty s = Stdlib.String.length s = 0
+
+  let for_all s ~f =
+    let len = Stdlib.String.length s in
+    let rec aux i = if i >= len then true else f (Stdlib.String.get s i) && aux (i + 1) in
+    aux 0
+  ;;
+
+  let rstrip s =
+    let len = Stdlib.String.length s in
+    let j = ref (len - 1) in
+    while !j >= 0 && Char.is_whitespace (Stdlib.String.get s !j) do
+      decr j
+    done;
+    if !j >= len - 1 then s else Stdlib.String.sub s 0 (!j + 1)
+  ;;
+
+  let chop_prefix_exn s ~prefix =
+    if Stdlib.String.starts_with ~prefix s
+    then
+      Stdlib.String.sub
+        s
+        (Stdlib.String.length prefix)
+        (Stdlib.String.length s - Stdlib.String.length prefix)
+    else failwithf "%S does not start with %S" s prefix ()
+  ;;
+
+  let lsplit2_exn s ~on =
+    match Stdlib.String.index_opt s on with
+    | Some i ->
+      ( Stdlib.String.sub s 0 i
+      , Stdlib.String.sub s (i + 1) (Stdlib.String.length s - i - 1) )
+    | None -> failwithf "String.lsplit2_exn: %C not found in %S" on s ()
+  ;;
 
   let strip s =
     let len = Stdlib.String.length s in
@@ -185,11 +281,36 @@ module String = struct
     else None
   ;;
 
+  let chop_suffix s ~suffix =
+    if Stdlib.String.ends_with ~suffix s
+    then Some (Stdlib.String.sub s 0 (Stdlib.String.length s - Stdlib.String.length suffix))
+    else None
+  ;;
+
   let concat_map s ~f =
     let buf = Buffer.create (Stdlib.String.length s * 2) in
     Stdlib.String.iter (fun c -> Buffer.add_string buf (f c)) s;
     Buffer.contents buf
   ;;
+
+  let lfindi s ~f =
+    let len = Stdlib.String.length s in
+    let rec aux i =
+      if i >= len then None
+      else if f i (Stdlib.String.get s i) then Some i
+      else aux (i + 1)
+    in
+    aux 0
+  ;;
+
+  let slice s start stop =
+    let len = Stdlib.String.length s in
+    let start = if start < 0 then Stdlib.max 0 (len + start) else start in
+    let stop = if stop < 0 then Stdlib.max 0 (len + stop) else Stdlib.min stop len in
+    if start >= stop then "" else Stdlib.String.sub s start (stop - start)
+  ;;
+
+  let to_list s = Stdlib.List.init (Stdlib.String.length s) (Stdlib.String.get s)
 
   let split s ~on = Stdlib.String.split_on_char on s
 
@@ -250,6 +371,26 @@ module String = struct
 
   module Caseless = struct
     let equal a b = Stdlib.String.equal (lowercase_ascii a) (lowercase_ascii b)
+
+    module Map = struct
+      module M = Stdlib.Map.Make (struct
+        type t = string
+
+        let compare a b =
+          Stdlib.String.compare (lowercase_ascii a) (lowercase_ascii b)
+        ;;
+      end)
+
+      include M
+
+      let of_alist_multi l =
+        Stdlib.List.fold_left
+          (fun m (k, v) ->
+            M.update k (function None -> Some [ v ] | Some vs -> Some (vs @ [ v ])) m)
+          M.empty
+          l
+      ;;
+    end
   end
 
   let ( = ) = Stdlib.String.equal
@@ -272,7 +413,10 @@ module Map = struct
 
   let find m k = String.Map.find_opt k m
   let find_exn m k = String.Map.find_exn k m
+  let set m ~key ~data = String.Map.add key data m
+  let mem m k = String.Map.mem k m
   let of_alist_exn = String.Map.of_alist_exn
+  let to_alist m = String.Map.bindings m
 end
 
 module Hashtbl = struct
@@ -311,6 +455,12 @@ module Option = struct
     match x with
     | Some v -> f v
     | None -> None
+  ;;
+
+  let value_map x ~default ~f =
+    match x with
+    | Some v -> f v
+    | None -> default
   ;;
 
   let is_some = function
@@ -394,6 +544,18 @@ module Result = struct
     aux [] l
   ;;
 
+  let combine_errors l =
+    let rec aux oks errs = function
+      | [] -> (
+        match errs with
+        | [] -> Ok (Stdlib.List.rev oks)
+        | _ -> Error (Stdlib.List.rev errs))
+      | Ok x :: rest -> aux (x :: oks) errs rest
+      | Error e :: rest -> aux oks (e :: errs) rest
+    in
+    aux [] [] l
+  ;;
+
   let failf fmt = Printf.ksprintf (fun s -> Error s) fmt
 
   let ok_or_failwith = function
@@ -413,6 +575,9 @@ module Result = struct
     try Ok (f ()) with
     | e -> Error e
   ;;
+
+  let ( >>= ) x f = bind x ~f
+  let ( >>| ) x f = map x ~f
 
   module Let_syntax = struct
     module Let_syntax = struct
@@ -444,12 +609,27 @@ module Int = struct
   let of_float = Stdlib.int_of_float
   let to_int64 = Stdlib.Int64.of_int
   let max_value = Stdlib.max_int
+  let succ = Stdlib.succ
 end
 
 module Int64 = struct
   include Stdlib.Int64
 
+  let compare (a : int64) (b : int64) = Stdlib.Int64.compare a b
+  let equal (a : int64) (b : int64) = Stdlib.Int64.equal a b
+  let ( >= ) (a : int64) (b : int64) = Stdlib.( >= ) (Stdlib.Int64.compare a b) 0
+  let ( <= ) (a : int64) (b : int64) = Stdlib.( <= ) (Stdlib.Int64.compare a b) 0
   let of_float = Stdlib.Int64.of_float
+  let of_int = Stdlib.Int64.of_int
+  let to_string = Stdlib.Int64.to_string
+  let min_value = Stdlib.Int64.min_int
+  let max_value = Stdlib.Int64.max_int
+  let to_int_exn x =
+    if Stdlib.Int64.compare x (Stdlib.Int64.of_int Stdlib.max_int) > 0
+       || Stdlib.Int64.compare x (Stdlib.Int64.of_int Stdlib.min_int) < 0
+    then failwith "Int64.to_int_exn: overflow"
+    else Stdlib.Int64.to_int x
+  ;;
 end
 
 module Float = struct
@@ -459,6 +639,12 @@ module Float = struct
   let to_int = Stdlib.int_of_float
   let round_up x = Stdlib.ceil x
   let ( / ) = ( /. )
+  let ( >= ) (a : float) (b : float) = Stdlib.( >= ) a b
+  let ( <= ) (a : float) (b : float) = Stdlib.( <= ) a b
+  let ( > ) (a : float) (b : float) = Stdlib.( > ) a b
+  let ( < ) (a : float) (b : float) = Stdlib.( < ) a b
+  let ( = ) (a : float) (b : float) = Stdlib.( = ) a b
+  let to_string = Stdlib.string_of_float
 end
 
 module Bool = struct
@@ -467,6 +653,27 @@ module Bool = struct
   let to_string = Stdlib.string_of_bool
   let of_string = Stdlib.bool_of_string
   let equal (a : bool) (b : bool) = Stdlib.( = ) a b
+end
+
+module Array = struct
+  include Stdlib.Array
+
+  let to_list = Stdlib.Array.to_list
+
+  let foldi a ~init ~f =
+    let acc = ref init in
+    Stdlib.Array.iteri (fun i x -> acc := f i !acc x) a;
+    !acc
+  ;;
+end
+
+module Exn = struct
+  let to_string e =
+    match e with
+    | Failure msg -> sprintf "(Failure %S)" msg
+    | Invalid_argument msg -> sprintf "(Invalid_argument %S)" msg
+    | _ -> Printexc.to_string e
+  ;;
 end
 
 module Memo = struct
