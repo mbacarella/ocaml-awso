@@ -3,8 +3,8 @@
 (library
  (name awso_identitystore_async)
  (flags (:standard))
- (public_name awso-identitystore-async)
- (libraries awso-identitystore awso-async)
+ (public_name awso-async.identitystore)
+ (libraries awso.identitystore awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

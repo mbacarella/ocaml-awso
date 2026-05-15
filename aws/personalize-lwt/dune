@@ -3,8 +3,8 @@
 (library
  (name awso_personalize_lwt)
  (flags (:standard))
- (public_name awso-personalize-lwt)
- (libraries awso-personalize awso-lwt))
+ (public_name awso-lwt.personalize)
+ (libraries awso.personalize awso-lwt))
 
 (rule
  (targets io.ml io.mli)

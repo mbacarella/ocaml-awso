@@ -3,8 +3,8 @@
 (library
  (name awso_apigatewaymanagementapi_async)
  (flags (:standard))
- (public_name awso-apigatewaymanagementapi-async)
- (libraries awso-apigatewaymanagementapi awso-async)
+ (public_name awso-async.apigatewaymanagementapi)
+ (libraries awso.apigatewaymanagementapi awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

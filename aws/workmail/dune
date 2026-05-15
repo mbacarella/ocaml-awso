@@ -2,7 +2,7 @@
 
 (library
  (name awso_workmail)
- (public_name awso-workmail)
+ (public_name awso.workmail)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

@@ -3,8 +3,8 @@
 (library
  (name awso_gamelift_async)
  (flags (:standard))
- (public_name awso-gamelift-async)
- (libraries awso-gamelift awso-async)
+ (public_name awso-async.gamelift)
+ (libraries awso.gamelift awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

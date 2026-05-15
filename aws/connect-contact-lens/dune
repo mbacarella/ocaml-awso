@@ -2,7 +2,7 @@
 
 (library
  (name awso_connect_contact_lens)
- (public_name awso-connect-contact-lens)
+ (public_name awso.connect-contact-lens)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

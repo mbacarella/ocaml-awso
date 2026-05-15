@@ -3,8 +3,8 @@
 (library
  (name awso_kafkaconnect_async)
  (flags (:standard))
- (public_name awso-kafkaconnect-async)
- (libraries awso-kafkaconnect awso-async)
+ (public_name awso-async.kafkaconnect)
+ (libraries awso.kafkaconnect awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

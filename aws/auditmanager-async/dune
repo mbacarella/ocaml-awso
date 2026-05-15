@@ -3,8 +3,8 @@
 (library
  (name awso_auditmanager_async)
  (flags (:standard))
- (public_name awso-auditmanager-async)
- (libraries awso-auditmanager awso-async)
+ (public_name awso-async.auditmanager)
+ (libraries awso.auditmanager awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

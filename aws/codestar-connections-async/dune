@@ -3,8 +3,8 @@
 (library
  (name awso_codestar_connections_async)
  (flags (:standard))
- (public_name awso-codestar-connections-async)
- (libraries awso-codestar-connections awso-async)
+ (public_name awso-async.codestar-connections)
+ (libraries awso.codestar-connections awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

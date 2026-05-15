@@ -3,8 +3,8 @@
 (library
  (name awso_alexaforbusiness_async)
  (flags (:standard))
- (public_name awso-alexaforbusiness-async)
- (libraries awso-alexaforbusiness awso-async)
+ (public_name awso-async.alexaforbusiness)
+ (libraries awso.alexaforbusiness awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

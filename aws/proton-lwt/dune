@@ -3,8 +3,8 @@
 (library
  (name awso_proton_lwt)
  (flags (:standard))
- (public_name awso-proton-lwt)
- (libraries awso-proton awso-lwt))
+ (public_name awso-lwt.proton)
+ (libraries awso.proton awso-lwt))
 
 (rule
  (targets io.ml io.mli)

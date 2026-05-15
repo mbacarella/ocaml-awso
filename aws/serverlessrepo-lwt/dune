@@ -3,8 +3,8 @@
 (library
  (name awso_serverlessrepo_lwt)
  (flags (:standard))
- (public_name awso-serverlessrepo-lwt)
- (libraries awso-serverlessrepo awso-lwt))
+ (public_name awso-lwt.serverlessrepo)
+ (libraries awso.serverlessrepo awso-lwt))
 
 (rule
  (targets io.ml io.mli)

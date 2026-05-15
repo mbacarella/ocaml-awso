@@ -3,8 +3,8 @@
 (library
  (name awso_mediastore_async)
  (flags (:standard))
- (public_name awso-mediastore-async)
- (libraries awso-mediastore awso-async)
+ (public_name awso-async.mediastore)
+ (libraries awso.mediastore awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

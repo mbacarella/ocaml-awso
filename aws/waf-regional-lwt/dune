@@ -3,8 +3,8 @@
 (library
  (name awso_waf_regional_lwt)
  (flags (:standard))
- (public_name awso-waf-regional-lwt)
- (libraries awso-waf-regional awso-lwt))
+ (public_name awso-lwt.waf-regional)
+ (libraries awso.waf-regional awso-lwt))
 
 (rule
  (targets io.ml io.mli)

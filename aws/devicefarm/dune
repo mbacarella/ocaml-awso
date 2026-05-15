@@ -2,7 +2,7 @@
 
 (library
  (name awso_devicefarm)
- (public_name awso-devicefarm)
+ (public_name awso.devicefarm)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

@@ -3,8 +3,8 @@
 (library
  (name awso_codeartifact_async)
  (flags (:standard))
- (public_name awso-codeartifact-async)
- (libraries awso-codeartifact awso-async)
+ (public_name awso-async.codeartifact)
+ (libraries awso.codeartifact awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

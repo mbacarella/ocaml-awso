@@ -3,8 +3,8 @@
 (library
  (name awso_guardduty_async)
  (flags (:standard))
- (public_name awso-guardduty-async)
- (libraries awso-guardduty awso-async)
+ (public_name awso-async.guardduty)
+ (libraries awso.guardduty awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

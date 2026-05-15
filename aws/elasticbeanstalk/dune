@@ -2,7 +2,7 @@
 
 (library
  (name awso_elasticbeanstalk)
- (public_name awso-elasticbeanstalk)
+ (public_name awso.elasticbeanstalk)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

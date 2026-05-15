@@ -3,8 +3,8 @@
 (library
  (name awso_athena_lwt)
  (flags (:standard))
- (public_name awso-athena-lwt)
- (libraries awso-athena awso-lwt))
+ (public_name awso-lwt.athena)
+ (libraries awso.athena awso-lwt))
 
 (rule
  (targets io.ml io.mli)

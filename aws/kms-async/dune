@@ -3,8 +3,8 @@
 (library
  (name awso_kms_async)
  (flags (:standard))
- (public_name awso-kms-async)
- (libraries awso-kms awso-async)
+ (public_name awso-async.kms)
+ (libraries awso.kms awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

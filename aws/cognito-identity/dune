@@ -2,7 +2,7 @@
 
 (library
  (name awso_cognito_identity)
- (public_name awso-cognito-identity)
+ (public_name awso.cognito-identity)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

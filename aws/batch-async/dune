@@ -3,8 +3,8 @@
 (library
  (name awso_batch_async)
  (flags (:standard))
- (public_name awso-batch-async)
- (libraries awso-batch awso-async)
+ (public_name awso-async.batch)
+ (libraries awso.batch awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

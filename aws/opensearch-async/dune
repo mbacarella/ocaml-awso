@@ -3,8 +3,8 @@
 (library
  (name awso_opensearch_async)
  (flags (:standard))
- (public_name awso-opensearch-async)
- (libraries awso-opensearch awso-async)
+ (public_name awso-async.opensearch)
+ (libraries awso.opensearch awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

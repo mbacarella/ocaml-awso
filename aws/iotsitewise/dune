@@ -2,7 +2,7 @@
 
 (library
  (name awso_iotsitewise)
- (public_name awso-iotsitewise)
+ (public_name awso.iotsitewise)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

@@ -2,7 +2,7 @@
 
 (library
  (name awso_managedblockchain)
- (public_name awso-managedblockchain)
+ (public_name awso.managedblockchain)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

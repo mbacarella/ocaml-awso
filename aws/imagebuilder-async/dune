@@ -3,8 +3,8 @@
 (library
  (name awso_imagebuilder_async)
  (flags (:standard))
- (public_name awso-imagebuilder-async)
- (libraries awso-imagebuilder awso-async)
+ (public_name awso-async.imagebuilder)
+ (libraries awso.imagebuilder awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

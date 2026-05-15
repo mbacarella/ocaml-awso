@@ -2,7 +2,7 @@
 
 (library
  (name awso_identitystore)
- (public_name awso-identitystore)
+ (public_name awso.identitystore)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

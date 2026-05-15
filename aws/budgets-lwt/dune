@@ -3,8 +3,8 @@
 (library
  (name awso_budgets_lwt)
  (flags (:standard))
- (public_name awso-budgets-lwt)
- (libraries awso-budgets awso-lwt))
+ (public_name awso-lwt.budgets)
+ (libraries awso.budgets awso-lwt))
 
 (rule
  (targets io.ml io.mli)

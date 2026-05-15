@@ -3,8 +3,8 @@
 (library
  (name awso_securityhub_lwt)
  (flags (:standard))
- (public_name awso-securityhub-lwt)
- (libraries awso-securityhub awso-lwt))
+ (public_name awso-lwt.securityhub)
+ (libraries awso.securityhub awso-lwt))
 
 (rule
  (targets io.ml io.mli)

@@ -3,8 +3,8 @@
 (library
  (name awso_evidently_async)
  (flags (:standard))
- (public_name awso-evidently-async)
- (libraries awso-evidently awso-async)
+ (public_name awso-async.evidently)
+ (libraries awso.evidently awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

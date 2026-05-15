@@ -2,7 +2,7 @@
 
 (library
  (name awso_braket)
- (public_name awso-braket)
+ (public_name awso.braket)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

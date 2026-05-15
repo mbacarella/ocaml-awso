@@ -2,7 +2,7 @@
 
 (library
  (name awso_resource_groups)
- (public_name awso-resource-groups)
+ (public_name awso.resource-groups)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

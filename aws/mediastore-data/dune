@@ -2,7 +2,7 @@
 
 (library
  (name awso_mediastore_data)
- (public_name awso-mediastore-data)
+ (public_name awso.mediastore-data)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

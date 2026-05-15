@@ -3,8 +3,8 @@
 (library
  (name awso_iotanalytics_async)
  (flags (:standard))
- (public_name awso-iotanalytics-async)
- (libraries awso-iotanalytics awso-async)
+ (public_name awso-async.iotanalytics)
+ (libraries awso.iotanalytics awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

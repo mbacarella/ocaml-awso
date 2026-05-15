@@ -3,8 +3,8 @@
 (library
  (name awso_timestream_write_lwt)
  (flags (:standard))
- (public_name awso-timestream-write-lwt)
- (libraries awso-timestream-write awso-lwt))
+ (public_name awso-lwt.timestream-write)
+ (libraries awso.timestream-write awso-lwt))
 
 (rule
  (targets io.ml io.mli)

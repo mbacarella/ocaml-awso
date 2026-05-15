@@ -2,7 +2,7 @@
 
 (library
  (name awso_iotfleethub)
- (public_name awso-iotfleethub)
+ (public_name awso.iotfleethub)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

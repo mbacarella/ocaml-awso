@@ -3,8 +3,8 @@
 (library
  (name awso_gamesparks_async)
  (flags (:standard))
- (public_name awso-gamesparks-async)
- (libraries awso-gamesparks awso-async)
+ (public_name awso-async.gamesparks)
+ (libraries awso.gamesparks awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

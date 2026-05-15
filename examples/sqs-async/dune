@@ -1,6 +1,6 @@
 (executable
  (name awso_sqs)
- (libraries awso-sqs-async core_unix.time_unix)
+ (libraries awso-async.sqs core_unix.time_unix)
  (preprocess
   (pps ppx_jane))
  (flags

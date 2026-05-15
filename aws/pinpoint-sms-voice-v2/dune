@@ -2,7 +2,7 @@
 
 (library
  (name awso_pinpoint_sms_voice_v2)
- (public_name awso-pinpoint-sms-voice-v2)
+ (public_name awso.pinpoint-sms-voice-v2)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

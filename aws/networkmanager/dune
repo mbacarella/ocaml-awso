@@ -2,7 +2,7 @@
 
 (library
  (name awso_networkmanager)
- (public_name awso-networkmanager)
+ (public_name awso.networkmanager)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

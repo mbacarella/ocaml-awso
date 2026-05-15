@@ -2,7 +2,7 @@
 
 (library
  (name awso_kinesis_video_media)
- (public_name awso-kinesis-video-media)
+ (public_name awso.kinesis-video-media)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

@@ -2,7 +2,7 @@
 
 (library
  (name awso_ec2_instance_connect)
- (public_name awso-ec2-instance-connect)
+ (public_name awso.ec2-instance-connect)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

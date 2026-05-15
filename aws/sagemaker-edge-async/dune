@@ -3,8 +3,8 @@
 (library
  (name awso_sagemaker_edge_async)
  (flags (:standard))
- (public_name awso-sagemaker-edge-async)
- (libraries awso-sagemaker-edge awso-async)
+ (public_name awso-async.sagemaker-edge)
+ (libraries awso.sagemaker-edge awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

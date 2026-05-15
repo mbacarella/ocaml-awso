@@ -3,8 +3,8 @@
 (library
  (name awso_polly_async)
  (flags (:standard))
- (public_name awso-polly-async)
- (libraries awso-polly awso-async)
+ (public_name awso-async.polly)
+ (libraries awso.polly awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

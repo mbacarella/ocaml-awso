@@ -3,8 +3,8 @@
 (library
  (name awso_lookoutequipment_lwt)
  (flags (:standard))
- (public_name awso-lookoutequipment-lwt)
- (libraries awso-lookoutequipment awso-lwt))
+ (public_name awso-lwt.lookoutequipment)
+ (libraries awso.lookoutequipment awso-lwt))
 
 (rule
  (targets io.ml io.mli)

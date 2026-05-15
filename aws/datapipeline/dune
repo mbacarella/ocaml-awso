@@ -2,7 +2,7 @@
 
 (library
  (name awso_datapipeline)
- (public_name awso-datapipeline)
+ (public_name awso.datapipeline)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

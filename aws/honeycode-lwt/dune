@@ -3,8 +3,8 @@
 (library
  (name awso_honeycode_lwt)
  (flags (:standard))
- (public_name awso-honeycode-lwt)
- (libraries awso-honeycode awso-lwt))
+ (public_name awso-lwt.honeycode)
+ (libraries awso.honeycode awso-lwt))
 
 (rule
  (targets io.ml io.mli)

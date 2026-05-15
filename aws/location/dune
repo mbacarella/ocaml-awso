@@ -2,7 +2,7 @@
 
 (library
  (name awso_location)
- (public_name awso-location)
+ (public_name awso.location)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

@@ -3,8 +3,8 @@
 (library
  (name awso_ec2_instance_connect_lwt)
  (flags (:standard))
- (public_name awso-ec2-instance-connect-lwt)
- (libraries awso-ec2-instance-connect awso-lwt))
+ (public_name awso-lwt.ec2-instance-connect)
+ (libraries awso.ec2-instance-connect awso-lwt))
 
 (rule
  (targets io.ml io.mli)

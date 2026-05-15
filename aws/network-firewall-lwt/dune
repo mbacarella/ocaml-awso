@@ -3,8 +3,8 @@
 (library
  (name awso_network_firewall_lwt)
  (flags (:standard))
- (public_name awso-network-firewall-lwt)
- (libraries awso-network-firewall awso-lwt))
+ (public_name awso-lwt.network-firewall)
+ (libraries awso.network-firewall awso-lwt))
 
 (rule
  (targets io.ml io.mli)

@@ -3,8 +3,8 @@
 (library
  (name awso_cloudhsmv2_lwt)
  (flags (:standard))
- (public_name awso-cloudhsmv2-lwt)
- (libraries awso-cloudhsmv2 awso-lwt))
+ (public_name awso-lwt.cloudhsmv2)
+ (libraries awso.cloudhsmv2 awso-lwt))
 
 (rule
  (targets io.ml io.mli)

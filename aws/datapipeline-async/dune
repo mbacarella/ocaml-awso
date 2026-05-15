@@ -3,8 +3,8 @@
 (library
  (name awso_datapipeline_async)
  (flags (:standard))
- (public_name awso-datapipeline-async)
- (libraries awso-datapipeline awso-async)
+ (public_name awso-async.datapipeline)
+ (libraries awso.datapipeline awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

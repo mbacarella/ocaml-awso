@@ -2,7 +2,7 @@
 
 (library
  (name awso_greengrass)
- (public_name awso-greengrass)
+ (public_name awso.greengrass)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

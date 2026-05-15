@@ -3,8 +3,8 @@
 (library
  (name awso_kinesisanalyticsv2_lwt)
  (flags (:standard))
- (public_name awso-kinesisanalyticsv2-lwt)
- (libraries awso-kinesisanalyticsv2 awso-lwt))
+ (public_name awso-lwt.kinesisanalyticsv2)
+ (libraries awso.kinesisanalyticsv2 awso-lwt))
 
 (rule
  (targets io.ml io.mli)

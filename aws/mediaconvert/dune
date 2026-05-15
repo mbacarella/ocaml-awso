@@ -2,7 +2,7 @@
 
 (library
  (name awso_mediaconvert)
- (public_name awso-mediaconvert)
+ (public_name awso.mediaconvert)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

@@ -3,8 +3,8 @@
 (library
  (name awso_translate_async)
  (flags (:standard))
- (public_name awso-translate-async)
- (libraries awso-translate awso-async)
+ (public_name awso-async.translate)
+ (libraries awso.translate awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

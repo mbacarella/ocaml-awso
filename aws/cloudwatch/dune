@@ -2,7 +2,7 @@
 
 (library
  (name awso_cloudwatch)
- (public_name awso-cloudwatch)
+ (public_name awso.cloudwatch)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

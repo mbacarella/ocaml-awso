@@ -3,8 +3,8 @@
 (library
  (name awso_dms_async)
  (flags (:standard))
- (public_name awso-dms-async)
- (libraries awso-dms awso-async)
+ (public_name awso-async.dms)
+ (libraries awso.dms awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

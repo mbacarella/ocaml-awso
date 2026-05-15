@@ -3,8 +3,8 @@
 (library
  (name awso_license_manager_async)
  (flags (:standard))
- (public_name awso-license-manager-async)
- (libraries awso-license-manager awso-async)
+ (public_name awso-async.license-manager)
+ (libraries awso.license-manager awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

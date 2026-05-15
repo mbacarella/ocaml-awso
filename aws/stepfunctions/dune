@@ -2,7 +2,7 @@
 
 (library
  (name awso_stepfunctions)
- (public_name awso-stepfunctions)
+ (public_name awso.stepfunctions)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

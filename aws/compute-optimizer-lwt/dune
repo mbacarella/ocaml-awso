@@ -3,8 +3,8 @@
 (library
  (name awso_compute_optimizer_lwt)
  (flags (:standard))
- (public_name awso-compute-optimizer-lwt)
- (libraries awso-compute-optimizer awso-lwt))
+ (public_name awso-lwt.compute-optimizer)
+ (libraries awso.compute-optimizer awso-lwt))
 
 (rule
  (targets io.ml io.mli)

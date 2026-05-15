@@ -2,7 +2,7 @@
 
 (library
  (name awso_route53resolver)
- (public_name awso-route53resolver)
+ (public_name awso.route53resolver)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

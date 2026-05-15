@@ -2,7 +2,7 @@
 
 (library
  (name awso_codebuild)
- (public_name awso-codebuild)
+ (public_name awso.codebuild)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

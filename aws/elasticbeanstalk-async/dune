@@ -3,8 +3,8 @@
 (library
  (name awso_elasticbeanstalk_async)
  (flags (:standard))
- (public_name awso-elasticbeanstalk-async)
- (libraries awso-elasticbeanstalk awso-async)
+ (public_name awso-async.elasticbeanstalk)
+ (libraries awso.elasticbeanstalk awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

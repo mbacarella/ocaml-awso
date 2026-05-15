@@ -2,7 +2,7 @@
 
 (library
  (name awso_elasticache)
- (public_name awso-elasticache)
+ (public_name awso.elasticache)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

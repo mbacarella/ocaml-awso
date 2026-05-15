@@ -3,8 +3,8 @@
 (library
  (name awso_robomaker_lwt)
  (flags (:standard))
- (public_name awso-robomaker-lwt)
- (libraries awso-robomaker awso-lwt))
+ (public_name awso-lwt.robomaker)
+ (libraries awso.robomaker awso-lwt))
 
 (rule
  (targets io.ml io.mli)

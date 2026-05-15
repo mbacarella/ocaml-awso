@@ -3,8 +3,8 @@
 (library
  (name awso_connect_contact_lens_async)
  (flags (:standard))
- (public_name awso-connect-contact-lens-async)
- (libraries awso-connect-contact-lens awso-async)
+ (public_name awso-async.connect-contact-lens)
+ (libraries awso.connect-contact-lens awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

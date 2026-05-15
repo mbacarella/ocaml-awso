@@ -3,8 +3,8 @@
 (library
  (name awso_firehose_async)
  (flags (:standard))
- (public_name awso-firehose-async)
- (libraries awso-firehose awso-async)
+ (public_name awso-async.firehose)
+ (libraries awso.firehose awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

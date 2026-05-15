@@ -2,7 +2,7 @@
 
 (library
  (name awso_codepipeline)
- (public_name awso-codepipeline)
+ (public_name awso.codepipeline)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

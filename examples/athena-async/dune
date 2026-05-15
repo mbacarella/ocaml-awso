@@ -1,6 +1,6 @@
 (executable
  (name awso_athena)
- (libraries awso-athena-async core_unix.command_unix)
+ (libraries awso-async.athena core_unix.command_unix)
  (preprocess
   (pps ppx_jane))
  (flags

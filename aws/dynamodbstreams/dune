@@ -2,7 +2,7 @@
 
 (library
  (name awso_dynamodbstreams)
- (public_name awso-dynamodbstreams)
+ (public_name awso.dynamodbstreams)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

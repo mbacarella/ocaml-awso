@@ -2,7 +2,7 @@
 
 (library
  (name awso_kinesisanalytics)
- (public_name awso-kinesisanalytics)
+ (public_name awso.kinesisanalytics)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

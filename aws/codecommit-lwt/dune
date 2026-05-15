@@ -3,8 +3,8 @@
 (library
  (name awso_codecommit_lwt)
  (flags (:standard))
- (public_name awso-codecommit-lwt)
- (libraries awso-codecommit awso-lwt))
+ (public_name awso-lwt.codecommit)
+ (libraries awso.codecommit awso-lwt))
 
 (rule
  (targets io.ml io.mli)

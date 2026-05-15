@@ -3,8 +3,8 @@
 (library
  (name awso_route53_recovery_control_config_lwt)
  (flags (:standard))
- (public_name awso-route53-recovery-control-config-lwt)
- (libraries awso-route53-recovery-control-config awso-lwt))
+ (public_name awso-lwt.route53-recovery-control-config)
+ (libraries awso.route53-recovery-control-config awso-lwt))
 
 (rule
  (targets io.ml io.mli)

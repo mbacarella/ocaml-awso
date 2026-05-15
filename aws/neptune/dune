@@ -2,7 +2,7 @@
 
 (library
  (name awso_neptune)
- (public_name awso-neptune)
+ (public_name awso.neptune)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

@@ -3,8 +3,8 @@
 (library
  (name awso_cloudformation_async)
  (flags (:standard))
- (public_name awso-cloudformation-async)
- (libraries awso-cloudformation awso-async)
+ (public_name awso-async.cloudformation)
+ (libraries awso.cloudformation awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

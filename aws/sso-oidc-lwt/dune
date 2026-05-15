@@ -3,8 +3,8 @@
 (library
  (name awso_sso_oidc_lwt)
  (flags (:standard))
- (public_name awso-sso-oidc-lwt)
- (libraries awso-sso-oidc awso-lwt))
+ (public_name awso-lwt.sso-oidc)
+ (libraries awso.sso-oidc awso-lwt))
 
 (rule
  (targets io.ml io.mli)

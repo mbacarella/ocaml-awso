@@ -3,8 +3,8 @@
 (library
  (name awso_iotevents_async)
  (flags (:standard))
- (public_name awso-iotevents-async)
- (libraries awso-iotevents awso-async)
+ (public_name awso-async.iotevents)
+ (libraries awso.iotevents awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

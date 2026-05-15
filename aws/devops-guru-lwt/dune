@@ -3,8 +3,8 @@
 (library
  (name awso_devops_guru_lwt)
  (flags (:standard))
- (public_name awso-devops-guru-lwt)
- (libraries awso-devops-guru awso-lwt))
+ (public_name awso-lwt.devops-guru)
+ (libraries awso.devops-guru awso-lwt))
 
 (rule
  (targets io.ml io.mli)

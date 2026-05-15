@@ -2,7 +2,7 @@
 
 (library
  (name awso_transcribe)
- (public_name awso-transcribe)
+ (public_name awso.transcribe)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

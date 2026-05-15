@@ -3,8 +3,8 @@
 (library
  (name awso_mediaconvert_lwt)
  (flags (:standard))
- (public_name awso-mediaconvert-lwt)
- (libraries awso-mediaconvert awso-lwt))
+ (public_name awso-lwt.mediaconvert)
+ (libraries awso.mediaconvert awso-lwt))
 
 (rule
  (targets io.ml io.mli)

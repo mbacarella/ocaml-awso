@@ -3,8 +3,8 @@
 (library
  (name awso_migration_hub_refactor_spaces_lwt)
  (flags (:standard))
- (public_name awso-migration-hub-refactor-spaces-lwt)
- (libraries awso-migration-hub-refactor-spaces awso-lwt))
+ (public_name awso-lwt.migration-hub-refactor-spaces)
+ (libraries awso.migration-hub-refactor-spaces awso-lwt))
 
 (rule
  (targets io.ml io.mli)

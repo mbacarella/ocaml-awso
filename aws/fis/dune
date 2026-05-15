@@ -2,7 +2,7 @@
 
 (library
  (name awso_fis)
- (public_name awso-fis)
+ (public_name awso.fis)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

@@ -3,8 +3,8 @@
 (library
  (name awso_signer_lwt)
  (flags (:standard))
- (public_name awso-signer-lwt)
- (libraries awso-signer awso-lwt))
+ (public_name awso-lwt.signer)
+ (libraries awso.signer awso-lwt))
 
 (rule
  (targets io.ml io.mli)

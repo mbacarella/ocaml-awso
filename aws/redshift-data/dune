@@ -2,7 +2,7 @@
 
 (library
  (name awso_redshift_data)
- (public_name awso-redshift-data)
+ (public_name awso.redshift-data)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

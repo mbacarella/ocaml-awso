@@ -3,8 +3,8 @@
 (library
  (name awso_amplifyuibuilder_async)
  (flags (:standard))
- (public_name awso-amplifyuibuilder-async)
- (libraries awso-amplifyuibuilder awso-async)
+ (public_name awso-async.amplifyuibuilder)
+ (libraries awso.amplifyuibuilder awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

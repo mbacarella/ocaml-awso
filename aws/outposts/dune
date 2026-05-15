@@ -2,7 +2,7 @@
 
 (library
  (name awso_outposts)
- (public_name awso-outposts)
+ (public_name awso.outposts)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

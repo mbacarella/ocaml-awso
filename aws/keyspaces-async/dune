@@ -3,8 +3,8 @@
 (library
  (name awso_keyspaces_async)
  (flags (:standard))
- (public_name awso-keyspaces-async)
- (libraries awso-keyspaces awso-async)
+ (public_name awso-async.keyspaces)
+ (libraries awso.keyspaces awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

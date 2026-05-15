@@ -2,7 +2,7 @@
 
 (library
  (name awso_iotwireless)
- (public_name awso-iotwireless)
+ (public_name awso.iotwireless)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

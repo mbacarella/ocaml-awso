@@ -3,8 +3,8 @@
 (library
  (name awso_route53_recovery_cluster_lwt)
  (flags (:standard))
- (public_name awso-route53-recovery-cluster-lwt)
- (libraries awso-route53-recovery-cluster awso-lwt))
+ (public_name awso-lwt.route53-recovery-cluster)
+ (libraries awso.route53-recovery-cluster awso-lwt))
 
 (rule
  (targets io.ml io.mli)

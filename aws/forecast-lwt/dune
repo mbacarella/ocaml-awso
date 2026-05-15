@@ -3,8 +3,8 @@
 (library
  (name awso_forecast_lwt)
  (flags (:standard))
- (public_name awso-forecast-lwt)
- (libraries awso-forecast awso-lwt))
+ (public_name awso-lwt.forecast)
+ (libraries awso.forecast awso-lwt))
 
 (rule
  (targets io.ml io.mli)

@@ -3,8 +3,8 @@
 (library
  (name awso_billingconductor_async)
  (flags (:standard))
- (public_name awso-billingconductor-async)
- (libraries awso-billingconductor awso-async)
+ (public_name awso-async.billingconductor)
+ (libraries awso.billingconductor awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

@@ -2,7 +2,7 @@
 
 (library
  (name awso_appmesh)
- (public_name awso-appmesh)
+ (public_name awso.appmesh)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

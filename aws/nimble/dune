@@ -2,7 +2,7 @@
 
 (library
  (name awso_nimble)
- (public_name awso-nimble)
+ (public_name awso.nimble)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

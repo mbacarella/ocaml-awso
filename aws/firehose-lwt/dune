@@ -3,8 +3,8 @@
 (library
  (name awso_firehose_lwt)
  (flags (:standard))
- (public_name awso-firehose-lwt)
- (libraries awso-firehose awso-lwt))
+ (public_name awso-lwt.firehose)
+ (libraries awso.firehose awso-lwt))
 
 (rule
  (targets io.ml io.mli)

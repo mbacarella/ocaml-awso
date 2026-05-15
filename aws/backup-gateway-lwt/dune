@@ -3,8 +3,8 @@
 (library
  (name awso_backup_gateway_lwt)
  (flags (:standard))
- (public_name awso-backup-gateway-lwt)
- (libraries awso-backup-gateway awso-lwt))
+ (public_name awso-lwt.backup-gateway)
+ (libraries awso.backup-gateway awso-lwt))
 
 (rule
  (targets io.ml io.mli)

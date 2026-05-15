@@ -2,7 +2,7 @@
 
 (library
  (name awso_chime_sdk_messaging)
- (public_name awso-chime-sdk-messaging)
+ (public_name awso.chime-sdk-messaging)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

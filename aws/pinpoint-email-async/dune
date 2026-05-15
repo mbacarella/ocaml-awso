@@ -3,8 +3,8 @@
 (library
  (name awso_pinpoint_email_async)
  (flags (:standard))
- (public_name awso-pinpoint-email-async)
- (libraries awso-pinpoint-email awso-async)
+ (public_name awso-async.pinpoint-email)
+ (libraries awso.pinpoint-email awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

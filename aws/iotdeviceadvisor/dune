@@ -2,7 +2,7 @@
 
 (library
  (name awso_iotdeviceadvisor)
- (public_name awso-iotdeviceadvisor)
+ (public_name awso.iotdeviceadvisor)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

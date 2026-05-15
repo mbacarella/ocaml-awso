@@ -3,8 +3,8 @@
 (library
  (name awso_ssm_contacts_lwt)
  (flags (:standard))
- (public_name awso-ssm-contacts-lwt)
- (libraries awso-ssm-contacts awso-lwt))
+ (public_name awso-lwt.ssm-contacts)
+ (libraries awso.ssm-contacts awso-lwt))
 
 (rule
  (targets io.ml io.mli)

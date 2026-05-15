@@ -2,7 +2,7 @@
 
 (library
  (name awso_databrew)
- (public_name awso-databrew)
+ (public_name awso.databrew)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

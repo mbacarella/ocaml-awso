@@ -3,8 +3,8 @@
 (library
  (name awso_sagemaker_a2i_runtime_async)
  (flags (:standard))
- (public_name awso-sagemaker-a2i-runtime-async)
- (libraries awso-sagemaker-a2i-runtime awso-async)
+ (public_name awso-async.sagemaker-a2i-runtime)
+ (libraries awso.sagemaker-a2i-runtime awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

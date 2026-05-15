@@ -2,7 +2,7 @@
 
 (library
  (name awso_guardduty)
- (public_name awso-guardduty)
+ (public_name awso.guardduty)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

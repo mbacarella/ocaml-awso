@@ -3,8 +3,8 @@
 (library
  (name awso_groundstation_lwt)
  (flags (:standard))
- (public_name awso-groundstation-lwt)
- (libraries awso-groundstation awso-lwt))
+ (public_name awso-lwt.groundstation)
+ (libraries awso.groundstation awso-lwt))
 
 (rule
  (targets io.ml io.mli)

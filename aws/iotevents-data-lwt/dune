@@ -3,8 +3,8 @@
 (library
  (name awso_iotevents_data_lwt)
  (flags (:standard))
- (public_name awso-iotevents-data-lwt)
- (libraries awso-iotevents-data awso-lwt))
+ (public_name awso-lwt.iotevents-data)
+ (libraries awso.iotevents-data awso-lwt))
 
 (rule
  (targets io.ml io.mli)

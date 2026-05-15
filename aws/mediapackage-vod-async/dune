@@ -3,8 +3,8 @@
 (library
  (name awso_mediapackage_vod_async)
  (flags (:standard))
- (public_name awso-mediapackage-vod-async)
- (libraries awso-mediapackage-vod awso-async)
+ (public_name awso-async.mediapackage-vod)
+ (libraries awso.mediapackage-vod awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

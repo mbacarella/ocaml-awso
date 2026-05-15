@@ -2,7 +2,7 @@
 
 (library
  (name awso_billingconductor)
- (public_name awso-billingconductor)
+ (public_name awso.billingconductor)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

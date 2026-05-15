@@ -3,8 +3,8 @@
 (library
  (name awso_clouddirectory_lwt)
  (flags (:standard))
- (public_name awso-clouddirectory-lwt)
- (libraries awso-clouddirectory awso-lwt))
+ (public_name awso-lwt.clouddirectory)
+ (libraries awso.clouddirectory awso-lwt))
 
 (rule
  (targets io.ml io.mli)

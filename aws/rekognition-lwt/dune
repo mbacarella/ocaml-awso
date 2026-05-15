@@ -3,8 +3,8 @@
 (library
  (name awso_rekognition_lwt)
  (flags (:standard))
- (public_name awso-rekognition-lwt)
- (libraries awso-rekognition awso-lwt))
+ (public_name awso-lwt.rekognition)
+ (libraries awso.rekognition awso-lwt))
 
 (rule
  (targets io.ml io.mli)

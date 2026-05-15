@@ -2,7 +2,7 @@
 
 (library
  (name awso_lex_models)
- (public_name awso-lex-models)
+ (public_name awso.lex-models)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

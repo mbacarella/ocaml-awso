@@ -3,8 +3,8 @@
 (library
  (name awso_customer_profiles_async)
  (flags (:standard))
- (public_name awso-customer-profiles-async)
- (libraries awso-customer-profiles awso-async)
+ (public_name awso-async.customer-profiles)
+ (libraries awso.customer-profiles awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

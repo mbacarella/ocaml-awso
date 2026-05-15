@@ -2,7 +2,7 @@
 
 (library
  (name awso_iot_jobs_data)
- (public_name awso-iot-jobs-data)
+ (public_name awso.iot-jobs-data)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

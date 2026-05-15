@@ -2,7 +2,7 @@
 
 (library
  (name awso_autoscaling_plans)
- (public_name awso-autoscaling-plans)
+ (public_name awso.autoscaling-plans)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

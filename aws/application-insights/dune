@@ -2,7 +2,7 @@
 
 (library
  (name awso_application_insights)
- (public_name awso-application-insights)
+ (public_name awso.application-insights)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

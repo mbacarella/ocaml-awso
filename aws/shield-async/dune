@@ -3,8 +3,8 @@
 (library
  (name awso_shield_async)
  (flags (:standard))
- (public_name awso-shield-async)
- (libraries awso-shield awso-async)
+ (public_name awso-async.shield)
+ (libraries awso.shield awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

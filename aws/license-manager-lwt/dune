@@ -3,8 +3,8 @@
 (library
  (name awso_license_manager_lwt)
  (flags (:standard))
- (public_name awso-license-manager-lwt)
- (libraries awso-license-manager awso-lwt))
+ (public_name awso-lwt.license-manager)
+ (libraries awso.license-manager awso-lwt))
 
 (rule
  (targets io.ml io.mli)

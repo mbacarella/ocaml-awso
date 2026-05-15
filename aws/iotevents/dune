@@ -2,7 +2,7 @@
 
 (library
  (name awso_iotevents)
- (public_name awso-iotevents)
+ (public_name awso.iotevents)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

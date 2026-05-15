@@ -1,5 +1,5 @@
 (executable
  (name main)
- (libraries awso-cognito-idp-async core_unix.command_unix)
+ (libraries awso-async.cognito-idp core_unix.command_unix)
  (flags
   (:standard)))

@@ -2,7 +2,7 @@
 
 (library
  (name awso_robomaker)
- (public_name awso-robomaker)
+ (public_name awso.robomaker)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

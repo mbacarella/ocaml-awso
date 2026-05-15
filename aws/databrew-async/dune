@@ -3,8 +3,8 @@
 (library
  (name awso_databrew_async)
  (flags (:standard))
- (public_name awso-databrew-async)
- (libraries awso-databrew awso-async)
+ (public_name awso-async.databrew)
+ (libraries awso.databrew awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

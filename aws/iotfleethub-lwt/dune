@@ -3,8 +3,8 @@
 (library
  (name awso_iotfleethub_lwt)
  (flags (:standard))
- (public_name awso-iotfleethub-lwt)
- (libraries awso-iotfleethub awso-lwt))
+ (public_name awso-lwt.iotfleethub)
+ (libraries awso.iotfleethub awso-lwt))
 
 (rule
  (targets io.ml io.mli)

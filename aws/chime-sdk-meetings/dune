@@ -2,7 +2,7 @@
 
 (library
  (name awso_chime_sdk_meetings)
- (public_name awso-chime-sdk-meetings)
+ (public_name awso.chime-sdk-meetings)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

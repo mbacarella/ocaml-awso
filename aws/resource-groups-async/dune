@@ -3,8 +3,8 @@
 (library
  (name awso_resource_groups_async)
  (flags (:standard))
- (public_name awso-resource-groups-async)
- (libraries awso-resource-groups awso-async)
+ (public_name awso-async.resource-groups)
+ (libraries awso.resource-groups awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

@@ -102,19 +102,9 @@ let ocamlformat ?(prog = "ocamlformat") ~path () =
   run_and_print_errors ~prog ~args:[ "--"; path ]
 ;;
 
-let format_dune_file ~path =
-  run_and_print_errors ~prog:"dune" ~args:[ "format-dune-file"; path ]
-;;
-
-let save_file_and_format (fmt : [ `dune | `ocaml ]) ~(path : string) ~(contents : string)
-  : unit
-  =
+let save_file_and_format ~(path : string) ~(contents : string) : unit =
   Out_channel.write_all path ~data:contents;
-  let result =
-    match fmt with
-    | `ocaml -> ocamlformat ~path ()
-    | `dune -> format_dune_file ~path
-  in
+  let result = ocamlformat ~path () in
   let contents2 =
     match result with
     | Ok x -> x
@@ -131,32 +121,6 @@ let dashes_to_underscores : string -> string =
     | c -> c)
 ;;
 
-(** Services that we don't yet support for some reason. *)
-let unsupported_services : String.Set.t =
-  String.Set.of_list
-    [ "apigateway"
-    ; "apigatewayv2"
-    ; "appconfig"
-    ; "appconfigdata"
-    ; "appsync"
-    ; "cloudhsm"
-    ; "codeguruprofiler"
-    ; "dataexchange"
-    ; "health"
-    ; "iottwinmaker"
-    ; "lex-runtime"
-    ; "lexv2-runtime"
-    ; "lookoutvision"
-    ; "mediaconnect"
-    ; "medialive"
-    ; "mq"
-    ; "pinpoint"
-    ; "s3control"
-    ; "sagemaker-runtime"
-    ; "workmailmessageflow"
-    ]
-;;
-
 let get_all_services ~(botocore_data : string) : string list =
   Sys_unix.ls_dir botocore_data
   |> List.filter ~f:(fun ent -> Sys_unix.is_directory_exn (botocore_data ^/ ent))
@@ -170,160 +134,6 @@ module Param = struct
         "--botocore-data"
         (required string)
         ~doc:"PATH Path to the botocore/data directory.")
-  ;;
-end
-
-module Build_dune_project_file : sig
-  val main : Command.t
-end = struct
-  let header () : string =
-    let async_base_pkg =
-      {|
-    (package
-      (name awso-async)
-      (synopsis "AWS API base library Async")
-      (depends
-        awso
-        cohttp-async
-        (async
-          (>= v0.11.0))
-        async_ssl))
-      |}
-    in
-    let async_srp_pkg =
-      {|
-    (package
-      (name awso-srp-async)
-      (synopsis "AWS Async API for SRP")
-      (depends awso-async awso-cognito-idp-async awso-srp))
-      |}
-    in
-    let lwt_base_pkg =
-      {|
-    (package
-      (name awso-lwt)
-      (synopsis "AWS API base library Lwt")
-      (depends awso lwt cohttp-lwt-unix))
-      |}
-    in
-    [%string
-      {|
-    (lang dune 3.8)
-    ;; dune-project is auto-generated, see bin/awso_bootstrap
-    (name awso)
-
-    (generate_opam_files true)
-    (opam_file_location inside_opam_directory)
-
-    (license MIT)
-
-    (authors "Solvuu Inc.")
-
-    (maintainers "Michael Bacarella <m@bacarella.com>")
-
-    (homepage "https://github.com/solvuu/awso")
-
-    (source
-      (github mbacarella/awso))
-
-    (package
-      (name awso)
-      (synopsis "AWS API base library")
-      (depends
-        awso-codegen
-        (base64 (>= 3.1.0))
-        (cohttp (>= 0.21.0))
-        cryptokit
-        xmlm
-        zarith))
-
-    %{async_base_pkg}
-
-    %{lwt_base_pkg}
-
-    (package
-      (name awso-codegen)
-      (synopsis "AWS botocore code generator")
-      (depends
-        cohttp
-        ocamlgraph
-        ppxlib
-        (re (>= 1.7.2))
-        (sedlex (>= 2.3))
-        xmlm
-        yojson))
-
-    (package
-      (name awso-unix)
-      (synopsis "AWS API base library Unix"))
-
-    ;; Packages above this line are base packages needed by all services.
-
-    ;; The following SRP packages provide support for Cognito SRP.
-    (package
-      (name awso-srp)
-      (synopsis "AWS API for SRP")
-      (depends awso))
-
-    %{async_srp_pkg}
-
-    ;; Packages after this line each regard a specific service.
-      |}]
-  ;;
-
-  let make_base_package ~(service : string) : string =
-    [%string
-      {|
-    (package
-      (name awso-%{service})
-      (synopsis "AWS API for %{String.capitalize service}")
-      (depends awso))
-        |}]
-  ;;
-
-  let make_io_package ~service (io_kind : [ `async | `lwt ]) =
-    let c_service = String.capitalize service in
-    let io =
-      match io_kind with
-      | `async -> "async"
-      | `lwt -> "lwt"
-    in
-    let io_cap = String.capitalize io in
-    [%string
-      {|
-    (package
-    (name awso-%{service}-%{io})
-    (synopsis "AWS %{io_cap} API for %{c_service}")
-    (depends awso-%{io} awso-%{service}))
-        |}]
-  ;;
-
-  let make services =
-    services
-    |> List.map ~f:(fun service ->
-      [ make_base_package ~service
-      ; make_io_package ~service `async
-      ; make_io_package ~service `lwt
-      ])
-    |> List.concat
-    |> (fun l -> header () :: l)
-    |> String.concat ~sep:"\n"
-  ;;
-
-  let main : Command.t =
-    let open Command.Let_syntax in
-    Command.basic
-      ~summary:"generate the dune-project file"
-      [%map_open
-        let botocore_data = Param.botocore_data in
-        fun () ->
-          let all_services = get_all_services ~botocore_data in
-          let generated_services =
-            List.filter all_services ~f:(fun service ->
-              not (Set.mem unsupported_services service))
-          in
-          let contents = make generated_services in
-          save_file_and_format `dune ~path:"dune-project" ~contents]
   ;;
 end
 
@@ -392,9 +202,8 @@ end = struct
         let botocore_data = Param.botocore_data in
         fun () ->
           let all_services = get_all_services ~botocore_data in
-          save_file_and_format `ocaml ~path:"service.ml" ~contents:(make_ml all_services);
+          save_file_and_format ~path:"service.ml" ~contents:(make_ml all_services);
           save_file_and_format
-            `ocaml
             ~path:"service.mli"
             ~contents:(make_mli all_services)]
   ;;
@@ -404,9 +213,7 @@ let main : Command.t =
   Command.group
     ~summary:"scripts used to build awso"
     ~readme:(fun () -> "Scripts used internally to build the awso project.")
-    [ "build-dune-project", Build_dune_project_file.main
-    ; "build-service-module", Build_service_module.main
-    ]
+    [ "build-service-module", Build_service_module.main ]
 ;;
 
 let () =

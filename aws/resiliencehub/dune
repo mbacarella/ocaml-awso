@@ -2,7 +2,7 @@
 
 (library
  (name awso_resiliencehub)
- (public_name awso-resiliencehub)
+ (public_name awso.resiliencehub)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

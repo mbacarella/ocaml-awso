@@ -3,8 +3,8 @@
 (library
  (name awso_xray_lwt)
  (flags (:standard))
- (public_name awso-xray-lwt)
- (libraries awso-xray awso-lwt))
+ (public_name awso-lwt.xray)
+ (libraries awso.xray awso-lwt))
 
 (rule
  (targets io.ml io.mli)

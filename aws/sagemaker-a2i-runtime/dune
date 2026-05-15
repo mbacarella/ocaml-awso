@@ -2,7 +2,7 @@
 
 (library
  (name awso_sagemaker_a2i_runtime)
- (public_name awso-sagemaker-a2i-runtime)
+ (public_name awso.sagemaker-a2i-runtime)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

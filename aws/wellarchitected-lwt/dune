@@ -3,8 +3,8 @@
 (library
  (name awso_wellarchitected_lwt)
  (flags (:standard))
- (public_name awso-wellarchitected-lwt)
- (libraries awso-wellarchitected awso-lwt))
+ (public_name awso-lwt.wellarchitected)
+ (libraries awso.wellarchitected awso-lwt))
 
 (rule
  (targets io.ml io.mli)

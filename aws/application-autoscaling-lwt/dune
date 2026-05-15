@@ -3,8 +3,8 @@
 (library
  (name awso_application_autoscaling_lwt)
  (flags (:standard))
- (public_name awso-application-autoscaling-lwt)
- (libraries awso-application-autoscaling awso-lwt))
+ (public_name awso-lwt.application-autoscaling)
+ (libraries awso.application-autoscaling awso-lwt))
 
 (rule
  (targets io.ml io.mli)

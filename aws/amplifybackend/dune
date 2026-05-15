@@ -2,7 +2,7 @@
 
 (library
  (name awso_amplifybackend)
- (public_name awso-amplifybackend)
+ (public_name awso.amplifybackend)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

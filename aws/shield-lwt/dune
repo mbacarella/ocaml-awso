@@ -3,8 +3,8 @@
 (library
  (name awso_shield_lwt)
  (flags (:standard))
- (public_name awso-shield-lwt)
- (libraries awso-shield awso-lwt))
+ (public_name awso-lwt.shield)
+ (libraries awso.shield awso-lwt))
 
 (rule
  (targets io.ml io.mli)

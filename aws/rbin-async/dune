@@ -3,8 +3,8 @@
 (library
  (name awso_rbin_async)
  (flags (:standard))
- (public_name awso-rbin-async)
- (libraries awso-rbin awso-async)
+ (public_name awso-async.rbin)
+ (libraries awso.rbin awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

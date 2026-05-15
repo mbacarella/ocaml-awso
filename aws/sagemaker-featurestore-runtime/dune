@@ -2,7 +2,7 @@
 
 (library
  (name awso_sagemaker_featurestore_runtime)
- (public_name awso-sagemaker-featurestore-runtime)
+ (public_name awso.sagemaker-featurestore-runtime)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

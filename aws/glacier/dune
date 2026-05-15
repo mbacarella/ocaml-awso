@@ -2,7 +2,7 @@
 
 (library
  (name awso_glacier)
- (public_name awso-glacier)
+ (public_name awso.glacier)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

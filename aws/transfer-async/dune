@@ -3,8 +3,8 @@
 (library
  (name awso_transfer_async)
  (flags (:standard))
- (public_name awso-transfer-async)
- (libraries awso-transfer awso-async)
+ (public_name awso-async.transfer)
+ (libraries awso.transfer awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

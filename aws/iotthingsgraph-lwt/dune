@@ -3,8 +3,8 @@
 (library
  (name awso_iotthingsgraph_lwt)
  (flags (:standard))
- (public_name awso-iotthingsgraph-lwt)
- (libraries awso-iotthingsgraph awso-lwt))
+ (public_name awso-lwt.iotthingsgraph)
+ (libraries awso.iotthingsgraph awso-lwt))
 
 (rule
  (targets io.ml io.mli)

@@ -2,7 +2,7 @@
 
 (library
  (name awso_cur)
- (public_name awso-cur)
+ (public_name awso.cur)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

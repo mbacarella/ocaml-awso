@@ -3,8 +3,8 @@
 (library
  (name awso_rum_async)
  (flags (:standard))
- (public_name awso-rum-async)
- (libraries awso-rum awso-async)
+ (public_name awso-async.rum)
+ (libraries awso.rum awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

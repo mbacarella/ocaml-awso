@@ -3,8 +3,8 @@
 (library
  (name awso_ecr_lwt)
  (flags (:standard))
- (public_name awso-ecr-lwt)
- (libraries awso-ecr awso-lwt))
+ (public_name awso-lwt.ecr)
+ (libraries awso.ecr awso-lwt))
 
 (rule
  (targets io.ml io.mli)

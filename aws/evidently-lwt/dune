@@ -3,8 +3,8 @@
 (library
  (name awso_evidently_lwt)
  (flags (:standard))
- (public_name awso-evidently-lwt)
- (libraries awso-evidently awso-lwt))
+ (public_name awso-lwt.evidently)
+ (libraries awso.evidently awso-lwt))
 
 (rule
  (targets io.ml io.mli)

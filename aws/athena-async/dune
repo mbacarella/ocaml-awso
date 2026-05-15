@@ -3,8 +3,8 @@
 (library
  (name awso_athena_async)
  (flags (:standard))
- (public_name awso-athena-async)
- (libraries awso-athena awso-async)
+ (public_name awso-async.athena)
+ (libraries awso.athena awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

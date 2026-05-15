@@ -2,7 +2,7 @@
 
 (library
  (name awso_keyspaces)
- (public_name awso-keyspaces)
+ (public_name awso.keyspaces)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

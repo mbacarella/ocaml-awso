@@ -3,8 +3,8 @@
 (library
  (name awso_cloudwatch_lwt)
  (flags (:standard))
- (public_name awso-cloudwatch-lwt)
- (libraries awso-cloudwatch awso-lwt))
+ (public_name awso-lwt.cloudwatch)
+ (libraries awso.cloudwatch awso-lwt))
 
 (rule
  (targets io.ml io.mli)

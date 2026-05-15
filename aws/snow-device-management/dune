@@ -2,7 +2,7 @@
 
 (library
  (name awso_snow_device_management)
- (public_name awso-snow-device-management)
+ (public_name awso.snow-device-management)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

@@ -3,8 +3,8 @@
 (library
  (name awso_neptune_async)
  (flags (:standard))
- (public_name awso-neptune-async)
- (libraries awso-neptune awso-async)
+ (public_name awso-async.neptune)
+ (libraries awso.neptune awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

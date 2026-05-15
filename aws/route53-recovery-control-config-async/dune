@@ -3,8 +3,8 @@
 (library
  (name awso_route53_recovery_control_config_async)
  (flags (:standard))
- (public_name awso-route53-recovery-control-config-async)
- (libraries awso-route53-recovery-control-config awso-async)
+ (public_name awso-async.route53-recovery-control-config)
+ (libraries awso.route53-recovery-control-config awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

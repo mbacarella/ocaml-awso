@@ -3,8 +3,8 @@
 (library
  (name awso_storagegateway_lwt)
  (flags (:standard))
- (public_name awso-storagegateway-lwt)
- (libraries awso-storagegateway awso-lwt))
+ (public_name awso-lwt.storagegateway)
+ (libraries awso.storagegateway awso-lwt))
 
 (rule
  (targets io.ml io.mli)

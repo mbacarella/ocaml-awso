@@ -2,7 +2,7 @@
 
 (library
  (name awso_voice_id)
- (public_name awso-voice-id)
+ (public_name awso.voice-id)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

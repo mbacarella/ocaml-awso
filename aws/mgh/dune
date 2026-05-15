@@ -2,7 +2,7 @@
 
 (library
  (name awso_mgh)
- (public_name awso-mgh)
+ (public_name awso.mgh)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

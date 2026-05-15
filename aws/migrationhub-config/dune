@@ -2,7 +2,7 @@
 
 (library
  (name awso_migrationhub_config)
- (public_name awso-migrationhub-config)
+ (public_name awso.migrationhub-config)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

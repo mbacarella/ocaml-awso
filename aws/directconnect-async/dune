@@ -3,8 +3,8 @@
 (library
  (name awso_directconnect_async)
  (flags (:standard))
- (public_name awso-directconnect-async)
- (libraries awso-directconnect awso-async)
+ (public_name awso-async.directconnect)
+ (libraries awso.directconnect awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

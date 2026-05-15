@@ -3,8 +3,8 @@
 (library
  (name awso_mobile_lwt)
  (flags (:standard))
- (public_name awso-mobile-lwt)
- (libraries awso-mobile awso-lwt))
+ (public_name awso-lwt.mobile)
+ (libraries awso.mobile awso-lwt))
 
 (rule
  (targets io.ml io.mli)

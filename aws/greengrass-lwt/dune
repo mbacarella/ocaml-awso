@@ -3,8 +3,8 @@
 (library
  (name awso_greengrass_lwt)
  (flags (:standard))
- (public_name awso-greengrass-lwt)
- (libraries awso-greengrass awso-lwt))
+ (public_name awso-lwt.greengrass)
+ (libraries awso.greengrass awso-lwt))
 
 (rule
  (targets io.ml io.mli)

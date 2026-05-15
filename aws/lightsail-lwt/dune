@@ -3,8 +3,8 @@
 (library
  (name awso_lightsail_lwt)
  (flags (:standard))
- (public_name awso-lightsail-lwt)
- (libraries awso-lightsail awso-lwt))
+ (public_name awso-lwt.lightsail)
+ (libraries awso.lightsail awso-lwt))
 
 (rule
  (targets io.ml io.mli)

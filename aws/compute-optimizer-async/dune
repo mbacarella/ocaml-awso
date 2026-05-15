@@ -3,8 +3,8 @@
 (library
  (name awso_compute_optimizer_async)
  (flags (:standard))
- (public_name awso-compute-optimizer-async)
- (libraries awso-compute-optimizer awso-async)
+ (public_name awso-async.compute-optimizer)
+ (libraries awso.compute-optimizer awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

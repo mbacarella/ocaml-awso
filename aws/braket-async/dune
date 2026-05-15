@@ -3,8 +3,8 @@
 (library
  (name awso_braket_async)
  (flags (:standard))
- (public_name awso-braket-async)
- (libraries awso-braket awso-async)
+ (public_name awso-async.braket)
+ (libraries awso.braket awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

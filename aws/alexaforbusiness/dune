@@ -2,7 +2,7 @@
 
 (library
  (name awso_alexaforbusiness)
- (public_name awso-alexaforbusiness)
+ (public_name awso.alexaforbusiness)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

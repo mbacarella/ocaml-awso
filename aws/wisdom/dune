@@ -2,7 +2,7 @@
 
 (library
  (name awso_wisdom)
- (public_name awso-wisdom)
+ (public_name awso.wisdom)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

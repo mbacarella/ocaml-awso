@@ -3,8 +3,8 @@
 (library
  (name awso_comprehendmedical_async)
  (flags (:standard))
- (public_name awso-comprehendmedical-async)
- (libraries awso-comprehendmedical awso-async)
+ (public_name awso-async.comprehendmedical)
+ (libraries awso.comprehendmedical awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

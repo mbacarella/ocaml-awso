@@ -2,7 +2,7 @@
 
 (library
  (name awso_panorama)
- (public_name awso-panorama)
+ (public_name awso.panorama)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

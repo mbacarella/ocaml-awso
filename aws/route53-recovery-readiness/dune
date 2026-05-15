@@ -2,7 +2,7 @@
 
 (library
  (name awso_route53_recovery_readiness)
- (public_name awso-route53-recovery-readiness)
+ (public_name awso.route53-recovery-readiness)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

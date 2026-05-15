@@ -3,8 +3,8 @@
 (library
  (name awso_codepipeline_async)
  (flags (:standard))
- (public_name awso-codepipeline-async)
- (libraries awso-codepipeline awso-async)
+ (public_name awso-async.codepipeline)
+ (libraries awso.codepipeline awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

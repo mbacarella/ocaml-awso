@@ -3,8 +3,8 @@
 (library
  (name awso_sdb_async)
  (flags (:standard))
- (public_name awso-sdb-async)
- (libraries awso-sdb awso-async)
+ (public_name awso-async.sdb)
+ (libraries awso.sdb awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

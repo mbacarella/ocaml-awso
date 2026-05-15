@@ -3,8 +3,8 @@
 (library
  (name awso_forecastquery_async)
  (flags (:standard))
- (public_name awso-forecastquery-async)
- (libraries awso-forecastquery awso-async)
+ (public_name awso-async.forecastquery)
+ (libraries awso.forecastquery awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

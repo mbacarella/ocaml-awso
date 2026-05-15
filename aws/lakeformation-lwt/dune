@@ -3,8 +3,8 @@
 (library
  (name awso_lakeformation_lwt)
  (flags (:standard))
- (public_name awso-lakeformation-lwt)
- (libraries awso-lakeformation awso-lwt))
+ (public_name awso-lwt.lakeformation)
+ (libraries awso.lakeformation awso-lwt))
 
 (rule
  (targets io.ml io.mli)

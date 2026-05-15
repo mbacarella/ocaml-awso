@@ -3,8 +3,8 @@
 (library
  (name awso_cloudcontrol_async)
  (flags (:standard))
- (public_name awso-cloudcontrol-async)
- (libraries awso-cloudcontrol awso-async)
+ (public_name awso-async.cloudcontrol)
+ (libraries awso.cloudcontrol awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

@@ -3,8 +3,8 @@
 (library
  (name awso_codestar_notifications_lwt)
  (flags (:standard))
- (public_name awso-codestar-notifications-lwt)
- (libraries awso-codestar-notifications awso-lwt))
+ (public_name awso-lwt.codestar-notifications)
+ (libraries awso.codestar-notifications awso-lwt))
 
 (rule
  (targets io.ml io.mli)

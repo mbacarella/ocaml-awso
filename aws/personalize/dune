@@ -2,7 +2,7 @@
 
 (library
  (name awso_personalize)
- (public_name awso-personalize)
+ (public_name awso.personalize)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

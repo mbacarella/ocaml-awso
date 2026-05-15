@@ -2,7 +2,7 @@
 
 (library
  (name awso_network_firewall)
- (public_name awso-network-firewall)
+ (public_name awso.network-firewall)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

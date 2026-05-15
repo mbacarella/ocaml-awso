@@ -3,8 +3,8 @@
 (library
  (name awso_greengrassv2_async)
  (flags (:standard))
- (public_name awso-greengrassv2-async)
- (libraries awso-greengrassv2 awso-async)
+ (public_name awso-async.greengrassv2)
+ (libraries awso.greengrassv2 awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

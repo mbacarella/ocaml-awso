@@ -3,8 +3,8 @@
 (library
  (name awso_kinesisvideo_async)
  (flags (:standard))
- (public_name awso-kinesisvideo-async)
- (libraries awso-kinesisvideo awso-async)
+ (public_name awso-async.kinesisvideo)
+ (libraries awso.kinesisvideo awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

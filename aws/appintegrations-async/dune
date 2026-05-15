@@ -3,8 +3,8 @@
 (library
  (name awso_appintegrations_async)
  (flags (:standard))
- (public_name awso-appintegrations-async)
- (libraries awso-appintegrations awso-async)
+ (public_name awso-async.appintegrations)
+ (libraries awso.appintegrations awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

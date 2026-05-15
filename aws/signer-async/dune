@@ -3,8 +3,8 @@
 (library
  (name awso_signer_async)
  (flags (:standard))
- (public_name awso-signer-async)
- (libraries awso-signer awso-async)
+ (public_name awso-async.signer)
+ (libraries awso.signer awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

@@ -2,7 +2,7 @@
 
 (library
  (name awso_mediatailor)
- (public_name awso-mediatailor)
+ (public_name awso.mediatailor)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

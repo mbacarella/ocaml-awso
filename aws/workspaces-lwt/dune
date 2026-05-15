@@ -3,8 +3,8 @@
 (library
  (name awso_workspaces_lwt)
  (flags (:standard))
- (public_name awso-workspaces-lwt)
- (libraries awso-workspaces awso-lwt))
+ (public_name awso-lwt.workspaces)
+ (libraries awso.workspaces awso-lwt))
 
 (rule
  (targets io.ml io.mli)

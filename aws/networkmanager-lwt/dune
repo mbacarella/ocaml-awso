@@ -3,8 +3,8 @@
 (library
  (name awso_networkmanager_lwt)
  (flags (:standard))
- (public_name awso-networkmanager-lwt)
- (libraries awso-networkmanager awso-lwt))
+ (public_name awso-lwt.networkmanager)
+ (libraries awso.networkmanager awso-lwt))
 
 (rule
  (targets io.ml io.mli)

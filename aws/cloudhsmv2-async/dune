@@ -3,8 +3,8 @@
 (library
  (name awso_cloudhsmv2_async)
  (flags (:standard))
- (public_name awso-cloudhsmv2-async)
- (libraries awso-cloudhsmv2 awso-async)
+ (public_name awso-async.cloudhsmv2)
+ (libraries awso.cloudhsmv2 awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

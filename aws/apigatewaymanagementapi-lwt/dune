@@ -3,8 +3,8 @@
 (library
  (name awso_apigatewaymanagementapi_lwt)
  (flags (:standard))
- (public_name awso-apigatewaymanagementapi-lwt)
- (libraries awso-apigatewaymanagementapi awso-lwt))
+ (public_name awso-lwt.apigatewaymanagementapi)
+ (libraries awso.apigatewaymanagementapi awso-lwt))
 
 (rule
  (targets io.ml io.mli)

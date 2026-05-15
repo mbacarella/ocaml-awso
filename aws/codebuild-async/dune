@@ -3,8 +3,8 @@
 (library
  (name awso_codebuild_async)
  (flags (:standard))
- (public_name awso-codebuild-async)
- (libraries awso-codebuild awso-async)
+ (public_name awso-async.codebuild)
+ (libraries awso.codebuild awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

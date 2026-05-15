@@ -3,8 +3,8 @@
 (library
  (name awso_sagemaker_lwt)
  (flags (:standard))
- (public_name awso-sagemaker-lwt)
- (libraries awso-sagemaker awso-lwt))
+ (public_name awso-lwt.sagemaker)
+ (libraries awso.sagemaker awso-lwt))
 
 (rule
  (targets io.ml io.mli)

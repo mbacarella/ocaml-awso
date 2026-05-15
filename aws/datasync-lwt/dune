@@ -3,8 +3,8 @@
 (library
  (name awso_datasync_lwt)
  (flags (:standard))
- (public_name awso-datasync-lwt)
- (libraries awso-datasync awso-lwt))
+ (public_name awso-lwt.datasync)
+ (libraries awso.datasync awso-lwt))
 
 (rule
  (targets io.ml io.mli)

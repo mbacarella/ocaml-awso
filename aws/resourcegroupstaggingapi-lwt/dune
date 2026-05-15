@@ -3,8 +3,8 @@
 (library
  (name awso_resourcegroupstaggingapi_lwt)
  (flags (:standard))
- (public_name awso-resourcegroupstaggingapi-lwt)
- (libraries awso-resourcegroupstaggingapi awso-lwt))
+ (public_name awso-lwt.resourcegroupstaggingapi)
+ (libraries awso.resourcegroupstaggingapi awso-lwt))
 
 (rule
  (targets io.ml io.mli)

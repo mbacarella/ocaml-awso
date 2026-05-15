@@ -3,8 +3,8 @@
 (library
  (name awso_iotwireless_lwt)
  (flags (:standard))
- (public_name awso-iotwireless-lwt)
- (libraries awso-iotwireless awso-lwt))
+ (public_name awso-lwt.iotwireless)
+ (libraries awso.iotwireless awso-lwt))
 
 (rule
  (targets io.ml io.mli)

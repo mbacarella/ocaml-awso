@@ -2,7 +2,7 @@
 
 (library
  (name awso_license_manager)
- (public_name awso-license-manager)
+ (public_name awso.license-manager)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

@@ -3,8 +3,8 @@
 (library
  (name awso_mgh_async)
  (flags (:standard))
- (public_name awso-mgh-async)
- (libraries awso-mgh awso-async)
+ (public_name awso-async.mgh)
+ (libraries awso.mgh awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

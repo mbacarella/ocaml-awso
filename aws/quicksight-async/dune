@@ -3,8 +3,8 @@
 (library
  (name awso_quicksight_async)
  (flags (:standard))
- (public_name awso-quicksight-async)
- (libraries awso-quicksight awso-async)
+ (public_name awso-async.quicksight)
+ (libraries awso.quicksight awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

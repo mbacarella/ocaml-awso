@@ -3,8 +3,8 @@
 (library
  (name awso_lakeformation_async)
  (flags (:standard))
- (public_name awso-lakeformation-async)
- (libraries awso-lakeformation awso-async)
+ (public_name awso-async.lakeformation)
+ (libraries awso.lakeformation awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

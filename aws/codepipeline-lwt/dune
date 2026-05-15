@@ -3,8 +3,8 @@
 (library
  (name awso_codepipeline_lwt)
  (flags (:standard))
- (public_name awso-codepipeline-lwt)
- (libraries awso-codepipeline awso-lwt))
+ (public_name awso-lwt.codepipeline)
+ (libraries awso.codepipeline awso-lwt))
 
 (rule
  (targets io.ml io.mli)

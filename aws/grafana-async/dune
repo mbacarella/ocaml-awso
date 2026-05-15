@@ -3,8 +3,8 @@
 (library
  (name awso_grafana_async)
  (flags (:standard))
- (public_name awso-grafana-async)
- (libraries awso-grafana awso-async)
+ (public_name awso-async.grafana)
+ (libraries awso.grafana awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

@@ -3,8 +3,8 @@
 (library
  (name awso_devicefarm_lwt)
  (flags (:standard))
- (public_name awso-devicefarm-lwt)
- (libraries awso-devicefarm awso-lwt))
+ (public_name awso-lwt.devicefarm)
+ (libraries awso.devicefarm awso-lwt))
 
 (rule
  (targets io.ml io.mli)

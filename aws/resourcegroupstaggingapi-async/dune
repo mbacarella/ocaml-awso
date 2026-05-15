@@ -3,8 +3,8 @@
 (library
  (name awso_resourcegroupstaggingapi_async)
  (flags (:standard))
- (public_name awso-resourcegroupstaggingapi-async)
- (libraries awso-resourcegroupstaggingapi awso-async)
+ (public_name awso-async.resourcegroupstaggingapi)
+ (libraries awso.resourcegroupstaggingapi awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

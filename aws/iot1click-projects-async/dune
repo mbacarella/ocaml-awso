@@ -3,8 +3,8 @@
 (library
  (name awso_iot1click_projects_async)
  (flags (:standard))
- (public_name awso-iot1click-projects-async)
- (libraries awso-iot1click-projects awso-async)
+ (public_name awso-async.iot1click-projects)
+ (libraries awso.iot1click-projects awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

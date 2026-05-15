@@ -3,8 +3,8 @@
 (library
  (name awso_healthlake_async)
  (flags (:standard))
- (public_name awso-healthlake-async)
- (libraries awso-healthlake awso-async)
+ (public_name awso-async.healthlake)
+ (libraries awso.healthlake awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

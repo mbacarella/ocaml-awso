@@ -3,8 +3,8 @@
 (library
  (name awso_comprehendmedical_lwt)
  (flags (:standard))
- (public_name awso-comprehendmedical-lwt)
- (libraries awso-comprehendmedical awso-lwt))
+ (public_name awso-lwt.comprehendmedical)
+ (libraries awso.comprehendmedical awso-lwt))
 
 (rule
  (targets io.ml io.mli)

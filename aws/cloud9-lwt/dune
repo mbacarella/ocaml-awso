@@ -3,8 +3,8 @@
 (library
  (name awso_cloud9_lwt)
  (flags (:standard))
- (public_name awso-cloud9-lwt)
- (libraries awso-cloud9 awso-lwt))
+ (public_name awso-lwt.cloud9)
+ (libraries awso.cloud9 awso-lwt))
 
 (rule
  (targets io.ml io.mli)

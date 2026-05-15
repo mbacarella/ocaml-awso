@@ -3,8 +3,8 @@
 (library
  (name awso_frauddetector_lwt)
  (flags (:standard))
- (public_name awso-frauddetector-lwt)
- (libraries awso-frauddetector awso-lwt))
+ (public_name awso-lwt.frauddetector)
+ (libraries awso.frauddetector awso-lwt))
 
 (rule
  (targets io.ml io.mli)

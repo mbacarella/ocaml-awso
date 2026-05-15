@@ -3,8 +3,8 @@
 (library
  (name awso_chime_sdk_identity_lwt)
  (flags (:standard))
- (public_name awso-chime-sdk-identity-lwt)
- (libraries awso-chime-sdk-identity awso-lwt))
+ (public_name awso-lwt.chime-sdk-identity)
+ (libraries awso.chime-sdk-identity awso-lwt))
 
 (rule
  (targets io.ml io.mli)

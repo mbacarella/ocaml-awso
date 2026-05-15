@@ -2,7 +2,7 @@
 
 (library
  (name awso_mobile)
- (public_name awso-mobile)
+ (public_name awso.mobile)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

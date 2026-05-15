@@ -3,8 +3,8 @@
 (library
  (name awso_fms_lwt)
  (flags (:standard))
- (public_name awso-fms-lwt)
- (libraries awso-fms awso-lwt))
+ (public_name awso-lwt.fms)
+ (libraries awso.fms awso-lwt))
 
 (rule
  (targets io.ml io.mli)

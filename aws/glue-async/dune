@@ -3,8 +3,8 @@
 (library
  (name awso_glue_async)
  (flags (:standard))
- (public_name awso-glue-async)
- (libraries awso-glue awso-async)
+ (public_name awso-async.glue)
+ (libraries awso.glue awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

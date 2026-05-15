@@ -3,8 +3,8 @@
 (library
  (name awso_textract_async)
  (flags (:standard))
- (public_name awso-textract-async)
- (libraries awso-textract awso-async)
+ (public_name awso-async.textract)
+ (libraries awso.textract awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

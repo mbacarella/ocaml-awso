@@ -3,8 +3,8 @@
 (library
  (name awso_synthetics_lwt)
  (flags (:standard))
- (public_name awso-synthetics-lwt)
- (libraries awso-synthetics awso-lwt))
+ (public_name awso-lwt.synthetics)
+ (libraries awso.synthetics awso-lwt))
 
 (rule
  (targets io.ml io.mli)

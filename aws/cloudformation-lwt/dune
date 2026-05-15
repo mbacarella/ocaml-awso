@@ -3,8 +3,8 @@
 (library
  (name awso_cloudformation_lwt)
  (flags (:standard))
- (public_name awso-cloudformation-lwt)
- (libraries awso-cloudformation awso-lwt))
+ (public_name awso-lwt.cloudformation)
+ (libraries awso.cloudformation awso-lwt))
 
 (rule
  (targets io.ml io.mli)

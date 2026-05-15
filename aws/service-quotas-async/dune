@@ -3,8 +3,8 @@
 (library
  (name awso_service_quotas_async)
  (flags (:standard))
- (public_name awso-service-quotas-async)
- (libraries awso-service-quotas awso-async)
+ (public_name awso-async.service-quotas)
+ (libraries awso.service-quotas awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

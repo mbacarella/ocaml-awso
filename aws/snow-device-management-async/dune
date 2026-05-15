@@ -3,8 +3,8 @@
 (library
  (name awso_snow_device_management_async)
  (flags (:standard))
- (public_name awso-snow-device-management-async)
- (libraries awso-snow-device-management awso-async)
+ (public_name awso-async.snow-device-management)
+ (libraries awso.snow-device-management awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

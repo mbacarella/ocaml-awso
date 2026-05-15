@@ -3,8 +3,8 @@
 (library
  (name awso_transcribe_async)
  (flags (:standard))
- (public_name awso-transcribe-async)
- (libraries awso-transcribe awso-async)
+ (public_name awso-async.transcribe)
+ (libraries awso.transcribe awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

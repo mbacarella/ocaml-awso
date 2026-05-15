@@ -3,8 +3,8 @@
 (library
  (name awso_swf_async)
  (flags (:standard))
- (public_name awso-swf-async)
- (libraries awso-swf awso-async)
+ (public_name awso-async.swf)
+ (libraries awso.swf awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

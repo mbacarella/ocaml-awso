@@ -2,7 +2,7 @@
 
 (library
  (name awso_waf_regional)
- (public_name awso-waf-regional)
+ (public_name awso.waf-regional)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

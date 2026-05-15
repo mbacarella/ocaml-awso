@@ -3,8 +3,8 @@
 (library
  (name awso_redshift_lwt)
  (flags (:standard))
- (public_name awso-redshift-lwt)
- (libraries awso-redshift awso-lwt))
+ (public_name awso-lwt.redshift)
+ (libraries awso.redshift awso-lwt))
 
 (rule
  (targets io.ml io.mli)

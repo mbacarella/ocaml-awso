@@ -2,7 +2,7 @@
 
 (library
  (name awso_lightsail)
- (public_name awso-lightsail)
+ (public_name awso.lightsail)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

@@ -3,8 +3,8 @@
 (library
  (name awso_quicksight_lwt)
  (flags (:standard))
- (public_name awso-quicksight-lwt)
- (libraries awso-quicksight awso-lwt))
+ (public_name awso-lwt.quicksight)
+ (libraries awso.quicksight awso-lwt))
 
 (rule
  (targets io.ml io.mli)

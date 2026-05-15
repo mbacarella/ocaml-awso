@@ -3,8 +3,8 @@
 (library
  (name awso_lightsail_async)
  (flags (:standard))
- (public_name awso-lightsail-async)
- (libraries awso-lightsail awso-async)
+ (public_name awso-async.lightsail)
+ (libraries awso.lightsail awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

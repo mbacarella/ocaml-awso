@@ -2,7 +2,7 @@
 
 (library
  (name awso_rekognition)
- (public_name awso-rekognition)
+ (public_name awso.rekognition)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

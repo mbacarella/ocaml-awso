@@ -2,7 +2,7 @@
 
 (library
  (name awso_wellarchitected)
- (public_name awso-wellarchitected)
+ (public_name awso.wellarchitected)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

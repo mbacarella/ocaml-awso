@@ -3,8 +3,8 @@
 (library
  (name awso_storagegateway_async)
  (flags (:standard))
- (public_name awso-storagegateway-async)
- (libraries awso-storagegateway awso-async)
+ (public_name awso-async.storagegateway)
+ (libraries awso.storagegateway awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

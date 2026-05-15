@@ -2,7 +2,7 @@
 
 (library
  (name awso_servicecatalog_appregistry)
- (public_name awso-servicecatalog-appregistry)
+ (public_name awso.servicecatalog-appregistry)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

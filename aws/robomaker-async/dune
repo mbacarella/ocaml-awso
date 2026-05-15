@@ -3,8 +3,8 @@
 (library
  (name awso_robomaker_async)
  (flags (:standard))
- (public_name awso-robomaker-async)
- (libraries awso-robomaker awso-async)
+ (public_name awso-async.robomaker)
+ (libraries awso.robomaker awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

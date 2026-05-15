@@ -3,8 +3,8 @@
 (library
  (name awso_marketplacecommerceanalytics_lwt)
  (flags (:standard))
- (public_name awso-marketplacecommerceanalytics-lwt)
- (libraries awso-marketplacecommerceanalytics awso-lwt))
+ (public_name awso-lwt.marketplacecommerceanalytics)
+ (libraries awso.marketplacecommerceanalytics awso-lwt))
 
 (rule
  (targets io.ml io.mli)

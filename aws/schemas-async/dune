@@ -3,8 +3,8 @@
 (library
  (name awso_schemas_async)
  (flags (:standard))
- (public_name awso-schemas-async)
- (libraries awso-schemas awso-async)
+ (public_name awso-async.schemas)
+ (libraries awso.schemas awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

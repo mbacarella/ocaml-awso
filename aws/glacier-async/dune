@@ -3,8 +3,8 @@
 (library
  (name awso_glacier_async)
  (flags (:standard))
- (public_name awso-glacier-async)
- (libraries awso-glacier awso-async)
+ (public_name awso-async.glacier)
+ (libraries awso.glacier awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

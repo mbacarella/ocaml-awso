@@ -2,7 +2,7 @@
 
 (library
  (name awso_codeartifact)
- (public_name awso-codeartifact)
+ (public_name awso.codeartifact)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

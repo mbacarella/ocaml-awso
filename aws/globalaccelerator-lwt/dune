@@ -3,8 +3,8 @@
 (library
  (name awso_globalaccelerator_lwt)
  (flags (:standard))
- (public_name awso-globalaccelerator-lwt)
- (libraries awso-globalaccelerator awso-lwt))
+ (public_name awso-lwt.globalaccelerator)
+ (libraries awso.globalaccelerator awso-lwt))
 
 (rule
  (targets io.ml io.mli)

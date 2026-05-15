@@ -3,8 +3,8 @@
 (library
  (name awso_accessanalyzer_async)
  (flags (:standard))
- (public_name awso-accessanalyzer-async)
- (libraries awso-accessanalyzer awso-async)
+ (public_name awso-async.accessanalyzer)
+ (libraries awso.accessanalyzer awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

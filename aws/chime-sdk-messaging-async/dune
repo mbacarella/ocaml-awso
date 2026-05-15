@@ -3,8 +3,8 @@
 (library
  (name awso_chime_sdk_messaging_async)
  (flags (:standard))
- (public_name awso-chime-sdk-messaging-async)
- (libraries awso-chime-sdk-messaging awso-async)
+ (public_name awso-async.chime-sdk-messaging)
+ (libraries awso.chime-sdk-messaging awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

@@ -1,7 +1,7 @@
 SHELL=/bin/bash
 
 .PHONY: default
-default: dune-project start-ocaml
+default: start-ocaml
 
 .PHONY: install-deps
 install-deps:
@@ -17,9 +17,6 @@ start-ocaml:
 # single package. For example, try `make aws-s3`.
 aws-%:
 	dune build @aws/$*/all -w
-
-dune-project: FORCE
-	dune exec bin/awso_bootstrap.exe -- build-dune-project --botocore-data vendor/botocore/botocore/data
 
 botodata-%:
 	wget https://github.com/boto/botocore/archive/$*.tar.gz

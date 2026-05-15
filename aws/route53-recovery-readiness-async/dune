@@ -3,8 +3,8 @@
 (library
  (name awso_route53_recovery_readiness_async)
  (flags (:standard))
- (public_name awso-route53-recovery-readiness-async)
- (libraries awso-route53-recovery-readiness awso-async)
+ (public_name awso-async.route53-recovery-readiness)
+ (libraries awso.route53-recovery-readiness awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

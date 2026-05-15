@@ -3,8 +3,8 @@
 (library
  (name awso_meteringmarketplace_async)
  (flags (:standard))
- (public_name awso-meteringmarketplace-async)
- (libraries awso-meteringmarketplace awso-async)
+ (public_name awso-async.meteringmarketplace)
+ (libraries awso.meteringmarketplace awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

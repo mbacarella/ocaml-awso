@@ -3,8 +3,8 @@
 (library
  (name awso_neptune_lwt)
  (flags (:standard))
- (public_name awso-neptune-lwt)
- (libraries awso-neptune awso-lwt))
+ (public_name awso-lwt.neptune)
+ (libraries awso.neptune awso-lwt))
 
 (rule
  (targets io.ml io.mli)

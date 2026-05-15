@@ -3,8 +3,8 @@
 (library
  (name awso_account_lwt)
  (flags (:standard))
- (public_name awso-account-lwt)
- (libraries awso-account awso-lwt))
+ (public_name awso-lwt.account)
+ (libraries awso.account awso-lwt))
 
 (rule
  (targets io.ml io.mli)

@@ -3,8 +3,8 @@
 (library
  (name awso_identitystore_lwt)
  (flags (:standard))
- (public_name awso-identitystore-lwt)
- (libraries awso-identitystore awso-lwt))
+ (public_name awso-lwt.identitystore)
+ (libraries awso.identitystore awso-lwt))
 
 (rule
  (targets io.ml io.mli)

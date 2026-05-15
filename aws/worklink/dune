@@ -2,7 +2,7 @@
 
 (library
  (name awso_worklink)
- (public_name awso-worklink)
+ (public_name awso.worklink)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

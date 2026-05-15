@@ -3,8 +3,8 @@
 (library
  (name awso_snow_device_management_lwt)
  (flags (:standard))
- (public_name awso-snow-device-management-lwt)
- (libraries awso-snow-device-management awso-lwt))
+ (public_name awso-lwt.snow-device-management)
+ (libraries awso.snow-device-management awso-lwt))
 
 (rule
  (targets io.ml io.mli)

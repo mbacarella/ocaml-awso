@@ -3,8 +3,8 @@
 (library
  (name awso_iotthingsgraph_async)
  (flags (:standard))
- (public_name awso-iotthingsgraph-async)
- (libraries awso-iotthingsgraph awso-async)
+ (public_name awso-async.iotthingsgraph)
+ (libraries awso.iotthingsgraph awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

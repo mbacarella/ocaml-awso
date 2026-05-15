@@ -3,8 +3,8 @@
 (library
  (name awso_mediapackage_vod_lwt)
  (flags (:standard))
- (public_name awso-mediapackage-vod-lwt)
- (libraries awso-mediapackage-vod awso-lwt))
+ (public_name awso-lwt.mediapackage-vod)
+ (libraries awso.mediapackage-vod awso-lwt))
 
 (rule
  (targets io.ml io.mli)

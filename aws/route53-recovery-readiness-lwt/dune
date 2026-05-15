@@ -3,8 +3,8 @@
 (library
  (name awso_route53_recovery_readiness_lwt)
  (flags (:standard))
- (public_name awso-route53-recovery-readiness-lwt)
- (libraries awso-route53-recovery-readiness awso-lwt))
+ (public_name awso-lwt.route53-recovery-readiness)
+ (libraries awso.route53-recovery-readiness awso-lwt))
 
 (rule
  (targets io.ml io.mli)

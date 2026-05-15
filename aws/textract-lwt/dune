@@ -3,8 +3,8 @@
 (library
  (name awso_textract_lwt)
  (flags (:standard))
- (public_name awso-textract-lwt)
- (libraries awso-textract awso-lwt))
+ (public_name awso-lwt.textract)
+ (libraries awso.textract awso-lwt))
 
 (rule
  (targets io.ml io.mli)

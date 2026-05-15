@@ -3,8 +3,8 @@
 (library
  (name awso_finspace_async)
  (flags (:standard))
- (public_name awso-finspace-async)
- (libraries awso-finspace awso-async)
+ (public_name awso-async.finspace)
+ (libraries awso.finspace awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

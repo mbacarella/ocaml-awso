@@ -2,7 +2,7 @@
 
 (library
  (name awso_lambda)
- (public_name awso-lambda)
+ (public_name awso.lambda)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

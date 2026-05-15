@@ -2,7 +2,7 @@
 
 (library
  (name awso_ce)
- (public_name awso-ce)
+ (public_name awso.ce)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

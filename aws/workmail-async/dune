@@ -3,8 +3,8 @@
 (library
  (name awso_workmail_async)
  (flags (:standard))
- (public_name awso-workmail-async)
- (libraries awso-workmail awso-async)
+ (public_name awso-async.workmail)
+ (libraries awso.workmail awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

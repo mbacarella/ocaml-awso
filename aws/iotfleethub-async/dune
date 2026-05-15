@@ -3,8 +3,8 @@
 (library
  (name awso_iotfleethub_async)
  (flags (:standard))
- (public_name awso-iotfleethub-async)
- (libraries awso-iotfleethub awso-async)
+ (public_name awso-async.iotfleethub)
+ (libraries awso.iotfleethub awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

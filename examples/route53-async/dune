@@ -1,5 +1,5 @@
 (executable
  (name awso_route53)
- (libraries awso-route53-async core_unix.command_unix)
+ (libraries awso-async.route53 core_unix.command_unix)
  (flags
   (:standard)))

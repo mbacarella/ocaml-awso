@@ -3,8 +3,8 @@
 (library
  (name awso_cloudwatch_async)
  (flags (:standard))
- (public_name awso-cloudwatch-async)
- (libraries awso-cloudwatch awso-async)
+ (public_name awso-async.cloudwatch)
+ (libraries awso.cloudwatch awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

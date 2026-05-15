@@ -2,7 +2,7 @@
 
 (library
  (name awso_comprehend)
- (public_name awso-comprehend)
+ (public_name awso.comprehend)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

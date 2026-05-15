@@ -3,8 +3,8 @@
 (library
  (name awso_amplifyuibuilder_lwt)
  (flags (:standard))
- (public_name awso-amplifyuibuilder-lwt)
- (libraries awso-amplifyuibuilder awso-lwt))
+ (public_name awso-lwt.amplifyuibuilder)
+ (libraries awso.amplifyuibuilder awso-lwt))
 
 (rule
  (targets io.ml io.mli)

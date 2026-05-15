@@ -3,8 +3,8 @@
 (library
  (name awso_alexaforbusiness_lwt)
  (flags (:standard))
- (public_name awso-alexaforbusiness-lwt)
- (libraries awso-alexaforbusiness awso-lwt))
+ (public_name awso-lwt.alexaforbusiness)
+ (libraries awso.alexaforbusiness awso-lwt))
 
 (rule
  (targets io.ml io.mli)

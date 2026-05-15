@@ -3,8 +3,8 @@
 (library
  (name awso_importexport_async)
  (flags (:standard))
- (public_name awso-importexport-async)
- (libraries awso-importexport awso-async)
+ (public_name awso-async.importexport)
+ (libraries awso.importexport awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

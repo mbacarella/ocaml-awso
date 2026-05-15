@@ -3,8 +3,8 @@
 (library
  (name awso_networkmanager_async)
  (flags (:standard))
- (public_name awso-networkmanager-async)
- (libraries awso-networkmanager awso-async)
+ (public_name awso-async.networkmanager)
+ (libraries awso.networkmanager awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

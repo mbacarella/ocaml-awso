@@ -2,7 +2,7 @@
 
 (library
  (name awso_machinelearning)
- (public_name awso-machinelearning)
+ (public_name awso.machinelearning)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

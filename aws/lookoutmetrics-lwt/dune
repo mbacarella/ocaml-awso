@@ -3,8 +3,8 @@
 (library
  (name awso_lookoutmetrics_lwt)
  (flags (:standard))
- (public_name awso-lookoutmetrics-lwt)
- (libraries awso-lookoutmetrics awso-lwt))
+ (public_name awso-lwt.lookoutmetrics)
+ (libraries awso.lookoutmetrics awso-lwt))
 
 (rule
  (targets io.ml io.mli)

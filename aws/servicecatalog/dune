@@ -2,7 +2,7 @@
 
 (library
  (name awso_servicecatalog)
- (public_name awso-servicecatalog)
+ (public_name awso.servicecatalog)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

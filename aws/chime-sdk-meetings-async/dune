@@ -3,8 +3,8 @@
 (library
  (name awso_chime_sdk_meetings_async)
  (flags (:standard))
- (public_name awso-chime-sdk-meetings-async)
- (libraries awso-chime-sdk-meetings awso-async)
+ (public_name awso-async.chime-sdk-meetings)
+ (libraries awso.chime-sdk-meetings awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

@@ -3,8 +3,8 @@
 (library
  (name awso_opensearch_lwt)
  (flags (:standard))
- (public_name awso-opensearch-lwt)
- (libraries awso-opensearch awso-lwt))
+ (public_name awso-lwt.opensearch)
+ (libraries awso.opensearch awso-lwt))
 
 (rule
  (targets io.ml io.mli)

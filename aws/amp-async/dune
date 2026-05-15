@@ -3,8 +3,8 @@
 (library
  (name awso_amp_async)
  (flags (:standard))
- (public_name awso-amp-async)
- (libraries awso-amp awso-async)
+ (public_name awso-async.amp)
+ (libraries awso.amp awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

@@ -3,8 +3,8 @@
 (library
  (name awso_lookoutequipment_async)
  (flags (:standard))
- (public_name awso-lookoutequipment-async)
- (libraries awso-lookoutequipment awso-async)
+ (public_name awso-async.lookoutequipment)
+ (libraries awso.lookoutequipment awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

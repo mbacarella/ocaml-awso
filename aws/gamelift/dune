@@ -2,7 +2,7 @@
 
 (library
  (name awso_gamelift)
- (public_name awso-gamelift)
+ (public_name awso.gamelift)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

@@ -3,8 +3,8 @@
 (library
  (name awso_docdb_async)
  (flags (:standard))
- (public_name awso-docdb-async)
- (libraries awso-docdb awso-async)
+ (public_name awso-async.docdb)
+ (libraries awso.docdb awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

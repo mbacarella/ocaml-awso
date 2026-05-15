@@ -2,7 +2,7 @@
 
 (library
  (name awso_transfer)
- (public_name awso-transfer)
+ (public_name awso.transfer)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

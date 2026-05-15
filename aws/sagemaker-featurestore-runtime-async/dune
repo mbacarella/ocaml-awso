@@ -3,8 +3,8 @@
 (library
  (name awso_sagemaker_featurestore_runtime_async)
  (flags (:standard))
- (public_name awso-sagemaker-featurestore-runtime-async)
- (libraries awso-sagemaker-featurestore-runtime awso-async)
+ (public_name awso-async.sagemaker-featurestore-runtime)
+ (libraries awso.sagemaker-featurestore-runtime awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

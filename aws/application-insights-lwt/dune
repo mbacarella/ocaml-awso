@@ -3,8 +3,8 @@
 (library
  (name awso_application_insights_lwt)
  (flags (:standard))
- (public_name awso-application-insights-lwt)
- (libraries awso-application-insights awso-lwt))
+ (public_name awso-lwt.application-insights)
+ (libraries awso.application-insights awso-lwt))
 
 (rule
  (targets io.ml io.mli)

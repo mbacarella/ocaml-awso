@@ -2,7 +2,7 @@
 
 (library
  (name awso_savingsplans)
- (public_name awso-savingsplans)
+ (public_name awso.savingsplans)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

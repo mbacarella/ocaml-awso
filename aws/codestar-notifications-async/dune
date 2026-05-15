@@ -3,8 +3,8 @@
 (library
  (name awso_codestar_notifications_async)
  (flags (:standard))
- (public_name awso-codestar-notifications-async)
- (libraries awso-codestar-notifications awso-async)
+ (public_name awso-async.codestar-notifications)
+ (libraries awso.codestar-notifications awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

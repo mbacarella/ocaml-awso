@@ -3,8 +3,8 @@
 (library
  (name awso_personalize_events_async)
  (flags (:standard))
- (public_name awso-personalize-events-async)
- (libraries awso-personalize-events awso-async)
+ (public_name awso-async.personalize-events)
+ (libraries awso.personalize-events awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

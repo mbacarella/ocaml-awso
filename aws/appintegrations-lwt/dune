@@ -3,8 +3,8 @@
 (library
  (name awso_appintegrations_lwt)
  (flags (:standard))
- (public_name awso-appintegrations-lwt)
- (libraries awso-appintegrations awso-lwt))
+ (public_name awso-lwt.appintegrations)
+ (libraries awso.appintegrations awso-lwt))
 
 (rule
  (targets io.ml io.mli)

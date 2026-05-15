@@ -2,7 +2,7 @@
 
 (library
  (name awso_waf)
- (public_name awso-waf)
+ (public_name awso.waf)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))

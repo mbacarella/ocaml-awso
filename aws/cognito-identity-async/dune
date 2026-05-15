@@ -3,8 +3,8 @@
 (library
  (name awso_cognito_identity_async)
  (flags (:standard))
- (public_name awso-cognito-identity-async)
- (libraries awso-cognito-identity awso-async)
+ (public_name awso-async.cognito-identity)
+ (libraries awso.cognito-identity awso-async)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

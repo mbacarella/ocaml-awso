@@ -2,7 +2,7 @@
 
 (library
  (name awso_iotsecuretunneling)
- (public_name awso-iotsecuretunneling)
+ (public_name awso.iotsecuretunneling)
  (libraries awso)
  (flags :standard)
  (ocamlopt_flags (-linscan))
