@@ -224,7 +224,7 @@ module Put_multipart = struct
       >>| fun v -> S3_part.completed_part part v
     in
     let parts = S3_part.build_parts infile in
-    let nparts = Core.List.length parts in
+    let nparts = List.length parts in
     Deferred.List.mapi parts ~how:`Sequential ~f:(upload_part ~nparts)
     >>= fun parts ->
     dispatch_exn

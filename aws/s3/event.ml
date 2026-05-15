@@ -1,4 +1,3 @@
-open! Core
 open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 open Awso
 open! Import
@@ -11,15 +10,13 @@ type s3_event_notification_event_name =
   ]
 [@@deriving yojson_of]
 
-type inet_addr = Core_unix.Inet_addr.t
+type inet_addr = string
 
-let yojson_of_inet_addr (a : inet_addr) =
-  `String (Core_unix.Inet_addr.to_string a)
+let yojson_of_inet_addr (a : inet_addr) = `String a
 
-type time_float_unix = Time_float_unix.t
+type time_string = string
 
-let yojson_of_time_float_unix (t : time_float_unix) =
-  `String (Time_float_unix.to_string_utc t)
+let yojson_of_time_string (t : time_string) = `String t
 
 type request_parameters_entity = { source_ip_address : inet_addr }
 [@@deriving yojson_of]
@@ -60,7 +57,7 @@ type s3_event_notification_record =
   { aws_region : Region.t
   ; event_name : s3_event_notification_event_name
   ; event_source : string
-  ; event_time : time_float_unix option
+  ; event_time : time_string option
   ; event_version : string
   ; request_parameters : request_parameters_entity
   ; response_elements : response_elements_entity
@@ -129,7 +126,7 @@ module Exn = struct
 
     let field x fld =
       try find x fld with
-      | Not_found_s _ -> failwithf "No field named %s" fld ()
+      | Not_found -> failwithf "No field named %s" fld ()
     ;;
 
     let opt_field x fld = Option.try_with (fun () -> find x fld)
@@ -180,7 +177,6 @@ module Exn = struct
     check_fields ~shape:`Request_parameters_entity request_parameters_entity_fields x
     |> fun () ->
     J.string_field x "sourceIPAddress"
-    |> Core_unix.Inet_addr.of_string
     |> fun source_ip_address : request_parameters_entity -> { source_ip_address }
   ;;
 
@@ -258,7 +254,6 @@ module Exn = struct
     J.string_field x "eventSource"
     |> fun event_source ->
     J.opt_string_field x "eventTime"
-    |> Option.map ~f:Time_float_unix.of_string
     |> fun event_time ->
     J.string_field x "eventVersion"
     |> fun event_version ->

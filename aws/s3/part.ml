@@ -1,4 +1,4 @@
-open Core
+open! Awso.Import
 open Values
 
 type t =
@@ -30,10 +30,11 @@ let build_parts_from_size ~part_size size =
         ; size = last_part_size
         }
   in
-  List.range' ~compare:Int64.compare ~stride:Int64.succ 0L num_parts
-  |> List.rev_map ~f:(fun part_num ->
-       let size = part_size in
-       { start_offset = part_start_offset part_num; size; number = to_int_exn part_num })
+  let rec range_acc acc i =
+    if Int64.( >= ) i num_parts then acc
+    else range_acc ({ start_offset = part_start_offset i; size = part_size; number = to_int_exn i } :: acc) (Int64.succ i)
+  in
+  range_acc [] 0L
   |> cons_maybe last_part_opt
   |> List.rev
 ;;
@@ -67,7 +68,7 @@ let%expect_test "build_parts_from_size" =
 ;;
 
 let build_parts path =
-  let stat = Core_unix.stat path in
+  let stat = Unix.LargeFile.stat path in
   build_parts_from_size ~part_size:0x500000L stat.st_size
 ;;
 
@@ -91,7 +92,7 @@ let upload_request ~creation ~path part =
   let { bucket; key; uploadId } = params_of_creation creation in
   let partNumber = number part in
   let body_s =
-    In_channel.with_file path ~f:(fun ic ->
+    In_channel.with_open_bin path (fun ic ->
       In_channel.seek ic part.start_offset;
       let len = Int64.to_int_exn part.size in
       Stdlib.really_input_string ic len)
@@ -102,7 +103,7 @@ let upload_request ~creation ~path part =
 
 let completed_part part { UploadPartOutput.eTag; _ } =
   let partNumber = number part in
-  let eTag = Core.Option.value_exn ~message:"no ETag in output" eTag in
+  let eTag = Option.value_exn ~message:"no ETag in output" eTag in
   CompletedPart.make ~eTag ~partNumber ()
 ;;
 

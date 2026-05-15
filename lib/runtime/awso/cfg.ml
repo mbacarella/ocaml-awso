@@ -1,4 +1,3 @@
-open! Core
 open! Import
 open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 
@@ -34,7 +33,7 @@ module S3_custom_command_settings = struct
     ; use_dualstack_endpoint : string option
     ; addressing_style : string option
     }
-  [@@deriving fields, yojson]
+  [@@deriving yojson]
 
   let empty =
     { max_concurrent_requests = None
@@ -167,8 +166,8 @@ module Ini_file_parser (Stanza : Stanza_spec) (File_env : File_env_spec) = struc
   let path () =
     List.reduce_exn
       ~f:Option.first_some
-      [ Sys.getenv File_env.env_var
-      ; (match Sys.getenv "HOME" with
+      [ Sys.getenv_opt File_env.env_var
+      ; (match Sys.getenv_opt "HOME" with
          | None -> None
          | Some home -> Some (home ^/ ".aws" ^/ File_env.aws_home_dir_file))
       ]
@@ -212,7 +211,7 @@ module Config_file_stanza = struct
     ; tcp_keepalive : string option
     ; s3_custom_command_settings : S3_custom_command_settings.t option
     }
-  [@@deriving fields, yojson]
+  [@@deriving yojson]
 
   let empty =
     { aws_access_key_id = None
@@ -257,69 +256,64 @@ module Config_file_stanza = struct
     match is_s3_field with
     | true ->
       let profile_name, profile = Option.value_exn ~message name_settings in
-      let s3_custom_command_settings =
+      let s3 =
         match profile.s3_custom_command_settings with
         | Some x -> x
         | None -> S3_custom_command_settings.empty
       in
-      let set field v = Field.fset field s3_custom_command_settings (Some v) in
-      let really_set =
+      let s3 =
         match name with
         | "max_concurrent_requests" ->
-          set S3_custom_command_settings.Fields.max_concurrent_requests
-        | "max_queue_size" -> set S3_custom_command_settings.Fields.max_queue_size
-        | "multipart_threshold" ->
-          set S3_custom_command_settings.Fields.multipart_threshold
-        | "multipart_chunksize" ->
-          set S3_custom_command_settings.Fields.multipart_chunksize
-        | "max_bandwidth" -> set S3_custom_command_settings.Fields.max_bandwidth
+          { s3 with max_concurrent_requests = Some value }
+        | "max_queue_size" -> { s3 with max_queue_size = Some value }
+        | "multipart_threshold" -> { s3 with multipart_threshold = Some value }
+        | "multipart_chunksize" -> { s3 with multipart_chunksize = Some value }
+        | "max_bandwidth" -> { s3 with max_bandwidth = Some value }
         | "use_accelerate_endpoint" ->
-          set S3_custom_command_settings.Fields.use_accelerate_endpoint
+          { s3 with use_accelerate_endpoint = Some value }
         | "use_dualstack_endpoint" ->
-          set S3_custom_command_settings.Fields.use_dualstack_endpoint
-        | "addressing_style" -> set S3_custom_command_settings.Fields.addressing_style
-        | _ -> fun _ -> failwithf "Line %d: unknown field: %S (s3)" line_num name ()
+          { s3 with use_dualstack_endpoint = Some value }
+        | "addressing_style" -> { s3 with addressing_style = Some value }
+        | _ -> failwithf "Line %d: unknown field: %S (s3)" line_num name ()
       in
       let new_profile =
-        { profile with s3_custom_command_settings = Some (really_set value) }
+        { profile with s3_custom_command_settings = Some s3 }
       in
       completed, Some (profile_name, new_profile)
     | false ->
       let profile_name, profile = Option.value_exn ~message name_settings in
-      let set field v = Field.fset field profile (Some v) in
-      let really_set =
+      let new_profile =
         match name with
-        | "aws_access_key_id" -> set Fields.aws_access_key_id
-        | "aws_secret_access_key" -> set Fields.aws_secret_access_key
-        | "aws_session_token" -> set Fields.aws_session_token
-        | "region" -> fun value -> set Fields.region (Region.of_string value)
-        | "output" -> set Fields.output
-        | "ca_bundle" -> set Fields.ca_bundle
-        | "cli_auto_prompt" -> set Fields.cli_auto_prompt
-        | "cli_binary_format" -> set Fields.cli_binary_format
-        | "cli_history" -> set Fields.cli_history
-        | "cli_pager" -> set Fields.cli_pager
-        | "cli_timestamp_format" -> set Fields.cli_timestamp_format
-        | "credential_process" -> set Fields.credential_process
-        | "credential_source" -> set Fields.credential_source
-        | "duration_seconds" -> set Fields.duration_seconds
-        | "external_id" -> set Fields.external_id
-        | "max_attempts" -> set Fields.max_attempts
-        | "mfa_serial" -> set Fields.mfa_serial
-        | "parameter_validation" -> set Fields.parameter_validation
-        | "retry_mode" -> set Fields.retry_mode
-        | "role_arn" -> set Fields.role_arn
-        | "role_session_name" -> set Fields.role_session_name
-        | "source_profile" -> set Fields.source_profile
-        | "sso_account_id" -> set Fields.sso_account_id
-        | "sso_region" -> set Fields.sso_region
-        | "sso_role_name" -> set Fields.sso_role_name
-        | "sso_start_url" -> set Fields.sso_start_url
-        | "web_identity_token_file" -> set Fields.web_identity_token_file
-        | "tcp_keepalive" -> set Fields.tcp_keepalive
-        | _ -> fun _ -> failwithf "Line %d: unknown field: %S" line_num name ()
+        | "aws_access_key_id" -> { profile with aws_access_key_id = Some value }
+        | "aws_secret_access_key" -> { profile with aws_secret_access_key = Some value }
+        | "aws_session_token" -> { profile with aws_session_token = Some value }
+        | "region" -> { profile with region = Some (Region.of_string value) }
+        | "output" -> { profile with output = Some value }
+        | "ca_bundle" -> { profile with ca_bundle = Some value }
+        | "cli_auto_prompt" -> { profile with cli_auto_prompt = Some value }
+        | "cli_binary_format" -> { profile with cli_binary_format = Some value }
+        | "cli_history" -> { profile with cli_history = Some value }
+        | "cli_pager" -> { profile with cli_pager = Some value }
+        | "cli_timestamp_format" -> { profile with cli_timestamp_format = Some value }
+        | "credential_process" -> { profile with credential_process = Some value }
+        | "credential_source" -> { profile with credential_source = Some value }
+        | "duration_seconds" -> { profile with duration_seconds = Some value }
+        | "external_id" -> { profile with external_id = Some value }
+        | "max_attempts" -> { profile with max_attempts = Some value }
+        | "mfa_serial" -> { profile with mfa_serial = Some value }
+        | "parameter_validation" -> { profile with parameter_validation = Some value }
+        | "retry_mode" -> { profile with retry_mode = Some value }
+        | "role_arn" -> { profile with role_arn = Some value }
+        | "role_session_name" -> { profile with role_session_name = Some value }
+        | "source_profile" -> { profile with source_profile = Some value }
+        | "sso_account_id" -> { profile with sso_account_id = Some value }
+        | "sso_region" -> { profile with sso_region = Some value }
+        | "sso_role_name" -> { profile with sso_role_name = Some value }
+        | "sso_start_url" -> { profile with sso_start_url = Some value }
+        | "web_identity_token_file" -> { profile with web_identity_token_file = Some value }
+        | "tcp_keepalive" -> { profile with tcp_keepalive = Some value }
+        | _ -> failwithf "Line %d: unknown field: %S" line_num name ()
       in
-      let new_profile = really_set value in
       completed, Some (profile_name, new_profile)
   ;;
 end
@@ -462,7 +456,7 @@ module Shared_credentials_file_stanza = struct
     { aws_access_key_id : string option
     ; aws_secret_access_key : string option
     }
-  [@@deriving fields, yojson]
+  [@@deriving yojson]
 
   let empty = { aws_access_key_id = None; aws_secret_access_key = None }
 
@@ -475,14 +469,12 @@ module Shared_credentials_file_stanza = struct
         name
     in
     let profile_name, profile = Option.value_exn ~message name_settings in
-    let set field v = Field.fset field profile (Some v) in
-    let really_set =
+    let new_profile =
       match name with
-      | "aws_access_key_id" -> set Fields.aws_access_key_id
-      | "aws_secret_access_key" -> set Fields.aws_secret_access_key
-      | _ -> fun _ -> failwithf "Line %d: unknown field: %S" line_num name ()
+      | "aws_access_key_id" -> { profile with aws_access_key_id = Some value }
+      | "aws_secret_access_key" -> { profile with aws_secret_access_key = Some value }
+      | _ -> failwithf "Line %d: unknown field: %S" line_num name ()
     in
-    let new_profile = really_set value in
     completed, Some (profile_name, new_profile)
   ;;
 end
@@ -503,38 +495,41 @@ let prefer_right_if_defined a b =
   | Some _, Some b -> Some b
 ;;
 
-let merge ~(from : Config_file_stanza.t) ~(to_ : Config_file_stanza.t) =
-  let mv field = prefer_right_if_defined (Field.get field from) (Field.get field to_) in
-  Config_file_stanza.Fields.map
-    ~aws_access_key_id:mv
-    ~aws_secret_access_key:mv
-    ~aws_session_token:mv
-    ~output:mv
-    ~region:mv
-    ~ca_bundle:mv
-    ~cli_auto_prompt:mv
-    ~cli_binary_format:mv
-    ~cli_history:mv
-    ~cli_pager:mv
-    ~cli_timestamp_format:mv
-    ~credential_process:mv
-    ~credential_source:mv
-    ~duration_seconds:mv
-    ~external_id:mv
-    ~max_attempts:mv
-    ~mfa_serial:mv
-    ~parameter_validation:mv
-    ~role_arn:mv
-    ~role_session_name:mv
-    ~retry_mode:mv
-    ~source_profile:mv
-    ~sso_account_id:mv
-    ~sso_region:mv
-    ~sso_role_name:mv
-    ~sso_start_url:mv
-    ~web_identity_token_file:mv
-    ~tcp_keepalive:mv
-    ~s3_custom_command_settings:mv
+let merge ~(from : Config_file_stanza.t) ~(to_ : Config_file_stanza.t)
+  : Config_file_stanza.t
+  =
+  let mv a b = prefer_right_if_defined a b in
+  { aws_access_key_id = mv from.aws_access_key_id to_.aws_access_key_id
+  ; aws_secret_access_key = mv from.aws_secret_access_key to_.aws_secret_access_key
+  ; aws_session_token = mv from.aws_session_token to_.aws_session_token
+  ; region = mv from.region to_.region
+  ; output = mv from.output to_.output
+  ; ca_bundle = mv from.ca_bundle to_.ca_bundle
+  ; cli_auto_prompt = mv from.cli_auto_prompt to_.cli_auto_prompt
+  ; cli_binary_format = mv from.cli_binary_format to_.cli_binary_format
+  ; cli_history = mv from.cli_history to_.cli_history
+  ; cli_pager = mv from.cli_pager to_.cli_pager
+  ; cli_timestamp_format = mv from.cli_timestamp_format to_.cli_timestamp_format
+  ; credential_process = mv from.credential_process to_.credential_process
+  ; credential_source = mv from.credential_source to_.credential_source
+  ; duration_seconds = mv from.duration_seconds to_.duration_seconds
+  ; external_id = mv from.external_id to_.external_id
+  ; max_attempts = mv from.max_attempts to_.max_attempts
+  ; mfa_serial = mv from.mfa_serial to_.mfa_serial
+  ; parameter_validation = mv from.parameter_validation to_.parameter_validation
+  ; retry_mode = mv from.retry_mode to_.retry_mode
+  ; role_arn = mv from.role_arn to_.role_arn
+  ; role_session_name = mv from.role_session_name to_.role_session_name
+  ; source_profile = mv from.source_profile to_.source_profile
+  ; sso_account_id = mv from.sso_account_id to_.sso_account_id
+  ; sso_region = mv from.sso_region to_.sso_region
+  ; sso_role_name = mv from.sso_role_name to_.sso_role_name
+  ; sso_start_url = mv from.sso_start_url to_.sso_start_url
+  ; web_identity_token_file = mv from.web_identity_token_file to_.web_identity_token_file
+  ; tcp_keepalive = mv from.tcp_keepalive to_.tcp_keepalive
+  ; s3_custom_command_settings =
+      mv from.s3_custom_command_settings to_.s3_custom_command_settings
+  }
 ;;
 
 let make_internal
@@ -599,7 +594,7 @@ let make_internal
     List.reduce_exn
       ~f:Option.first_some
       [ aws_access_key_id
-      ; Sys.getenv "AWS_ACCESS_KEY_ID"
+      ; Sys.getenv_opt "AWS_ACCESS_KEY_ID"
       ; Option.bind credentials_profile ~f:(fun x -> x.aws_access_key_id)
       ; config_profile.aws_access_key_id
       ]
@@ -608,7 +603,7 @@ let make_internal
     List.reduce_exn
       ~f:Option.first_some
       [ aws_secret_access_key
-      ; Sys.getenv "AWS_SECRET_ACCESS_KEY"
+      ; Sys.getenv_opt "AWS_SECRET_ACCESS_KEY"
       ; Option.bind credentials_profile ~f:(fun x -> x.aws_secret_access_key)
       ; config_profile.aws_secret_access_key
       ]
@@ -618,7 +613,7 @@ let make_internal
     List.reduce_exn
       ~f:Option.first_some
       [ region
-      ; (match Sys.getenv "AWS_DEFAULT_REGION" with
+      ; (match Sys.getenv_opt "AWS_DEFAULT_REGION" with
          | None -> None
          | Some x -> Some (Region.of_string x))
       ; config_profile.region

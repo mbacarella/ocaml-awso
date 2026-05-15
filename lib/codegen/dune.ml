@@ -9,7 +9,7 @@ let dashes_to_underscores : string -> string =
 let library_base ~service =
   let extra_deps =
     match service with
-    | "s3" -> [ "core_unix"; "core_unix.time_unix" ]
+    | "s3" -> []
     | _ -> []
   in
   let service_unders = dashes_to_underscores service in

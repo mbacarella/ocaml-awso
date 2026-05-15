@@ -17,7 +17,6 @@
     requirements for a given service, which these functions may enforce (though
     we don't yet). *)
 
-open! Core
 open! Import
 
 module Error : sig
@@ -51,7 +50,7 @@ type t =
   ; resource_type : resource_type
   ; qualifier : qualifier
   }
-[@@deriving yojson, compare]
+[@@deriving yojson]
 
 (** Make an ARN. Defaults: - partition: {!Default.partition} - region: None -
     account_id: None - resource_type: `None - qualifier: `None *)

@@ -12,8 +12,9 @@ homepage: "https://github.com/mbacarella/awso"
 bug-reports: "https://github.com/mbacarella/awso/issues"
 depends: [
   "dune" {>= "3.0"}
+  "ocaml" {>= "4.14"}
   "awso"
-  "ppx_jane"
+  "ppx_expect"
   "odoc" {with-doc}
 ]
 build: [

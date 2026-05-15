@@ -1,3 +1,5 @@
+include Awso.Import
+
 module Cohttp = struct
   module Body = Cohttp.Body
   module Header = Cohttp.Header

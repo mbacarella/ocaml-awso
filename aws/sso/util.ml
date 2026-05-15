@@ -1,5 +1,5 @@
 open! Values
-open! Core
+open! Awso.Import
 
 (* In sha1_insecure below, [@alert "-crypto"] suppresses the "SHA1 is broken" alert
    from Cryptokit. We know. AWS credential file caching require this for cache lookups still,
@@ -11,6 +11,12 @@ let sha1_insecure s =
    Cryptokit.transform_string (Cryptokit.Hexa.encode ()) hh) [@alert "-crypto"]
 ;;
 
+let format_utc (t : float) =
+  let tm = Unix.gmtime t in
+  sprintf "%04d-%02d-%02d %02d:%02d:%02dZ"
+    (tm.tm_year + 1900) (tm.tm_mon + 1) tm.tm_mday
+    tm.tm_hour tm.tm_min tm.tm_sec
+
 let validate_expiration expiration =
   let expiration =
     expiration
@@ -18,17 +24,15 @@ let validate_expiration expiration =
          ~message:
            "Sso.get_role_credentials returned roleCredentials with empty expiration??"
     |> Int64.to_float
-    |> Time_float_unix.Span.of_sec
-    |> Time_float_unix.of_span_since_epoch
   in
-  let now = Time_float_unix.now () in
-  if Time_float_unix.( < ) expiration now
+  let now = Unix.gettimeofday () in
+  if Float.( < ) expiration now
   then
     failwithf
       "Sso.get_role_credentials returned roleCredentials that were already expired! \
        %s < now (%s)"
-      (Time_float_unix.to_string_utc expiration)
-      (Time_float_unix.to_string_utc now)
+      (format_utc expiration)
+      (format_utc now)
       ()
 ;;
 
@@ -49,7 +53,7 @@ let get_cached_sso_token_file_path ~cfg =
       ()
   | Some fn ->
     let sha1 = sha1_insecure fn in
-    sprintf "%s/.aws/sso/cache/%s.json" (Sys.getenv_exn "HOME") sha1
+    sprintf "%s/.aws/sso/cache/%s.json" (Stdlib.Sys.getenv "HOME") sha1
 ;;
 
 let get_sso_role_request_and_cfg_exn ~cfg ~cached_sso_token_file jsonstr =

@@ -1,6 +1,5 @@
 (** Secure Random Password protocol implementation for AWS *)
 
-open! Core
 open Awso
 open! Import
 

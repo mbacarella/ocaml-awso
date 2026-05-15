@@ -12,8 +12,8 @@ homepage: "https://github.com/mbacarella/awso"
 bug-reports: "https://github.com/mbacarella/awso/issues"
 depends: [
   "dune" {>= "3.0"}
+  "ocaml" {>= "4.14"}
   "awso"
-  "core_unix"
   "lwt"
   "lwt_ppx"
   "cohttp-lwt-unix"

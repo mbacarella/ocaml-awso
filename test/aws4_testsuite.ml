@@ -1,13 +1,9 @@
-open! Core
 open! Import
 
 module Req = struct
-  let string_of_file : string -> string =
-    let replace_pattern = String.Search_pattern.create "http/1.1" in
-    fun filename ->
-      In_channel.read_all filename
-      |> fun content ->
-      String.Search_pattern.replace_first replace_pattern ~in_:content ~with_:"HTTP/1.1"
+  let string_of_file filename =
+    read_file filename
+    |> String.substr_replace_all ~pattern:"http/1.1" ~with_:"HTTP/1.1"
   ;;
 
   let request_of_file filename =
@@ -19,10 +15,9 @@ module Req = struct
     | `Ok x -> x
   ;;
 
-  (** Get body from given filename. Ideally we could use Cohttp's Request parser
-      to do this, but it requires a content-length header to parse bodies, which
-      AWS's .req files don't have. *)
   let body_of_file filename : Cohttp.Body.t =
+    let content = read_file filename in
+    let lines = String.split content ~on:'\n' in
     let rec loop body_started accum = function
       | [] -> accum
       | "" :: lines -> (
@@ -34,18 +29,15 @@ module Req = struct
         | true -> loop body_started (x :: accum) lines
         | false -> loop body_started accum lines)
     in
-    In_channel.read_lines filename |> loop false [] |> List.rev |> fun x -> `Strings x
+    loop false [] lines |> List.rev |> fun x -> `Strings x
   ;;
 
   let of_file filename = request_of_file filename, body_of_file filename
 end
 
 module Creq = struct
-  let of_file : string -> string =
-    let replace_pattern = String.Search_pattern.create "\r\n" in
-    fun filename ->
-      In_channel.read_all filename
-      |> fun content ->
-      String.Search_pattern.replace_all replace_pattern ~in_:content ~with_:"\n"
+  let of_file filename =
+    read_file filename
+    |> String.substr_replace_all ~pattern:"\r\n" ~with_:"\n"
   ;;
 end

@@ -1,4 +1,3 @@
-open! Core
 open! Import
 include Awso_codegen.Botodata
 
@@ -21,8 +20,8 @@ end = struct
     | `Integer i -> `Int i
     | `Long l -> (
       (* try storing these as ints if possible *)
-      try `Int (Core.Int64.to_int_exn l) with
-      | Failure _ -> `Intlit (Core.Int64.to_string l))
+      try `Int (Stdlib.Int64.to_int l) with
+      | Failure _ -> `Intlit (Stdlib.Int64.to_string l))
     | `Float f | `Double f -> `Float f
     | `Blob s | `String s | `Timestamp s | `Enum s -> `String s
     | `Structure fields -> structure_to_json fields

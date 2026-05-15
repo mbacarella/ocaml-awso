@@ -26,11 +26,8 @@
    (>= 3.1.0))
   (cohttp
    (>= 0.21.0))
-  core
-  core_unix
   cryptokit
   ppx_expect
-  ppx_jane
   ppx_yojson_conv
   (re
    (>= 1.7.2))
@@ -59,7 +56,6 @@
   (ocaml
    (>= 4.14))
   awso
-  core_unix
   lwt
   lwt_ppx
   cohttp-lwt-unix))
@@ -97,4 +93,4 @@
   (ocaml
    (>= 4.14))
   awso
-  ppx_jane))
+  ppx_expect))

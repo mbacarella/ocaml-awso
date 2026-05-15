@@ -2,7 +2,6 @@
     {{:http://docs.aws.amazon.com/general/latest/gr/signature-version-4.html}AWS's
     Signature Version 4} signing process. *)
 
-open! Core
 open! Import
 
 type payload_hash = private string * int
@@ -11,7 +10,7 @@ val payload_hash : string -> payload_hash
 val empty_payload_hash : payload_hash
 
 module Date_header : sig
-  val to_value : Time_float_unix.t -> string
+  val to_value : float -> string
   val value_of_now : unit -> string
 end
 
@@ -21,7 +20,7 @@ end
 
 val headers_with_date_and_payload_hash
   :  ?session_token:string
-  -> timestamp:Time_float_unix.t
+  -> timestamp:float
   -> payload_hash:[ `Unsigned | `Signed of payload_hash ]
   -> Cohttp.Header.t
   -> Cohttp.Header.t
@@ -44,7 +43,7 @@ val sign_url
   :  http_method:Cohttp.Code.meth
   -> region:Region.t
   -> service:Service.t
-  -> timestamp:Time_float_unix.t
+  -> timestamp:float
   -> headers:Cohttp.Header.t
   -> ?aws_secret_access_key:string
   -> ?aws_access_key_id:string
@@ -89,7 +88,7 @@ val canonical_request
   -> canonical_request
 
 val credential_scope
-  :  timestamp:Time_float_unix.t
+  :  timestamp:float
   -> region:Region.t
   -> service:Service.t
   -> credential_scope
@@ -100,7 +99,7 @@ val credential_scope
 val string_to_sign
   :  canonical_request:canonical_request
   -> credential_scope:credential_scope
-  -> timestamp:Time_float_unix.t
+  -> timestamp:float
   -> string_to_sign
 
 (** Calculate signature, i.e.
@@ -109,7 +108,7 @@ val string_to_sign
 val signature
   :  ?aws_secret_access_key:string
   -> string_to_sign:string_to_sign
-  -> timestamp:Time_float_unix.t
+  -> timestamp:float
   -> region:Region.t
   -> service:Service.t
   -> unit

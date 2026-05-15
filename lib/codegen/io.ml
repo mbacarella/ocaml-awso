@@ -68,7 +68,7 @@ let%expect_test "eval_structure_async" =
     open Base_module
     open Awso_async
     module Io = Http.Io
-    let eval ?endpoint_url ?cfg endpoint input =
+    let eval ?endpoint_url  ?cfg  endpoint input =
       Io.bind (Io.resolve_cfg cfg)
         (fun cfg ->
            let meth = Endpoints.method_of_endpoint endpoint in
@@ -77,9 +77,9 @@ let%expect_test "eval_structure_async" =
              (Io.call ?endpoint_url ~cfg ~service:Values.service meth
                 (Endpoints.to_request endpoint input) uri)
              (fun resp_result -> Endpoints.of_response endpoint resp_result))
-    let abort_multipart_upload ?endpoint_url ?cfg input =
+    let abort_multipart_upload ?endpoint_url  ?cfg  input =
       eval ?endpoint_url ?cfg Endpoints.AbortMultipartUpload input
-    let complete_multipart_upload ?endpoint_url ?cfg input =
+    let complete_multipart_upload ?endpoint_url  ?cfg  input =
       eval ?endpoint_url ?cfg Endpoints.CompleteMultipartUpload input
     |}]
 ;;
@@ -98,7 +98,7 @@ let%expect_test "eval_structure_lwt" =
     open Base_module
     open Awso_lwt
     module Io = Http.Io
-    let eval ?endpoint_url ?cfg endpoint input =
+    let eval ?endpoint_url  ?cfg  endpoint input =
       Io.bind (Io.resolve_cfg cfg)
         (fun cfg ->
            let meth = Endpoints.method_of_endpoint endpoint in
@@ -107,9 +107,9 @@ let%expect_test "eval_structure_lwt" =
              (Io.call ?endpoint_url ~cfg ~service:Values.service meth
                 (Endpoints.to_request endpoint input) uri)
              (fun resp_result -> Endpoints.of_response endpoint resp_result))
-    let abort_multipart_upload ?endpoint_url ?cfg input =
+    let abort_multipart_upload ?endpoint_url  ?cfg  input =
       eval ?endpoint_url ?cfg Endpoints.AbortMultipartUpload input
-    let complete_multipart_upload ?endpoint_url ?cfg input =
+    let complete_multipart_upload ?endpoint_url  ?cfg  input =
       eval ?endpoint_url ?cfg Endpoints.CompleteMultipartUpload input
     |}]
 ;;

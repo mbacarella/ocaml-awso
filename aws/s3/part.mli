@@ -1,5 +1,4 @@
-open! Core
-
+open! Awso.Import
 open Values
 
 type t

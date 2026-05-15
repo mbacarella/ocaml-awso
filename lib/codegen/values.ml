@@ -88,7 +88,7 @@ let ec2_error_module () =
                 List.map children ~f:(function
                   | `Data s -> s
                   | `El _ -> "")
-                |> Core.String.concat ~sep:""
+                |> String.concat ~sep:""
             in
             let _request_id = data (Awso.Xml.child_exn xml "RequestID") in
             let errors =

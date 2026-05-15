@@ -61,6 +61,7 @@ module List : sig
   val exists : 'a list -> f:('a -> bool) -> bool
   val mem : 'a list -> 'a -> equal:('a -> 'a -> bool) -> bool
   val dedup_and_sort : compare:('a -> 'a -> int) -> 'a list -> 'a list
+  val rev_map : 'a list -> f:('a -> 'b) -> 'b list
   val filter_opt : 'a option list -> 'a list
   val is_empty : 'a list -> bool
   val hd_exn : 'a list -> 'a
@@ -260,13 +261,23 @@ module Int64 : sig
 
   val compare : int64 -> int64 -> int
   val equal : int64 -> int64 -> bool
+  val ( = ) : int64 -> int64 -> bool
   val ( >= ) : int64 -> int64 -> bool
   val ( <= ) : int64 -> int64 -> bool
+  val ( > ) : int64 -> int64 -> bool
+  val ( < ) : int64 -> int64 -> bool
   val of_float : float -> int64
   val of_int : int -> int64
   val to_string : int64 -> string
   val min_value : int64
   val max_value : int64
+  val succ : int64 -> int64
+  val pred : int64 -> int64
+  val ( * ) : int64 -> int64 -> int64
+  val ( + ) : int64 -> int64 -> int64
+  val ( - ) : int64 -> int64 -> int64
+  val ( / ) : int64 -> int64 -> int64
+  val rem : int64 -> int64 -> int64
   val to_int_exn : int64 -> int
 end
 

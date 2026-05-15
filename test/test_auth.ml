@@ -1,4 +1,3 @@
-open! Core
 open! Import
 include Awso.Auth
 
@@ -59,9 +58,9 @@ let make_test ~dir name =
 ;;
 
 let to_test_name s =
-  match Filename.split_extension s with
-  | name, Some "req" -> Some name
-  | _ -> None
+  match Filename.chop_suffix_opt ~suffix:".req" s with
+  | Some name -> Some name
+  | None -> None
 ;;
 
 let discover_tests ~dir =
@@ -73,7 +72,7 @@ let discover_tests ~dir =
 ;;
 
 let () =
-  let dir = (Sys.get_argv ()).(1) in
+  let dir = Sys.argv.(1) in
   let test_names = discover_tests ~dir in
   List.iter test_names ~f:test_canonical_request
 ;;

@@ -1,4 +1,3 @@
-open! Core
 open! Import
 
 type payload_hash = string * int
@@ -28,22 +27,22 @@ module Payload_header = struct
 end
 
 module Date_header = struct
-  let datestamp (timestamp : Time_float_unix.t) : string =
-    let date = Time_float_unix.to_date timestamp ~zone:Time_float_unix.Zone.utc in
-    Date.to_string_iso8601_basic date
+  let datestamp (timestamp : float) : string =
+    let tm = Unix.gmtime timestamp in
+    sprintf "%04d%02d%02d" (tm.tm_year + 1900) (tm.tm_mon + 1) tm.tm_mday
   ;;
 
-  let amzdate (timestamp : Time_float_unix.t) : string =
-    let date, time_ofday = Time_float_unix.to_date_ofday timestamp ~zone:Time_float_unix.Zone.utc in
-    let datestamp = Date.to_string_iso8601_basic date in
-    let { Time_float_unix.Span.Parts.hr; min; sec; _ } = Time_float_unix.Ofday.to_parts time_ofday in
-    sprintf "%sT%02d%02d%02dZ" datestamp hr min sec
+  let amzdate (timestamp : float) : string =
+    let tm = Unix.gmtime timestamp in
+    sprintf "%04d%02d%02dT%02d%02d%02dZ"
+      (tm.tm_year + 1900) (tm.tm_mon + 1) tm.tm_mday
+      tm.tm_hour tm.tm_min tm.tm_sec
   ;;
 
   let x_amz_date_key = "x-amz-date"
   let to_value timestamp = amzdate timestamp
   let add t header = Cohttp.Header.add header x_amz_date_key (to_value t)
-  let value_of_now () = amzdate (Time_float_unix.now ())
+  let value_of_now () = amzdate (Unix.gettimeofday ())
 end
 
 module Session_token_header = struct
@@ -119,7 +118,10 @@ let canonical_uri_encode x = String.concat_map x ~f:canonical_uri_encode_char
 let canonical_uri_query : Uri.t -> string =
  fun uri ->
   Uri.query uri
-  |> List.sort ~compare:[%compare: string * string list]
+  |> List.sort ~compare:(fun (a, avs) (b, bvs) ->
+       match String.compare a b with
+       | 0 -> Stdlib.compare avs bvs
+       | c -> c)
   |> List.map ~f:(fun (x, ys) ->
        sprintf
          "%s=%s"
@@ -245,11 +247,7 @@ let sign_url
    | Some x ->
      if x < 1 || x > 604800
      then
-       failwiths
-         ~here:[%here]
-         "timeout must be between 1 and 604800 seconds"
-         x
-         sexp_of_int
+       failwithf "timeout must be between 1 and 604800 seconds: %d" x ()
      else timeout)
   |> fun timeout ->
   let credential_scope = credential_scope ~timestamp ~region ~service in
@@ -289,7 +287,7 @@ let sign_request
   ~payload_hash
   req
   =
-  let timestamp = Time_float_unix.now () in
+  let timestamp = Unix.gettimeofday () in
   let headers =
     headers_with_date_and_payload_hash
       ?session_token

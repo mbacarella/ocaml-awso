@@ -1,4 +1,3 @@
-open! Core
 open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 open! Awso.Import
 module Stdlib = Stdlib

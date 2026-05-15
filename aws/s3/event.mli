@@ -1,4 +1,3 @@
-open! Core
 open Awso
 open! Import
 
@@ -10,7 +9,7 @@ type s3_event_notification_event_name =
   ]
 [@@deriving yojson_of]
 
-type inet_addr = Core_unix.Inet_addr.t
+type inet_addr = string
 
 val yojson_of_inet_addr : inet_addr -> Yojson.Safe.t
 
@@ -53,7 +52,7 @@ type s3_event_notification_record =
   { aws_region : Region.t
   ; event_name : s3_event_notification_event_name
   ; event_source : string
-  ; event_time : Time_float_unix.t option
+  ; event_time : string option
   ; event_version : string
   ; request_parameters : request_parameters_entity
   ; response_elements : response_elements_entity

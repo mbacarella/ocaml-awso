@@ -1,4 +1,3 @@
-open! Core
 open! Import
 open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 
@@ -191,7 +190,7 @@ module Range = struct
   ;;
 
   let%expect_test "byte_range_spec_to_string" =
-    let test x = printf !"%s" (byte_range_spec_to_string x) in
+    let test x = printf "%s" (byte_range_spec_to_string x) in
     (* Test 1: `Range (correct by design, no need to check the bounds) *)
     test (`Range (Int64.zero, Int64.one));
     [%expect {| 0-1 |}];
@@ -236,7 +235,7 @@ module Range = struct
   ;;
 
   let%expect_test "to_header_value" =
-    let test x = printf !"%s" (to_header_value x) in
+    let test x = printf "%s" (to_header_value x) in
     (* Test 1: empty list *)
     test [];
     [%expect {| Range: bytes= |}];
@@ -336,7 +335,12 @@ module Request = struct
     ; headers : Headers.t
     ; body : string
     }
-  [@@deriving fields, yojson_of]
+  [@@deriving yojson_of]
+
+  let meth t = t.meth
+  let version t = t.version
+  let headers t = t.headers
+  let body t = t.body
 
   let make ?(version = 1, 1) ?(headers = Headers.empty) ?(body = "") meth =
     { meth; version; headers; body }

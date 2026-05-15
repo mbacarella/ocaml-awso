@@ -1,4 +1,4 @@
-open! Core
+open! Awso.Import
 
 (** Implementation of Secure Remote Password (SRP) authenticate protocol for AWS
     cognito authentication flow. Never directly sends the password over the

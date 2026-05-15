@@ -1,4 +1,3 @@
-open! Core
 open! Import
 open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 
@@ -19,14 +18,14 @@ type resource_type =
   | `Colon_delimited of string
   | `None
   ]
-[@@deriving yojson, compare]
+[@@deriving yojson]
 
 type qualifier =
   [ `Slash_delimited of string
   | `Colon_delimited of string
   | `None
   ]
-[@@deriving yojson, compare]
+[@@deriving yojson]
 
 type t =
   { partition : string
@@ -37,7 +36,7 @@ type t =
   ; resource_type : resource_type
   ; qualifier : qualifier
   }
-[@@deriving yojson, compare]
+[@@deriving yojson]
 
 let make
   ?(partition = Default.partition)

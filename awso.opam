@@ -12,14 +12,12 @@ homepage: "https://github.com/mbacarella/awso"
 bug-reports: "https://github.com/mbacarella/awso/issues"
 depends: [
   "dune" {>= "3.0"}
+  "ocaml" {>= "4.14"}
   "awso-codegen"
   "base64" {>= "3.1.0"}
   "cohttp" {>= "0.21.0"}
-  "core"
-  "core_unix"
   "cryptokit"
   "ppx_expect"
-  "ppx_jane"
   "ppx_yojson_conv"
   "re" {>= "1.7.2"}
   "xmlm"

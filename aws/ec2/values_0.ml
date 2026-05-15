@@ -1227,7 +1227,7 @@ module Ec2_error =
                  | `El (_, children) ->
                      (List.map children
                         ~f:(function | `Data s -> s | `El _ -> ""))
-                       |> (Core.String.concat ~sep:"") in
+                       |> (String.concat ~sep:"") in
                let _request_id = data (Awso.Xml.child_exn xml "RequestID") in
                let errors =
                  ((Awso.Xml.child_exn xml "Errors") |> Awso.Xml.all_children)

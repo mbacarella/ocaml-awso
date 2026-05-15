@@ -1,4 +1,4 @@
-open! Core
+open! Import
 
 module Query : sig
   type t =

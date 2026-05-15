@@ -12,7 +12,6 @@
     This module should not be confused with the
     {{:http://aws.amazon.com/config/}AWS Config} service. *)
 
-open! Core
 open! Import
 
 module S3_custom_command_settings : sig
@@ -28,7 +27,7 @@ module S3_custom_command_settings : sig
     ; use_dualstack_endpoint : string option
     ; addressing_style : string option
     }
-  [@@deriving fields, yojson]
+  [@@deriving yojson]
 end
 
 type t =

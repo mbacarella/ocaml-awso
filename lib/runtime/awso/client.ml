@@ -1,4 +1,3 @@
-open! Core
 open! Import
 
 module Query = struct
@@ -72,4 +71,5 @@ module Query = struct
   let render q = render_aux "" q
 end
 
-let content_md5 body = body |> Md5.digest_string |> Md5.to_binary |> Base64.encode_string
+let content_md5 body =
+  Cryptokit.hash_string (Cryptokit.Hash.md5 ()) body |> Base64.encode_string

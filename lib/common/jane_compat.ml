@@ -81,6 +81,7 @@ module List = struct
   let exists l ~f = Stdlib.List.exists f l
   let mem l x ~equal = Stdlib.List.exists (equal x) l
   let dedup_and_sort ~compare l = Stdlib.List.sort_uniq compare l
+  let rev_map l ~f = Stdlib.List.rev_map f l
   let filter_opt l = Stdlib.List.filter_map Fn.id l
 
   let is_empty = function
@@ -618,16 +619,26 @@ module Int64 = struct
 
   let compare (a : int64) (b : int64) = Stdlib.Int64.compare a b
   let equal (a : int64) (b : int64) = Stdlib.Int64.equal a b
+  let ( = ) (a : int64) (b : int64) = Stdlib.Int64.equal a b
   let ( >= ) (a : int64) (b : int64) = Stdlib.( >= ) (Stdlib.Int64.compare a b) 0
   let ( <= ) (a : int64) (b : int64) = Stdlib.( <= ) (Stdlib.Int64.compare a b) 0
+  let ( > ) (a : int64) (b : int64) = Stdlib.( > ) (Stdlib.Int64.compare a b) 0
+  let ( < ) (a : int64) (b : int64) = Stdlib.( < ) (Stdlib.Int64.compare a b) 0
   let of_float = Stdlib.Int64.of_float
   let of_int = Stdlib.Int64.of_int
   let to_string = Stdlib.Int64.to_string
   let min_value = Stdlib.Int64.min_int
   let max_value = Stdlib.Int64.max_int
+  let succ x = Stdlib.Int64.add x 1L
+  let pred x = Stdlib.Int64.sub x 1L
+  let ( * ) = Stdlib.Int64.mul
+  let ( + ) = Stdlib.Int64.add
+  let ( - ) = Stdlib.Int64.sub
+  let ( / ) = Stdlib.Int64.div
+  let rem = Stdlib.Int64.rem
   let to_int_exn x =
-    if Stdlib.Int64.compare x (Stdlib.Int64.of_int Stdlib.max_int) > 0
-       || Stdlib.Int64.compare x (Stdlib.Int64.of_int Stdlib.min_int) < 0
+    if Stdlib.( > ) (Stdlib.Int64.compare x (Stdlib.Int64.of_int Stdlib.max_int)) 0
+       || Stdlib.( < ) (Stdlib.Int64.compare x (Stdlib.Int64.of_int Stdlib.min_int)) 0
     then failwith "Int64.to_int_exn: overflow"
     else Stdlib.Int64.to_int x
   ;;

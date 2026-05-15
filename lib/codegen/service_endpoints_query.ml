@@ -70,49 +70,50 @@ let%expect_test "of_response" =
   [%expect
     {|
     let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-      (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-      (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-      let handle_error err error_of_xml =
-        let generic_error () = Error (`Transport err) in
-        match err with
-        | `Too_many_redirects -> generic_error ()
-        | `Bad_response
-            { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-            (match (error_of_xml, ((code >= 400) && (code <= 599))) with
-             | (None, _) | (_, false) -> generic_error ()
-             | (Some error_of_xml, true) ->
-                 (match Awso.Xml.parse_response body with
-                  | `Data _ -> generic_error ()
-                  | `El (((_, "ErrorResponse"), _), _) as error_response_xml ->
-                      let error_xml =
-                        Awso.Xml.child_exn error_response_xml "Error" in
-                      (try
-                         let error_code =
-                           match Awso.Xml.child_exn error_xml "Code" with
-                           | `Data error_code -> error_code
-                           | `El (_, children) ->
-                               (List.map children
-                                  ~f:(function | `Data s -> s | `El _ -> ""))
-                                 |> (String.concat ~sep:"") in
-                         Error
-                           (`AWS
-                              (error_of_xml (String.strip error_code) error_xml))
-                       with | Failure _ -> generic_error ())
-                  | `El _ -> generic_error ())) in
-      match endpoint with
-      | Name1 ->
-          (match resp with
-           | Error err -> handle_error err None
-           | Ok resp ->
-               let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-               Ok (ResultModule1.of_xml xml))
-      | Name2 ->
-          (match resp with
-           | Error err -> handle_error err None
-           | Ok resp ->
-               let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-               Ok (ResultModule2.of_xml xml))
-      | Name3 -> Ok ()
+      (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) =
+      (let handle_error err error_of_xml =
+         let generic_error () = Error (`Transport err) in
+         match err with
+         | `Too_many_redirects -> generic_error ()
+         | `Bad_response
+             { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
+             (match (error_of_xml, ((code >= 400) && (code <= 599))) with
+              | (None, _) | (_, false) -> generic_error ()
+              | (Some error_of_xml, true) ->
+                  (match Awso.Xml.parse_response body with
+                   | `Data _ -> generic_error ()
+                   | `El (((_, "ErrorResponse"), _), _) as error_response_xml ->
+                       let error_xml =
+                         Awso.Xml.child_exn error_response_xml "Error" in
+                       (try
+                          let error_code =
+                            match Awso.Xml.child_exn error_xml "Code" with
+                            | `Data error_code -> error_code
+                            | `El (_, children) ->
+                                (List.map children
+                                   ~f:(function | `Data s -> s | `El _ -> ""))
+                                  |> (String.concat ~sep:"") in
+                          Error
+                            (`AWS
+                               (error_of_xml (String.strip error_code) error_xml))
+                        with | Failure _ -> generic_error ())
+                   | `El _ -> generic_error ())) in
+       match endpoint with
+       | Name1 ->
+           (match resp with
+            | Error err -> handle_error err None
+            | Ok resp ->
+                let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+                Ok (ResultModule1.of_xml xml))
+       | Name2 ->
+           (match resp with
+            | Error err -> handle_error err None
+            | Ok resp ->
+                let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+                Ok (ResultModule2.of_xml xml))
+       | Name3 -> Ok () : (o,
+                            [ `AWS of e
+                            | `Transport of Awso.Http.Io.Error.call ]) result)
     |}]
 ;;
 

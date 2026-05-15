@@ -1,4 +1,3 @@
-open! Core
 open! Import
 
 type t = ('a Xmlm.frag as 'a) Xmlm.frag

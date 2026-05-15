@@ -3,7 +3,6 @@
     Lwt. We define a signature here that covers the features of Cohttp we need.
     Async and Lwt implementations matching this signature are provided. *)
 
-open! Core
 open! Import
 
 module type S = sig

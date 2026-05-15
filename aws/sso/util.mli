@@ -1,5 +1,5 @@
 open! Values
-open! Core
+open! Awso.Import
 
 val get_cached_sso_token_file_path : cfg:Awso.Cfg.t -> string
 

@@ -6,14 +6,13 @@
   awso_common
   base64
   cohttp
-  core
-  core_unix.time_float_unix
+  unix
   cryptokit
   xmlm
   yojson
   re.perl)
  (ocamlopt_flags (-linscan))
  (preprocess
-  (pps ppx_jane ppx_yojson_conv))
+  (pps ppx_expect ppx_yojson_conv))
  (synopsis "OCaml AWS general API.")
  (inline_tests))
