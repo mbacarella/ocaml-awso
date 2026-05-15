@@ -54,20 +54,23 @@
  (depends awso core_unix lwt lwt_ppx cohttp-lwt-unix))
 
 (package
+ (name awso-common)
+ (synopsis "Jane Street Core/Base compatibility shim")
+ (depends ppx_expect))
+
+(package
  (name awso-codegen)
  (synopsis "AWS botocore code generator")
  (depends
-  cohttp
-  core
-  core_unix
+  awso-common
   ocamlgraph
   ppxlib
-  ppx_jane
+  ppx_expect
   (re
    (>= 1.7.2))
   (sedlex
    (>= 2.3))
-  uri-sexp
+  uri
   xmlm
   yojson))
 

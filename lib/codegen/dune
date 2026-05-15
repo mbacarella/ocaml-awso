@@ -2,6 +2,7 @@
  (name awso_codegen)
  (public_name awso-codegen)
  (libraries
+  awso_common
   unix
   yojson
   xmlm
