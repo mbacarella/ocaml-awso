@@ -51,6 +51,13 @@
    async)))
 
 (rule
+ (targets awso_sagemaker_async.ml)
+ (action
+  (with-stdout-to
+   awso_sagemaker_async.ml
+   (echo "include Io\nmodule Values = Values\nmodule Cli = Cli"))))
+
+(rule
  (targets values.ml)
  (action
   (with-stdout-to

@@ -1,7 +1,6 @@
 (** AWS Athena Async API *)
 
 module Values = Awso_athena_async.Values
-module Io = Awso_athena_async.Io
 
 module Query : sig
   type query_id_params =

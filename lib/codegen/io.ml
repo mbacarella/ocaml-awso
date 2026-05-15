@@ -52,6 +52,7 @@ let eval_structure ~base_module ~io_subsystem operations =
         let s = Endpoint.name e in
         make (Util.camel_to_snake_case s) s)
       operations
+
 ;;
 
 let%expect_test "eval_structure_async" =
@@ -80,7 +81,8 @@ let%expect_test "eval_structure_async" =
     let abort_multipart_upload ?endpoint_url ?cfg input =
       eval ?endpoint_url ?cfg Endpoints.AbortMultipartUpload input
     let complete_multipart_upload ?endpoint_url ?cfg input =
-      eval ?endpoint_url ?cfg Endpoints.CompleteMultipartUpload input |}]
+      eval ?endpoint_url ?cfg Endpoints.CompleteMultipartUpload input
+    module Values = Values |}]
 ;;
 
 let%expect_test "eval_structure_lwt" =
@@ -109,7 +111,8 @@ let%expect_test "eval_structure_lwt" =
     let abort_multipart_upload ?endpoint_url ?cfg input =
       eval ?endpoint_url ?cfg Endpoints.AbortMultipartUpload input
     let complete_multipart_upload ?endpoint_url ?cfg input =
-      eval ?endpoint_url ?cfg Endpoints.CompleteMultipartUpload input |}]
+      eval ?endpoint_url ?cfg Endpoints.CompleteMultipartUpload input
+    module Values = Values |}]
 ;;
 
 let eval_signature ~protocol ~base_module ~io_subsystem endpoints =
@@ -143,6 +146,7 @@ let eval_signature ~protocol ~base_module ~io_subsystem endpoints =
            name
            [%type:
              ?endpoint_url:string -> ?cfg:Awso.Cfg.t -> [%t request_type] -> [%t result_type]]))
+
 ;;
 
 let%expect_test "eval_signature_async" =

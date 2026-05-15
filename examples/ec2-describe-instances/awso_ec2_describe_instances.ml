@@ -1,13 +1,8 @@
-module Ec2 = struct
-  module Values = Awso_ec2_async.Values
-  module Io = Awso_ec2_async.Io
-end
+module Ec2 = Awso_ec2_async
 
-let ec2_describe_instances ~cfg =
+let ec2_describe_instances () =
   let%bind response =
-    Ec2.Io.describe_instances
-      ~cfg
-      (Ec2.Values.DescribeInstancesRequest.make ())
+    Ec2.describe_instances (Ec2.Values.DescribeInstancesRequest.make ())
   in
   let reservations =
     match response with
@@ -32,17 +27,12 @@ let ec2_describe_instances ~cfg =
   return ()
 ;;
 
-let main () =
-  let%bind cfg = Awso_async.Cfg.get_exn () in
-  ec2_describe_instances ~cfg
-;;
-
 let () =
   let cmd =
     Command.async
       ~summary:"Test script: list EC2 instances in default region"
       (let%map_open.Command () = return () in
-       fun () -> main ())
+       fun () -> ec2_describe_instances ())
   in
   Command_unix.run cmd
 ;;
