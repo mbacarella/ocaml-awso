@@ -11,7 +11,7 @@ license: "MIT"
 homepage: "https://github.com/mbacarella/awso"
 bug-reports: "https://github.com/mbacarella/awso/issues"
 depends: [
-  "dune" {>= "3.8"}
+  "dune" {>= "3.0"}
   "awso"
   "cohttp-async"
   "core_unix"

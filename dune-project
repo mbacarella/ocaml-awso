@@ -1,10 +1,8 @@
-(lang dune 3.8)
+(lang dune 3.0)
 
 (name awso)
 
 (generate_opam_files true)
-
-(opam_file_location inside_opam_directory)
 
 (license MIT)
 
