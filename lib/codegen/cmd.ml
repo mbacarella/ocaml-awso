@@ -207,9 +207,9 @@ module Generate_all = struct
            in
            let botoservice = service_json |> read_file |> Botocore_service.of_json in
            let base_dir = outdir ^/ service in
-           let async_dir = outdir ^/ service ^ "-async" in
-           let lwt_dir = outdir ^/ service ^ "-lwt" in
-           let cli_dir = outdir ^/ service ^ "-cli-async" in
+           let async_dir = outdir ^/ service ^/ "async" in
+           let lwt_dir = outdir ^/ service ^/ "lwt" in
+           let cli_dir = outdir ^/ service ^/ "cli-async" in
            eprintf "generating %s ...\n%!" service;
            (* base service: dune, endpoints.ml, values.ml (+ submodules) *)
            write_dune_file ~argv:argv_strs ~outdir:base_dir

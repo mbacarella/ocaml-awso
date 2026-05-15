@@ -32,6 +32,9 @@ doc:
 format:
 	dune fmt
 
+build:
+	dune build
+
 runtest:
 	dune build @runtest
 
