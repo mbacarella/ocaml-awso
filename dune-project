@@ -12,7 +12,7 @@
 
 (maintainers "Michael Bacarella <m@bacarella.com>")
 
-(homepage "https://github.com/solvuu/awso")
+(homepage "https://github.com/mbacarella/awso")
 
 (source
  (github mbacarella/awso))
