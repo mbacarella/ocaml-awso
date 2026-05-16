@@ -5,110 +5,82 @@ val create_suite_definition :
     ?cfg:Awso.Cfg.t ->
       CreateSuiteDefinitionRequest.t ->
         (CreateSuiteDefinitionResponse.t,
-          [ `AWS of CreateSuiteDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateSuiteDefinitionResponse.error) Result.t Async.Deferred.t
 val delete_suite_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSuiteDefinitionRequest.t ->
         (DeleteSuiteDefinitionResponse.t,
-          [ `AWS of DeleteSuiteDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeleteSuiteDefinitionResponse.error) Result.t Async.Deferred.t
 val get_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEndpointRequest.t ->
-        (GetEndpointResponse.t,
-          [ `AWS of GetEndpointResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetEndpointResponse.t, GetEndpointResponse.error) Result.t
           Async.Deferred.t
 val get_suite_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSuiteDefinitionRequest.t ->
-        (GetSuiteDefinitionResponse.t,
-          [ `AWS of GetSuiteDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetSuiteDefinitionResponse.t, GetSuiteDefinitionResponse.error)
+          Result.t Async.Deferred.t
 val get_suite_run :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSuiteRunRequest.t ->
-        (GetSuiteRunResponse.t,
-          [ `AWS of GetSuiteRunResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetSuiteRunResponse.t, GetSuiteRunResponse.error) Result.t
           Async.Deferred.t
 val get_suite_run_report :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSuiteRunReportRequest.t ->
-        (GetSuiteRunReportResponse.t,
-          [ `AWS of GetSuiteRunReportResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetSuiteRunReportResponse.t, GetSuiteRunReportResponse.error)
+          Result.t Async.Deferred.t
 val list_suite_definitions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSuiteDefinitionsRequest.t ->
-        (ListSuiteDefinitionsResponse.t,
-          [ `AWS of ListSuiteDefinitionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListSuiteDefinitionsResponse.t, ListSuiteDefinitionsResponse.error)
+          Result.t Async.Deferred.t
 val list_suite_runs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSuiteRunsRequest.t ->
-        (ListSuiteRunsResponse.t,
-          [ `AWS of ListSuiteRunsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListSuiteRunsResponse.t, ListSuiteRunsResponse.error) Result.t
           Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val start_suite_run :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartSuiteRunRequest.t ->
-        (StartSuiteRunResponse.t,
-          [ `AWS of StartSuiteRunResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StartSuiteRunResponse.t, StartSuiteRunResponse.error) Result.t
           Async.Deferred.t
 val stop_suite_run :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopSuiteRunRequest.t ->
-        (StopSuiteRunResponse.t,
-          [ `AWS of StopSuiteRunResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StopSuiteRunResponse.t, StopSuiteRunResponse.error) Result.t
           Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
 val update_suite_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSuiteDefinitionRequest.t ->
         (UpdateSuiteDefinitionResponse.t,
-          [ `AWS of UpdateSuiteDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateSuiteDefinitionResponse.error) Result.t Async.Deferred.t

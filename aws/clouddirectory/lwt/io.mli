@@ -4,460 +4,369 @@ val add_facet_to_object :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AddFacetToObjectRequest.t ->
-        (AddFacetToObjectResponse.t,
-          [ `AWS of AddFacetToObjectResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AddFacetToObjectResponse.t, AddFacetToObjectResponse.error) Result.t
+          Lwt.t
 val apply_schema :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ApplySchemaRequest.t ->
-        (ApplySchemaResponse.t,
-          [ `AWS of ApplySchemaResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ApplySchemaResponse.t, ApplySchemaResponse.error) Result.t Lwt.t
 val attach_object :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AttachObjectRequest.t ->
-        (AttachObjectResponse.t,
-          [ `AWS of AttachObjectResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AttachObjectResponse.t, AttachObjectResponse.error) Result.t Lwt.t
 val attach_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AttachPolicyRequest.t ->
-        (AttachPolicyResponse.t,
-          [ `AWS of AttachPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AttachPolicyResponse.t, AttachPolicyResponse.error) Result.t Lwt.t
 val attach_to_index :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AttachToIndexRequest.t ->
-        (AttachToIndexResponse.t,
-          [ `AWS of AttachToIndexResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AttachToIndexResponse.t, AttachToIndexResponse.error) Result.t Lwt.t
 val attach_typed_link :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AttachTypedLinkRequest.t ->
-        (AttachTypedLinkResponse.t,
-          [ `AWS of AttachTypedLinkResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AttachTypedLinkResponse.t, AttachTypedLinkResponse.error) Result.t
+          Lwt.t
 val batch_read :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchReadRequest.t ->
-        (BatchReadResponse.t,
-          [ `AWS of BatchReadResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (BatchReadResponse.t, BatchReadResponse.error) Result.t Lwt.t
 val batch_write :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchWriteRequest.t ->
-        (BatchWriteResponse.t,
-          [ `AWS of BatchWriteResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (BatchWriteResponse.t, BatchWriteResponse.error) Result.t Lwt.t
 val create_directory :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDirectoryRequest.t ->
-        (CreateDirectoryResponse.t,
-          [ `AWS of CreateDirectoryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateDirectoryResponse.t, CreateDirectoryResponse.error) Result.t
+          Lwt.t
 val create_facet :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateFacetRequest.t ->
-        (CreateFacetResponse.t,
-          [ `AWS of CreateFacetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateFacetResponse.t, CreateFacetResponse.error) Result.t Lwt.t
 val create_index :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateIndexRequest.t ->
-        (CreateIndexResponse.t,
-          [ `AWS of CreateIndexResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateIndexResponse.t, CreateIndexResponse.error) Result.t Lwt.t
 val create_object :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateObjectRequest.t ->
-        (CreateObjectResponse.t,
-          [ `AWS of CreateObjectResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateObjectResponse.t, CreateObjectResponse.error) Result.t Lwt.t
 val create_schema :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSchemaRequest.t ->
-        (CreateSchemaResponse.t,
-          [ `AWS of CreateSchemaResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateSchemaResponse.t, CreateSchemaResponse.error) Result.t Lwt.t
 val create_typed_link_facet :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTypedLinkFacetRequest.t ->
-        (CreateTypedLinkFacetResponse.t,
-          [ `AWS of CreateTypedLinkFacetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateTypedLinkFacetResponse.t, CreateTypedLinkFacetResponse.error)
+          Result.t Lwt.t
 val delete_directory :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDirectoryRequest.t ->
-        (DeleteDirectoryResponse.t,
-          [ `AWS of DeleteDirectoryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteDirectoryResponse.t, DeleteDirectoryResponse.error) Result.t
+          Lwt.t
 val delete_facet :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteFacetRequest.t ->
-        (DeleteFacetResponse.t,
-          [ `AWS of DeleteFacetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteFacetResponse.t, DeleteFacetResponse.error) Result.t Lwt.t
 val delete_object :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteObjectRequest.t ->
-        (DeleteObjectResponse.t,
-          [ `AWS of DeleteObjectResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteObjectResponse.t, DeleteObjectResponse.error) Result.t Lwt.t
 val delete_schema :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSchemaRequest.t ->
-        (DeleteSchemaResponse.t,
-          [ `AWS of DeleteSchemaResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteSchemaResponse.t, DeleteSchemaResponse.error) Result.t Lwt.t
 val delete_typed_link_facet :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTypedLinkFacetRequest.t ->
-        (DeleteTypedLinkFacetResponse.t,
-          [ `AWS of DeleteTypedLinkFacetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteTypedLinkFacetResponse.t, DeleteTypedLinkFacetResponse.error)
+          Result.t Lwt.t
 val detach_from_index :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DetachFromIndexRequest.t ->
-        (DetachFromIndexResponse.t,
-          [ `AWS of DetachFromIndexResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DetachFromIndexResponse.t, DetachFromIndexResponse.error) Result.t
+          Lwt.t
 val detach_object :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DetachObjectRequest.t ->
-        (DetachObjectResponse.t,
-          [ `AWS of DetachObjectResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DetachObjectResponse.t, DetachObjectResponse.error) Result.t Lwt.t
 val detach_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DetachPolicyRequest.t ->
-        (DetachPolicyResponse.t,
-          [ `AWS of DetachPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DetachPolicyResponse.t, DetachPolicyResponse.error) Result.t Lwt.t
 val detach_typed_link :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DetachTypedLinkRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DetachTypedLinkRequest.t -> (unit, unit) Result.t Lwt.t
 val disable_directory :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisableDirectoryRequest.t ->
-        (DisableDirectoryResponse.t,
-          [ `AWS of DisableDirectoryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DisableDirectoryResponse.t, DisableDirectoryResponse.error) Result.t
+          Lwt.t
 val enable_directory :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EnableDirectoryRequest.t ->
-        (EnableDirectoryResponse.t,
-          [ `AWS of EnableDirectoryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (EnableDirectoryResponse.t, EnableDirectoryResponse.error) Result.t
+          Lwt.t
 val get_applied_schema_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAppliedSchemaVersionRequest.t ->
         (GetAppliedSchemaVersionResponse.t,
-          [ `AWS of GetAppliedSchemaVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetAppliedSchemaVersionResponse.error) Result.t Lwt.t
 val get_directory :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDirectoryRequest.t ->
-        (GetDirectoryResponse.t,
-          [ `AWS of GetDirectoryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetDirectoryResponse.t, GetDirectoryResponse.error) Result.t Lwt.t
 val get_facet :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetFacetRequest.t ->
-        (GetFacetResponse.t,
-          [ `AWS of GetFacetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetFacetResponse.t, GetFacetResponse.error) Result.t Lwt.t
 val get_link_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLinkAttributesRequest.t ->
-        (GetLinkAttributesResponse.t,
-          [ `AWS of GetLinkAttributesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetLinkAttributesResponse.t, GetLinkAttributesResponse.error)
+          Result.t Lwt.t
 val get_object_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetObjectAttributesRequest.t ->
-        (GetObjectAttributesResponse.t,
-          [ `AWS of GetObjectAttributesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetObjectAttributesResponse.t, GetObjectAttributesResponse.error)
+          Result.t Lwt.t
 val get_object_information :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetObjectInformationRequest.t ->
-        (GetObjectInformationResponse.t,
-          [ `AWS of GetObjectInformationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetObjectInformationResponse.t, GetObjectInformationResponse.error)
+          Result.t Lwt.t
 val get_schema_as_json :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSchemaAsJsonRequest.t ->
-        (GetSchemaAsJsonResponse.t,
-          [ `AWS of GetSchemaAsJsonResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetSchemaAsJsonResponse.t, GetSchemaAsJsonResponse.error) Result.t
+          Lwt.t
 val get_typed_link_facet_information :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTypedLinkFacetInformationRequest.t ->
         (GetTypedLinkFacetInformationResponse.t,
-          [ `AWS of GetTypedLinkFacetInformationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetTypedLinkFacetInformationResponse.error) Result.t Lwt.t
 val list_applied_schema_arns :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAppliedSchemaArnsRequest.t ->
         (ListAppliedSchemaArnsResponse.t,
-          [ `AWS of ListAppliedSchemaArnsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListAppliedSchemaArnsResponse.error) Result.t Lwt.t
 val list_attached_indices :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAttachedIndicesRequest.t ->
-        (ListAttachedIndicesResponse.t,
-          [ `AWS of ListAttachedIndicesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListAttachedIndicesResponse.t, ListAttachedIndicesResponse.error)
+          Result.t Lwt.t
 val list_development_schema_arns :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDevelopmentSchemaArnsRequest.t ->
         (ListDevelopmentSchemaArnsResponse.t,
-          [ `AWS of ListDevelopmentSchemaArnsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListDevelopmentSchemaArnsResponse.error) Result.t Lwt.t
 val list_directories :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDirectoriesRequest.t ->
-        (ListDirectoriesResponse.t,
-          [ `AWS of ListDirectoriesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListDirectoriesResponse.t, ListDirectoriesResponse.error) Result.t
+          Lwt.t
 val list_facet_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFacetAttributesRequest.t ->
-        (ListFacetAttributesResponse.t,
-          [ `AWS of ListFacetAttributesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListFacetAttributesResponse.t, ListFacetAttributesResponse.error)
+          Result.t Lwt.t
 val list_facet_names :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFacetNamesRequest.t ->
-        (ListFacetNamesResponse.t,
-          [ `AWS of ListFacetNamesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListFacetNamesResponse.t, ListFacetNamesResponse.error) Result.t
+          Lwt.t
 val list_incoming_typed_links :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListIncomingTypedLinksRequest.t ->
         (ListIncomingTypedLinksResponse.t,
-          [ `AWS of ListIncomingTypedLinksResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListIncomingTypedLinksResponse.error) Result.t Lwt.t
 val list_index :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListIndexRequest.t ->
-        (ListIndexResponse.t,
-          [ `AWS of ListIndexResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListIndexResponse.t, ListIndexResponse.error) Result.t Lwt.t
 val list_managed_schema_arns :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListManagedSchemaArnsRequest.t ->
         (ListManagedSchemaArnsResponse.t,
-          [ `AWS of ListManagedSchemaArnsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListManagedSchemaArnsResponse.error) Result.t Lwt.t
 val list_object_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListObjectAttributesRequest.t ->
-        (ListObjectAttributesResponse.t,
-          [ `AWS of ListObjectAttributesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListObjectAttributesResponse.t, ListObjectAttributesResponse.error)
+          Result.t Lwt.t
 val list_object_children :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListObjectChildrenRequest.t ->
-        (ListObjectChildrenResponse.t,
-          [ `AWS of ListObjectChildrenResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListObjectChildrenResponse.t, ListObjectChildrenResponse.error)
+          Result.t Lwt.t
 val list_object_parent_paths :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListObjectParentPathsRequest.t ->
         (ListObjectParentPathsResponse.t,
-          [ `AWS of ListObjectParentPathsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListObjectParentPathsResponse.error) Result.t Lwt.t
 val list_object_parents :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListObjectParentsRequest.t ->
-        (ListObjectParentsResponse.t,
-          [ `AWS of ListObjectParentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListObjectParentsResponse.t, ListObjectParentsResponse.error)
+          Result.t Lwt.t
 val list_object_policies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListObjectPoliciesRequest.t ->
-        (ListObjectPoliciesResponse.t,
-          [ `AWS of ListObjectPoliciesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListObjectPoliciesResponse.t, ListObjectPoliciesResponse.error)
+          Result.t Lwt.t
 val list_outgoing_typed_links :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListOutgoingTypedLinksRequest.t ->
         (ListOutgoingTypedLinksResponse.t,
-          [ `AWS of ListOutgoingTypedLinksResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListOutgoingTypedLinksResponse.error) Result.t Lwt.t
 val list_policy_attachments :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPolicyAttachmentsRequest.t ->
         (ListPolicyAttachmentsResponse.t,
-          [ `AWS of ListPolicyAttachmentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListPolicyAttachmentsResponse.error) Result.t Lwt.t
 val list_published_schema_arns :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPublishedSchemaArnsRequest.t ->
         (ListPublishedSchemaArnsResponse.t,
-          [ `AWS of ListPublishedSchemaArnsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListPublishedSchemaArnsResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val list_typed_link_facet_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTypedLinkFacetAttributesRequest.t ->
         (ListTypedLinkFacetAttributesResponse.t,
-          [ `AWS of ListTypedLinkFacetAttributesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListTypedLinkFacetAttributesResponse.error) Result.t Lwt.t
 val list_typed_link_facet_names :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTypedLinkFacetNamesRequest.t ->
         (ListTypedLinkFacetNamesResponse.t,
-          [ `AWS of ListTypedLinkFacetNamesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListTypedLinkFacetNamesResponse.error) Result.t Lwt.t
 val lookup_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       LookupPolicyRequest.t ->
-        (LookupPolicyResponse.t,
-          [ `AWS of LookupPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (LookupPolicyResponse.t, LookupPolicyResponse.error) Result.t Lwt.t
 val publish_schema :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PublishSchemaRequest.t ->
-        (PublishSchemaResponse.t,
-          [ `AWS of PublishSchemaResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PublishSchemaResponse.t, PublishSchemaResponse.error) Result.t Lwt.t
 val put_schema_from_json :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutSchemaFromJsonRequest.t ->
-        (PutSchemaFromJsonResponse.t,
-          [ `AWS of PutSchemaFromJsonResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutSchemaFromJsonResponse.t, PutSchemaFromJsonResponse.error)
+          Result.t Lwt.t
 val remove_facet_from_object :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RemoveFacetFromObjectRequest.t ->
         (RemoveFacetFromObjectResponse.t,
-          [ `AWS of RemoveFacetFromObjectResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          RemoveFacetFromObjectResponse.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_facet :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateFacetRequest.t ->
-        (UpdateFacetResponse.t,
-          [ `AWS of UpdateFacetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateFacetResponse.t, UpdateFacetResponse.error) Result.t Lwt.t
 val update_link_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateLinkAttributesRequest.t ->
-        (UpdateLinkAttributesResponse.t,
-          [ `AWS of UpdateLinkAttributesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateLinkAttributesResponse.t, UpdateLinkAttributesResponse.error)
+          Result.t Lwt.t
 val update_object_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateObjectAttributesRequest.t ->
         (UpdateObjectAttributesResponse.t,
-          [ `AWS of UpdateObjectAttributesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateObjectAttributesResponse.error) Result.t Lwt.t
 val update_schema :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSchemaRequest.t ->
-        (UpdateSchemaResponse.t,
-          [ `AWS of UpdateSchemaResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateSchemaResponse.t, UpdateSchemaResponse.error) Result.t Lwt.t
 val update_typed_link_facet :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateTypedLinkFacetRequest.t ->
-        (UpdateTypedLinkFacetResponse.t,
-          [ `AWS of UpdateTypedLinkFacetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateTypedLinkFacetResponse.t, UpdateTypedLinkFacetResponse.error)
+          Result.t Lwt.t
 val upgrade_applied_schema :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpgradeAppliedSchemaRequest.t ->
-        (UpgradeAppliedSchemaResponse.t,
-          [ `AWS of UpgradeAppliedSchemaResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpgradeAppliedSchemaResponse.t, UpgradeAppliedSchemaResponse.error)
+          Result.t Lwt.t
 val upgrade_published_schema :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpgradePublishedSchemaRequest.t ->
         (UpgradePublishedSchemaResponse.t,
-          [ `AWS of UpgradePublishedSchemaResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpgradePublishedSchemaResponse.error) Result.t Lwt.t

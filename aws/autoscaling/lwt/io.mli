@@ -2,408 +2,306 @@
 open Awso_autoscaling.Values
 val attach_instances :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      AttachInstancesQuery.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> AttachInstancesQuery.t -> (unit, unit) Result.t Lwt.t
 val attach_load_balancer_target_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AttachLoadBalancerTargetGroupsType.t ->
         (AttachLoadBalancerTargetGroupsResultType.t,
-          [ `AWS of AttachLoadBalancerTargetGroupsResultType.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AttachLoadBalancerTargetGroupsResultType.error) Result.t Lwt.t
 val attach_load_balancers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AttachLoadBalancersType.t ->
         (AttachLoadBalancersResultType.t,
-          [ `AWS of AttachLoadBalancersResultType.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AttachLoadBalancersResultType.error) Result.t Lwt.t
 val batch_delete_scheduled_action :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchDeleteScheduledActionType.t ->
         (BatchDeleteScheduledActionAnswer.t,
-          [ `AWS of BatchDeleteScheduledActionAnswer.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          BatchDeleteScheduledActionAnswer.error) Result.t Lwt.t
 val batch_put_scheduled_update_group_action :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchPutScheduledUpdateGroupActionType.t ->
         (BatchPutScheduledUpdateGroupActionAnswer.t,
-          [ `AWS of BatchPutScheduledUpdateGroupActionAnswer.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          BatchPutScheduledUpdateGroupActionAnswer.error) Result.t Lwt.t
 val cancel_instance_refresh :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelInstanceRefreshType.t ->
-        (CancelInstanceRefreshAnswer.t,
-          [ `AWS of CancelInstanceRefreshAnswer.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CancelInstanceRefreshAnswer.t, CancelInstanceRefreshAnswer.error)
+          Result.t Lwt.t
 val complete_lifecycle_action :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CompleteLifecycleActionType.t ->
         (CompleteLifecycleActionAnswer.t,
-          [ `AWS of CompleteLifecycleActionAnswer.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CompleteLifecycleActionAnswer.error) Result.t Lwt.t
 val create_auto_scaling_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      CreateAutoScalingGroupType.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      CreateAutoScalingGroupType.t -> (unit, unit) Result.t Lwt.t
 val create_launch_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      CreateLaunchConfigurationType.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      CreateLaunchConfigurationType.t -> (unit, unit) Result.t Lwt.t
 val create_or_update_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      CreateOrUpdateTagsType.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      CreateOrUpdateTagsType.t -> (unit, unit) Result.t Lwt.t
 val delete_auto_scaling_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteAutoScalingGroupType.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteAutoScalingGroupType.t -> (unit, unit) Result.t Lwt.t
 val delete_launch_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      LaunchConfigurationNameType.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      LaunchConfigurationNameType.t -> (unit, unit) Result.t Lwt.t
 val delete_lifecycle_hook :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteLifecycleHookType.t ->
-        (DeleteLifecycleHookAnswer.t,
-          [ `AWS of DeleteLifecycleHookAnswer.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteLifecycleHookAnswer.t, DeleteLifecycleHookAnswer.error)
+          Result.t Lwt.t
 val delete_notification_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteNotificationConfigurationType.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteNotificationConfigurationType.t -> (unit, unit) Result.t Lwt.t
 val delete_policy :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeletePolicyType.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeletePolicyType.t -> (unit, unit) Result.t Lwt.t
 val delete_scheduled_action :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteScheduledActionType.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteScheduledActionType.t -> (unit, unit) Result.t Lwt.t
 val delete_tags :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteTagsType.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteTagsType.t -> (unit, unit) Result.t Lwt.t
 val delete_warm_pool :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteWarmPoolType.t ->
-        (DeleteWarmPoolAnswer.t,
-          [ `AWS of DeleteWarmPoolAnswer.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteWarmPoolAnswer.t, DeleteWarmPoolAnswer.error) Result.t Lwt.t
 val describe_account_limits :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       unit ->
-        (DescribeAccountLimitsAnswer.t,
-          [ `AWS of DescribeAccountLimitsAnswer.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeAccountLimitsAnswer.t, DescribeAccountLimitsAnswer.error)
+          Result.t Lwt.t
 val describe_adjustment_types :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       unit ->
         (DescribeAdjustmentTypesAnswer.t,
-          [ `AWS of DescribeAdjustmentTypesAnswer.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeAdjustmentTypesAnswer.error) Result.t Lwt.t
 val describe_auto_scaling_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AutoScalingGroupNamesType.t ->
-        (AutoScalingGroupsType.t,
-          [ `AWS of AutoScalingGroupsType.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AutoScalingGroupsType.t, AutoScalingGroupsType.error) Result.t Lwt.t
 val describe_auto_scaling_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAutoScalingInstancesType.t ->
-        (AutoScalingInstancesType.t,
-          [ `AWS of AutoScalingInstancesType.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AutoScalingInstancesType.t, AutoScalingInstancesType.error) Result.t
+          Lwt.t
 val describe_auto_scaling_notification_types :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       unit ->
         (DescribeAutoScalingNotificationTypesAnswer.t,
-          [ `AWS of DescribeAutoScalingNotificationTypesAnswer.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeAutoScalingNotificationTypesAnswer.error) Result.t Lwt.t
 val describe_instance_refreshes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeInstanceRefreshesType.t ->
         (DescribeInstanceRefreshesAnswer.t,
-          [ `AWS of DescribeInstanceRefreshesAnswer.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeInstanceRefreshesAnswer.error) Result.t Lwt.t
 val describe_launch_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       LaunchConfigurationNamesType.t ->
-        (LaunchConfigurationsType.t,
-          [ `AWS of LaunchConfigurationsType.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (LaunchConfigurationsType.t, LaunchConfigurationsType.error) Result.t
+          Lwt.t
 val describe_lifecycle_hook_types :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       unit ->
         (DescribeLifecycleHookTypesAnswer.t,
-          [ `AWS of DescribeLifecycleHookTypesAnswer.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeLifecycleHookTypesAnswer.error) Result.t Lwt.t
 val describe_lifecycle_hooks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeLifecycleHooksType.t ->
-        (DescribeLifecycleHooksAnswer.t,
-          [ `AWS of DescribeLifecycleHooksAnswer.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeLifecycleHooksAnswer.t, DescribeLifecycleHooksAnswer.error)
+          Result.t Lwt.t
 val describe_load_balancer_target_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeLoadBalancerTargetGroupsRequest.t ->
         (DescribeLoadBalancerTargetGroupsResponse.t,
-          [ `AWS of DescribeLoadBalancerTargetGroupsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeLoadBalancerTargetGroupsResponse.error) Result.t Lwt.t
 val describe_load_balancers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeLoadBalancersRequest.t ->
         (DescribeLoadBalancersResponse.t,
-          [ `AWS of DescribeLoadBalancersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeLoadBalancersResponse.error) Result.t Lwt.t
 val describe_metric_collection_types :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       unit ->
         (DescribeMetricCollectionTypesAnswer.t,
-          [ `AWS of DescribeMetricCollectionTypesAnswer.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeMetricCollectionTypesAnswer.error) Result.t Lwt.t
 val describe_notification_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeNotificationConfigurationsType.t ->
         (DescribeNotificationConfigurationsAnswer.t,
-          [ `AWS of DescribeNotificationConfigurationsAnswer.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeNotificationConfigurationsAnswer.error) Result.t Lwt.t
 val describe_policies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePoliciesType.t ->
-        (PoliciesType.t,
-          [ `AWS of PoliciesType.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PoliciesType.t, PoliciesType.error) Result.t Lwt.t
 val describe_scaling_activities :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeScalingActivitiesType.t ->
-        (ActivitiesType.t,
-          [ `AWS of ActivitiesType.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ActivitiesType.t, ActivitiesType.error) Result.t Lwt.t
 val describe_scaling_process_types :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      unit ->
-        (ProcessesType.t,
-          [ `AWS of ProcessesType.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+      unit -> (ProcessesType.t, ProcessesType.error) Result.t Lwt.t
 val describe_scheduled_actions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeScheduledActionsType.t ->
-        (ScheduledActionsType.t,
-          [ `AWS of ScheduledActionsType.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ScheduledActionsType.t, ScheduledActionsType.error) Result.t Lwt.t
 val describe_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DescribeTagsType.t ->
-        (TagsType.t,
-          [ `AWS of TagsType.error  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DescribeTagsType.t -> (TagsType.t, TagsType.error) Result.t Lwt.t
 val describe_termination_policy_types :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       unit ->
         (DescribeTerminationPolicyTypesAnswer.t,
-          [ `AWS of DescribeTerminationPolicyTypesAnswer.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeTerminationPolicyTypesAnswer.error) Result.t Lwt.t
 val describe_warm_pool :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeWarmPoolType.t ->
-        (DescribeWarmPoolAnswer.t,
-          [ `AWS of DescribeWarmPoolAnswer.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeWarmPoolAnswer.t, DescribeWarmPoolAnswer.error) Result.t
+          Lwt.t
 val detach_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DetachInstancesQuery.t ->
-        (DetachInstancesAnswer.t,
-          [ `AWS of DetachInstancesAnswer.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DetachInstancesAnswer.t, DetachInstancesAnswer.error) Result.t Lwt.t
 val detach_load_balancer_target_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DetachLoadBalancerTargetGroupsType.t ->
         (DetachLoadBalancerTargetGroupsResultType.t,
-          [ `AWS of DetachLoadBalancerTargetGroupsResultType.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DetachLoadBalancerTargetGroupsResultType.error) Result.t Lwt.t
 val detach_load_balancers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DetachLoadBalancersType.t ->
         (DetachLoadBalancersResultType.t,
-          [ `AWS of DetachLoadBalancersResultType.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DetachLoadBalancersResultType.error) Result.t Lwt.t
 val disable_metrics_collection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DisableMetricsCollectionQuery.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DisableMetricsCollectionQuery.t -> (unit, unit) Result.t Lwt.t
 val enable_metrics_collection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      EnableMetricsCollectionQuery.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      EnableMetricsCollectionQuery.t -> (unit, unit) Result.t Lwt.t
 val enter_standby :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EnterStandbyQuery.t ->
-        (EnterStandbyAnswer.t,
-          [ `AWS of EnterStandbyAnswer.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (EnterStandbyAnswer.t, EnterStandbyAnswer.error) Result.t Lwt.t
 val execute_policy :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      ExecutePolicyType.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> ExecutePolicyType.t -> (unit, unit) Result.t Lwt.t
 val exit_standby :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ExitStandbyQuery.t ->
-        (ExitStandbyAnswer.t,
-          [ `AWS of ExitStandbyAnswer.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ExitStandbyAnswer.t, ExitStandbyAnswer.error) Result.t Lwt.t
 val get_predictive_scaling_forecast :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPredictiveScalingForecastType.t ->
         (GetPredictiveScalingForecastAnswer.t,
-          [ `AWS of GetPredictiveScalingForecastAnswer.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetPredictiveScalingForecastAnswer.error) Result.t Lwt.t
 val put_lifecycle_hook :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutLifecycleHookType.t ->
-        (PutLifecycleHookAnswer.t,
-          [ `AWS of PutLifecycleHookAnswer.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutLifecycleHookAnswer.t, PutLifecycleHookAnswer.error) Result.t
+          Lwt.t
 val put_notification_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PutNotificationConfigurationType.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      PutNotificationConfigurationType.t -> (unit, unit) Result.t Lwt.t
 val put_scaling_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutScalingPolicyType.t ->
-        (PolicyARNType.t,
-          [ `AWS of PolicyARNType.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PolicyARNType.t, PolicyARNType.error) Result.t Lwt.t
 val put_scheduled_update_group_action :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PutScheduledUpdateGroupActionType.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      PutScheduledUpdateGroupActionType.t -> (unit, unit) Result.t Lwt.t
 val put_warm_pool :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutWarmPoolType.t ->
-        (PutWarmPoolAnswer.t,
-          [ `AWS of PutWarmPoolAnswer.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutWarmPoolAnswer.t, PutWarmPoolAnswer.error) Result.t Lwt.t
 val record_lifecycle_action_heartbeat :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RecordLifecycleActionHeartbeatType.t ->
         (RecordLifecycleActionHeartbeatAnswer.t,
-          [ `AWS of RecordLifecycleActionHeartbeatAnswer.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          RecordLifecycleActionHeartbeatAnswer.error) Result.t Lwt.t
 val resume_processes :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      ScalingProcessQuery.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> ScalingProcessQuery.t -> (unit, unit) Result.t Lwt.t
 val set_desired_capacity :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      SetDesiredCapacityType.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      SetDesiredCapacityType.t -> (unit, unit) Result.t Lwt.t
 val set_instance_health :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      SetInstanceHealthQuery.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      SetInstanceHealthQuery.t -> (unit, unit) Result.t Lwt.t
 val set_instance_protection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SetInstanceProtectionQuery.t ->
-        (SetInstanceProtectionAnswer.t,
-          [ `AWS of SetInstanceProtectionAnswer.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SetInstanceProtectionAnswer.t, SetInstanceProtectionAnswer.error)
+          Result.t Lwt.t
 val start_instance_refresh :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartInstanceRefreshType.t ->
-        (StartInstanceRefreshAnswer.t,
-          [ `AWS of StartInstanceRefreshAnswer.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartInstanceRefreshAnswer.t, StartInstanceRefreshAnswer.error)
+          Result.t Lwt.t
 val suspend_processes :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      ScalingProcessQuery.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> ScalingProcessQuery.t -> (unit, unit) Result.t Lwt.t
 val terminate_instance_in_auto_scaling_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TerminateInstanceInAutoScalingGroupType.t ->
-        (ActivityType.t,
-          [ `AWS of ActivityType.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ActivityType.t, ActivityType.error) Result.t Lwt.t
 val update_auto_scaling_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UpdateAutoScalingGroupType.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      UpdateAutoScalingGroupType.t -> (unit, unit) Result.t Lwt.t

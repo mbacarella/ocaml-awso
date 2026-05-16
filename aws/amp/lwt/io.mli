@@ -5,113 +5,90 @@ val create_alert_manager_definition :
     ?cfg:Awso.Cfg.t ->
       CreateAlertManagerDefinitionRequest.t ->
         (CreateAlertManagerDefinitionResponse.t,
-          [ `AWS of CreateAlertManagerDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateAlertManagerDefinitionResponse.error) Result.t Lwt.t
 val create_rule_groups_namespace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRuleGroupsNamespaceRequest.t ->
         (CreateRuleGroupsNamespaceResponse.t,
-          [ `AWS of CreateRuleGroupsNamespaceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateRuleGroupsNamespaceResponse.error) Result.t Lwt.t
 val create_workspace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateWorkspaceRequest.t ->
-        (CreateWorkspaceResponse.t,
-          [ `AWS of CreateWorkspaceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateWorkspaceResponse.t, CreateWorkspaceResponse.error) Result.t
+          Lwt.t
 val delete_alert_manager_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteAlertManagerDefinitionRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteAlertManagerDefinitionRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_rule_groups_namespace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteRuleGroupsNamespaceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteRuleGroupsNamespaceRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_workspace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteWorkspaceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteWorkspaceRequest.t -> (unit, unit) Result.t Lwt.t
 val describe_alert_manager_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAlertManagerDefinitionRequest.t ->
         (DescribeAlertManagerDefinitionResponse.t,
-          [ `AWS of DescribeAlertManagerDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeAlertManagerDefinitionResponse.error) Result.t Lwt.t
 val describe_rule_groups_namespace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRuleGroupsNamespaceRequest.t ->
         (DescribeRuleGroupsNamespaceResponse.t,
-          [ `AWS of DescribeRuleGroupsNamespaceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeRuleGroupsNamespaceResponse.error) Result.t Lwt.t
 val describe_workspace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeWorkspaceRequest.t ->
-        (DescribeWorkspaceResponse.t,
-          [ `AWS of DescribeWorkspaceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeWorkspaceResponse.t, DescribeWorkspaceResponse.error)
+          Result.t Lwt.t
 val list_rule_groups_namespaces :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRuleGroupsNamespacesRequest.t ->
         (ListRuleGroupsNamespacesResponse.t,
-          [ `AWS of ListRuleGroupsNamespacesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListRuleGroupsNamespacesResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val list_workspaces :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListWorkspacesRequest.t ->
-        (ListWorkspacesResponse.t,
-          [ `AWS of ListWorkspacesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListWorkspacesResponse.t, ListWorkspacesResponse.error) Result.t
+          Lwt.t
 val put_alert_manager_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutAlertManagerDefinitionRequest.t ->
         (PutAlertManagerDefinitionResponse.t,
-          [ `AWS of PutAlertManagerDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutAlertManagerDefinitionResponse.error) Result.t Lwt.t
 val put_rule_groups_namespace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutRuleGroupsNamespaceRequest.t ->
         (PutRuleGroupsNamespaceResponse.t,
-          [ `AWS of PutRuleGroupsNamespaceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutRuleGroupsNamespaceResponse.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_workspace_alias :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UpdateWorkspaceAliasRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      UpdateWorkspaceAliasRequest.t -> (unit, unit) Result.t Lwt.t

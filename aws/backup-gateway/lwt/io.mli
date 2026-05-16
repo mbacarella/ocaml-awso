@@ -5,110 +5,88 @@ val associate_gateway_to_server :
     ?cfg:Awso.Cfg.t ->
       AssociateGatewayToServerInput.t ->
         (AssociateGatewayToServerOutput.t,
-          [ `AWS of AssociateGatewayToServerOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssociateGatewayToServerOutput.error) Result.t Lwt.t
 val create_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateGatewayInput.t ->
-        (CreateGatewayOutput.t,
-          [ `AWS of CreateGatewayOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateGatewayOutput.t, CreateGatewayOutput.error) Result.t Lwt.t
 val delete_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteGatewayInput.t ->
-        (DeleteGatewayOutput.t,
-          [ `AWS of DeleteGatewayOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteGatewayOutput.t, DeleteGatewayOutput.error) Result.t Lwt.t
 val delete_hypervisor :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteHypervisorInput.t ->
-        (DeleteHypervisorOutput.t,
-          [ `AWS of DeleteHypervisorOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteHypervisorOutput.t, DeleteHypervisorOutput.error) Result.t
+          Lwt.t
 val disassociate_gateway_from_server :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateGatewayFromServerInput.t ->
         (DisassociateGatewayFromServerOutput.t,
-          [ `AWS of DisassociateGatewayFromServerOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateGatewayFromServerOutput.error) Result.t Lwt.t
 val import_hypervisor_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ImportHypervisorConfigurationInput.t ->
         (ImportHypervisorConfigurationOutput.t,
-          [ `AWS of ImportHypervisorConfigurationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ImportHypervisorConfigurationOutput.error) Result.t Lwt.t
 val list_gateways :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListGatewaysInput.t ->
-        (ListGatewaysOutput.t,
-          [ `AWS of ListGatewaysOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListGatewaysOutput.t, ListGatewaysOutput.error) Result.t Lwt.t
 val list_hypervisors :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListHypervisorsInput.t ->
-        (ListHypervisorsOutput.t,
-          [ `AWS of ListHypervisorsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListHypervisorsOutput.t, ListHypervisorsOutput.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceInput.t ->
-        (ListTagsForResourceOutput.t,
-          [ `AWS of ListTagsForResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceOutput.t, ListTagsForResourceOutput.error)
+          Result.t Lwt.t
 val list_virtual_machines :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListVirtualMachinesInput.t ->
-        (ListVirtualMachinesOutput.t,
-          [ `AWS of ListVirtualMachinesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListVirtualMachinesOutput.t, ListVirtualMachinesOutput.error)
+          Result.t Lwt.t
 val put_maintenance_start_time :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutMaintenanceStartTimeInput.t ->
         (PutMaintenanceStartTimeOutput.t,
-          [ `AWS of PutMaintenanceStartTimeOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutMaintenanceStartTimeOutput.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceInput.t ->
-        (TagResourceOutput.t,
-          [ `AWS of TagResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceOutput.t, TagResourceOutput.error) Result.t Lwt.t
 val test_hypervisor_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TestHypervisorConfigurationInput.t ->
         (TestHypervisorConfigurationOutput.t,
-          [ `AWS of TestHypervisorConfigurationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          TestHypervisorConfigurationOutput.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceInput.t ->
-        (UntagResourceOutput.t,
-          [ `AWS of UntagResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceOutput.t, UntagResourceOutput.error) Result.t Lwt.t
 val update_gateway_information :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateGatewayInformationInput.t ->
         (UpdateGatewayInformationOutput.t,
-          [ `AWS of UpdateGatewayInformationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateGatewayInformationOutput.error) Result.t Lwt.t
 val update_hypervisor :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateHypervisorInput.t ->
-        (UpdateHypervisorOutput.t,
-          [ `AWS of UpdateHypervisorOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateHypervisorOutput.t, UpdateHypervisorOutput.error) Result.t
+          Lwt.t

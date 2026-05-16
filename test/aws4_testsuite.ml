@@ -2,8 +2,7 @@ open! Import
 
 module Req = struct
   let string_of_file filename =
-    read_file filename
-    |> String.substr_replace_all ~pattern:"http/1.1" ~with_:"HTTP/1.1"
+    read_file filename |> String.substr_replace_all ~pattern:"http/1.1" ~with_:"HTTP/1.1"
   ;;
 
   let request_of_file filename =
@@ -37,7 +36,6 @@ end
 
 module Creq = struct
   let of_file filename =
-    read_file filename
-    |> String.substr_replace_all ~pattern:"\r\n" ~with_:"\n"
+    read_file filename |> String.substr_replace_all ~pattern:"\r\n" ~with_:"\n"
   ;;
 end

@@ -1,7 +1,6 @@
 (executable
  (name find_box_with_most_cores)
  (libraries awso-async.ec2 core_unix.command_unix)
- (flags
-  (:standard))
+ (flags (:standard))
  (preprocess
   (pps ppx_jane)))

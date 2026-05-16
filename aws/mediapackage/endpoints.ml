@@ -330,158 +330,156 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpdateChannel -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateOriginEndpoint -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | ConfigureLogs ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ConfigureLogsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ConfigureLogsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ConfigureLogsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ConfigureLogsResponse.error_of_json))
   | CreateChannel ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateChannelResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateChannelResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateChannelResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateChannelResponse.error_of_json))
   | CreateHarvestJob ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateHarvestJobResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateHarvestJobResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateHarvestJobResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateHarvestJobResponse.error_of_json))
   | CreateOriginEndpoint ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateOriginEndpointResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateOriginEndpointResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateOriginEndpointResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateOriginEndpointResponse.error_of_json))
   | DeleteChannel ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteChannelResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteChannelResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteChannelResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some DeleteChannelResponse.error_of_json))
   | DeleteOriginEndpoint ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteOriginEndpointResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteOriginEndpointResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteOriginEndpointResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteOriginEndpointResponse.error_of_json))
   | DescribeChannel ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeChannelResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeChannelResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeChannelResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeChannelResponse.error_of_json))
   | DescribeHarvestJob ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeHarvestJobResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeHarvestJobResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeHarvestJobResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeHarvestJobResponse.error_of_json))
   | DescribeOriginEndpoint ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeOriginEndpointResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeOriginEndpointResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (DescribeOriginEndpointResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeOriginEndpointResponse.error_of_json))
   | ListChannels ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListChannelsResponse.error_of_json)
-       | Ok resp -> Ok (ListChannelsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListChannelsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListChannelsResponse.error_of_json))
   | ListHarvestJobs ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListHarvestJobsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListHarvestJobsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListHarvestJobsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListHarvestJobsResponse.error_of_json))
   | ListOriginEndpoints ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListOriginEndpointsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListOriginEndpointsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListOriginEndpointsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListOriginEndpointsResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | RotateChannelCredentials ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some RotateChannelCredentialsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (RotateChannelCredentialsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (RotateChannelCredentialsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some RotateChannelCredentialsResponse.error_of_json))
   | RotateIngestEndpointCredentials ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some RotateIngestEndpointCredentialsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (RotateIngestEndpointCredentialsResponse.of_json
-                (response_to_json resp)))
-  | TagResource -> Ok ()
-  | UntagResource -> Ok ()
+      if is_success
+      then
+        Ok
+          (RotateIngestEndpointCredentialsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some RotateIngestEndpointCredentialsResponse.error_of_json))
+  | TagResource -> if is_success then Ok () else Error (parse_aws_error None)
+  | UntagResource ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | UpdateChannel ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateChannelResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateChannelResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateChannelResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateChannelResponse.error_of_json))
   | UpdateOriginEndpoint ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateOriginEndpointResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateOriginEndpointResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateOriginEndpointResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateOriginEndpointResponse.error_of_json))

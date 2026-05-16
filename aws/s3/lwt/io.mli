@@ -4,641 +4,492 @@ val abort_multipart_upload :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AbortMultipartUploadRequest.t ->
-        (AbortMultipartUploadOutput.t,
-          [ `AWS of AbortMultipartUploadOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AbortMultipartUploadOutput.t, AbortMultipartUploadOutput.error)
+          Result.t Lwt.t
 val complete_multipart_upload :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CompleteMultipartUploadRequest.t ->
         (CompleteMultipartUploadOutput.t,
-          [ `AWS of CompleteMultipartUploadOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CompleteMultipartUploadOutput.error) Result.t Lwt.t
 val copy_object :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CopyObjectRequest.t ->
-        (CopyObjectOutput.t,
-          [ `AWS of CopyObjectOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CopyObjectOutput.t, CopyObjectOutput.error) Result.t Lwt.t
 val create_bucket :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateBucketRequest.t ->
-        (CreateBucketOutput.t,
-          [ `AWS of CreateBucketOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateBucketOutput.t, CreateBucketOutput.error) Result.t Lwt.t
 val create_multipart_upload :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateMultipartUploadRequest.t ->
-        (CreateMultipartUploadOutput.t,
-          [ `AWS of CreateMultipartUploadOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateMultipartUploadOutput.t, CreateMultipartUploadOutput.error)
+          Result.t Lwt.t
 val delete_bucket :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteBucketRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteBucketRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_bucket_analytics_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteBucketAnalyticsConfigurationRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+        (unit, unit) Result.t Lwt.t
 val delete_bucket_cors :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteBucketCorsRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteBucketCorsRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_bucket_encryption :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteBucketEncryptionRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteBucketEncryptionRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_bucket_intelligent_tiering_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteBucketIntelligentTieringConfigurationRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+        (unit, unit) Result.t Lwt.t
 val delete_bucket_inventory_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteBucketInventoryConfigurationRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+        (unit, unit) Result.t Lwt.t
 val delete_bucket_lifecycle :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteBucketLifecycleRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteBucketLifecycleRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_bucket_metrics_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteBucketMetricsConfigurationRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+        (unit, unit) Result.t Lwt.t
 val delete_bucket_ownership_controls :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteBucketOwnershipControlsRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteBucketOwnershipControlsRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_bucket_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteBucketPolicyRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteBucketPolicyRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_bucket_replication :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteBucketReplicationRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteBucketReplicationRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_bucket_tagging :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteBucketTaggingRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteBucketTaggingRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_bucket_website :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteBucketWebsiteRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteBucketWebsiteRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_object :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteObjectRequest.t ->
-        (DeleteObjectOutput.t,
-          [ `AWS of DeleteObjectOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteObjectOutput.t, DeleteObjectOutput.error) Result.t Lwt.t
 val delete_object_tagging :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteObjectTaggingRequest.t ->
-        (DeleteObjectTaggingOutput.t,
-          [ `AWS of DeleteObjectTaggingOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteObjectTaggingOutput.t, DeleteObjectTaggingOutput.error)
+          Result.t Lwt.t
 val delete_objects :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteObjectsRequest.t ->
-        (DeleteObjectsOutput.t,
-          [ `AWS of DeleteObjectsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteObjectsOutput.t, DeleteObjectsOutput.error) Result.t Lwt.t
 val delete_public_access_block :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeletePublicAccessBlockRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeletePublicAccessBlockRequest.t -> (unit, unit) Result.t Lwt.t
 val get_bucket_accelerate_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBucketAccelerateConfigurationRequest.t ->
         (GetBucketAccelerateConfigurationOutput.t,
-          [ `AWS of GetBucketAccelerateConfigurationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetBucketAccelerateConfigurationOutput.error) Result.t Lwt.t
 val get_bucket_acl :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBucketAclRequest.t ->
-        (GetBucketAclOutput.t,
-          [ `AWS of GetBucketAclOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetBucketAclOutput.t, GetBucketAclOutput.error) Result.t Lwt.t
 val get_bucket_analytics_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBucketAnalyticsConfigurationRequest.t ->
         (GetBucketAnalyticsConfigurationOutput.t,
-          [ `AWS of GetBucketAnalyticsConfigurationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetBucketAnalyticsConfigurationOutput.error) Result.t Lwt.t
 val get_bucket_cors :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBucketCorsRequest.t ->
-        (GetBucketCorsOutput.t,
-          [ `AWS of GetBucketCorsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetBucketCorsOutput.t, GetBucketCorsOutput.error) Result.t Lwt.t
 val get_bucket_encryption :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBucketEncryptionRequest.t ->
-        (GetBucketEncryptionOutput.t,
-          [ `AWS of GetBucketEncryptionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetBucketEncryptionOutput.t, GetBucketEncryptionOutput.error)
+          Result.t Lwt.t
 val get_bucket_intelligent_tiering_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBucketIntelligentTieringConfigurationRequest.t ->
         (GetBucketIntelligentTieringConfigurationOutput.t,
-          [ `AWS of GetBucketIntelligentTieringConfigurationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetBucketIntelligentTieringConfigurationOutput.error) Result.t
+          Lwt.t
 val get_bucket_inventory_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBucketInventoryConfigurationRequest.t ->
         (GetBucketInventoryConfigurationOutput.t,
-          [ `AWS of GetBucketInventoryConfigurationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetBucketInventoryConfigurationOutput.error) Result.t Lwt.t
 val get_bucket_lifecycle :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBucketLifecycleRequest.t ->
-        (GetBucketLifecycleOutput.t,
-          [ `AWS of GetBucketLifecycleOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetBucketLifecycleOutput.t, GetBucketLifecycleOutput.error) Result.t
+          Lwt.t
 val get_bucket_lifecycle_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBucketLifecycleConfigurationRequest.t ->
         (GetBucketLifecycleConfigurationOutput.t,
-          [ `AWS of GetBucketLifecycleConfigurationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetBucketLifecycleConfigurationOutput.error) Result.t Lwt.t
 val get_bucket_location :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBucketLocationRequest.t ->
-        (GetBucketLocationOutput.t,
-          [ `AWS of GetBucketLocationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetBucketLocationOutput.t, GetBucketLocationOutput.error) Result.t
+          Lwt.t
 val get_bucket_logging :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBucketLoggingRequest.t ->
-        (GetBucketLoggingOutput.t,
-          [ `AWS of GetBucketLoggingOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetBucketLoggingOutput.t, GetBucketLoggingOutput.error) Result.t
+          Lwt.t
 val get_bucket_metrics_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBucketMetricsConfigurationRequest.t ->
         (GetBucketMetricsConfigurationOutput.t,
-          [ `AWS of GetBucketMetricsConfigurationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetBucketMetricsConfigurationOutput.error) Result.t Lwt.t
 val get_bucket_notification :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBucketNotificationConfigurationRequest.t ->
         (NotificationConfigurationDeprecated.t,
-          [ `AWS of NotificationConfigurationDeprecated.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          NotificationConfigurationDeprecated.error) Result.t Lwt.t
 val get_bucket_notification_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBucketNotificationConfigurationRequest.t ->
-        (NotificationConfiguration.t,
-          [ `AWS of NotificationConfiguration.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (NotificationConfiguration.t, NotificationConfiguration.error)
+          Result.t Lwt.t
 val get_bucket_ownership_controls :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBucketOwnershipControlsRequest.t ->
         (GetBucketOwnershipControlsOutput.t,
-          [ `AWS of GetBucketOwnershipControlsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetBucketOwnershipControlsOutput.error) Result.t Lwt.t
 val get_bucket_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBucketPolicyRequest.t ->
-        (GetBucketPolicyOutput.t,
-          [ `AWS of GetBucketPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetBucketPolicyOutput.t, GetBucketPolicyOutput.error) Result.t Lwt.t
 val get_bucket_policy_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBucketPolicyStatusRequest.t ->
-        (GetBucketPolicyStatusOutput.t,
-          [ `AWS of GetBucketPolicyStatusOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetBucketPolicyStatusOutput.t, GetBucketPolicyStatusOutput.error)
+          Result.t Lwt.t
 val get_bucket_replication :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBucketReplicationRequest.t ->
-        (GetBucketReplicationOutput.t,
-          [ `AWS of GetBucketReplicationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetBucketReplicationOutput.t, GetBucketReplicationOutput.error)
+          Result.t Lwt.t
 val get_bucket_request_payment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBucketRequestPaymentRequest.t ->
         (GetBucketRequestPaymentOutput.t,
-          [ `AWS of GetBucketRequestPaymentOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetBucketRequestPaymentOutput.error) Result.t Lwt.t
 val get_bucket_tagging :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBucketTaggingRequest.t ->
-        (GetBucketTaggingOutput.t,
-          [ `AWS of GetBucketTaggingOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetBucketTaggingOutput.t, GetBucketTaggingOutput.error) Result.t
+          Lwt.t
 val get_bucket_versioning :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBucketVersioningRequest.t ->
-        (GetBucketVersioningOutput.t,
-          [ `AWS of GetBucketVersioningOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetBucketVersioningOutput.t, GetBucketVersioningOutput.error)
+          Result.t Lwt.t
 val get_bucket_website :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBucketWebsiteRequest.t ->
-        (GetBucketWebsiteOutput.t,
-          [ `AWS of GetBucketWebsiteOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetBucketWebsiteOutput.t, GetBucketWebsiteOutput.error) Result.t
+          Lwt.t
 val get_object :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetObjectRequest.t ->
-        (GetObjectOutput.t,
-          [ `AWS of GetObjectOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetObjectOutput.t, GetObjectOutput.error) Result.t Lwt.t
 val get_object_acl :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetObjectAclRequest.t ->
-        (GetObjectAclOutput.t,
-          [ `AWS of GetObjectAclOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetObjectAclOutput.t, GetObjectAclOutput.error) Result.t Lwt.t
 val get_object_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetObjectAttributesRequest.t ->
-        (GetObjectAttributesOutput.t,
-          [ `AWS of GetObjectAttributesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetObjectAttributesOutput.t, GetObjectAttributesOutput.error)
+          Result.t Lwt.t
 val get_object_legal_hold :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetObjectLegalHoldRequest.t ->
-        (GetObjectLegalHoldOutput.t,
-          [ `AWS of GetObjectLegalHoldOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetObjectLegalHoldOutput.t, GetObjectLegalHoldOutput.error) Result.t
+          Lwt.t
 val get_object_lock_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetObjectLockConfigurationRequest.t ->
         (GetObjectLockConfigurationOutput.t,
-          [ `AWS of GetObjectLockConfigurationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetObjectLockConfigurationOutput.error) Result.t Lwt.t
 val get_object_retention :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetObjectRetentionRequest.t ->
-        (GetObjectRetentionOutput.t,
-          [ `AWS of GetObjectRetentionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetObjectRetentionOutput.t, GetObjectRetentionOutput.error) Result.t
+          Lwt.t
 val get_object_tagging :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetObjectTaggingRequest.t ->
-        (GetObjectTaggingOutput.t,
-          [ `AWS of GetObjectTaggingOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetObjectTaggingOutput.t, GetObjectTaggingOutput.error) Result.t
+          Lwt.t
 val get_object_torrent :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetObjectTorrentRequest.t ->
-        (GetObjectTorrentOutput.t,
-          [ `AWS of GetObjectTorrentOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetObjectTorrentOutput.t, GetObjectTorrentOutput.error) Result.t
+          Lwt.t
 val get_public_access_block :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPublicAccessBlockRequest.t ->
-        (GetPublicAccessBlockOutput.t,
-          [ `AWS of GetPublicAccessBlockOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetPublicAccessBlockOutput.t, GetPublicAccessBlockOutput.error)
+          Result.t Lwt.t
 val head_bucket :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      HeadBucketRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> HeadBucketRequest.t -> (unit, unit) Result.t Lwt.t
 val head_object :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       HeadObjectRequest.t ->
-        (HeadObjectOutput.t,
-          [ `AWS of HeadObjectOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (HeadObjectOutput.t, HeadObjectOutput.error) Result.t Lwt.t
 val list_bucket_analytics_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListBucketAnalyticsConfigurationsRequest.t ->
         (ListBucketAnalyticsConfigurationsOutput.t,
-          [ `AWS of ListBucketAnalyticsConfigurationsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListBucketAnalyticsConfigurationsOutput.error) Result.t Lwt.t
 val list_bucket_intelligent_tiering_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListBucketIntelligentTieringConfigurationsRequest.t ->
         (ListBucketIntelligentTieringConfigurationsOutput.t,
-          [ `AWS of ListBucketIntelligentTieringConfigurationsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListBucketIntelligentTieringConfigurationsOutput.error) Result.t
+          Lwt.t
 val list_bucket_inventory_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListBucketInventoryConfigurationsRequest.t ->
         (ListBucketInventoryConfigurationsOutput.t,
-          [ `AWS of ListBucketInventoryConfigurationsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListBucketInventoryConfigurationsOutput.error) Result.t Lwt.t
 val list_bucket_metrics_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListBucketMetricsConfigurationsRequest.t ->
         (ListBucketMetricsConfigurationsOutput.t,
-          [ `AWS of ListBucketMetricsConfigurationsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListBucketMetricsConfigurationsOutput.error) Result.t Lwt.t
 val list_buckets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      unit ->
-        (ListBucketsOutput.t,
-          [ `AWS of ListBucketsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+      unit -> (ListBucketsOutput.t, ListBucketsOutput.error) Result.t Lwt.t
 val list_multipart_uploads :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListMultipartUploadsRequest.t ->
-        (ListMultipartUploadsOutput.t,
-          [ `AWS of ListMultipartUploadsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListMultipartUploadsOutput.t, ListMultipartUploadsOutput.error)
+          Result.t Lwt.t
 val list_object_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListObjectVersionsRequest.t ->
-        (ListObjectVersionsOutput.t,
-          [ `AWS of ListObjectVersionsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListObjectVersionsOutput.t, ListObjectVersionsOutput.error) Result.t
+          Lwt.t
 val list_objects :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListObjectsRequest.t ->
-        (ListObjectsOutput.t,
-          [ `AWS of ListObjectsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListObjectsOutput.t, ListObjectsOutput.error) Result.t Lwt.t
 val list_objects_v2 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListObjectsV2Request.t ->
-        (ListObjectsV2Output.t,
-          [ `AWS of ListObjectsV2Output.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListObjectsV2Output.t, ListObjectsV2Output.error) Result.t Lwt.t
 val list_parts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPartsRequest.t ->
-        (ListPartsOutput.t,
-          [ `AWS of ListPartsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListPartsOutput.t, ListPartsOutput.error) Result.t Lwt.t
 val put_bucket_accelerate_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutBucketAccelerateConfigurationRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+        (unit, unit) Result.t Lwt.t
 val put_bucket_acl :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      PutBucketAclRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> PutBucketAclRequest.t -> (unit, unit) Result.t Lwt.t
 val put_bucket_analytics_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PutBucketAnalyticsConfigurationRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      PutBucketAnalyticsConfigurationRequest.t -> (unit, unit) Result.t Lwt.t
 val put_bucket_cors :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      PutBucketCorsRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> PutBucketCorsRequest.t -> (unit, unit) Result.t Lwt.t
 val put_bucket_encryption :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PutBucketEncryptionRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      PutBucketEncryptionRequest.t -> (unit, unit) Result.t Lwt.t
 val put_bucket_intelligent_tiering_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutBucketIntelligentTieringConfigurationRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+        (unit, unit) Result.t Lwt.t
 val put_bucket_inventory_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PutBucketInventoryConfigurationRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      PutBucketInventoryConfigurationRequest.t -> (unit, unit) Result.t Lwt.t
 val put_bucket_lifecycle :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PutBucketLifecycleRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      PutBucketLifecycleRequest.t -> (unit, unit) Result.t Lwt.t
 val put_bucket_lifecycle_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PutBucketLifecycleConfigurationRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      PutBucketLifecycleConfigurationRequest.t -> (unit, unit) Result.t Lwt.t
 val put_bucket_logging :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PutBucketLoggingRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      PutBucketLoggingRequest.t -> (unit, unit) Result.t Lwt.t
 val put_bucket_metrics_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PutBucketMetricsConfigurationRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      PutBucketMetricsConfigurationRequest.t -> (unit, unit) Result.t Lwt.t
 val put_bucket_notification :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PutBucketNotificationRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      PutBucketNotificationRequest.t -> (unit, unit) Result.t Lwt.t
 val put_bucket_notification_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutBucketNotificationConfigurationRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+        (unit, unit) Result.t Lwt.t
 val put_bucket_ownership_controls :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PutBucketOwnershipControlsRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      PutBucketOwnershipControlsRequest.t -> (unit, unit) Result.t Lwt.t
 val put_bucket_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PutBucketPolicyRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      PutBucketPolicyRequest.t -> (unit, unit) Result.t Lwt.t
 val put_bucket_replication :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PutBucketReplicationRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      PutBucketReplicationRequest.t -> (unit, unit) Result.t Lwt.t
 val put_bucket_request_payment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PutBucketRequestPaymentRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      PutBucketRequestPaymentRequest.t -> (unit, unit) Result.t Lwt.t
 val put_bucket_tagging :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PutBucketTaggingRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      PutBucketTaggingRequest.t -> (unit, unit) Result.t Lwt.t
 val put_bucket_versioning :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PutBucketVersioningRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      PutBucketVersioningRequest.t -> (unit, unit) Result.t Lwt.t
 val put_bucket_website :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PutBucketWebsiteRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      PutBucketWebsiteRequest.t -> (unit, unit) Result.t Lwt.t
 val put_object :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutObjectRequest.t ->
-        (PutObjectOutput.t,
-          [ `AWS of PutObjectOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutObjectOutput.t, PutObjectOutput.error) Result.t Lwt.t
 val put_object_acl :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutObjectAclRequest.t ->
-        (PutObjectAclOutput.t,
-          [ `AWS of PutObjectAclOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutObjectAclOutput.t, PutObjectAclOutput.error) Result.t Lwt.t
 val put_object_legal_hold :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutObjectLegalHoldRequest.t ->
-        (PutObjectLegalHoldOutput.t,
-          [ `AWS of PutObjectLegalHoldOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutObjectLegalHoldOutput.t, PutObjectLegalHoldOutput.error) Result.t
+          Lwt.t
 val put_object_lock_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutObjectLockConfigurationRequest.t ->
         (PutObjectLockConfigurationOutput.t,
-          [ `AWS of PutObjectLockConfigurationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutObjectLockConfigurationOutput.error) Result.t Lwt.t
 val put_object_retention :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutObjectRetentionRequest.t ->
-        (PutObjectRetentionOutput.t,
-          [ `AWS of PutObjectRetentionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutObjectRetentionOutput.t, PutObjectRetentionOutput.error) Result.t
+          Lwt.t
 val put_object_tagging :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutObjectTaggingRequest.t ->
-        (PutObjectTaggingOutput.t,
-          [ `AWS of PutObjectTaggingOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutObjectTaggingOutput.t, PutObjectTaggingOutput.error) Result.t
+          Lwt.t
 val put_public_access_block :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PutPublicAccessBlockRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      PutPublicAccessBlockRequest.t -> (unit, unit) Result.t Lwt.t
 val restore_object :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RestoreObjectRequest.t ->
-        (RestoreObjectOutput.t,
-          [ `AWS of RestoreObjectOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RestoreObjectOutput.t, RestoreObjectOutput.error) Result.t Lwt.t
 val select_object_content :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SelectObjectContentRequest.t ->
-        (SelectObjectContentOutput.t,
-          [ `AWS of SelectObjectContentOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SelectObjectContentOutput.t, SelectObjectContentOutput.error)
+          Result.t Lwt.t
 val upload_part :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UploadPartRequest.t ->
-        (UploadPartOutput.t,
-          [ `AWS of UploadPartOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UploadPartOutput.t, UploadPartOutput.error) Result.t Lwt.t
 val upload_part_copy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UploadPartCopyRequest.t ->
-        (UploadPartCopyOutput.t,
-          [ `AWS of UploadPartCopyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UploadPartCopyOutput.t, UploadPartCopyOutput.error) Result.t Lwt.t
 val write_get_object_response :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      WriteGetObjectResponseRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      WriteGetObjectResponseRequest.t -> (unit, unit) Result.t Lwt.t

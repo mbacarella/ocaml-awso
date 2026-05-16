@@ -139,7 +139,7 @@ let request_args (service : Botodata.service) (op : Botodata.operation option) =
                    (List.map [%e body_values] ~f:(fun (x, y) ->
                       let value = Awso.Botodata.Json.value_to_json_scalar y in
                       x, value))
-                |> Yojson.Safe.to_string)
+                 |> Yojson.Safe.to_string)
             in
             headers, body])))
 ;;
@@ -149,21 +149,21 @@ let to_request service data =
   let e =
     data
     |> Endpoint.cases ~f:(fun endpoint ->
-         match Endpoint.payload endpoint with
-         | None -> (
-           match Endpoint.meth endpoint with
-           | `GET | `POST ->
-             [%expr
-               let headers, body = [%e request_args service (Endpoint.op endpoint)] in
-               Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)]
-           | _ -> [%expr Awso.Http.Request.make (method_of_endpoint endp)])
-         | Some payload ->
-           Payload.convert_rest_json
-             payload
-             ~service
-             ~op:(Endpoint.op endpoint)
-             ~endpoint_name:(Endpoint.name endpoint)
-             [%expr req])
+      match Endpoint.payload endpoint with
+      | None -> (
+        match Endpoint.meth endpoint with
+        | `GET | `POST ->
+          [%expr
+            let headers, body = [%e request_args service (Endpoint.op endpoint)] in
+            Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)]
+        | _ -> [%expr Awso.Http.Request.make (method_of_endpoint endp)])
+      | Some payload ->
+        Payload.convert_rest_json
+          payload
+          ~service
+          ~op:(Endpoint.op endpoint)
+          ~endpoint_name:(Endpoint.name endpoint)
+          [%expr req])
     |> Ast_helper.Exp.match_ [%expr endp]
   in
   [%stri
@@ -222,109 +222,110 @@ let of_response data =
   let body =
     data
     |> Endpoint.cases ~f:(fun endpoint ->
-         let error_of_json =
-           Service_endpoints_common.make_error_expression
-             ~loc
-             ~label:"error_of_json"
-             endpoint
-         in
-         match Endpoint.result_decoder endpoint with
-         | None -> [%expr Ok ()]
-         | Some Xml -> assert false
-         | Some Json ->
-           let of_json =
-             Endpoint.in_result_module endpoint "of_json"
-             |> Option.value_exn
-                  ~message:"no result module"
-                  ~error:"no result module for endpoint"
-           in
-           [%expr
-             match resp with
-             | Error err -> handle_error err [%e error_of_json]
-             | Ok resp -> Ok ([%e of_json] (response_to_json resp))]
-         | Some (Of_header_and_body payload_opt) -> (
-           let of_header_and_body =
-             Endpoint.in_result_module endpoint "of_header_and_body"
-             |> Option.value_exn
-                  ~message:"no result module"
-                  ~error:"no result module for endpoint"
-           in
-           match payload_opt with
-           | Some payload ->
-             let of_string =
-               Printf.ksprintf
-                 Ast_convenience.evar
-                 "%s.of_string"
-                 (Shape.capitalized_id payload)
-             in
-             [%expr
-               match resp with
-               | Error err -> handle_error err [%e error_of_json]
-               | Ok resp ->
-                 let body =
-                   [%e of_string] (Awso.Http.Response.body resp)
-                 in
-                 let headers =
-                   Awso.Http.Headers.to_list (Awso.Http.Response.headers resp)
-                 in
-                 Ok ([%e of_header_and_body] (headers, body))]
-           | None ->
-             [%expr
-               match resp with
-               | Error err -> handle_error err [%e error_of_json]
-               | Ok resp ->
-                 let headers =
-                   Awso.Http.Headers.to_list (Awso.Http.Response.headers resp)
-                 in
-                 Ok ([%e of_header_and_body] (headers, ()))]))
+      let error_of_json =
+        Service_endpoints_common.make_error_expression
+          ~loc
+          ~label:"error_of_json"
+          endpoint
+      in
+      match Endpoint.result_decoder endpoint with
+      | None ->
+        [%expr if is_success then Ok () else Error (parse_aws_error [%e error_of_json])]
+      | Some Xml -> assert false
+      | Some Json ->
+        let of_json =
+          Endpoint.in_result_module endpoint "of_json"
+          |> Option.value_exn
+               ~message:"no result module"
+               ~error:"no result module for endpoint"
+        in
+        [%expr
+          if is_success
+          then Ok ([%e of_json] (response_to_json resp))
+          else Error (parse_aws_error [%e error_of_json])]
+      | Some (Of_header_and_body payload_opt) -> (
+        let of_header_and_body =
+          Endpoint.in_result_module endpoint "of_header_and_body"
+          |> Option.value_exn
+               ~message:"no result module"
+               ~error:"no result module for endpoint"
+        in
+        match payload_opt with
+        | Some payload ->
+          let of_string =
+            Printf.ksprintf
+              Ast_convenience.evar
+              "%s.of_string"
+              (Shape.capitalized_id payload)
+          in
+          [%expr
+            if is_success
+            then (
+              let body = [%e of_string] (Awso.Http.Response.body resp) in
+              let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+              Ok ([%e of_header_and_body] (headers, body)))
+            else Error (parse_aws_error [%e error_of_json])]
+        | None ->
+          [%expr
+            if is_success
+            then (
+              let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+              Ok ([%e of_header_and_body] (headers, ())))
+            else Error (parse_aws_error [%e error_of_json])]))
     |> Ast_helper.Exp.match_ [%expr endpoint]
   in
   [%stri
-    let of_response
-      (type i o e)
-      (endpoint : (i, o, e) t)
-      (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result)
-      : (o, [ `AWS of e | `Transport of Awso.Http.Io.Error.call ]) result
+    let of_response (type i o e) (endpoint : (i, o, e) t) (resp : Awso.Http.Response.t)
+      : (o, e) result
       =
-      let handle_error err error_of_json =
-        match err with
-        | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-        | `Bad_response { Awso.Http.Io.Error.code; body; x_amzn_error_type } -> (
-          let generic_error () =
-            Error
-              (`Transport
-                (`Bad_response { Awso.Http.Io.Error.code; body; x_amzn_error_type }))
-          in
-          match x_amzn_error_type, error_of_json, code >= 400 && code <= 599 with
-          | Some error_type, Some error_of_json, true ->
+      let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+      let is_success = code >= 200 && code < 300 in
+      let x_amzn_error_type =
+        let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        match List.Assoc.find ~equal:String.Caseless.equal headers "x-amzn-ErrorType" with
+        | None -> None
+        | Some value -> (
+          match String.lsplit2 value ~on:':' with
+          | None -> Some value
+          | Some (v, _) -> Some v)
+      in
+      let parse_aws_error error_of_json =
+        let body = Awso.Http.Response.body resp in
+        let bail () =
+          raise
+            (Awso.Http.Io.Error.Bad_response
+               { Awso.Http.Io.Error.code; body; x_amzn_error_type })
+        in
+        match x_amzn_error_type, error_of_json, code >= 400 && code <= 599 with
+        | Some error_type, Some error_of_json, true ->
+          let json = Yojson.Safe.from_string body in
+          error_of_json error_type json
+        | None, Some error_of_json, true -> (
+          try
             let json = Yojson.Safe.from_string body in
-            Error (`AWS (error_of_json error_type json))
-          | None, Some error_of_json, true -> (
-            try
-              let json = Yojson.Safe.from_string body in
-              match json |> Yojson.Safe.Util.member "__type" with
-              | `String error_type ->
-                let error_type =
-                  (* sometimes errors have names like
-                     "com.amazonaws.switchboard.portal#UnauthorizedException";
-                     just strip off the leading part. *)
-                  match String.lsplit2 error_type ~on:'#' with
-                  | Some (_, s) -> s
-                  | None -> error_type
-                in
-                Error (`AWS (error_of_json error_type json))
-              | `Null -> generic_error ()
-              | _ -> failwithf "Error '__type' did not have string type: %s" body ()
-            with
-            | _ -> generic_error ())
-          | None, _, _ | _, None, _ | _, _, false -> generic_error ())
+            match json |> Yojson.Safe.Util.member "__type" with
+            | `String error_type ->
+              let error_type =
+                (* sometimes errors have names like
+                   "com.amazonaws.switchboard.portal#UnauthorizedException";
+                   just strip off the leading part. *)
+                match String.lsplit2 error_type ~on:'#' with
+                | Some (_, s) -> s
+                | None -> error_type
+              in
+              error_of_json error_type json
+            | `Null -> bail ()
+            | _ -> failwithf "Error '__type' did not have string type: %s" body ()
+          with
+          | _ -> bail ())
+        | None, _, _ | _, None, _ | _, _, false -> bail ()
       in
       let response_to_json resp =
         Yojson.Safe.from_string (Awso.Http.Response.body resp)
       in
-      let _ = resp in
-      let _ = handle_error in
+      let _ = parse_aws_error in
       let _ = response_to_json in
+      let _ = resp in
       [%e body]
     ;;]
 ;;
@@ -351,66 +352,73 @@ let%expect_test "of_response" =
   [%expect
     {|
     let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-      (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-      (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-      let handle_error err error_of_json =
-        match err with
-        | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-        | `Bad_response
-            { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-            let generic_error () =
-              Error
-                (`Transport
-                   (`Bad_response
-                      { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-            (match (x_amzn_error_type, error_of_json,
-                     ((code >= 400) && (code <= 599)))
-             with
-             | (Some error_type, Some error_of_json, true) ->
-                 let json = Yojson.Safe.from_string body in
-                 Error (`AWS (error_of_json error_type json))
-             | (None, Some error_of_json, true) ->
-                 (try
-                    let json = Yojson.Safe.from_string body in
-                    match json |> (Yojson.Safe.Util.member "__type") with
-                    | `String error_type ->
-                        let error_type =
-                          match String.lsplit2 error_type ~on:'#' with
-                          | Some (_, s) -> s
-                          | None -> error_type in
-                        Error (`AWS (error_of_json error_type json))
-                    | `Null -> generic_error ()
-                    | _ ->
-                        failwithf "Error '__type' did not have string type: %s"
-                          body ()
-                  with | _ -> generic_error ())
-             | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+      (resp : Awso.Http.Response.t) : (o, e) result=
+      let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+      let is_success = (code >= 200) && (code < 300) in
+      let x_amzn_error_type =
+        let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        match List.Assoc.find ~equal:String.Caseless.equal headers
+                "x-amzn-ErrorType"
+        with
+        | None -> None
+        | Some value ->
+            (match String.lsplit2 value ~on:':' with
+             | None -> Some value
+             | Some (v, _) -> Some v) in
+      let parse_aws_error error_of_json =
+        let body = Awso.Http.Response.body resp in
+        let bail () =
+          raise
+            (Awso.Http.Io.Error.Bad_response
+               { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+        match (x_amzn_error_type, error_of_json,
+                ((code >= 400) && (code <= 599)))
+        with
+        | (Some error_type, Some error_of_json, true) ->
+            let json = Yojson.Safe.from_string body in
+            error_of_json error_type json
+        | (None, Some error_of_json, true) ->
+            (try
+               let json = Yojson.Safe.from_string body in
+               match json |> (Yojson.Safe.Util.member "__type") with
+               | `String error_type ->
+                   let error_type =
+                     match String.lsplit2 error_type ~on:'#' with
+                     | Some (_, s) -> s
+                     | None -> error_type in
+                   error_of_json error_type json
+               | `Null -> bail ()
+               | _ ->
+                   failwithf "Error '__type' did not have string type: %s" body
+                     ()
+             with | _ -> bail ())
+        | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
       let response_to_json resp =
         Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-      let _ = resp in
-      let _ = handle_error in
+      let _ = parse_aws_error in
       let _ = response_to_json in
+      let _ = resp in
       match endpoint with
       | Of_header_and_no_body ->
-          (match resp with
-           | Error err -> handle_error err None
-           | Ok resp ->
-               let headers =
-                 Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-               Ok (Result.of_header_and_body (headers, ())))
+          if is_success
+          then
+            let headers =
+              Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+            Ok (Result.of_header_and_body (headers, ()))
+          else Error (parse_aws_error None)
       | Direct ->
-          (match resp with
-           | Error err -> handle_error err None
-           | Ok resp -> Ok (DirectResult.of_json (response_to_json resp)))
+          if is_success
+          then Ok (DirectResult.of_json (response_to_json resp))
+          else Error (parse_aws_error None)
       | Of_header_and_body ->
-          (match resp with
-           | Error err -> handle_error err None
-           | Ok resp ->
-               let body = Payload_module.of_string (Awso.Http.Response.body resp) in
-               let headers =
-                 Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-               Ok (Result_of_header_and_body.of_header_and_body (headers, body)))
-      | No_output -> Ok ()
+          if is_success
+          then
+            let body = Payload_module.of_string (Awso.Http.Response.body resp) in
+            let headers =
+              Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+            Ok (Result_of_header_and_body.of_header_and_body (headers, body))
+          else Error (parse_aws_error None)
+      | No_output -> if is_success then Ok () else Error (parse_aws_error None)
     |}]
 ;;
 

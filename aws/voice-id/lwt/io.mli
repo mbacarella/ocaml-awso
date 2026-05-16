@@ -4,143 +4,110 @@ val create_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDomainRequest.t ->
-        (CreateDomainResponse.t,
-          [ `AWS of CreateDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateDomainResponse.t, CreateDomainResponse.error) Result.t Lwt.t
 val delete_domain :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteDomainRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteDomainRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_fraudster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteFraudsterRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteFraudsterRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_speaker :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteSpeakerRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteSpeakerRequest.t -> (unit, unit) Result.t Lwt.t
 val describe_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDomainRequest.t ->
-        (DescribeDomainResponse.t,
-          [ `AWS of DescribeDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeDomainResponse.t, DescribeDomainResponse.error) Result.t
+          Lwt.t
 val describe_fraudster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeFraudsterRequest.t ->
-        (DescribeFraudsterResponse.t,
-          [ `AWS of DescribeFraudsterResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeFraudsterResponse.t, DescribeFraudsterResponse.error)
+          Result.t Lwt.t
 val describe_fraudster_registration_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeFraudsterRegistrationJobRequest.t ->
         (DescribeFraudsterRegistrationJobResponse.t,
-          [ `AWS of DescribeFraudsterRegistrationJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeFraudsterRegistrationJobResponse.error) Result.t Lwt.t
 val describe_speaker :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSpeakerRequest.t ->
-        (DescribeSpeakerResponse.t,
-          [ `AWS of DescribeSpeakerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeSpeakerResponse.t, DescribeSpeakerResponse.error) Result.t
+          Lwt.t
 val describe_speaker_enrollment_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSpeakerEnrollmentJobRequest.t ->
         (DescribeSpeakerEnrollmentJobResponse.t,
-          [ `AWS of DescribeSpeakerEnrollmentJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeSpeakerEnrollmentJobResponse.error) Result.t Lwt.t
 val evaluate_session :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EvaluateSessionRequest.t ->
-        (EvaluateSessionResponse.t,
-          [ `AWS of EvaluateSessionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (EvaluateSessionResponse.t, EvaluateSessionResponse.error) Result.t
+          Lwt.t
 val list_domains :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDomainsRequest.t ->
-        (ListDomainsResponse.t,
-          [ `AWS of ListDomainsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListDomainsResponse.t, ListDomainsResponse.error) Result.t Lwt.t
 val list_fraudster_registration_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFraudsterRegistrationJobsRequest.t ->
         (ListFraudsterRegistrationJobsResponse.t,
-          [ `AWS of ListFraudsterRegistrationJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListFraudsterRegistrationJobsResponse.error) Result.t Lwt.t
 val list_speaker_enrollment_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSpeakerEnrollmentJobsRequest.t ->
         (ListSpeakerEnrollmentJobsResponse.t,
-          [ `AWS of ListSpeakerEnrollmentJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListSpeakerEnrollmentJobsResponse.error) Result.t Lwt.t
 val list_speakers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSpeakersRequest.t ->
-        (ListSpeakersResponse.t,
-          [ `AWS of ListSpeakersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListSpeakersResponse.t, ListSpeakersResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val opt_out_speaker :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       OptOutSpeakerRequest.t ->
-        (OptOutSpeakerResponse.t,
-          [ `AWS of OptOutSpeakerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (OptOutSpeakerResponse.t, OptOutSpeakerResponse.error) Result.t Lwt.t
 val start_fraudster_registration_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartFraudsterRegistrationJobRequest.t ->
         (StartFraudsterRegistrationJobResponse.t,
-          [ `AWS of StartFraudsterRegistrationJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartFraudsterRegistrationJobResponse.error) Result.t Lwt.t
 val start_speaker_enrollment_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartSpeakerEnrollmentJobRequest.t ->
         (StartSpeakerEnrollmentJobResponse.t,
-          [ `AWS of StartSpeakerEnrollmentJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartSpeakerEnrollmentJobResponse.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDomainRequest.t ->
-        (UpdateDomainResponse.t,
-          [ `AWS of UpdateDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateDomainResponse.t, UpdateDomainResponse.error) Result.t Lwt.t

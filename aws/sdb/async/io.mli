@@ -4,67 +4,47 @@ val batch_delete_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchDeleteAttributesRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val batch_put_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      BatchPutAttributesRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      BatchPutAttributesRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val create_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      CreateDomainRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      CreateDomainRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteAttributesRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteAttributesRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteDomainRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteDomainRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val domain_metadata :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DomainMetadataRequest.t ->
-        (DomainMetadataResult.t,
-          [ `AWS of DomainMetadataResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DomainMetadataResult.t, DomainMetadataResult.error) Result.t
           Async.Deferred.t
 val get_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAttributesRequest.t ->
-        (GetAttributesResult.t,
-          [ `AWS of GetAttributesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetAttributesResult.t, GetAttributesResult.error) Result.t
           Async.Deferred.t
 val list_domains :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDomainsRequest.t ->
-        (ListDomainsResult.t,
-          [ `AWS of ListDomainsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListDomainsResult.t, ListDomainsResult.error) Result.t
           Async.Deferred.t
 val put_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PutAttributesRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      PutAttributesRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val select :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SelectRequest.t ->
-        (SelectResult.t,
-          [ `AWS of SelectResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (SelectResult.t, SelectResult.error) Result.t Async.Deferred.t

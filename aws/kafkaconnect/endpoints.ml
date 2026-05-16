@@ -265,124 +265,127 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UpdateConnector -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | CreateConnector ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateConnectorResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateConnectorResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateConnectorResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateConnectorResponse.error_of_json))
   | CreateCustomPlugin ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateCustomPluginResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateCustomPluginResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateCustomPluginResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateCustomPluginResponse.error_of_json))
   | CreateWorkerConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateWorkerConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateWorkerConfigurationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (CreateWorkerConfigurationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateWorkerConfigurationResponse.error_of_json))
   | DeleteConnector ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteConnectorResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteConnectorResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteConnectorResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DeleteConnectorResponse.error_of_json))
   | DeleteCustomPlugin ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteCustomPluginResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteCustomPluginResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteCustomPluginResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteCustomPluginResponse.error_of_json))
   | DescribeConnector ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeConnectorResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeConnectorResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeConnectorResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeConnectorResponse.error_of_json))
   | DescribeCustomPlugin ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeCustomPluginResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeCustomPluginResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeCustomPluginResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeCustomPluginResponse.error_of_json))
   | DescribeWorkerConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeWorkerConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeWorkerConfigurationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeWorkerConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeWorkerConfigurationResponse.error_of_json))
   | ListConnectors ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListConnectorsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListConnectorsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListConnectorsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListConnectorsResponse.error_of_json))
   | ListCustomPlugins ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListCustomPluginsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListCustomPluginsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListCustomPluginsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListCustomPluginsResponse.error_of_json))
   | ListWorkerConfigurations ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListWorkerConfigurationsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListWorkerConfigurationsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListWorkerConfigurationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListWorkerConfigurationsResponse.error_of_json))
   | UpdateConnector ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateConnectorResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateConnectorResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateConnectorResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateConnectorResponse.error_of_json))

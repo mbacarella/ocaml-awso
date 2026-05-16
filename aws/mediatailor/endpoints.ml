@@ -560,296 +560,287 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpdateSourceLocation -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateVodSource -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | ConfigureLogsForPlaybackConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (ConfigureLogsForPlaybackConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                ConfigureLogsForPlaybackConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ConfigureLogsForPlaybackConfigurationResponse.of_json
-                (response_to_json resp)))
+                ConfigureLogsForPlaybackConfigurationResponse.error_of_json))
   | CreateChannel ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateChannelResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateChannelResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateChannelResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateChannelResponse.error_of_json))
   | CreatePrefetchSchedule ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreatePrefetchScheduleResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreatePrefetchScheduleResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (CreatePrefetchScheduleResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreatePrefetchScheduleResponse.error_of_json))
   | CreateProgram ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateProgramResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateProgramResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateProgramResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateProgramResponse.error_of_json))
   | CreateSourceLocation ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateSourceLocationResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateSourceLocationResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateSourceLocationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateSourceLocationResponse.error_of_json))
   | CreateVodSource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateVodSourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateVodSourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateVodSourceResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateVodSourceResponse.error_of_json))
   | DeleteChannel ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteChannelResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteChannelResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteChannelResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some DeleteChannelResponse.error_of_json))
   | DeleteChannelPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteChannelPolicyResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteChannelPolicyResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteChannelPolicyResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteChannelPolicyResponse.error_of_json))
   | DeletePlaybackConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeletePlaybackConfigurationResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DeletePlaybackConfigurationResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeletePlaybackConfigurationResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeletePlaybackConfigurationResponse.error_of_json))
   | DeletePrefetchSchedule ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeletePrefetchScheduleResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DeletePrefetchScheduleResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeletePrefetchScheduleResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeletePrefetchScheduleResponse.error_of_json))
   | DeleteProgram ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteProgramResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteProgramResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteProgramResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some DeleteProgramResponse.error_of_json))
   | DeleteSourceLocation ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteSourceLocationResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteSourceLocationResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteSourceLocationResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteSourceLocationResponse.error_of_json))
   | DeleteVodSource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteVodSourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteVodSourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteVodSourceResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some DeleteVodSourceResponse.error_of_json))
   | DescribeChannel ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeChannelResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeChannelResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeChannelResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeChannelResponse.error_of_json))
   | DescribeProgram ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeProgramResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeProgramResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeProgramResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeProgramResponse.error_of_json))
   | DescribeSourceLocation ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeSourceLocationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeSourceLocationResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (DescribeSourceLocationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeSourceLocationResponse.error_of_json))
   | DescribeVodSource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeVodSourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeVodSourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeVodSourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeVodSourceResponse.error_of_json))
   | GetChannelPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetChannelPolicyResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetChannelPolicyResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetChannelPolicyResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetChannelPolicyResponse.error_of_json))
   | GetChannelSchedule ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetChannelScheduleResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetChannelScheduleResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetChannelScheduleResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetChannelScheduleResponse.error_of_json))
   | GetPlaybackConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetPlaybackConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetPlaybackConfigurationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (GetPlaybackConfigurationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetPlaybackConfigurationResponse.error_of_json))
   | GetPrefetchSchedule ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetPrefetchScheduleResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetPrefetchScheduleResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetPrefetchScheduleResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetPrefetchScheduleResponse.error_of_json))
   | ListAlerts ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListAlertsResponse.error_of_json)
-       | Ok resp -> Ok (ListAlertsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListAlertsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListAlertsResponse.error_of_json))
   | ListChannels ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListChannelsResponse.error_of_json)
-       | Ok resp -> Ok (ListChannelsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListChannelsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListChannelsResponse.error_of_json))
   | ListPlaybackConfigurations ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListPlaybackConfigurationsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListPlaybackConfigurationsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListPlaybackConfigurationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListPlaybackConfigurationsResponse.error_of_json))
   | ListPrefetchSchedules ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListPrefetchSchedulesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListPrefetchSchedulesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListPrefetchSchedulesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListPrefetchSchedulesResponse.error_of_json))
   | ListSourceLocations ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListSourceLocationsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListSourceLocationsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListSourceLocationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListSourceLocationsResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | ListVodSources ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListVodSourcesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListVodSourcesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListVodSourcesResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListVodSourcesResponse.error_of_json))
   | PutChannelPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutChannelPolicyResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (PutChannelPolicyResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (PutChannelPolicyResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some PutChannelPolicyResponse.error_of_json))
   | PutPlaybackConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PutPlaybackConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (PutPlaybackConfigurationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (PutPlaybackConfigurationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some PutPlaybackConfigurationResponse.error_of_json))
   | StartChannel ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StartChannelResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (StartChannelResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (StartChannelResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some StartChannelResponse.error_of_json))
   | StopChannel ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StopChannelResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (StopChannelResponse.of_header_and_body (headers, ())))
-  | TagResource -> Ok ()
-  | UntagResource -> Ok ()
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (StopChannelResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some StopChannelResponse.error_of_json))
+  | TagResource -> if is_success then Ok () else Error (parse_aws_error None)
+  | UntagResource ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | UpdateChannel ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateChannelResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateChannelResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateChannelResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateChannelResponse.error_of_json))
   | UpdateSourceLocation ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateSourceLocationResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateSourceLocationResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateSourceLocationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateSourceLocationResponse.error_of_json))
   | UpdateVodSource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateVodSourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateVodSourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateVodSourceResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateVodSourceResponse.error_of_json))

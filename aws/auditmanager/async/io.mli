@@ -5,488 +5,386 @@ val associate_assessment_report_evidence_folder :
     ?cfg:Awso.Cfg.t ->
       AssociateAssessmentReportEvidenceFolderRequest.t ->
         (AssociateAssessmentReportEvidenceFolderResponse.t,
-          [ `AWS of AssociateAssessmentReportEvidenceFolderResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          AssociateAssessmentReportEvidenceFolderResponse.error) Result.t
           Async.Deferred.t
 val batch_associate_assessment_report_evidence :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchAssociateAssessmentReportEvidenceRequest.t ->
         (BatchAssociateAssessmentReportEvidenceResponse.t,
-          [ `AWS of BatchAssociateAssessmentReportEvidenceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          BatchAssociateAssessmentReportEvidenceResponse.error) Result.t
           Async.Deferred.t
 val batch_create_delegation_by_assessment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchCreateDelegationByAssessmentRequest.t ->
         (BatchCreateDelegationByAssessmentResponse.t,
-          [ `AWS of BatchCreateDelegationByAssessmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          BatchCreateDelegationByAssessmentResponse.error) Result.t
           Async.Deferred.t
 val batch_delete_delegation_by_assessment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchDeleteDelegationByAssessmentRequest.t ->
         (BatchDeleteDelegationByAssessmentResponse.t,
-          [ `AWS of BatchDeleteDelegationByAssessmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          BatchDeleteDelegationByAssessmentResponse.error) Result.t
           Async.Deferred.t
 val batch_disassociate_assessment_report_evidence :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchDisassociateAssessmentReportEvidenceRequest.t ->
         (BatchDisassociateAssessmentReportEvidenceResponse.t,
-          [ `AWS of BatchDisassociateAssessmentReportEvidenceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          BatchDisassociateAssessmentReportEvidenceResponse.error) Result.t
           Async.Deferred.t
 val batch_import_evidence_to_assessment_control :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchImportEvidenceToAssessmentControlRequest.t ->
         (BatchImportEvidenceToAssessmentControlResponse.t,
-          [ `AWS of BatchImportEvidenceToAssessmentControlResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          BatchImportEvidenceToAssessmentControlResponse.error) Result.t
           Async.Deferred.t
 val create_assessment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAssessmentRequest.t ->
-        (CreateAssessmentResponse.t,
-          [ `AWS of CreateAssessmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateAssessmentResponse.t, CreateAssessmentResponse.error) Result.t
           Async.Deferred.t
 val create_assessment_framework :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAssessmentFrameworkRequest.t ->
         (CreateAssessmentFrameworkResponse.t,
-          [ `AWS of CreateAssessmentFrameworkResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateAssessmentFrameworkResponse.error) Result.t Async.Deferred.t
 val create_assessment_report :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAssessmentReportRequest.t ->
         (CreateAssessmentReportResponse.t,
-          [ `AWS of CreateAssessmentReportResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateAssessmentReportResponse.error) Result.t Async.Deferred.t
 val create_control :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateControlRequest.t ->
-        (CreateControlResponse.t,
-          [ `AWS of CreateControlResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateControlResponse.t, CreateControlResponse.error) Result.t
           Async.Deferred.t
 val delete_assessment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAssessmentRequest.t ->
-        (DeleteAssessmentResponse.t,
-          [ `AWS of DeleteAssessmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteAssessmentResponse.t, DeleteAssessmentResponse.error) Result.t
           Async.Deferred.t
 val delete_assessment_framework :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAssessmentFrameworkRequest.t ->
         (DeleteAssessmentFrameworkResponse.t,
-          [ `AWS of DeleteAssessmentFrameworkResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeleteAssessmentFrameworkResponse.error) Result.t Async.Deferred.t
 val delete_assessment_framework_share :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAssessmentFrameworkShareRequest.t ->
         (DeleteAssessmentFrameworkShareResponse.t,
-          [ `AWS of DeleteAssessmentFrameworkShareResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DeleteAssessmentFrameworkShareResponse.error) Result.t
           Async.Deferred.t
 val delete_assessment_report :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAssessmentReportRequest.t ->
         (DeleteAssessmentReportResponse.t,
-          [ `AWS of DeleteAssessmentReportResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeleteAssessmentReportResponse.error) Result.t Async.Deferred.t
 val delete_control :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteControlRequest.t ->
-        (DeleteControlResponse.t,
-          [ `AWS of DeleteControlResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteControlResponse.t, DeleteControlResponse.error) Result.t
           Async.Deferred.t
 val deregister_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeregisterAccountRequest.t ->
-        (DeregisterAccountResponse.t,
-          [ `AWS of DeregisterAccountResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeregisterAccountResponse.t, DeregisterAccountResponse.error)
+          Result.t Async.Deferred.t
 val deregister_organization_admin_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeregisterOrganizationAdminAccountRequest.t ->
         (DeregisterOrganizationAdminAccountResponse.t,
-          [ `AWS of DeregisterOrganizationAdminAccountResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DeregisterOrganizationAdminAccountResponse.error) Result.t
           Async.Deferred.t
 val disassociate_assessment_report_evidence_folder :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateAssessmentReportEvidenceFolderRequest.t ->
         (DisassociateAssessmentReportEvidenceFolderResponse.t,
-          [ `AWS of DisassociateAssessmentReportEvidenceFolderResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DisassociateAssessmentReportEvidenceFolderResponse.error) Result.t
           Async.Deferred.t
 val get_account_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAccountStatusRequest.t ->
-        (GetAccountStatusResponse.t,
-          [ `AWS of GetAccountStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetAccountStatusResponse.t, GetAccountStatusResponse.error) Result.t
           Async.Deferred.t
 val get_assessment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAssessmentRequest.t ->
-        (GetAssessmentResponse.t,
-          [ `AWS of GetAssessmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetAssessmentResponse.t, GetAssessmentResponse.error) Result.t
           Async.Deferred.t
 val get_assessment_framework :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAssessmentFrameworkRequest.t ->
         (GetAssessmentFrameworkResponse.t,
-          [ `AWS of GetAssessmentFrameworkResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetAssessmentFrameworkResponse.error) Result.t Async.Deferred.t
 val get_assessment_report_url :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAssessmentReportUrlRequest.t ->
         (GetAssessmentReportUrlResponse.t,
-          [ `AWS of GetAssessmentReportUrlResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetAssessmentReportUrlResponse.error) Result.t Async.Deferred.t
 val get_change_logs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetChangeLogsRequest.t ->
-        (GetChangeLogsResponse.t,
-          [ `AWS of GetChangeLogsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetChangeLogsResponse.t, GetChangeLogsResponse.error) Result.t
           Async.Deferred.t
 val get_control :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetControlRequest.t ->
-        (GetControlResponse.t,
-          [ `AWS of GetControlResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetControlResponse.t, GetControlResponse.error) Result.t
           Async.Deferred.t
 val get_delegations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDelegationsRequest.t ->
-        (GetDelegationsResponse.t,
-          [ `AWS of GetDelegationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetDelegationsResponse.t, GetDelegationsResponse.error) Result.t
           Async.Deferred.t
 val get_evidence :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEvidenceRequest.t ->
-        (GetEvidenceResponse.t,
-          [ `AWS of GetEvidenceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetEvidenceResponse.t, GetEvidenceResponse.error) Result.t
           Async.Deferred.t
 val get_evidence_by_evidence_folder :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEvidenceByEvidenceFolderRequest.t ->
         (GetEvidenceByEvidenceFolderResponse.t,
-          [ `AWS of GetEvidenceByEvidenceFolderResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetEvidenceByEvidenceFolderResponse.error) Result.t
           Async.Deferred.t
 val get_evidence_folder :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEvidenceFolderRequest.t ->
-        (GetEvidenceFolderResponse.t,
-          [ `AWS of GetEvidenceFolderResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetEvidenceFolderResponse.t, GetEvidenceFolderResponse.error)
+          Result.t Async.Deferred.t
 val get_evidence_folders_by_assessment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEvidenceFoldersByAssessmentRequest.t ->
         (GetEvidenceFoldersByAssessmentResponse.t,
-          [ `AWS of GetEvidenceFoldersByAssessmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetEvidenceFoldersByAssessmentResponse.error) Result.t
           Async.Deferred.t
 val get_evidence_folders_by_assessment_control :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEvidenceFoldersByAssessmentControlRequest.t ->
         (GetEvidenceFoldersByAssessmentControlResponse.t,
-          [ `AWS of GetEvidenceFoldersByAssessmentControlResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetEvidenceFoldersByAssessmentControlResponse.error) Result.t
           Async.Deferred.t
 val get_insights :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetInsightsRequest.t ->
-        (GetInsightsResponse.t,
-          [ `AWS of GetInsightsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetInsightsResponse.t, GetInsightsResponse.error) Result.t
           Async.Deferred.t
 val get_insights_by_assessment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetInsightsByAssessmentRequest.t ->
         (GetInsightsByAssessmentResponse.t,
-          [ `AWS of GetInsightsByAssessmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetInsightsByAssessmentResponse.error) Result.t Async.Deferred.t
 val get_organization_admin_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetOrganizationAdminAccountRequest.t ->
         (GetOrganizationAdminAccountResponse.t,
-          [ `AWS of GetOrganizationAdminAccountResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetOrganizationAdminAccountResponse.error) Result.t
           Async.Deferred.t
 val get_services_in_scope :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetServicesInScopeRequest.t ->
-        (GetServicesInScopeResponse.t,
-          [ `AWS of GetServicesInScopeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetServicesInScopeResponse.t, GetServicesInScopeResponse.error)
+          Result.t Async.Deferred.t
 val get_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSettingsRequest.t ->
-        (GetSettingsResponse.t,
-          [ `AWS of GetSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetSettingsResponse.t, GetSettingsResponse.error) Result.t
           Async.Deferred.t
 val list_assessment_control_insights_by_control_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAssessmentControlInsightsByControlDomainRequest.t ->
         (ListAssessmentControlInsightsByControlDomainResponse.t,
-          [
-            `AWS of
-              ListAssessmentControlInsightsByControlDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListAssessmentControlInsightsByControlDomainResponse.error)
+          Result.t Async.Deferred.t
 val list_assessment_framework_share_requests :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAssessmentFrameworkShareRequestsRequest.t ->
         (ListAssessmentFrameworkShareRequestsResponse.t,
-          [ `AWS of ListAssessmentFrameworkShareRequestsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListAssessmentFrameworkShareRequestsResponse.error) Result.t
           Async.Deferred.t
 val list_assessment_frameworks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAssessmentFrameworksRequest.t ->
         (ListAssessmentFrameworksResponse.t,
-          [ `AWS of ListAssessmentFrameworksResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListAssessmentFrameworksResponse.error) Result.t Async.Deferred.t
 val list_assessment_reports :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAssessmentReportsRequest.t ->
         (ListAssessmentReportsResponse.t,
-          [ `AWS of ListAssessmentReportsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListAssessmentReportsResponse.error) Result.t Async.Deferred.t
 val list_assessments :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAssessmentsRequest.t ->
-        (ListAssessmentsResponse.t,
-          [ `AWS of ListAssessmentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListAssessmentsResponse.t, ListAssessmentsResponse.error) Result.t
           Async.Deferred.t
 val list_control_domain_insights :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListControlDomainInsightsRequest.t ->
         (ListControlDomainInsightsResponse.t,
-          [ `AWS of ListControlDomainInsightsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListControlDomainInsightsResponse.error) Result.t Async.Deferred.t
 val list_control_domain_insights_by_assessment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListControlDomainInsightsByAssessmentRequest.t ->
         (ListControlDomainInsightsByAssessmentResponse.t,
-          [ `AWS of ListControlDomainInsightsByAssessmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListControlDomainInsightsByAssessmentResponse.error) Result.t
           Async.Deferred.t
 val list_control_insights_by_control_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListControlInsightsByControlDomainRequest.t ->
         (ListControlInsightsByControlDomainResponse.t,
-          [ `AWS of ListControlInsightsByControlDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListControlInsightsByControlDomainResponse.error) Result.t
           Async.Deferred.t
 val list_controls :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListControlsRequest.t ->
-        (ListControlsResponse.t,
-          [ `AWS of ListControlsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListControlsResponse.t, ListControlsResponse.error) Result.t
           Async.Deferred.t
 val list_keywords_for_data_source :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListKeywordsForDataSourceRequest.t ->
         (ListKeywordsForDataSourceResponse.t,
-          [ `AWS of ListKeywordsForDataSourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListKeywordsForDataSourceResponse.error) Result.t Async.Deferred.t
 val list_notifications :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListNotificationsRequest.t ->
-        (ListNotificationsResponse.t,
-          [ `AWS of ListNotificationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListNotificationsResponse.t, ListNotificationsResponse.error)
+          Result.t Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val register_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegisterAccountRequest.t ->
-        (RegisterAccountResponse.t,
-          [ `AWS of RegisterAccountResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RegisterAccountResponse.t, RegisterAccountResponse.error) Result.t
           Async.Deferred.t
 val register_organization_admin_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegisterOrganizationAdminAccountRequest.t ->
         (RegisterOrganizationAdminAccountResponse.t,
-          [ `AWS of RegisterOrganizationAdminAccountResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          RegisterOrganizationAdminAccountResponse.error) Result.t
           Async.Deferred.t
 val start_assessment_framework_share :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartAssessmentFrameworkShareRequest.t ->
         (StartAssessmentFrameworkShareResponse.t,
-          [ `AWS of StartAssessmentFrameworkShareResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          StartAssessmentFrameworkShareResponse.error) Result.t
           Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
 val update_assessment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateAssessmentRequest.t ->
-        (UpdateAssessmentResponse.t,
-          [ `AWS of UpdateAssessmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateAssessmentResponse.t, UpdateAssessmentResponse.error) Result.t
           Async.Deferred.t
 val update_assessment_control :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateAssessmentControlRequest.t ->
         (UpdateAssessmentControlResponse.t,
-          [ `AWS of UpdateAssessmentControlResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateAssessmentControlResponse.error) Result.t Async.Deferred.t
 val update_assessment_control_set_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateAssessmentControlSetStatusRequest.t ->
         (UpdateAssessmentControlSetStatusResponse.t,
-          [ `AWS of UpdateAssessmentControlSetStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          UpdateAssessmentControlSetStatusResponse.error) Result.t
           Async.Deferred.t
 val update_assessment_framework :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateAssessmentFrameworkRequest.t ->
         (UpdateAssessmentFrameworkResponse.t,
-          [ `AWS of UpdateAssessmentFrameworkResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateAssessmentFrameworkResponse.error) Result.t Async.Deferred.t
 val update_assessment_framework_share :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateAssessmentFrameworkShareRequest.t ->
         (UpdateAssessmentFrameworkShareResponse.t,
-          [ `AWS of UpdateAssessmentFrameworkShareResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          UpdateAssessmentFrameworkShareResponse.error) Result.t
           Async.Deferred.t
 val update_assessment_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateAssessmentStatusRequest.t ->
         (UpdateAssessmentStatusResponse.t,
-          [ `AWS of UpdateAssessmentStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateAssessmentStatusResponse.error) Result.t Async.Deferred.t
 val update_control :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateControlRequest.t ->
-        (UpdateControlResponse.t,
-          [ `AWS of UpdateControlResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateControlResponse.t, UpdateControlResponse.error) Result.t
           Async.Deferred.t
 val update_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSettingsRequest.t ->
-        (UpdateSettingsResponse.t,
-          [ `AWS of UpdateSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateSettingsResponse.t, UpdateSettingsResponse.error) Result.t
           Async.Deferred.t
 val validate_assessment_report_integrity :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ValidateAssessmentReportIntegrityRequest.t ->
         (ValidateAssessmentReportIntegrityResponse.t,
-          [ `AWS of ValidateAssessmentReportIntegrityResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ValidateAssessmentReportIntegrityResponse.error) Result.t
           Async.Deferred.t

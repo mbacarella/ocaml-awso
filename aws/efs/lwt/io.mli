@@ -4,199 +4,152 @@ val create_access_point :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAccessPointRequest.t ->
-        (AccessPointDescription.t,
-          [ `AWS of AccessPointDescription.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AccessPointDescription.t, AccessPointDescription.error) Result.t
+          Lwt.t
 val create_file_system :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateFileSystemRequest.t ->
-        (FileSystemDescription.t,
-          [ `AWS of FileSystemDescription.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (FileSystemDescription.t, FileSystemDescription.error) Result.t Lwt.t
 val create_mount_target :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateMountTargetRequest.t ->
-        (MountTargetDescription.t,
-          [ `AWS of MountTargetDescription.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (MountTargetDescription.t, MountTargetDescription.error) Result.t
+          Lwt.t
 val create_replication_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateReplicationConfigurationRequest.t ->
         (ReplicationConfigurationDescription.t,
-          [ `AWS of ReplicationConfigurationDescription.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ReplicationConfigurationDescription.error) Result.t Lwt.t
 val create_tags :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      CreateTagsRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> CreateTagsRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_access_point :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteAccessPointRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteAccessPointRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_file_system :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteFileSystemRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteFileSystemRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_file_system_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteFileSystemPolicyRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteFileSystemPolicyRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_mount_target :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteMountTargetRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteMountTargetRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_replication_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteReplicationConfigurationRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteReplicationConfigurationRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_tags :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteTagsRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteTagsRequest.t -> (unit, unit) Result.t Lwt.t
 val describe_access_points :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAccessPointsRequest.t ->
-        (DescribeAccessPointsResponse.t,
-          [ `AWS of DescribeAccessPointsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeAccessPointsResponse.t, DescribeAccessPointsResponse.error)
+          Result.t Lwt.t
 val describe_account_preferences :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAccountPreferencesRequest.t ->
         (DescribeAccountPreferencesResponse.t,
-          [ `AWS of DescribeAccountPreferencesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeAccountPreferencesResponse.error) Result.t Lwt.t
 val describe_backup_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeBackupPolicyRequest.t ->
-        (BackupPolicyDescription.t,
-          [ `AWS of BackupPolicyDescription.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (BackupPolicyDescription.t, BackupPolicyDescription.error) Result.t
+          Lwt.t
 val describe_file_system_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeFileSystemPolicyRequest.t ->
-        (FileSystemPolicyDescription.t,
-          [ `AWS of FileSystemPolicyDescription.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (FileSystemPolicyDescription.t, FileSystemPolicyDescription.error)
+          Result.t Lwt.t
 val describe_file_systems :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeFileSystemsRequest.t ->
-        (DescribeFileSystemsResponse.t,
-          [ `AWS of DescribeFileSystemsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeFileSystemsResponse.t, DescribeFileSystemsResponse.error)
+          Result.t Lwt.t
 val describe_lifecycle_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeLifecycleConfigurationRequest.t ->
         (LifecycleConfigurationDescription.t,
-          [ `AWS of LifecycleConfigurationDescription.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          LifecycleConfigurationDescription.error) Result.t Lwt.t
 val describe_mount_target_security_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeMountTargetSecurityGroupsRequest.t ->
         (DescribeMountTargetSecurityGroupsResponse.t,
-          [ `AWS of DescribeMountTargetSecurityGroupsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeMountTargetSecurityGroupsResponse.error) Result.t Lwt.t
 val describe_mount_targets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeMountTargetsRequest.t ->
-        (DescribeMountTargetsResponse.t,
-          [ `AWS of DescribeMountTargetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeMountTargetsResponse.t, DescribeMountTargetsResponse.error)
+          Result.t Lwt.t
 val describe_replication_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeReplicationConfigurationsRequest.t ->
         (DescribeReplicationConfigurationsResponse.t,
-          [ `AWS of DescribeReplicationConfigurationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeReplicationConfigurationsResponse.error) Result.t Lwt.t
 val describe_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTagsRequest.t ->
-        (DescribeTagsResponse.t,
-          [ `AWS of DescribeTagsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeTagsResponse.t, DescribeTagsResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val modify_mount_target_security_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      ModifyMountTargetSecurityGroupsRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      ModifyMountTargetSecurityGroupsRequest.t -> (unit, unit) Result.t Lwt.t
 val put_account_preferences :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutAccountPreferencesRequest.t ->
         (PutAccountPreferencesResponse.t,
-          [ `AWS of PutAccountPreferencesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutAccountPreferencesResponse.error) Result.t Lwt.t
 val put_backup_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutBackupPolicyRequest.t ->
-        (BackupPolicyDescription.t,
-          [ `AWS of BackupPolicyDescription.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (BackupPolicyDescription.t, BackupPolicyDescription.error) Result.t
+          Lwt.t
 val put_file_system_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutFileSystemPolicyRequest.t ->
-        (FileSystemPolicyDescription.t,
-          [ `AWS of FileSystemPolicyDescription.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (FileSystemPolicyDescription.t, FileSystemPolicyDescription.error)
+          Result.t Lwt.t
 val put_lifecycle_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutLifecycleConfigurationRequest.t ->
         (LifecycleConfigurationDescription.t,
-          [ `AWS of LifecycleConfigurationDescription.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          LifecycleConfigurationDescription.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      TagResourceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> TagResourceRequest.t -> (unit, unit) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      UntagResourceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> UntagResourceRequest.t -> (unit, unit) Result.t Lwt.t
 val update_file_system :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateFileSystemRequest.t ->
-        (FileSystemDescription.t,
-          [ `AWS of FileSystemDescription.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (FileSystemDescription.t, FileSystemDescription.error) Result.t Lwt.t

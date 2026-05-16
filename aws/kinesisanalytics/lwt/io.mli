@@ -5,140 +5,119 @@ val add_application_cloud_watch_logging_option :
     ?cfg:Awso.Cfg.t ->
       AddApplicationCloudWatchLoggingOptionRequest.t ->
         (AddApplicationCloudWatchLoggingOptionResponse.t,
-          [ `AWS of AddApplicationCloudWatchLoggingOptionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AddApplicationCloudWatchLoggingOptionResponse.error) Result.t Lwt.t
 val add_application_input :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AddApplicationInputRequest.t ->
-        (AddApplicationInputResponse.t,
-          [ `AWS of AddApplicationInputResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AddApplicationInputResponse.t, AddApplicationInputResponse.error)
+          Result.t Lwt.t
 val add_application_input_processing_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AddApplicationInputProcessingConfigurationRequest.t ->
         (AddApplicationInputProcessingConfigurationResponse.t,
-          [ `AWS of AddApplicationInputProcessingConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AddApplicationInputProcessingConfigurationResponse.error) Result.t
+          Lwt.t
 val add_application_output :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AddApplicationOutputRequest.t ->
-        (AddApplicationOutputResponse.t,
-          [ `AWS of AddApplicationOutputResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AddApplicationOutputResponse.t, AddApplicationOutputResponse.error)
+          Result.t Lwt.t
 val add_application_reference_data_source :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AddApplicationReferenceDataSourceRequest.t ->
         (AddApplicationReferenceDataSourceResponse.t,
-          [ `AWS of AddApplicationReferenceDataSourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AddApplicationReferenceDataSourceResponse.error) Result.t Lwt.t
 val create_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateApplicationRequest.t ->
-        (CreateApplicationResponse.t,
-          [ `AWS of CreateApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateApplicationResponse.t, CreateApplicationResponse.error)
+          Result.t Lwt.t
 val delete_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteApplicationRequest.t ->
-        (DeleteApplicationResponse.t,
-          [ `AWS of DeleteApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteApplicationResponse.t, DeleteApplicationResponse.error)
+          Result.t Lwt.t
 val delete_application_cloud_watch_logging_option :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteApplicationCloudWatchLoggingOptionRequest.t ->
         (DeleteApplicationCloudWatchLoggingOptionResponse.t,
-          [ `AWS of DeleteApplicationCloudWatchLoggingOptionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteApplicationCloudWatchLoggingOptionResponse.error) Result.t
+          Lwt.t
 val delete_application_input_processing_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteApplicationInputProcessingConfigurationRequest.t ->
         (DeleteApplicationInputProcessingConfigurationResponse.t,
-          [
-            `AWS of
-              DeleteApplicationInputProcessingConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteApplicationInputProcessingConfigurationResponse.error)
+          Result.t Lwt.t
 val delete_application_output :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteApplicationOutputRequest.t ->
         (DeleteApplicationOutputResponse.t,
-          [ `AWS of DeleteApplicationOutputResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteApplicationOutputResponse.error) Result.t Lwt.t
 val delete_application_reference_data_source :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteApplicationReferenceDataSourceRequest.t ->
         (DeleteApplicationReferenceDataSourceResponse.t,
-          [ `AWS of DeleteApplicationReferenceDataSourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteApplicationReferenceDataSourceResponse.error) Result.t Lwt.t
 val describe_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeApplicationRequest.t ->
-        (DescribeApplicationResponse.t,
-          [ `AWS of DescribeApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeApplicationResponse.t, DescribeApplicationResponse.error)
+          Result.t Lwt.t
 val discover_input_schema :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DiscoverInputSchemaRequest.t ->
-        (DiscoverInputSchemaResponse.t,
-          [ `AWS of DiscoverInputSchemaResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DiscoverInputSchemaResponse.t, DiscoverInputSchemaResponse.error)
+          Result.t Lwt.t
 val list_applications :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListApplicationsRequest.t ->
-        (ListApplicationsResponse.t,
-          [ `AWS of ListApplicationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListApplicationsResponse.t, ListApplicationsResponse.error) Result.t
+          Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val start_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartApplicationRequest.t ->
-        (StartApplicationResponse.t,
-          [ `AWS of StartApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartApplicationResponse.t, StartApplicationResponse.error) Result.t
+          Lwt.t
 val stop_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopApplicationRequest.t ->
-        (StopApplicationResponse.t,
-          [ `AWS of StopApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StopApplicationResponse.t, StopApplicationResponse.error) Result.t
+          Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateApplicationRequest.t ->
-        (UpdateApplicationResponse.t,
-          [ `AWS of UpdateApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateApplicationResponse.t, UpdateApplicationResponse.error)
+          Result.t Lwt.t

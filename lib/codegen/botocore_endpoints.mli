@@ -18,7 +18,6 @@ type credentialScope =
   ; service : string option
   }
 
-
 type uri_token =
   [ `String_token of string
   | `Service_token
@@ -26,15 +25,13 @@ type uri_token =
   | `DnsSuffix_token
   ]
 
-
-type uri_pattern = uri_token list 
+type uri_pattern = uri_token list
 
 type variant =
   { dnsSuffix : string option
   ; hostname : uri_pattern option
   ; tags : string list
   }
-
 
 type properties =
   { credentialScope : credentialScope option
@@ -46,7 +43,6 @@ type properties =
   ; deprecated : bool option
   }
 
-
 type service =
   { defaults : properties option
   ; endpoints : (string * properties) list
@@ -54,8 +50,7 @@ type service =
   ; partitionEndpoint : string option
   }
 
-
-type region = { description : string } 
+type region = { description : string }
 
 type partition =
   { defaults : properties option
@@ -67,12 +62,10 @@ type partition =
   ; services : (string * service) list
   }
 
-
 type t =
   { partitions : partition list
   ; version : int
   }
-
 
 val of_json : string -> t
 

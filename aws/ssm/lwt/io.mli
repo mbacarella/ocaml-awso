@@ -4,946 +4,790 @@ val add_tags_to_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AddTagsToResourceRequest.t ->
-        (AddTagsToResourceResult.t,
-          [ `AWS of AddTagsToResourceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AddTagsToResourceResult.t, AddTagsToResourceResult.error) Result.t
+          Lwt.t
 val associate_ops_item_related_item :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateOpsItemRelatedItemRequest.t ->
         (AssociateOpsItemRelatedItemResponse.t,
-          [ `AWS of AssociateOpsItemRelatedItemResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssociateOpsItemRelatedItemResponse.error) Result.t Lwt.t
 val cancel_command :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelCommandRequest.t ->
-        (CancelCommandResult.t,
-          [ `AWS of CancelCommandResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CancelCommandResult.t, CancelCommandResult.error) Result.t Lwt.t
 val cancel_maintenance_window_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelMaintenanceWindowExecutionRequest.t ->
         (CancelMaintenanceWindowExecutionResult.t,
-          [ `AWS of CancelMaintenanceWindowExecutionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CancelMaintenanceWindowExecutionResult.error) Result.t Lwt.t
 val create_activation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateActivationRequest.t ->
-        (CreateActivationResult.t,
-          [ `AWS of CreateActivationResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateActivationResult.t, CreateActivationResult.error) Result.t
+          Lwt.t
 val create_association :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAssociationRequest.t ->
-        (CreateAssociationResult.t,
-          [ `AWS of CreateAssociationResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateAssociationResult.t, CreateAssociationResult.error) Result.t
+          Lwt.t
 val create_association_batch :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAssociationBatchRequest.t ->
-        (CreateAssociationBatchResult.t,
-          [ `AWS of CreateAssociationBatchResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateAssociationBatchResult.t, CreateAssociationBatchResult.error)
+          Result.t Lwt.t
 val create_document :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDocumentRequest.t ->
-        (CreateDocumentResult.t,
-          [ `AWS of CreateDocumentResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateDocumentResult.t, CreateDocumentResult.error) Result.t Lwt.t
 val create_maintenance_window :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateMaintenanceWindowRequest.t ->
         (CreateMaintenanceWindowResult.t,
-          [ `AWS of CreateMaintenanceWindowResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateMaintenanceWindowResult.error) Result.t Lwt.t
 val create_ops_item :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateOpsItemRequest.t ->
-        (CreateOpsItemResponse.t,
-          [ `AWS of CreateOpsItemResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateOpsItemResponse.t, CreateOpsItemResponse.error) Result.t Lwt.t
 val create_ops_metadata :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateOpsMetadataRequest.t ->
-        (CreateOpsMetadataResult.t,
-          [ `AWS of CreateOpsMetadataResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateOpsMetadataResult.t, CreateOpsMetadataResult.error) Result.t
+          Lwt.t
 val create_patch_baseline :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePatchBaselineRequest.t ->
-        (CreatePatchBaselineResult.t,
-          [ `AWS of CreatePatchBaselineResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreatePatchBaselineResult.t, CreatePatchBaselineResult.error)
+          Result.t Lwt.t
 val create_resource_data_sync :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateResourceDataSyncRequest.t ->
-        (CreateResourceDataSyncResult.t,
-          [ `AWS of CreateResourceDataSyncResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateResourceDataSyncResult.t, CreateResourceDataSyncResult.error)
+          Result.t Lwt.t
 val delete_activation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteActivationRequest.t ->
-        (DeleteActivationResult.t,
-          [ `AWS of DeleteActivationResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteActivationResult.t, DeleteActivationResult.error) Result.t
+          Lwt.t
 val delete_association :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAssociationRequest.t ->
-        (DeleteAssociationResult.t,
-          [ `AWS of DeleteAssociationResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteAssociationResult.t, DeleteAssociationResult.error) Result.t
+          Lwt.t
 val delete_document :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDocumentRequest.t ->
-        (DeleteDocumentResult.t,
-          [ `AWS of DeleteDocumentResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteDocumentResult.t, DeleteDocumentResult.error) Result.t Lwt.t
 val delete_inventory :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteInventoryRequest.t ->
-        (DeleteInventoryResult.t,
-          [ `AWS of DeleteInventoryResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteInventoryResult.t, DeleteInventoryResult.error) Result.t Lwt.t
 val delete_maintenance_window :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteMaintenanceWindowRequest.t ->
         (DeleteMaintenanceWindowResult.t,
-          [ `AWS of DeleteMaintenanceWindowResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteMaintenanceWindowResult.error) Result.t Lwt.t
 val delete_ops_metadata :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteOpsMetadataRequest.t ->
-        (DeleteOpsMetadataResult.t,
-          [ `AWS of DeleteOpsMetadataResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteOpsMetadataResult.t, DeleteOpsMetadataResult.error) Result.t
+          Lwt.t
 val delete_parameter :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteParameterRequest.t ->
-        (DeleteParameterResult.t,
-          [ `AWS of DeleteParameterResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteParameterResult.t, DeleteParameterResult.error) Result.t Lwt.t
 val delete_parameters :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteParametersRequest.t ->
-        (DeleteParametersResult.t,
-          [ `AWS of DeleteParametersResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteParametersResult.t, DeleteParametersResult.error) Result.t
+          Lwt.t
 val delete_patch_baseline :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePatchBaselineRequest.t ->
-        (DeletePatchBaselineResult.t,
-          [ `AWS of DeletePatchBaselineResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeletePatchBaselineResult.t, DeletePatchBaselineResult.error)
+          Result.t Lwt.t
 val delete_resource_data_sync :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteResourceDataSyncRequest.t ->
-        (DeleteResourceDataSyncResult.t,
-          [ `AWS of DeleteResourceDataSyncResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteResourceDataSyncResult.t, DeleteResourceDataSyncResult.error)
+          Result.t Lwt.t
 val deregister_managed_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeregisterManagedInstanceRequest.t ->
         (DeregisterManagedInstanceResult.t,
-          [ `AWS of DeregisterManagedInstanceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeregisterManagedInstanceResult.error) Result.t Lwt.t
 val deregister_patch_baseline_for_patch_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeregisterPatchBaselineForPatchGroupRequest.t ->
         (DeregisterPatchBaselineForPatchGroupResult.t,
-          [ `AWS of DeregisterPatchBaselineForPatchGroupResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeregisterPatchBaselineForPatchGroupResult.error) Result.t Lwt.t
 val deregister_target_from_maintenance_window :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeregisterTargetFromMaintenanceWindowRequest.t ->
         (DeregisterTargetFromMaintenanceWindowResult.t,
-          [ `AWS of DeregisterTargetFromMaintenanceWindowResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeregisterTargetFromMaintenanceWindowResult.error) Result.t Lwt.t
 val deregister_task_from_maintenance_window :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeregisterTaskFromMaintenanceWindowRequest.t ->
         (DeregisterTaskFromMaintenanceWindowResult.t,
-          [ `AWS of DeregisterTaskFromMaintenanceWindowResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeregisterTaskFromMaintenanceWindowResult.error) Result.t Lwt.t
 val describe_activations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeActivationsRequest.t ->
-        (DescribeActivationsResult.t,
-          [ `AWS of DescribeActivationsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeActivationsResult.t, DescribeActivationsResult.error)
+          Result.t Lwt.t
 val describe_association :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAssociationRequest.t ->
-        (DescribeAssociationResult.t,
-          [ `AWS of DescribeAssociationResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeAssociationResult.t, DescribeAssociationResult.error)
+          Result.t Lwt.t
 val describe_association_execution_targets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAssociationExecutionTargetsRequest.t ->
         (DescribeAssociationExecutionTargetsResult.t,
-          [ `AWS of DescribeAssociationExecutionTargetsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeAssociationExecutionTargetsResult.error) Result.t Lwt.t
 val describe_association_executions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAssociationExecutionsRequest.t ->
         (DescribeAssociationExecutionsResult.t,
-          [ `AWS of DescribeAssociationExecutionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeAssociationExecutionsResult.error) Result.t Lwt.t
 val describe_automation_executions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAutomationExecutionsRequest.t ->
         (DescribeAutomationExecutionsResult.t,
-          [ `AWS of DescribeAutomationExecutionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeAutomationExecutionsResult.error) Result.t Lwt.t
 val describe_automation_step_executions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAutomationStepExecutionsRequest.t ->
         (DescribeAutomationStepExecutionsResult.t,
-          [ `AWS of DescribeAutomationStepExecutionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeAutomationStepExecutionsResult.error) Result.t Lwt.t
 val describe_available_patches :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAvailablePatchesRequest.t ->
         (DescribeAvailablePatchesResult.t,
-          [ `AWS of DescribeAvailablePatchesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeAvailablePatchesResult.error) Result.t Lwt.t
 val describe_document :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDocumentRequest.t ->
-        (DescribeDocumentResult.t,
-          [ `AWS of DescribeDocumentResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeDocumentResult.t, DescribeDocumentResult.error) Result.t
+          Lwt.t
 val describe_document_permission :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDocumentPermissionRequest.t ->
         (DescribeDocumentPermissionResponse.t,
-          [ `AWS of DescribeDocumentPermissionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeDocumentPermissionResponse.error) Result.t Lwt.t
 val describe_effective_instance_associations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEffectiveInstanceAssociationsRequest.t ->
         (DescribeEffectiveInstanceAssociationsResult.t,
-          [ `AWS of DescribeEffectiveInstanceAssociationsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeEffectiveInstanceAssociationsResult.error) Result.t Lwt.t
 val describe_effective_patches_for_patch_baseline :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEffectivePatchesForPatchBaselineRequest.t ->
         (DescribeEffectivePatchesForPatchBaselineResult.t,
-          [ `AWS of DescribeEffectivePatchesForPatchBaselineResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeEffectivePatchesForPatchBaselineResult.error) Result.t
+          Lwt.t
 val describe_instance_associations_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeInstanceAssociationsStatusRequest.t ->
         (DescribeInstanceAssociationsStatusResult.t,
-          [ `AWS of DescribeInstanceAssociationsStatusResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeInstanceAssociationsStatusResult.error) Result.t Lwt.t
 val describe_instance_information :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeInstanceInformationRequest.t ->
         (DescribeInstanceInformationResult.t,
-          [ `AWS of DescribeInstanceInformationResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeInstanceInformationResult.error) Result.t Lwt.t
 val describe_instance_patch_states :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeInstancePatchStatesRequest.t ->
         (DescribeInstancePatchStatesResult.t,
-          [ `AWS of DescribeInstancePatchStatesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeInstancePatchStatesResult.error) Result.t Lwt.t
 val describe_instance_patch_states_for_patch_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeInstancePatchStatesForPatchGroupRequest.t ->
         (DescribeInstancePatchStatesForPatchGroupResult.t,
-          [ `AWS of DescribeInstancePatchStatesForPatchGroupResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeInstancePatchStatesForPatchGroupResult.error) Result.t
+          Lwt.t
 val describe_instance_patches :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeInstancePatchesRequest.t ->
         (DescribeInstancePatchesResult.t,
-          [ `AWS of DescribeInstancePatchesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeInstancePatchesResult.error) Result.t Lwt.t
 val describe_inventory_deletions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeInventoryDeletionsRequest.t ->
         (DescribeInventoryDeletionsResult.t,
-          [ `AWS of DescribeInventoryDeletionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeInventoryDeletionsResult.error) Result.t Lwt.t
 val describe_maintenance_window_execution_task_invocations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeMaintenanceWindowExecutionTaskInvocationsRequest.t ->
         (DescribeMaintenanceWindowExecutionTaskInvocationsResult.t,
-          [
-            `AWS of
-              DescribeMaintenanceWindowExecutionTaskInvocationsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeMaintenanceWindowExecutionTaskInvocationsResult.error)
+          Result.t Lwt.t
 val describe_maintenance_window_execution_tasks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeMaintenanceWindowExecutionTasksRequest.t ->
         (DescribeMaintenanceWindowExecutionTasksResult.t,
-          [ `AWS of DescribeMaintenanceWindowExecutionTasksResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeMaintenanceWindowExecutionTasksResult.error) Result.t Lwt.t
 val describe_maintenance_window_executions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeMaintenanceWindowExecutionsRequest.t ->
         (DescribeMaintenanceWindowExecutionsResult.t,
-          [ `AWS of DescribeMaintenanceWindowExecutionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeMaintenanceWindowExecutionsResult.error) Result.t Lwt.t
 val describe_maintenance_window_schedule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeMaintenanceWindowScheduleRequest.t ->
         (DescribeMaintenanceWindowScheduleResult.t,
-          [ `AWS of DescribeMaintenanceWindowScheduleResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeMaintenanceWindowScheduleResult.error) Result.t Lwt.t
 val describe_maintenance_window_targets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeMaintenanceWindowTargetsRequest.t ->
         (DescribeMaintenanceWindowTargetsResult.t,
-          [ `AWS of DescribeMaintenanceWindowTargetsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeMaintenanceWindowTargetsResult.error) Result.t Lwt.t
 val describe_maintenance_window_tasks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeMaintenanceWindowTasksRequest.t ->
         (DescribeMaintenanceWindowTasksResult.t,
-          [ `AWS of DescribeMaintenanceWindowTasksResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeMaintenanceWindowTasksResult.error) Result.t Lwt.t
 val describe_maintenance_windows :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeMaintenanceWindowsRequest.t ->
         (DescribeMaintenanceWindowsResult.t,
-          [ `AWS of DescribeMaintenanceWindowsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeMaintenanceWindowsResult.error) Result.t Lwt.t
 val describe_maintenance_windows_for_target :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeMaintenanceWindowsForTargetRequest.t ->
         (DescribeMaintenanceWindowsForTargetResult.t,
-          [ `AWS of DescribeMaintenanceWindowsForTargetResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeMaintenanceWindowsForTargetResult.error) Result.t Lwt.t
 val describe_ops_items :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeOpsItemsRequest.t ->
-        (DescribeOpsItemsResponse.t,
-          [ `AWS of DescribeOpsItemsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeOpsItemsResponse.t, DescribeOpsItemsResponse.error) Result.t
+          Lwt.t
 val describe_parameters :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeParametersRequest.t ->
-        (DescribeParametersResult.t,
-          [ `AWS of DescribeParametersResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeParametersResult.t, DescribeParametersResult.error) Result.t
+          Lwt.t
 val describe_patch_baselines :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePatchBaselinesRequest.t ->
-        (DescribePatchBaselinesResult.t,
-          [ `AWS of DescribePatchBaselinesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribePatchBaselinesResult.t, DescribePatchBaselinesResult.error)
+          Result.t Lwt.t
 val describe_patch_group_state :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePatchGroupStateRequest.t ->
         (DescribePatchGroupStateResult.t,
-          [ `AWS of DescribePatchGroupStateResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribePatchGroupStateResult.error) Result.t Lwt.t
 val describe_patch_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePatchGroupsRequest.t ->
-        (DescribePatchGroupsResult.t,
-          [ `AWS of DescribePatchGroupsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribePatchGroupsResult.t, DescribePatchGroupsResult.error)
+          Result.t Lwt.t
 val describe_patch_properties :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePatchPropertiesRequest.t ->
         (DescribePatchPropertiesResult.t,
-          [ `AWS of DescribePatchPropertiesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribePatchPropertiesResult.error) Result.t Lwt.t
 val describe_sessions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSessionsRequest.t ->
-        (DescribeSessionsResponse.t,
-          [ `AWS of DescribeSessionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeSessionsResponse.t, DescribeSessionsResponse.error) Result.t
+          Lwt.t
 val disassociate_ops_item_related_item :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateOpsItemRelatedItemRequest.t ->
         (DisassociateOpsItemRelatedItemResponse.t,
-          [ `AWS of DisassociateOpsItemRelatedItemResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateOpsItemRelatedItemResponse.error) Result.t Lwt.t
 val get_automation_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAutomationExecutionRequest.t ->
-        (GetAutomationExecutionResult.t,
-          [ `AWS of GetAutomationExecutionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetAutomationExecutionResult.t, GetAutomationExecutionResult.error)
+          Result.t Lwt.t
 val get_calendar_state :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCalendarStateRequest.t ->
-        (GetCalendarStateResponse.t,
-          [ `AWS of GetCalendarStateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetCalendarStateResponse.t, GetCalendarStateResponse.error) Result.t
+          Lwt.t
 val get_command_invocation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCommandInvocationRequest.t ->
-        (GetCommandInvocationResult.t,
-          [ `AWS of GetCommandInvocationResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetCommandInvocationResult.t, GetCommandInvocationResult.error)
+          Result.t Lwt.t
 val get_connection_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetConnectionStatusRequest.t ->
-        (GetConnectionStatusResponse.t,
-          [ `AWS of GetConnectionStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetConnectionStatusResponse.t, GetConnectionStatusResponse.error)
+          Result.t Lwt.t
 val get_default_patch_baseline :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDefaultPatchBaselineRequest.t ->
         (GetDefaultPatchBaselineResult.t,
-          [ `AWS of GetDefaultPatchBaselineResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetDefaultPatchBaselineResult.error) Result.t Lwt.t
 val get_deployable_patch_snapshot_for_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDeployablePatchSnapshotForInstanceRequest.t ->
         (GetDeployablePatchSnapshotForInstanceResult.t,
-          [ `AWS of GetDeployablePatchSnapshotForInstanceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetDeployablePatchSnapshotForInstanceResult.error) Result.t Lwt.t
 val get_document :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDocumentRequest.t ->
-        (GetDocumentResult.t,
-          [ `AWS of GetDocumentResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetDocumentResult.t, GetDocumentResult.error) Result.t Lwt.t
 val get_inventory :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetInventoryRequest.t ->
-        (GetInventoryResult.t,
-          [ `AWS of GetInventoryResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetInventoryResult.t, GetInventoryResult.error) Result.t Lwt.t
 val get_inventory_schema :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetInventorySchemaRequest.t ->
-        (GetInventorySchemaResult.t,
-          [ `AWS of GetInventorySchemaResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetInventorySchemaResult.t, GetInventorySchemaResult.error) Result.t
+          Lwt.t
 val get_maintenance_window :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMaintenanceWindowRequest.t ->
-        (GetMaintenanceWindowResult.t,
-          [ `AWS of GetMaintenanceWindowResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetMaintenanceWindowResult.t, GetMaintenanceWindowResult.error)
+          Result.t Lwt.t
 val get_maintenance_window_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMaintenanceWindowExecutionRequest.t ->
         (GetMaintenanceWindowExecutionResult.t,
-          [ `AWS of GetMaintenanceWindowExecutionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetMaintenanceWindowExecutionResult.error) Result.t Lwt.t
 val get_maintenance_window_execution_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMaintenanceWindowExecutionTaskRequest.t ->
         (GetMaintenanceWindowExecutionTaskResult.t,
-          [ `AWS of GetMaintenanceWindowExecutionTaskResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetMaintenanceWindowExecutionTaskResult.error) Result.t Lwt.t
 val get_maintenance_window_execution_task_invocation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMaintenanceWindowExecutionTaskInvocationRequest.t ->
         (GetMaintenanceWindowExecutionTaskInvocationResult.t,
-          [ `AWS of GetMaintenanceWindowExecutionTaskInvocationResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetMaintenanceWindowExecutionTaskInvocationResult.error) Result.t
+          Lwt.t
 val get_maintenance_window_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMaintenanceWindowTaskRequest.t ->
         (GetMaintenanceWindowTaskResult.t,
-          [ `AWS of GetMaintenanceWindowTaskResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetMaintenanceWindowTaskResult.error) Result.t Lwt.t
 val get_ops_item :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetOpsItemRequest.t ->
-        (GetOpsItemResponse.t,
-          [ `AWS of GetOpsItemResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetOpsItemResponse.t, GetOpsItemResponse.error) Result.t Lwt.t
 val get_ops_metadata :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetOpsMetadataRequest.t ->
-        (GetOpsMetadataResult.t,
-          [ `AWS of GetOpsMetadataResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetOpsMetadataResult.t, GetOpsMetadataResult.error) Result.t Lwt.t
 val get_ops_summary :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetOpsSummaryRequest.t ->
-        (GetOpsSummaryResult.t,
-          [ `AWS of GetOpsSummaryResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetOpsSummaryResult.t, GetOpsSummaryResult.error) Result.t Lwt.t
 val get_parameter :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetParameterRequest.t ->
-        (GetParameterResult.t,
-          [ `AWS of GetParameterResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetParameterResult.t, GetParameterResult.error) Result.t Lwt.t
 val get_parameter_history :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetParameterHistoryRequest.t ->
-        (GetParameterHistoryResult.t,
-          [ `AWS of GetParameterHistoryResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetParameterHistoryResult.t, GetParameterHistoryResult.error)
+          Result.t Lwt.t
 val get_parameters :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetParametersRequest.t ->
-        (GetParametersResult.t,
-          [ `AWS of GetParametersResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetParametersResult.t, GetParametersResult.error) Result.t Lwt.t
 val get_parameters_by_path :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetParametersByPathRequest.t ->
-        (GetParametersByPathResult.t,
-          [ `AWS of GetParametersByPathResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetParametersByPathResult.t, GetParametersByPathResult.error)
+          Result.t Lwt.t
 val get_patch_baseline :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPatchBaselineRequest.t ->
-        (GetPatchBaselineResult.t,
-          [ `AWS of GetPatchBaselineResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetPatchBaselineResult.t, GetPatchBaselineResult.error) Result.t
+          Lwt.t
 val get_patch_baseline_for_patch_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPatchBaselineForPatchGroupRequest.t ->
         (GetPatchBaselineForPatchGroupResult.t,
-          [ `AWS of GetPatchBaselineForPatchGroupResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetPatchBaselineForPatchGroupResult.error) Result.t Lwt.t
 val get_service_setting :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetServiceSettingRequest.t ->
-        (GetServiceSettingResult.t,
-          [ `AWS of GetServiceSettingResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetServiceSettingResult.t, GetServiceSettingResult.error) Result.t
+          Lwt.t
 val label_parameter_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       LabelParameterVersionRequest.t ->
-        (LabelParameterVersionResult.t,
-          [ `AWS of LabelParameterVersionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (LabelParameterVersionResult.t, LabelParameterVersionResult.error)
+          Result.t Lwt.t
 val list_association_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAssociationVersionsRequest.t ->
         (ListAssociationVersionsResult.t,
-          [ `AWS of ListAssociationVersionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListAssociationVersionsResult.error) Result.t Lwt.t
 val list_associations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAssociationsRequest.t ->
-        (ListAssociationsResult.t,
-          [ `AWS of ListAssociationsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListAssociationsResult.t, ListAssociationsResult.error) Result.t
+          Lwt.t
 val list_command_invocations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCommandInvocationsRequest.t ->
-        (ListCommandInvocationsResult.t,
-          [ `AWS of ListCommandInvocationsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListCommandInvocationsResult.t, ListCommandInvocationsResult.error)
+          Result.t Lwt.t
 val list_commands :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCommandsRequest.t ->
-        (ListCommandsResult.t,
-          [ `AWS of ListCommandsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListCommandsResult.t, ListCommandsResult.error) Result.t Lwt.t
 val list_compliance_items :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListComplianceItemsRequest.t ->
-        (ListComplianceItemsResult.t,
-          [ `AWS of ListComplianceItemsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListComplianceItemsResult.t, ListComplianceItemsResult.error)
+          Result.t Lwt.t
 val list_compliance_summaries :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListComplianceSummariesRequest.t ->
         (ListComplianceSummariesResult.t,
-          [ `AWS of ListComplianceSummariesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListComplianceSummariesResult.error) Result.t Lwt.t
 val list_document_metadata_history :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDocumentMetadataHistoryRequest.t ->
         (ListDocumentMetadataHistoryResponse.t,
-          [ `AWS of ListDocumentMetadataHistoryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListDocumentMetadataHistoryResponse.error) Result.t Lwt.t
 val list_document_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDocumentVersionsRequest.t ->
-        (ListDocumentVersionsResult.t,
-          [ `AWS of ListDocumentVersionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListDocumentVersionsResult.t, ListDocumentVersionsResult.error)
+          Result.t Lwt.t
 val list_documents :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDocumentsRequest.t ->
-        (ListDocumentsResult.t,
-          [ `AWS of ListDocumentsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListDocumentsResult.t, ListDocumentsResult.error) Result.t Lwt.t
 val list_inventory_entries :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListInventoryEntriesRequest.t ->
-        (ListInventoryEntriesResult.t,
-          [ `AWS of ListInventoryEntriesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListInventoryEntriesResult.t, ListInventoryEntriesResult.error)
+          Result.t Lwt.t
 val list_ops_item_events :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListOpsItemEventsRequest.t ->
-        (ListOpsItemEventsResponse.t,
-          [ `AWS of ListOpsItemEventsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListOpsItemEventsResponse.t, ListOpsItemEventsResponse.error)
+          Result.t Lwt.t
 val list_ops_item_related_items :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListOpsItemRelatedItemsRequest.t ->
         (ListOpsItemRelatedItemsResponse.t,
-          [ `AWS of ListOpsItemRelatedItemsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListOpsItemRelatedItemsResponse.error) Result.t Lwt.t
 val list_ops_metadata :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListOpsMetadataRequest.t ->
-        (ListOpsMetadataResult.t,
-          [ `AWS of ListOpsMetadataResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListOpsMetadataResult.t, ListOpsMetadataResult.error) Result.t Lwt.t
 val list_resource_compliance_summaries :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListResourceComplianceSummariesRequest.t ->
         (ListResourceComplianceSummariesResult.t,
-          [ `AWS of ListResourceComplianceSummariesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListResourceComplianceSummariesResult.error) Result.t Lwt.t
 val list_resource_data_sync :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListResourceDataSyncRequest.t ->
-        (ListResourceDataSyncResult.t,
-          [ `AWS of ListResourceDataSyncResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListResourceDataSyncResult.t, ListResourceDataSyncResult.error)
+          Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResult.t,
-          [ `AWS of ListTagsForResourceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResult.t, ListTagsForResourceResult.error)
+          Result.t Lwt.t
 val modify_document_permission :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyDocumentPermissionRequest.t ->
         (ModifyDocumentPermissionResponse.t,
-          [ `AWS of ModifyDocumentPermissionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ModifyDocumentPermissionResponse.error) Result.t Lwt.t
 val put_compliance_items :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutComplianceItemsRequest.t ->
-        (PutComplianceItemsResult.t,
-          [ `AWS of PutComplianceItemsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutComplianceItemsResult.t, PutComplianceItemsResult.error) Result.t
+          Lwt.t
 val put_inventory :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutInventoryRequest.t ->
-        (PutInventoryResult.t,
-          [ `AWS of PutInventoryResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutInventoryResult.t, PutInventoryResult.error) Result.t Lwt.t
 val put_parameter :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutParameterRequest.t ->
-        (PutParameterResult.t,
-          [ `AWS of PutParameterResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutParameterResult.t, PutParameterResult.error) Result.t Lwt.t
 val register_default_patch_baseline :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegisterDefaultPatchBaselineRequest.t ->
         (RegisterDefaultPatchBaselineResult.t,
-          [ `AWS of RegisterDefaultPatchBaselineResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          RegisterDefaultPatchBaselineResult.error) Result.t Lwt.t
 val register_patch_baseline_for_patch_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegisterPatchBaselineForPatchGroupRequest.t ->
         (RegisterPatchBaselineForPatchGroupResult.t,
-          [ `AWS of RegisterPatchBaselineForPatchGroupResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          RegisterPatchBaselineForPatchGroupResult.error) Result.t Lwt.t
 val register_target_with_maintenance_window :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegisterTargetWithMaintenanceWindowRequest.t ->
         (RegisterTargetWithMaintenanceWindowResult.t,
-          [ `AWS of RegisterTargetWithMaintenanceWindowResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          RegisterTargetWithMaintenanceWindowResult.error) Result.t Lwt.t
 val register_task_with_maintenance_window :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegisterTaskWithMaintenanceWindowRequest.t ->
         (RegisterTaskWithMaintenanceWindowResult.t,
-          [ `AWS of RegisterTaskWithMaintenanceWindowResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          RegisterTaskWithMaintenanceWindowResult.error) Result.t Lwt.t
 val remove_tags_from_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RemoveTagsFromResourceRequest.t ->
-        (RemoveTagsFromResourceResult.t,
-          [ `AWS of RemoveTagsFromResourceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RemoveTagsFromResourceResult.t, RemoveTagsFromResourceResult.error)
+          Result.t Lwt.t
 val reset_service_setting :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ResetServiceSettingRequest.t ->
-        (ResetServiceSettingResult.t,
-          [ `AWS of ResetServiceSettingResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ResetServiceSettingResult.t, ResetServiceSettingResult.error)
+          Result.t Lwt.t
 val resume_session :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ResumeSessionRequest.t ->
-        (ResumeSessionResponse.t,
-          [ `AWS of ResumeSessionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ResumeSessionResponse.t, ResumeSessionResponse.error) Result.t Lwt.t
 val send_automation_signal :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SendAutomationSignalRequest.t ->
-        (SendAutomationSignalResult.t,
-          [ `AWS of SendAutomationSignalResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SendAutomationSignalResult.t, SendAutomationSignalResult.error)
+          Result.t Lwt.t
 val send_command :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SendCommandRequest.t ->
-        (SendCommandResult.t,
-          [ `AWS of SendCommandResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SendCommandResult.t, SendCommandResult.error) Result.t Lwt.t
 val start_associations_once :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartAssociationsOnceRequest.t ->
-        (StartAssociationsOnceResult.t,
-          [ `AWS of StartAssociationsOnceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartAssociationsOnceResult.t, StartAssociationsOnceResult.error)
+          Result.t Lwt.t
 val start_automation_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartAutomationExecutionRequest.t ->
         (StartAutomationExecutionResult.t,
-          [ `AWS of StartAutomationExecutionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartAutomationExecutionResult.error) Result.t Lwt.t
 val start_change_request_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartChangeRequestExecutionRequest.t ->
         (StartChangeRequestExecutionResult.t,
-          [ `AWS of StartChangeRequestExecutionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartChangeRequestExecutionResult.error) Result.t Lwt.t
 val start_session :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartSessionRequest.t ->
-        (StartSessionResponse.t,
-          [ `AWS of StartSessionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartSessionResponse.t, StartSessionResponse.error) Result.t Lwt.t
 val stop_automation_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopAutomationExecutionRequest.t ->
         (StopAutomationExecutionResult.t,
-          [ `AWS of StopAutomationExecutionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StopAutomationExecutionResult.error) Result.t Lwt.t
 val terminate_session :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TerminateSessionRequest.t ->
-        (TerminateSessionResponse.t,
-          [ `AWS of TerminateSessionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TerminateSessionResponse.t, TerminateSessionResponse.error) Result.t
+          Lwt.t
 val unlabel_parameter_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UnlabelParameterVersionRequest.t ->
         (UnlabelParameterVersionResult.t,
-          [ `AWS of UnlabelParameterVersionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UnlabelParameterVersionResult.error) Result.t Lwt.t
 val update_association :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateAssociationRequest.t ->
-        (UpdateAssociationResult.t,
-          [ `AWS of UpdateAssociationResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateAssociationResult.t, UpdateAssociationResult.error) Result.t
+          Lwt.t
 val update_association_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateAssociationStatusRequest.t ->
         (UpdateAssociationStatusResult.t,
-          [ `AWS of UpdateAssociationStatusResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateAssociationStatusResult.error) Result.t Lwt.t
 val update_document :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDocumentRequest.t ->
-        (UpdateDocumentResult.t,
-          [ `AWS of UpdateDocumentResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateDocumentResult.t, UpdateDocumentResult.error) Result.t Lwt.t
 val update_document_default_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDocumentDefaultVersionRequest.t ->
         (UpdateDocumentDefaultVersionResult.t,
-          [ `AWS of UpdateDocumentDefaultVersionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateDocumentDefaultVersionResult.error) Result.t Lwt.t
 val update_document_metadata :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDocumentMetadataRequest.t ->
         (UpdateDocumentMetadataResponse.t,
-          [ `AWS of UpdateDocumentMetadataResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateDocumentMetadataResponse.error) Result.t Lwt.t
 val update_maintenance_window :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateMaintenanceWindowRequest.t ->
         (UpdateMaintenanceWindowResult.t,
-          [ `AWS of UpdateMaintenanceWindowResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateMaintenanceWindowResult.error) Result.t Lwt.t
 val update_maintenance_window_target :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateMaintenanceWindowTargetRequest.t ->
         (UpdateMaintenanceWindowTargetResult.t,
-          [ `AWS of UpdateMaintenanceWindowTargetResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateMaintenanceWindowTargetResult.error) Result.t Lwt.t
 val update_maintenance_window_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateMaintenanceWindowTaskRequest.t ->
         (UpdateMaintenanceWindowTaskResult.t,
-          [ `AWS of UpdateMaintenanceWindowTaskResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateMaintenanceWindowTaskResult.error) Result.t Lwt.t
 val update_managed_instance_role :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateManagedInstanceRoleRequest.t ->
         (UpdateManagedInstanceRoleResult.t,
-          [ `AWS of UpdateManagedInstanceRoleResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateManagedInstanceRoleResult.error) Result.t Lwt.t
 val update_ops_item :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateOpsItemRequest.t ->
-        (UpdateOpsItemResponse.t,
-          [ `AWS of UpdateOpsItemResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateOpsItemResponse.t, UpdateOpsItemResponse.error) Result.t Lwt.t
 val update_ops_metadata :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateOpsMetadataRequest.t ->
-        (UpdateOpsMetadataResult.t,
-          [ `AWS of UpdateOpsMetadataResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateOpsMetadataResult.t, UpdateOpsMetadataResult.error) Result.t
+          Lwt.t
 val update_patch_baseline :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePatchBaselineRequest.t ->
-        (UpdatePatchBaselineResult.t,
-          [ `AWS of UpdatePatchBaselineResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdatePatchBaselineResult.t, UpdatePatchBaselineResult.error)
+          Result.t Lwt.t
 val update_resource_data_sync :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateResourceDataSyncRequest.t ->
-        (UpdateResourceDataSyncResult.t,
-          [ `AWS of UpdateResourceDataSyncResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateResourceDataSyncResult.t, UpdateResourceDataSyncResult.error)
+          Result.t Lwt.t
 val update_service_setting :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateServiceSettingRequest.t ->
-        (UpdateServiceSettingResult.t,
-          [ `AWS of UpdateServiceSettingResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateServiceSettingResult.t, UpdateServiceSettingResult.error)
+          Result.t Lwt.t

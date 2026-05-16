@@ -4,230 +4,193 @@ val create_anomaly_monitor :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAnomalyMonitorRequest.t ->
-        (CreateAnomalyMonitorResponse.t,
-          [ `AWS of CreateAnomalyMonitorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateAnomalyMonitorResponse.t, CreateAnomalyMonitorResponse.error)
+          Result.t Lwt.t
 val create_anomaly_subscription :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAnomalySubscriptionRequest.t ->
         (CreateAnomalySubscriptionResponse.t,
-          [ `AWS of CreateAnomalySubscriptionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateAnomalySubscriptionResponse.error) Result.t Lwt.t
 val create_cost_category_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateCostCategoryDefinitionRequest.t ->
         (CreateCostCategoryDefinitionResponse.t,
-          [ `AWS of CreateCostCategoryDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateCostCategoryDefinitionResponse.error) Result.t Lwt.t
 val delete_anomaly_monitor :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAnomalyMonitorRequest.t ->
-        (DeleteAnomalyMonitorResponse.t,
-          [ `AWS of DeleteAnomalyMonitorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteAnomalyMonitorResponse.t, DeleteAnomalyMonitorResponse.error)
+          Result.t Lwt.t
 val delete_anomaly_subscription :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAnomalySubscriptionRequest.t ->
         (DeleteAnomalySubscriptionResponse.t,
-          [ `AWS of DeleteAnomalySubscriptionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteAnomalySubscriptionResponse.error) Result.t Lwt.t
 val delete_cost_category_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteCostCategoryDefinitionRequest.t ->
         (DeleteCostCategoryDefinitionResponse.t,
-          [ `AWS of DeleteCostCategoryDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteCostCategoryDefinitionResponse.error) Result.t Lwt.t
 val describe_cost_category_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeCostCategoryDefinitionRequest.t ->
         (DescribeCostCategoryDefinitionResponse.t,
-          [ `AWS of DescribeCostCategoryDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeCostCategoryDefinitionResponse.error) Result.t Lwt.t
 val get_anomalies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAnomaliesRequest.t ->
-        (GetAnomaliesResponse.t,
-          [ `AWS of GetAnomaliesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetAnomaliesResponse.t, GetAnomaliesResponse.error) Result.t Lwt.t
 val get_anomaly_monitors :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAnomalyMonitorsRequest.t ->
-        (GetAnomalyMonitorsResponse.t,
-          [ `AWS of GetAnomalyMonitorsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetAnomalyMonitorsResponse.t, GetAnomalyMonitorsResponse.error)
+          Result.t Lwt.t
 val get_anomaly_subscriptions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAnomalySubscriptionsRequest.t ->
         (GetAnomalySubscriptionsResponse.t,
-          [ `AWS of GetAnomalySubscriptionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetAnomalySubscriptionsResponse.error) Result.t Lwt.t
 val get_cost_and_usage :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCostAndUsageRequest.t ->
-        (GetCostAndUsageResponse.t,
-          [ `AWS of GetCostAndUsageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetCostAndUsageResponse.t, GetCostAndUsageResponse.error) Result.t
+          Lwt.t
 val get_cost_and_usage_with_resources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCostAndUsageWithResourcesRequest.t ->
         (GetCostAndUsageWithResourcesResponse.t,
-          [ `AWS of GetCostAndUsageWithResourcesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetCostAndUsageWithResourcesResponse.error) Result.t Lwt.t
 val get_cost_categories :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCostCategoriesRequest.t ->
-        (GetCostCategoriesResponse.t,
-          [ `AWS of GetCostCategoriesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetCostCategoriesResponse.t, GetCostCategoriesResponse.error)
+          Result.t Lwt.t
 val get_cost_forecast :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCostForecastRequest.t ->
-        (GetCostForecastResponse.t,
-          [ `AWS of GetCostForecastResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetCostForecastResponse.t, GetCostForecastResponse.error) Result.t
+          Lwt.t
 val get_dimension_values :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDimensionValuesRequest.t ->
-        (GetDimensionValuesResponse.t,
-          [ `AWS of GetDimensionValuesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetDimensionValuesResponse.t, GetDimensionValuesResponse.error)
+          Result.t Lwt.t
 val get_reservation_coverage :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetReservationCoverageRequest.t ->
         (GetReservationCoverageResponse.t,
-          [ `AWS of GetReservationCoverageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetReservationCoverageResponse.error) Result.t Lwt.t
 val get_reservation_purchase_recommendation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetReservationPurchaseRecommendationRequest.t ->
         (GetReservationPurchaseRecommendationResponse.t,
-          [ `AWS of GetReservationPurchaseRecommendationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetReservationPurchaseRecommendationResponse.error) Result.t Lwt.t
 val get_reservation_utilization :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetReservationUtilizationRequest.t ->
         (GetReservationUtilizationResponse.t,
-          [ `AWS of GetReservationUtilizationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetReservationUtilizationResponse.error) Result.t Lwt.t
 val get_rightsizing_recommendation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRightsizingRecommendationRequest.t ->
         (GetRightsizingRecommendationResponse.t,
-          [ `AWS of GetRightsizingRecommendationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetRightsizingRecommendationResponse.error) Result.t Lwt.t
 val get_savings_plans_coverage :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSavingsPlansCoverageRequest.t ->
         (GetSavingsPlansCoverageResponse.t,
-          [ `AWS of GetSavingsPlansCoverageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetSavingsPlansCoverageResponse.error) Result.t Lwt.t
 val get_savings_plans_purchase_recommendation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSavingsPlansPurchaseRecommendationRequest.t ->
         (GetSavingsPlansPurchaseRecommendationResponse.t,
-          [ `AWS of GetSavingsPlansPurchaseRecommendationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetSavingsPlansPurchaseRecommendationResponse.error) Result.t Lwt.t
 val get_savings_plans_utilization :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSavingsPlansUtilizationRequest.t ->
         (GetSavingsPlansUtilizationResponse.t,
-          [ `AWS of GetSavingsPlansUtilizationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetSavingsPlansUtilizationResponse.error) Result.t Lwt.t
 val get_savings_plans_utilization_details :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSavingsPlansUtilizationDetailsRequest.t ->
         (GetSavingsPlansUtilizationDetailsResponse.t,
-          [ `AWS of GetSavingsPlansUtilizationDetailsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetSavingsPlansUtilizationDetailsResponse.error) Result.t Lwt.t
 val get_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTagsRequest.t ->
-        (GetTagsResponse.t,
-          [ `AWS of GetTagsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetTagsResponse.t, GetTagsResponse.error) Result.t Lwt.t
 val get_usage_forecast :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetUsageForecastRequest.t ->
-        (GetUsageForecastResponse.t,
-          [ `AWS of GetUsageForecastResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetUsageForecastResponse.t, GetUsageForecastResponse.error) Result.t
+          Lwt.t
 val list_cost_category_definitions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCostCategoryDefinitionsRequest.t ->
         (ListCostCategoryDefinitionsResponse.t,
-          [ `AWS of ListCostCategoryDefinitionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListCostCategoryDefinitionsResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val provide_anomaly_feedback :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ProvideAnomalyFeedbackRequest.t ->
         (ProvideAnomalyFeedbackResponse.t,
-          [ `AWS of ProvideAnomalyFeedbackResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ProvideAnomalyFeedbackResponse.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_anomaly_monitor :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateAnomalyMonitorRequest.t ->
-        (UpdateAnomalyMonitorResponse.t,
-          [ `AWS of UpdateAnomalyMonitorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateAnomalyMonitorResponse.t, UpdateAnomalyMonitorResponse.error)
+          Result.t Lwt.t
 val update_anomaly_subscription :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateAnomalySubscriptionRequest.t ->
         (UpdateAnomalySubscriptionResponse.t,
-          [ `AWS of UpdateAnomalySubscriptionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateAnomalySubscriptionResponse.error) Result.t Lwt.t
 val update_cost_category_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateCostCategoryDefinitionRequest.t ->
         (UpdateCostCategoryDefinitionResponse.t,
-          [ `AWS of UpdateCostCategoryDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateCostCategoryDefinitionResponse.error) Result.t Lwt.t

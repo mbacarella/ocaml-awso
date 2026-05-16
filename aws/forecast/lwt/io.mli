@@ -4,303 +4,240 @@ val create_auto_predictor :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAutoPredictorRequest.t ->
-        (CreateAutoPredictorResponse.t,
-          [ `AWS of CreateAutoPredictorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateAutoPredictorResponse.t, CreateAutoPredictorResponse.error)
+          Result.t Lwt.t
 val create_dataset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDatasetRequest.t ->
-        (CreateDatasetResponse.t,
-          [ `AWS of CreateDatasetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateDatasetResponse.t, CreateDatasetResponse.error) Result.t Lwt.t
 val create_dataset_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDatasetGroupRequest.t ->
-        (CreateDatasetGroupResponse.t,
-          [ `AWS of CreateDatasetGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateDatasetGroupResponse.t, CreateDatasetGroupResponse.error)
+          Result.t Lwt.t
 val create_dataset_import_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDatasetImportJobRequest.t ->
         (CreateDatasetImportJobResponse.t,
-          [ `AWS of CreateDatasetImportJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateDatasetImportJobResponse.error) Result.t Lwt.t
 val create_explainability :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateExplainabilityRequest.t ->
-        (CreateExplainabilityResponse.t,
-          [ `AWS of CreateExplainabilityResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateExplainabilityResponse.t, CreateExplainabilityResponse.error)
+          Result.t Lwt.t
 val create_explainability_export :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateExplainabilityExportRequest.t ->
         (CreateExplainabilityExportResponse.t,
-          [ `AWS of CreateExplainabilityExportResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateExplainabilityExportResponse.error) Result.t Lwt.t
 val create_forecast :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateForecastRequest.t ->
-        (CreateForecastResponse.t,
-          [ `AWS of CreateForecastResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateForecastResponse.t, CreateForecastResponse.error) Result.t
+          Lwt.t
 val create_forecast_export_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateForecastExportJobRequest.t ->
         (CreateForecastExportJobResponse.t,
-          [ `AWS of CreateForecastExportJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateForecastExportJobResponse.error) Result.t Lwt.t
 val create_predictor :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePredictorRequest.t ->
-        (CreatePredictorResponse.t,
-          [ `AWS of CreatePredictorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreatePredictorResponse.t, CreatePredictorResponse.error) Result.t
+          Lwt.t
 val create_predictor_backtest_export_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePredictorBacktestExportJobRequest.t ->
         (CreatePredictorBacktestExportJobResponse.t,
-          [ `AWS of CreatePredictorBacktestExportJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreatePredictorBacktestExportJobResponse.error) Result.t Lwt.t
 val delete_dataset :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteDatasetRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteDatasetRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_dataset_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteDatasetGroupRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteDatasetGroupRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_dataset_import_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteDatasetImportJobRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteDatasetImportJobRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_explainability :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteExplainabilityRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteExplainabilityRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_explainability_export :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteExplainabilityExportRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteExplainabilityExportRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_forecast :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteForecastRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteForecastRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_forecast_export_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteForecastExportJobRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteForecastExportJobRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_predictor :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeletePredictorRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeletePredictorRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_predictor_backtest_export_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePredictorBacktestExportJobRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+        (unit, unit) Result.t Lwt.t
 val delete_resource_tree :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteResourceTreeRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteResourceTreeRequest.t -> (unit, unit) Result.t Lwt.t
 val describe_auto_predictor :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAutoPredictorRequest.t ->
         (DescribeAutoPredictorResponse.t,
-          [ `AWS of DescribeAutoPredictorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeAutoPredictorResponse.error) Result.t Lwt.t
 val describe_dataset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDatasetRequest.t ->
-        (DescribeDatasetResponse.t,
-          [ `AWS of DescribeDatasetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeDatasetResponse.t, DescribeDatasetResponse.error) Result.t
+          Lwt.t
 val describe_dataset_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDatasetGroupRequest.t ->
-        (DescribeDatasetGroupResponse.t,
-          [ `AWS of DescribeDatasetGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeDatasetGroupResponse.t, DescribeDatasetGroupResponse.error)
+          Result.t Lwt.t
 val describe_dataset_import_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDatasetImportJobRequest.t ->
         (DescribeDatasetImportJobResponse.t,
-          [ `AWS of DescribeDatasetImportJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeDatasetImportJobResponse.error) Result.t Lwt.t
 val describe_explainability :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeExplainabilityRequest.t ->
         (DescribeExplainabilityResponse.t,
-          [ `AWS of DescribeExplainabilityResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeExplainabilityResponse.error) Result.t Lwt.t
 val describe_explainability_export :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeExplainabilityExportRequest.t ->
         (DescribeExplainabilityExportResponse.t,
-          [ `AWS of DescribeExplainabilityExportResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeExplainabilityExportResponse.error) Result.t Lwt.t
 val describe_forecast :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeForecastRequest.t ->
-        (DescribeForecastResponse.t,
-          [ `AWS of DescribeForecastResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeForecastResponse.t, DescribeForecastResponse.error) Result.t
+          Lwt.t
 val describe_forecast_export_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeForecastExportJobRequest.t ->
         (DescribeForecastExportJobResponse.t,
-          [ `AWS of DescribeForecastExportJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeForecastExportJobResponse.error) Result.t Lwt.t
 val describe_predictor :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePredictorRequest.t ->
-        (DescribePredictorResponse.t,
-          [ `AWS of DescribePredictorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribePredictorResponse.t, DescribePredictorResponse.error)
+          Result.t Lwt.t
 val describe_predictor_backtest_export_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePredictorBacktestExportJobRequest.t ->
         (DescribePredictorBacktestExportJobResponse.t,
-          [ `AWS of DescribePredictorBacktestExportJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribePredictorBacktestExportJobResponse.error) Result.t Lwt.t
 val get_accuracy_metrics :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAccuracyMetricsRequest.t ->
-        (GetAccuracyMetricsResponse.t,
-          [ `AWS of GetAccuracyMetricsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetAccuracyMetricsResponse.t, GetAccuracyMetricsResponse.error)
+          Result.t Lwt.t
 val list_dataset_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDatasetGroupsRequest.t ->
-        (ListDatasetGroupsResponse.t,
-          [ `AWS of ListDatasetGroupsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListDatasetGroupsResponse.t, ListDatasetGroupsResponse.error)
+          Result.t Lwt.t
 val list_dataset_import_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDatasetImportJobsRequest.t ->
         (ListDatasetImportJobsResponse.t,
-          [ `AWS of ListDatasetImportJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListDatasetImportJobsResponse.error) Result.t Lwt.t
 val list_datasets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDatasetsRequest.t ->
-        (ListDatasetsResponse.t,
-          [ `AWS of ListDatasetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListDatasetsResponse.t, ListDatasetsResponse.error) Result.t Lwt.t
 val list_explainabilities :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListExplainabilitiesRequest.t ->
-        (ListExplainabilitiesResponse.t,
-          [ `AWS of ListExplainabilitiesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListExplainabilitiesResponse.t, ListExplainabilitiesResponse.error)
+          Result.t Lwt.t
 val list_explainability_exports :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListExplainabilityExportsRequest.t ->
         (ListExplainabilityExportsResponse.t,
-          [ `AWS of ListExplainabilityExportsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListExplainabilityExportsResponse.error) Result.t Lwt.t
 val list_forecast_export_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListForecastExportJobsRequest.t ->
         (ListForecastExportJobsResponse.t,
-          [ `AWS of ListForecastExportJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListForecastExportJobsResponse.error) Result.t Lwt.t
 val list_forecasts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListForecastsRequest.t ->
-        (ListForecastsResponse.t,
-          [ `AWS of ListForecastsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListForecastsResponse.t, ListForecastsResponse.error) Result.t Lwt.t
 val list_predictor_backtest_export_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPredictorBacktestExportJobsRequest.t ->
         (ListPredictorBacktestExportJobsResponse.t,
-          [ `AWS of ListPredictorBacktestExportJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListPredictorBacktestExportJobsResponse.error) Result.t Lwt.t
 val list_predictors :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPredictorsRequest.t ->
-        (ListPredictorsResponse.t,
-          [ `AWS of ListPredictorsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListPredictorsResponse.t, ListPredictorsResponse.error) Result.t
+          Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val stop_resource :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      StopResourceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> StopResourceRequest.t -> (unit, unit) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_dataset_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDatasetGroupRequest.t ->
-        (UpdateDatasetGroupResponse.t,
-          [ `AWS of UpdateDatasetGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateDatasetGroupResponse.t, UpdateDatasetGroupResponse.error)
+          Result.t Lwt.t

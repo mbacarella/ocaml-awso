@@ -5,7 +5,8 @@ let eval_structure ~base_module ~io_subsystem operations =
   let make binding ctor =
     let p = Ast_convenience.pvar binding in
     let c = Printf.ksprintf Ast_convenience.evar "Endpoints.%s" ctor in
-    [%stri let [%p p] = fun ?endpoint_url ?cfg input -> eval ?endpoint_url ?cfg [%e c] input]
+    [%stri
+      let [%p p] = fun ?endpoint_url ?cfg input -> eval ?endpoint_url ?cfg [%e c] input]
   in
   let make_open mod_name =
     let longident_loc txt loc = { txt = Longident.Lident txt; loc } in
@@ -39,7 +40,11 @@ let eval_structure ~base_module ~io_subsystem operations =
           let meth = Endpoints.method_of_endpoint endpoint in
           let uri = Endpoints.uri_of_endpoint endpoint input in
           Io.map
-            (Io.call ?endpoint_url ~cfg ~service:Values.service meth
+            (Io.call
+               ?endpoint_url
+               ~cfg
+               ~service:Values.service
+               meth
                (Endpoints.to_request endpoint input)
                uri)
             (fun resp_result -> Endpoints.of_response endpoint resp_result))
@@ -51,7 +56,6 @@ let eval_structure ~base_module ~io_subsystem operations =
         let s = Endpoint.name e in
         make (Util.camel_to_snake_case s) s)
       operations
-
 ;;
 
 let%expect_test "eval_structure_async" =
@@ -124,28 +128,27 @@ let eval_signature ~protocol ~base_module ~io_subsystem endpoints =
   in
   [%sig: [%%i open_]]
   @ List.map endpoints ~f:(fun e ->
-      let name = Endpoint.name e |> Util.camel_to_snake_case |> Ast_convenience.mknoloc in
-      let request_type = Endpoint.request_type e in
-      let result_type =
-        let ok_arg = Endpoint.result_ok_type e in
-        let error_arg =
-          let aws_error =
-            match protocol with
-            | `ec2 -> [%type: Values.Ec2_error.t]
-            | `json | `query | `rest_xml | `rest_json -> Endpoint.result_error_type e
-          in
-          [%type: [ `AWS of [%t aws_error] | `Transport of Awso.Http.Io.Error.call ]]
-        in
-        match io_subsystem with
-        | `Async -> [%type: ([%t ok_arg], [%t error_arg]) Result.t Async.Deferred.t]
-        | `Lwt -> [%type: ([%t ok_arg], [%t error_arg]) Result.t Lwt.t]
+    let name = Endpoint.name e |> Util.camel_to_snake_case |> Ast_convenience.mknoloc in
+    let request_type = Endpoint.request_type e in
+    let result_type =
+      let ok_arg = Endpoint.result_ok_type e in
+      let error_arg =
+        match protocol with
+        | `ec2 -> [%type: Values.Ec2_error.t]
+        | `json | `query | `rest_xml | `rest_json -> Endpoint.result_error_type e
       in
-      Ast_helper.Sig.value
-        (Ast_helper.Val.mk
-           name
-           [%type:
-             ?endpoint_url:string -> ?cfg:Awso.Cfg.t -> [%t request_type] -> [%t result_type]]))
-
+      match io_subsystem with
+      | `Async -> [%type: ([%t ok_arg], [%t error_arg]) Result.t Async.Deferred.t]
+      | `Lwt -> [%type: ([%t ok_arg], [%t error_arg]) Result.t Lwt.t]
+    in
+    Ast_helper.Sig.value
+      (Ast_helper.Val.mk
+         name
+         [%type:
+           ?endpoint_url:string
+           -> ?cfg:Awso.Cfg.t
+           -> [%t request_type]
+           -> [%t result_type]]))
 ;;
 
 let%expect_test "eval_signature_async" =
@@ -174,27 +177,15 @@ let%expect_test "eval_signature_async" =
     val input_and_output :
       ?endpoint_url:string ->
         ?cfg:Awso.Cfg.t ->
-          Input.t ->
-            (Output.t,
-              [ `AWS of Output.error  | `Transport of Awso.Http.Io.Error.call ])
-              Result.t Async.Deferred.t
+          Input.t -> (Output.t, Output.error) Result.t Async.Deferred.t
     val only_input :
       ?endpoint_url:string ->
-        ?cfg:Awso.Cfg.t ->
-          Input.t ->
-            (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-              Result.t Async.Deferred.t
+        ?cfg:Awso.Cfg.t -> Input.t -> (unit, unit) Result.t Async.Deferred.t
     val only_output :
       ?endpoint_url:string ->
         ?cfg:Awso.Cfg.t ->
-          unit ->
-            (Output.t,
-              [ `AWS of Output.error  | `Transport of Awso.Http.Io.Error.call ])
-              Result.t Async.Deferred.t
+          unit -> (Output.t, Output.error) Result.t Async.Deferred.t
     val no_input_and_no_output :
       ?endpoint_url:string ->
-        ?cfg:Awso.Cfg.t ->
-          unit ->
-            (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-              Result.t Async.Deferred.t |}]
+        ?cfg:Awso.Cfg.t -> unit -> (unit, unit) Result.t Async.Deferred.t |}]
 ;;

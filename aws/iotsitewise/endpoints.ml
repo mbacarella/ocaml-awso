@@ -1317,444 +1317,439 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpdatePortal -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateProject -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
-  | AssociateAssets -> Ok ()
-  | AssociateTimeSeriesToAssetProperty -> Ok ()
+  | AssociateAssets ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | AssociateTimeSeriesToAssetProperty ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | BatchAssociateProjectAssets ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some BatchAssociateProjectAssetsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (BatchAssociateProjectAssetsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (BatchAssociateProjectAssetsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchAssociateProjectAssetsResponse.error_of_json))
   | BatchDisassociateProjectAssets ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some BatchDisassociateProjectAssetsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (BatchDisassociateProjectAssetsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (BatchDisassociateProjectAssetsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchDisassociateProjectAssetsResponse.error_of_json))
   | BatchPutAssetPropertyValue ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some BatchPutAssetPropertyValueResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (BatchPutAssetPropertyValueResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (BatchPutAssetPropertyValueResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchPutAssetPropertyValueResponse.error_of_json))
   | CreateAccessPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateAccessPolicyResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateAccessPolicyResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateAccessPolicyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateAccessPolicyResponse.error_of_json))
   | CreateAsset ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateAssetResponse.error_of_json)
-       | Ok resp -> Ok (CreateAssetResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateAssetResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateAssetResponse.error_of_json))
   | CreateAssetModel ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateAssetModelResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateAssetModelResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateAssetModelResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateAssetModelResponse.error_of_json))
   | CreateDashboard ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateDashboardResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateDashboardResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateDashboardResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateDashboardResponse.error_of_json))
   | CreateGateway ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateGatewayResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateGatewayResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateGatewayResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateGatewayResponse.error_of_json))
   | CreatePortal ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreatePortalResponse.error_of_json)
-       | Ok resp -> Ok (CreatePortalResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreatePortalResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreatePortalResponse.error_of_json))
   | CreateProject ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateProjectResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateProjectResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateProjectResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateProjectResponse.error_of_json))
   | DeleteAccessPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteAccessPolicyResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteAccessPolicyResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteAccessPolicyResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteAccessPolicyResponse.error_of_json))
   | DeleteAsset ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteAssetResponse.error_of_json)
-       | Ok resp -> Ok (DeleteAssetResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteAssetResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteAssetResponse.error_of_json))
   | DeleteAssetModel ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteAssetModelResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteAssetModelResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteAssetModelResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DeleteAssetModelResponse.error_of_json))
   | DeleteDashboard ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteDashboardResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteDashboardResponse.of_header_and_body (headers, ())))
-  | DeleteGateway -> Ok ()
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteDashboardResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some DeleteDashboardResponse.error_of_json))
+  | DeleteGateway ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeletePortal ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeletePortalResponse.error_of_json)
-       | Ok resp -> Ok (DeletePortalResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeletePortalResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeletePortalResponse.error_of_json))
   | DeleteProject ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteProjectResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteProjectResponse.of_header_and_body (headers, ())))
-  | DeleteTimeSeries -> Ok ()
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteProjectResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some DeleteProjectResponse.error_of_json))
+  | DeleteTimeSeries ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DescribeAccessPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeAccessPolicyResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeAccessPolicyResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeAccessPolicyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeAccessPolicyResponse.error_of_json))
   | DescribeAsset ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeAssetResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeAssetResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeAssetResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DescribeAssetResponse.error_of_json))
   | DescribeAssetModel ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeAssetModelResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeAssetModelResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeAssetModelResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeAssetModelResponse.error_of_json))
   | DescribeAssetProperty ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeAssetPropertyResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeAssetPropertyResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeAssetPropertyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeAssetPropertyResponse.error_of_json))
   | DescribeDashboard ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeDashboardResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeDashboardResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeDashboardResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeDashboardResponse.error_of_json))
   | DescribeDefaultEncryptionConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (DescribeDefaultEncryptionConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                DescribeDefaultEncryptionConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeDefaultEncryptionConfigurationResponse.of_json
-                (response_to_json resp)))
+                DescribeDefaultEncryptionConfigurationResponse.error_of_json))
   | DescribeGateway ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeGatewayResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeGatewayResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeGatewayResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeGatewayResponse.error_of_json))
   | DescribeGatewayCapabilityConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (DescribeGatewayCapabilityConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                DescribeGatewayCapabilityConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeGatewayCapabilityConfigurationResponse.of_json
-                (response_to_json resp)))
+                DescribeGatewayCapabilityConfigurationResponse.error_of_json))
   | DescribeLoggingOptions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeLoggingOptionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeLoggingOptionsResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (DescribeLoggingOptionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeLoggingOptionsResponse.error_of_json))
   | DescribePortal ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribePortalResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribePortalResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribePortalResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribePortalResponse.error_of_json))
   | DescribeProject ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeProjectResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeProjectResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeProjectResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeProjectResponse.error_of_json))
   | DescribeStorageConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeStorageConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeStorageConfigurationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeStorageConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeStorageConfigurationResponse.error_of_json))
   | DescribeTimeSeries ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeTimeSeriesResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeTimeSeriesResponse.of_json (response_to_json resp)))
-  | DisassociateAssets -> Ok ()
-  | DisassociateTimeSeriesFromAssetProperty -> Ok ()
+      if is_success
+      then Ok (DescribeTimeSeriesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeTimeSeriesResponse.error_of_json))
+  | DisassociateAssets ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DisassociateTimeSeriesFromAssetProperty ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | GetAssetPropertyAggregates ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetAssetPropertyAggregatesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetAssetPropertyAggregatesResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetAssetPropertyAggregatesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetAssetPropertyAggregatesResponse.error_of_json))
   | GetAssetPropertyValue ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetAssetPropertyValueResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetAssetPropertyValueResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetAssetPropertyValueResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetAssetPropertyValueResponse.error_of_json))
   | GetAssetPropertyValueHistory ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetAssetPropertyValueHistoryResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetAssetPropertyValueHistoryResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetAssetPropertyValueHistoryResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetAssetPropertyValueHistoryResponse.error_of_json))
   | GetInterpolatedAssetPropertyValues ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetInterpolatedAssetPropertyValuesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetInterpolatedAssetPropertyValuesResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetInterpolatedAssetPropertyValuesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetInterpolatedAssetPropertyValuesResponse.error_of_json))
   | ListAccessPolicies ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListAccessPoliciesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListAccessPoliciesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListAccessPoliciesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListAccessPoliciesResponse.error_of_json))
   | ListAssetModels ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListAssetModelsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListAssetModelsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListAssetModelsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListAssetModelsResponse.error_of_json))
   | ListAssetRelationships ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListAssetRelationshipsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListAssetRelationshipsResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListAssetRelationshipsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListAssetRelationshipsResponse.error_of_json))
   | ListAssets ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListAssetsResponse.error_of_json)
-       | Ok resp -> Ok (ListAssetsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListAssetsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListAssetsResponse.error_of_json))
   | ListAssociatedAssets ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListAssociatedAssetsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListAssociatedAssetsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListAssociatedAssetsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListAssociatedAssetsResponse.error_of_json))
   | ListDashboards ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListDashboardsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListDashboardsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListDashboardsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListDashboardsResponse.error_of_json))
   | ListGateways ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListGatewaysResponse.error_of_json)
-       | Ok resp -> Ok (ListGatewaysResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListGatewaysResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListGatewaysResponse.error_of_json))
   | ListPortals ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListPortalsResponse.error_of_json)
-       | Ok resp -> Ok (ListPortalsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListPortalsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListPortalsResponse.error_of_json))
   | ListProjectAssets ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListProjectAssetsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListProjectAssetsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListProjectAssetsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListProjectAssetsResponse.error_of_json))
   | ListProjects ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListProjectsResponse.error_of_json)
-       | Ok resp -> Ok (ListProjectsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListProjectsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListProjectsResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | ListTimeSeries ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTimeSeriesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTimeSeriesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTimeSeriesResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListTimeSeriesResponse.error_of_json))
   | PutDefaultEncryptionConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PutDefaultEncryptionConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (PutDefaultEncryptionConfigurationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (PutDefaultEncryptionConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some PutDefaultEncryptionConfigurationResponse.error_of_json))
   | PutLoggingOptions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutLoggingOptionsResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (PutLoggingOptionsResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (PutLoggingOptionsResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some PutLoggingOptionsResponse.error_of_json))
   | PutStorageConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PutStorageConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (PutStorageConfigurationResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (PutStorageConfigurationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some PutStorageConfigurationResponse.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UntagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateAccessPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateAccessPolicyResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UpdateAccessPolicyResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateAccessPolicyResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some UpdateAccessPolicyResponse.error_of_json))
   | UpdateAsset ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateAssetResponse.error_of_json)
-       | Ok resp -> Ok (UpdateAssetResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateAssetResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateAssetResponse.error_of_json))
   | UpdateAssetModel ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateAssetModelResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateAssetModelResponse.of_json (response_to_json resp)))
-  | UpdateAssetProperty -> Ok ()
+      if is_success
+      then Ok (UpdateAssetModelResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateAssetModelResponse.error_of_json))
+  | UpdateAssetProperty ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | UpdateDashboard ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateDashboardResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UpdateDashboardResponse.of_header_and_body (headers, ())))
-  | UpdateGateway -> Ok ()
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateDashboardResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some UpdateDashboardResponse.error_of_json))
+  | UpdateGateway ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | UpdateGatewayCapabilityConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateGatewayCapabilityConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateGatewayCapabilityConfigurationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (UpdateGatewayCapabilityConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateGatewayCapabilityConfigurationResponse.error_of_json))
   | UpdatePortal ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdatePortalResponse.error_of_json)
-       | Ok resp -> Ok (UpdatePortalResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdatePortalResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdatePortalResponse.error_of_json))
   | UpdateProject ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateProjectResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UpdateProjectResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateProjectResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UpdateProjectResponse.error_of_json))

@@ -4,72 +4,51 @@ val batch_create_attendee :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchCreateAttendeeRequest.t ->
-        (BatchCreateAttendeeResponse.t,
-          [ `AWS of BatchCreateAttendeeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (BatchCreateAttendeeResponse.t, BatchCreateAttendeeResponse.error)
+          Result.t Lwt.t
 val create_attendee :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAttendeeRequest.t ->
-        (CreateAttendeeResponse.t,
-          [ `AWS of CreateAttendeeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateAttendeeResponse.t, CreateAttendeeResponse.error) Result.t
+          Lwt.t
 val create_meeting :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateMeetingRequest.t ->
-        (CreateMeetingResponse.t,
-          [ `AWS of CreateMeetingResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateMeetingResponse.t, CreateMeetingResponse.error) Result.t Lwt.t
 val create_meeting_with_attendees :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateMeetingWithAttendeesRequest.t ->
         (CreateMeetingWithAttendeesResponse.t,
-          [ `AWS of CreateMeetingWithAttendeesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateMeetingWithAttendeesResponse.error) Result.t Lwt.t
 val delete_attendee :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteAttendeeRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteAttendeeRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_meeting :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteMeetingRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteMeetingRequest.t -> (unit, unit) Result.t Lwt.t
 val get_attendee :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAttendeeRequest.t ->
-        (GetAttendeeResponse.t,
-          [ `AWS of GetAttendeeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetAttendeeResponse.t, GetAttendeeResponse.error) Result.t Lwt.t
 val get_meeting :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMeetingRequest.t ->
-        (GetMeetingResponse.t,
-          [ `AWS of GetMeetingResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetMeetingResponse.t, GetMeetingResponse.error) Result.t Lwt.t
 val list_attendees :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAttendeesRequest.t ->
-        (ListAttendeesResponse.t,
-          [ `AWS of ListAttendeesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListAttendeesResponse.t, ListAttendeesResponse.error) Result.t Lwt.t
 val start_meeting_transcription :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      StartMeetingTranscriptionRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      StartMeetingTranscriptionRequest.t -> (unit, unit) Result.t Lwt.t
 val stop_meeting_transcription :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      StopMeetingTranscriptionRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      StopMeetingTranscriptionRequest.t -> (unit, unit) Result.t Lwt.t

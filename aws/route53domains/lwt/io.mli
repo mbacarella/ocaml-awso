@@ -5,208 +5,176 @@ val accept_domain_transfer_from_another_aws_account :
     ?cfg:Awso.Cfg.t ->
       AcceptDomainTransferFromAnotherAwsAccountRequest.t ->
         (AcceptDomainTransferFromAnotherAwsAccountResponse.t,
-          [ `AWS of AcceptDomainTransferFromAnotherAwsAccountResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AcceptDomainTransferFromAnotherAwsAccountResponse.error) Result.t
+          Lwt.t
 val cancel_domain_transfer_to_another_aws_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelDomainTransferToAnotherAwsAccountRequest.t ->
         (CancelDomainTransferToAnotherAwsAccountResponse.t,
-          [ `AWS of CancelDomainTransferToAnotherAwsAccountResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CancelDomainTransferToAnotherAwsAccountResponse.error) Result.t
+          Lwt.t
 val check_domain_availability :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CheckDomainAvailabilityRequest.t ->
         (CheckDomainAvailabilityResponse.t,
-          [ `AWS of CheckDomainAvailabilityResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CheckDomainAvailabilityResponse.error) Result.t Lwt.t
 val check_domain_transferability :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CheckDomainTransferabilityRequest.t ->
         (CheckDomainTransferabilityResponse.t,
-          [ `AWS of CheckDomainTransferabilityResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CheckDomainTransferabilityResponse.error) Result.t Lwt.t
 val delete_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDomainRequest.t ->
-        (DeleteDomainResponse.t,
-          [ `AWS of DeleteDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteDomainResponse.t, DeleteDomainResponse.error) Result.t Lwt.t
 val delete_tags_for_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTagsForDomainRequest.t ->
-        (DeleteTagsForDomainResponse.t,
-          [ `AWS of DeleteTagsForDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteTagsForDomainResponse.t, DeleteTagsForDomainResponse.error)
+          Result.t Lwt.t
 val disable_domain_auto_renew :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisableDomainAutoRenewRequest.t ->
         (DisableDomainAutoRenewResponse.t,
-          [ `AWS of DisableDomainAutoRenewResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisableDomainAutoRenewResponse.error) Result.t Lwt.t
 val disable_domain_transfer_lock :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisableDomainTransferLockRequest.t ->
         (DisableDomainTransferLockResponse.t,
-          [ `AWS of DisableDomainTransferLockResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisableDomainTransferLockResponse.error) Result.t Lwt.t
 val enable_domain_auto_renew :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EnableDomainAutoRenewRequest.t ->
         (EnableDomainAutoRenewResponse.t,
-          [ `AWS of EnableDomainAutoRenewResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          EnableDomainAutoRenewResponse.error) Result.t Lwt.t
 val enable_domain_transfer_lock :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EnableDomainTransferLockRequest.t ->
         (EnableDomainTransferLockResponse.t,
-          [ `AWS of EnableDomainTransferLockResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          EnableDomainTransferLockResponse.error) Result.t Lwt.t
 val get_contact_reachability_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetContactReachabilityStatusRequest.t ->
         (GetContactReachabilityStatusResponse.t,
-          [ `AWS of GetContactReachabilityStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetContactReachabilityStatusResponse.error) Result.t Lwt.t
 val get_domain_detail :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDomainDetailRequest.t ->
-        (GetDomainDetailResponse.t,
-          [ `AWS of GetDomainDetailResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetDomainDetailResponse.t, GetDomainDetailResponse.error) Result.t
+          Lwt.t
 val get_domain_suggestions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDomainSuggestionsRequest.t ->
-        (GetDomainSuggestionsResponse.t,
-          [ `AWS of GetDomainSuggestionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetDomainSuggestionsResponse.t, GetDomainSuggestionsResponse.error)
+          Result.t Lwt.t
 val get_operation_detail :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetOperationDetailRequest.t ->
-        (GetOperationDetailResponse.t,
-          [ `AWS of GetOperationDetailResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetOperationDetailResponse.t, GetOperationDetailResponse.error)
+          Result.t Lwt.t
 val list_domains :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDomainsRequest.t ->
-        (ListDomainsResponse.t,
-          [ `AWS of ListDomainsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListDomainsResponse.t, ListDomainsResponse.error) Result.t Lwt.t
 val list_operations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListOperationsRequest.t ->
-        (ListOperationsResponse.t,
-          [ `AWS of ListOperationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListOperationsResponse.t, ListOperationsResponse.error) Result.t
+          Lwt.t
 val list_prices :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPricesRequest.t ->
-        (ListPricesResponse.t,
-          [ `AWS of ListPricesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListPricesResponse.t, ListPricesResponse.error) Result.t Lwt.t
 val list_tags_for_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForDomainRequest.t ->
-        (ListTagsForDomainResponse.t,
-          [ `AWS of ListTagsForDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForDomainResponse.t, ListTagsForDomainResponse.error)
+          Result.t Lwt.t
 val register_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegisterDomainRequest.t ->
-        (RegisterDomainResponse.t,
-          [ `AWS of RegisterDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RegisterDomainResponse.t, RegisterDomainResponse.error) Result.t
+          Lwt.t
 val reject_domain_transfer_from_another_aws_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RejectDomainTransferFromAnotherAwsAccountRequest.t ->
         (RejectDomainTransferFromAnotherAwsAccountResponse.t,
-          [ `AWS of RejectDomainTransferFromAnotherAwsAccountResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          RejectDomainTransferFromAnotherAwsAccountResponse.error) Result.t
+          Lwt.t
 val renew_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RenewDomainRequest.t ->
-        (RenewDomainResponse.t,
-          [ `AWS of RenewDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RenewDomainResponse.t, RenewDomainResponse.error) Result.t Lwt.t
 val resend_contact_reachability_email :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ResendContactReachabilityEmailRequest.t ->
         (ResendContactReachabilityEmailResponse.t,
-          [ `AWS of ResendContactReachabilityEmailResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ResendContactReachabilityEmailResponse.error) Result.t Lwt.t
 val retrieve_domain_auth_code :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RetrieveDomainAuthCodeRequest.t ->
         (RetrieveDomainAuthCodeResponse.t,
-          [ `AWS of RetrieveDomainAuthCodeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          RetrieveDomainAuthCodeResponse.error) Result.t Lwt.t
 val transfer_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TransferDomainRequest.t ->
-        (TransferDomainResponse.t,
-          [ `AWS of TransferDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TransferDomainResponse.t, TransferDomainResponse.error) Result.t
+          Lwt.t
 val transfer_domain_to_another_aws_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TransferDomainToAnotherAwsAccountRequest.t ->
         (TransferDomainToAnotherAwsAccountResponse.t,
-          [ `AWS of TransferDomainToAnotherAwsAccountResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          TransferDomainToAnotherAwsAccountResponse.error) Result.t Lwt.t
 val update_domain_contact :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDomainContactRequest.t ->
-        (UpdateDomainContactResponse.t,
-          [ `AWS of UpdateDomainContactResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateDomainContactResponse.t, UpdateDomainContactResponse.error)
+          Result.t Lwt.t
 val update_domain_contact_privacy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDomainContactPrivacyRequest.t ->
         (UpdateDomainContactPrivacyResponse.t,
-          [ `AWS of UpdateDomainContactPrivacyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateDomainContactPrivacyResponse.error) Result.t Lwt.t
 val update_domain_nameservers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDomainNameserversRequest.t ->
         (UpdateDomainNameserversResponse.t,
-          [ `AWS of UpdateDomainNameserversResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateDomainNameserversResponse.error) Result.t Lwt.t
 val update_tags_for_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateTagsForDomainRequest.t ->
-        (UpdateTagsForDomainResponse.t,
-          [ `AWS of UpdateTagsForDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateTagsForDomainResponse.t, UpdateTagsForDomainResponse.error)
+          Result.t Lwt.t
 val view_billing :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ViewBillingRequest.t ->
-        (ViewBillingResponse.t,
-          [ `AWS of ViewBillingResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ViewBillingResponse.t, ViewBillingResponse.error) Result.t Lwt.t

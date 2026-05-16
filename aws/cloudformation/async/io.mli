@@ -4,519 +4,387 @@ val activate_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ActivateTypeInput.t ->
-        (ActivateTypeOutput.t,
-          [ `AWS of ActivateTypeOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ActivateTypeOutput.t, ActivateTypeOutput.error) Result.t
           Async.Deferred.t
 val batch_describe_type_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchDescribeTypeConfigurationsInput.t ->
         (BatchDescribeTypeConfigurationsOutput.t,
-          [ `AWS of BatchDescribeTypeConfigurationsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          BatchDescribeTypeConfigurationsOutput.error) Result.t
           Async.Deferred.t
 val cancel_update_stack :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      CancelUpdateStackInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      CancelUpdateStackInput.t -> (unit, unit) Result.t Async.Deferred.t
 val continue_update_rollback :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ContinueUpdateRollbackInput.t ->
-        (ContinueUpdateRollbackOutput.t,
-          [ `AWS of ContinueUpdateRollbackOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ContinueUpdateRollbackOutput.t, ContinueUpdateRollbackOutput.error)
+          Result.t Async.Deferred.t
 val create_change_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateChangeSetInput.t ->
-        (CreateChangeSetOutput.t,
-          [ `AWS of CreateChangeSetOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateChangeSetOutput.t, CreateChangeSetOutput.error) Result.t
           Async.Deferred.t
 val create_stack :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateStackInput.t ->
-        (CreateStackOutput.t,
-          [ `AWS of CreateStackOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateStackOutput.t, CreateStackOutput.error) Result.t
           Async.Deferred.t
 val create_stack_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateStackInstancesInput.t ->
-        (CreateStackInstancesOutput.t,
-          [ `AWS of CreateStackInstancesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateStackInstancesOutput.t, CreateStackInstancesOutput.error)
+          Result.t Async.Deferred.t
 val create_stack_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateStackSetInput.t ->
-        (CreateStackSetOutput.t,
-          [ `AWS of CreateStackSetOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateStackSetOutput.t, CreateStackSetOutput.error) Result.t
           Async.Deferred.t
 val deactivate_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeactivateTypeInput.t ->
-        (DeactivateTypeOutput.t,
-          [ `AWS of DeactivateTypeOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeactivateTypeOutput.t, DeactivateTypeOutput.error) Result.t
           Async.Deferred.t
 val delete_change_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteChangeSetInput.t ->
-        (DeleteChangeSetOutput.t,
-          [ `AWS of DeleteChangeSetOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteChangeSetOutput.t, DeleteChangeSetOutput.error) Result.t
           Async.Deferred.t
 val delete_stack :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteStackInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteStackInput.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_stack_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteStackInstancesInput.t ->
-        (DeleteStackInstancesOutput.t,
-          [ `AWS of DeleteStackInstancesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteStackInstancesOutput.t, DeleteStackInstancesOutput.error)
+          Result.t Async.Deferred.t
 val delete_stack_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteStackSetInput.t ->
-        (DeleteStackSetOutput.t,
-          [ `AWS of DeleteStackSetOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteStackSetOutput.t, DeleteStackSetOutput.error) Result.t
           Async.Deferred.t
 val deregister_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeregisterTypeInput.t ->
-        (DeregisterTypeOutput.t,
-          [ `AWS of DeregisterTypeOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeregisterTypeOutput.t, DeregisterTypeOutput.error) Result.t
           Async.Deferred.t
 val describe_account_limits :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAccountLimitsInput.t ->
-        (DescribeAccountLimitsOutput.t,
-          [ `AWS of DescribeAccountLimitsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeAccountLimitsOutput.t, DescribeAccountLimitsOutput.error)
+          Result.t Async.Deferred.t
 val describe_change_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeChangeSetInput.t ->
-        (DescribeChangeSetOutput.t,
-          [ `AWS of DescribeChangeSetOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeChangeSetOutput.t, DescribeChangeSetOutput.error) Result.t
           Async.Deferred.t
 val describe_change_set_hooks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeChangeSetHooksInput.t ->
-        (DescribeChangeSetHooksOutput.t,
-          [ `AWS of DescribeChangeSetHooksOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeChangeSetHooksOutput.t, DescribeChangeSetHooksOutput.error)
+          Result.t Async.Deferred.t
 val describe_publisher :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePublisherInput.t ->
-        (DescribePublisherOutput.t,
-          [ `AWS of DescribePublisherOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribePublisherOutput.t, DescribePublisherOutput.error) Result.t
           Async.Deferred.t
 val describe_stack_drift_detection_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeStackDriftDetectionStatusInput.t ->
         (DescribeStackDriftDetectionStatusOutput.t,
-          [ `AWS of DescribeStackDriftDetectionStatusOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeStackDriftDetectionStatusOutput.error) Result.t
           Async.Deferred.t
 val describe_stack_events :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeStackEventsInput.t ->
-        (DescribeStackEventsOutput.t,
-          [ `AWS of DescribeStackEventsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeStackEventsOutput.t, DescribeStackEventsOutput.error)
+          Result.t Async.Deferred.t
 val describe_stack_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeStackInstanceInput.t ->
-        (DescribeStackInstanceOutput.t,
-          [ `AWS of DescribeStackInstanceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeStackInstanceOutput.t, DescribeStackInstanceOutput.error)
+          Result.t Async.Deferred.t
 val describe_stack_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeStackResourceInput.t ->
-        (DescribeStackResourceOutput.t,
-          [ `AWS of DescribeStackResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeStackResourceOutput.t, DescribeStackResourceOutput.error)
+          Result.t Async.Deferred.t
 val describe_stack_resource_drifts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeStackResourceDriftsInput.t ->
         (DescribeStackResourceDriftsOutput.t,
-          [ `AWS of DescribeStackResourceDriftsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeStackResourceDriftsOutput.error) Result.t Async.Deferred.t
 val describe_stack_resources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeStackResourcesInput.t ->
-        (DescribeStackResourcesOutput.t,
-          [ `AWS of DescribeStackResourcesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeStackResourcesOutput.t, DescribeStackResourcesOutput.error)
+          Result.t Async.Deferred.t
 val describe_stack_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeStackSetInput.t ->
-        (DescribeStackSetOutput.t,
-          [ `AWS of DescribeStackSetOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeStackSetOutput.t, DescribeStackSetOutput.error) Result.t
           Async.Deferred.t
 val describe_stack_set_operation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeStackSetOperationInput.t ->
         (DescribeStackSetOperationOutput.t,
-          [ `AWS of DescribeStackSetOperationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeStackSetOperationOutput.error) Result.t Async.Deferred.t
 val describe_stacks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeStacksInput.t ->
-        (DescribeStacksOutput.t,
-          [ `AWS of DescribeStacksOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeStacksOutput.t, DescribeStacksOutput.error) Result.t
           Async.Deferred.t
 val describe_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTypeInput.t ->
-        (DescribeTypeOutput.t,
-          [ `AWS of DescribeTypeOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeTypeOutput.t, DescribeTypeOutput.error) Result.t
           Async.Deferred.t
 val describe_type_registration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTypeRegistrationInput.t ->
         (DescribeTypeRegistrationOutput.t,
-          [ `AWS of DescribeTypeRegistrationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeTypeRegistrationOutput.error) Result.t Async.Deferred.t
 val detect_stack_drift :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DetectStackDriftInput.t ->
-        (DetectStackDriftOutput.t,
-          [ `AWS of DetectStackDriftOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DetectStackDriftOutput.t, DetectStackDriftOutput.error) Result.t
           Async.Deferred.t
 val detect_stack_resource_drift :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DetectStackResourceDriftInput.t ->
         (DetectStackResourceDriftOutput.t,
-          [ `AWS of DetectStackResourceDriftOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DetectStackResourceDriftOutput.error) Result.t Async.Deferred.t
 val detect_stack_set_drift :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DetectStackSetDriftInput.t ->
-        (DetectStackSetDriftOutput.t,
-          [ `AWS of DetectStackSetDriftOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DetectStackSetDriftOutput.t, DetectStackSetDriftOutput.error)
+          Result.t Async.Deferred.t
 val estimate_template_cost :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EstimateTemplateCostInput.t ->
-        (EstimateTemplateCostOutput.t,
-          [ `AWS of EstimateTemplateCostOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (EstimateTemplateCostOutput.t, EstimateTemplateCostOutput.error)
+          Result.t Async.Deferred.t
 val execute_change_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ExecuteChangeSetInput.t ->
-        (ExecuteChangeSetOutput.t,
-          [ `AWS of ExecuteChangeSetOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ExecuteChangeSetOutput.t, ExecuteChangeSetOutput.error) Result.t
           Async.Deferred.t
 val get_stack_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetStackPolicyInput.t ->
-        (GetStackPolicyOutput.t,
-          [ `AWS of GetStackPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetStackPolicyOutput.t, GetStackPolicyOutput.error) Result.t
           Async.Deferred.t
 val get_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTemplateInput.t ->
-        (GetTemplateOutput.t,
-          [ `AWS of GetTemplateOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetTemplateOutput.t, GetTemplateOutput.error) Result.t
           Async.Deferred.t
 val get_template_summary :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTemplateSummaryInput.t ->
-        (GetTemplateSummaryOutput.t,
-          [ `AWS of GetTemplateSummaryOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetTemplateSummaryOutput.t, GetTemplateSummaryOutput.error) Result.t
           Async.Deferred.t
 val import_stacks_to_stack_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ImportStacksToStackSetInput.t ->
-        (ImportStacksToStackSetOutput.t,
-          [ `AWS of ImportStacksToStackSetOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ImportStacksToStackSetOutput.t, ImportStacksToStackSetOutput.error)
+          Result.t Async.Deferred.t
 val list_change_sets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListChangeSetsInput.t ->
-        (ListChangeSetsOutput.t,
-          [ `AWS of ListChangeSetsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListChangeSetsOutput.t, ListChangeSetsOutput.error) Result.t
           Async.Deferred.t
 val list_exports :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListExportsInput.t ->
-        (ListExportsOutput.t,
-          [ `AWS of ListExportsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListExportsOutput.t, ListExportsOutput.error) Result.t
           Async.Deferred.t
 val list_imports :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListImportsInput.t ->
-        (ListImportsOutput.t,
-          [ `AWS of ListImportsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListImportsOutput.t, ListImportsOutput.error) Result.t
           Async.Deferred.t
 val list_stack_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListStackInstancesInput.t ->
-        (ListStackInstancesOutput.t,
-          [ `AWS of ListStackInstancesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListStackInstancesOutput.t, ListStackInstancesOutput.error) Result.t
           Async.Deferred.t
 val list_stack_resources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListStackResourcesInput.t ->
-        (ListStackResourcesOutput.t,
-          [ `AWS of ListStackResourcesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListStackResourcesOutput.t, ListStackResourcesOutput.error) Result.t
           Async.Deferred.t
 val list_stack_set_operation_results :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListStackSetOperationResultsInput.t ->
         (ListStackSetOperationResultsOutput.t,
-          [ `AWS of ListStackSetOperationResultsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListStackSetOperationResultsOutput.error) Result.t Async.Deferred.t
 val list_stack_set_operations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListStackSetOperationsInput.t ->
-        (ListStackSetOperationsOutput.t,
-          [ `AWS of ListStackSetOperationsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListStackSetOperationsOutput.t, ListStackSetOperationsOutput.error)
+          Result.t Async.Deferred.t
 val list_stack_sets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListStackSetsInput.t ->
-        (ListStackSetsOutput.t,
-          [ `AWS of ListStackSetsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListStackSetsOutput.t, ListStackSetsOutput.error) Result.t
           Async.Deferred.t
 val list_stacks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListStacksInput.t ->
-        (ListStacksOutput.t,
-          [ `AWS of ListStacksOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListStacksOutput.t, ListStacksOutput.error) Result.t
           Async.Deferred.t
 val list_type_registrations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTypeRegistrationsInput.t ->
-        (ListTypeRegistrationsOutput.t,
-          [ `AWS of ListTypeRegistrationsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTypeRegistrationsOutput.t, ListTypeRegistrationsOutput.error)
+          Result.t Async.Deferred.t
 val list_type_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTypeVersionsInput.t ->
-        (ListTypeVersionsOutput.t,
-          [ `AWS of ListTypeVersionsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListTypeVersionsOutput.t, ListTypeVersionsOutput.error) Result.t
           Async.Deferred.t
 val list_types :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTypesInput.t ->
-        (ListTypesOutput.t,
-          [ `AWS of ListTypesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTypesOutput.t, ListTypesOutput.error) Result.t Async.Deferred.t
 val publish_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PublishTypeInput.t ->
-        (PublishTypeOutput.t,
-          [ `AWS of PublishTypeOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (PublishTypeOutput.t, PublishTypeOutput.error) Result.t
           Async.Deferred.t
 val record_handler_progress :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RecordHandlerProgressInput.t ->
-        (RecordHandlerProgressOutput.t,
-          [ `AWS of RecordHandlerProgressOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (RecordHandlerProgressOutput.t, RecordHandlerProgressOutput.error)
+          Result.t Async.Deferred.t
 val register_publisher :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegisterPublisherInput.t ->
-        (RegisterPublisherOutput.t,
-          [ `AWS of RegisterPublisherOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RegisterPublisherOutput.t, RegisterPublisherOutput.error) Result.t
           Async.Deferred.t
 val register_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegisterTypeInput.t ->
-        (RegisterTypeOutput.t,
-          [ `AWS of RegisterTypeOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RegisterTypeOutput.t, RegisterTypeOutput.error) Result.t
           Async.Deferred.t
 val rollback_stack :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RollbackStackInput.t ->
-        (RollbackStackOutput.t,
-          [ `AWS of RollbackStackOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RollbackStackOutput.t, RollbackStackOutput.error) Result.t
           Async.Deferred.t
 val set_stack_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      SetStackPolicyInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      SetStackPolicyInput.t -> (unit, unit) Result.t Async.Deferred.t
 val set_type_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SetTypeConfigurationInput.t ->
-        (SetTypeConfigurationOutput.t,
-          [ `AWS of SetTypeConfigurationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (SetTypeConfigurationOutput.t, SetTypeConfigurationOutput.error)
+          Result.t Async.Deferred.t
 val set_type_default_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SetTypeDefaultVersionInput.t ->
-        (SetTypeDefaultVersionOutput.t,
-          [ `AWS of SetTypeDefaultVersionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (SetTypeDefaultVersionOutput.t, SetTypeDefaultVersionOutput.error)
+          Result.t Async.Deferred.t
 val signal_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      SignalResourceInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      SignalResourceInput.t -> (unit, unit) Result.t Async.Deferred.t
 val stop_stack_set_operation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopStackSetOperationInput.t ->
-        (StopStackSetOperationOutput.t,
-          [ `AWS of StopStackSetOperationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (StopStackSetOperationOutput.t, StopStackSetOperationOutput.error)
+          Result.t Async.Deferred.t
 val test_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TestTypeInput.t ->
-        (TestTypeOutput.t,
-          [ `AWS of TestTypeOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (TestTypeOutput.t, TestTypeOutput.error) Result.t Async.Deferred.t
 val update_stack :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateStackInput.t ->
-        (UpdateStackOutput.t,
-          [ `AWS of UpdateStackOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateStackOutput.t, UpdateStackOutput.error) Result.t
           Async.Deferred.t
 val update_stack_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateStackInstancesInput.t ->
-        (UpdateStackInstancesOutput.t,
-          [ `AWS of UpdateStackInstancesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateStackInstancesOutput.t, UpdateStackInstancesOutput.error)
+          Result.t Async.Deferred.t
 val update_stack_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateStackSetInput.t ->
-        (UpdateStackSetOutput.t,
-          [ `AWS of UpdateStackSetOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateStackSetOutput.t, UpdateStackSetOutput.error) Result.t
           Async.Deferred.t
 val update_termination_protection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateTerminationProtectionInput.t ->
         (UpdateTerminationProtectionOutput.t,
-          [ `AWS of UpdateTerminationProtectionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateTerminationProtectionOutput.error) Result.t Async.Deferred.t
 val validate_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ValidateTemplateInput.t ->
-        (ValidateTemplateOutput.t,
-          [ `AWS of ValidateTemplateOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ValidateTemplateOutput.t, ValidateTemplateOutput.error) Result.t
           Async.Deferred.t

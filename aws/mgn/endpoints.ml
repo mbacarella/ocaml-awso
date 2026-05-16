@@ -935,209 +935,212 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | ChangeServerLifeCycleState ->
-      (match resp with
-       | Error err -> handle_error err (Some SourceServer.error_of_json)
-       | Ok resp -> Ok (SourceServer.of_json (response_to_json resp)))
+      if is_success
+      then Ok (SourceServer.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some SourceServer.error_of_json))
   | CreateReplicationConfigurationTemplate ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ReplicationConfigurationTemplate.error_of_json)
-       | Ok resp ->
-           Ok
-             (ReplicationConfigurationTemplate.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (ReplicationConfigurationTemplate.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ReplicationConfigurationTemplate.error_of_json))
   | DeleteJob ->
-      (match resp with
-       | Error err -> handle_error err (Some DeleteJobResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteJobResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteJobResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some DeleteJobResponse.error_of_json))
   | DeleteReplicationConfigurationTemplate ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeleteReplicationConfigurationTemplateResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
              (Some
-                DeleteReplicationConfigurationTemplateResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DeleteReplicationConfigurationTemplateResponse.of_header_and_body
-                (headers, ())))
+                DeleteReplicationConfigurationTemplateResponse.error_of_json))
   | DeleteSourceServer ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteSourceServerResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteSourceServerResponse.of_header_and_body (headers, ())))
-  | DeleteVcenterClient -> Ok ()
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteSourceServerResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteSourceServerResponse.error_of_json))
+  | DeleteVcenterClient ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DescribeJobLogItems ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeJobLogItemsResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeJobLogItemsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeJobLogItemsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeJobLogItemsResponse.error_of_json))
   | DescribeJobs ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeJobsResponse.error_of_json)
-       | Ok resp -> Ok (DescribeJobsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeJobsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DescribeJobsResponse.error_of_json))
   | DescribeReplicationConfigurationTemplates ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (DescribeReplicationConfigurationTemplatesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                DescribeReplicationConfigurationTemplatesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeReplicationConfigurationTemplatesResponse.of_json
-                (response_to_json resp)))
+                DescribeReplicationConfigurationTemplatesResponse.error_of_json))
   | DescribeSourceServers ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeSourceServersResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeSourceServersResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeSourceServersResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeSourceServersResponse.error_of_json))
   | DescribeVcenterClients ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeVcenterClientsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeVcenterClientsResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (DescribeVcenterClientsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeVcenterClientsResponse.error_of_json))
   | DisconnectFromService ->
-      (match resp with
-       | Error err -> handle_error err (Some SourceServer.error_of_json)
-       | Ok resp -> Ok (SourceServer.of_json (response_to_json resp)))
+      if is_success
+      then Ok (SourceServer.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some SourceServer.error_of_json))
   | FinalizeCutover ->
-      (match resp with
-       | Error err -> handle_error err (Some SourceServer.error_of_json)
-       | Ok resp -> Ok (SourceServer.of_json (response_to_json resp)))
+      if is_success
+      then Ok (SourceServer.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some SourceServer.error_of_json))
   | GetLaunchConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some LaunchConfiguration.error_of_json)
-       | Ok resp -> Ok (LaunchConfiguration.of_json (response_to_json resp)))
+      if is_success
+      then Ok (LaunchConfiguration.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some LaunchConfiguration.error_of_json))
   | GetReplicationConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ReplicationConfiguration.error_of_json)
-       | Ok resp ->
-           Ok (ReplicationConfiguration.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ReplicationConfiguration.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ReplicationConfiguration.error_of_json))
   | InitializeService ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some InitializeServiceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (InitializeServiceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (InitializeServiceResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some InitializeServiceResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | MarkAsArchived ->
-      (match resp with
-       | Error err -> handle_error err (Some SourceServer.error_of_json)
-       | Ok resp -> Ok (SourceServer.of_json (response_to_json resp)))
+      if is_success
+      then Ok (SourceServer.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some SourceServer.error_of_json))
   | RetryDataReplication ->
-      (match resp with
-       | Error err -> handle_error err (Some SourceServer.error_of_json)
-       | Ok resp -> Ok (SourceServer.of_json (response_to_json resp)))
+      if is_success
+      then Ok (SourceServer.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some SourceServer.error_of_json))
   | StartCutover ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StartCutoverResponse.error_of_json)
-       | Ok resp -> Ok (StartCutoverResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (StartCutoverResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some StartCutoverResponse.error_of_json))
   | StartReplication ->
-      (match resp with
-       | Error err -> handle_error err (Some SourceServer.error_of_json)
-       | Ok resp -> Ok (SourceServer.of_json (response_to_json resp)))
+      if is_success
+      then Ok (SourceServer.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some SourceServer.error_of_json))
   | StartTest ->
-      (match resp with
-       | Error err -> handle_error err (Some StartTestResponse.error_of_json)
-       | Ok resp -> Ok (StartTestResponse.of_json (response_to_json resp)))
-  | TagResource -> Ok ()
+      if is_success
+      then Ok (StartTestResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some StartTestResponse.error_of_json))
+  | TagResource -> if is_success then Ok () else Error (parse_aws_error None)
   | TerminateTargetInstances ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some TerminateTargetInstancesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (TerminateTargetInstancesResponse.of_json
-                (response_to_json resp)))
-  | UntagResource -> Ok ()
+      if is_success
+      then
+        Ok (TerminateTargetInstancesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some TerminateTargetInstancesResponse.error_of_json))
+  | UntagResource ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | UpdateLaunchConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some LaunchConfiguration.error_of_json)
-       | Ok resp -> Ok (LaunchConfiguration.of_json (response_to_json resp)))
+      if is_success
+      then Ok (LaunchConfiguration.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some LaunchConfiguration.error_of_json))
   | UpdateReplicationConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ReplicationConfiguration.error_of_json)
-       | Ok resp ->
-           Ok (ReplicationConfiguration.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ReplicationConfiguration.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ReplicationConfiguration.error_of_json))
   | UpdateReplicationConfigurationTemplate ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ReplicationConfigurationTemplate.error_of_json)
-       | Ok resp ->
-           Ok
-             (ReplicationConfigurationTemplate.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (ReplicationConfigurationTemplate.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ReplicationConfigurationTemplate.error_of_json))
   | UpdateSourceServerReplicationType ->
-      (match resp with
-       | Error err -> handle_error err (Some SourceServer.error_of_json)
-       | Ok resp -> Ok (SourceServer.of_json (response_to_json resp)))
+      if is_success
+      then Ok (SourceServer.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some SourceServer.error_of_json))

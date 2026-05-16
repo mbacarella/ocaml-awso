@@ -4,335 +4,273 @@ val associate_web_a_c_l :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateWebACLRequest.t ->
-        (AssociateWebACLResponse.t,
-          [ `AWS of AssociateWebACLResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AssociateWebACLResponse.t, AssociateWebACLResponse.error) Result.t
+          Lwt.t
 val check_capacity :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CheckCapacityRequest.t ->
-        (CheckCapacityResponse.t,
-          [ `AWS of CheckCapacityResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CheckCapacityResponse.t, CheckCapacityResponse.error) Result.t Lwt.t
 val create_i_p_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateIPSetRequest.t ->
-        (CreateIPSetResponse.t,
-          [ `AWS of CreateIPSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateIPSetResponse.t, CreateIPSetResponse.error) Result.t Lwt.t
 val create_regex_pattern_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRegexPatternSetRequest.t ->
         (CreateRegexPatternSetResponse.t,
-          [ `AWS of CreateRegexPatternSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateRegexPatternSetResponse.error) Result.t Lwt.t
 val create_rule_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRuleGroupRequest.t ->
-        (CreateRuleGroupResponse.t,
-          [ `AWS of CreateRuleGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateRuleGroupResponse.t, CreateRuleGroupResponse.error) Result.t
+          Lwt.t
 val create_web_a_c_l :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateWebACLRequest.t ->
-        (CreateWebACLResponse.t,
-          [ `AWS of CreateWebACLResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateWebACLResponse.t, CreateWebACLResponse.error) Result.t Lwt.t
 val delete_firewall_manager_rule_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteFirewallManagerRuleGroupsRequest.t ->
         (DeleteFirewallManagerRuleGroupsResponse.t,
-          [ `AWS of DeleteFirewallManagerRuleGroupsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteFirewallManagerRuleGroupsResponse.error) Result.t Lwt.t
 val delete_i_p_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteIPSetRequest.t ->
-        (DeleteIPSetResponse.t,
-          [ `AWS of DeleteIPSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteIPSetResponse.t, DeleteIPSetResponse.error) Result.t Lwt.t
 val delete_logging_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteLoggingConfigurationRequest.t ->
         (DeleteLoggingConfigurationResponse.t,
-          [ `AWS of DeleteLoggingConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteLoggingConfigurationResponse.error) Result.t Lwt.t
 val delete_permission_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePermissionPolicyRequest.t ->
         (DeletePermissionPolicyResponse.t,
-          [ `AWS of DeletePermissionPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeletePermissionPolicyResponse.error) Result.t Lwt.t
 val delete_regex_pattern_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRegexPatternSetRequest.t ->
         (DeleteRegexPatternSetResponse.t,
-          [ `AWS of DeleteRegexPatternSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteRegexPatternSetResponse.error) Result.t Lwt.t
 val delete_rule_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRuleGroupRequest.t ->
-        (DeleteRuleGroupResponse.t,
-          [ `AWS of DeleteRuleGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteRuleGroupResponse.t, DeleteRuleGroupResponse.error) Result.t
+          Lwt.t
 val delete_web_a_c_l :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteWebACLRequest.t ->
-        (DeleteWebACLResponse.t,
-          [ `AWS of DeleteWebACLResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteWebACLResponse.t, DeleteWebACLResponse.error) Result.t Lwt.t
 val describe_managed_rule_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeManagedRuleGroupRequest.t ->
         (DescribeManagedRuleGroupResponse.t,
-          [ `AWS of DescribeManagedRuleGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeManagedRuleGroupResponse.error) Result.t Lwt.t
 val disassociate_web_a_c_l :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateWebACLRequest.t ->
-        (DisassociateWebACLResponse.t,
-          [ `AWS of DisassociateWebACLResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DisassociateWebACLResponse.t, DisassociateWebACLResponse.error)
+          Result.t Lwt.t
 val generate_mobile_sdk_release_url :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GenerateMobileSdkReleaseUrlRequest.t ->
         (GenerateMobileSdkReleaseUrlResponse.t,
-          [ `AWS of GenerateMobileSdkReleaseUrlResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GenerateMobileSdkReleaseUrlResponse.error) Result.t Lwt.t
 val get_i_p_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetIPSetRequest.t ->
-        (GetIPSetResponse.t,
-          [ `AWS of GetIPSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetIPSetResponse.t, GetIPSetResponse.error) Result.t Lwt.t
 val get_logging_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLoggingConfigurationRequest.t ->
         (GetLoggingConfigurationResponse.t,
-          [ `AWS of GetLoggingConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetLoggingConfigurationResponse.error) Result.t Lwt.t
 val get_managed_rule_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetManagedRuleSetRequest.t ->
-        (GetManagedRuleSetResponse.t,
-          [ `AWS of GetManagedRuleSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetManagedRuleSetResponse.t, GetManagedRuleSetResponse.error)
+          Result.t Lwt.t
 val get_mobile_sdk_release :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMobileSdkReleaseRequest.t ->
-        (GetMobileSdkReleaseResponse.t,
-          [ `AWS of GetMobileSdkReleaseResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetMobileSdkReleaseResponse.t, GetMobileSdkReleaseResponse.error)
+          Result.t Lwt.t
 val get_permission_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPermissionPolicyRequest.t ->
-        (GetPermissionPolicyResponse.t,
-          [ `AWS of GetPermissionPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetPermissionPolicyResponse.t, GetPermissionPolicyResponse.error)
+          Result.t Lwt.t
 val get_rate_based_statement_managed_keys :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRateBasedStatementManagedKeysRequest.t ->
         (GetRateBasedStatementManagedKeysResponse.t,
-          [ `AWS of GetRateBasedStatementManagedKeysResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetRateBasedStatementManagedKeysResponse.error) Result.t Lwt.t
 val get_regex_pattern_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRegexPatternSetRequest.t ->
-        (GetRegexPatternSetResponse.t,
-          [ `AWS of GetRegexPatternSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetRegexPatternSetResponse.t, GetRegexPatternSetResponse.error)
+          Result.t Lwt.t
 val get_rule_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRuleGroupRequest.t ->
-        (GetRuleGroupResponse.t,
-          [ `AWS of GetRuleGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetRuleGroupResponse.t, GetRuleGroupResponse.error) Result.t Lwt.t
 val get_sampled_requests :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSampledRequestsRequest.t ->
-        (GetSampledRequestsResponse.t,
-          [ `AWS of GetSampledRequestsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetSampledRequestsResponse.t, GetSampledRequestsResponse.error)
+          Result.t Lwt.t
 val get_web_a_c_l :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetWebACLRequest.t ->
-        (GetWebACLResponse.t,
-          [ `AWS of GetWebACLResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetWebACLResponse.t, GetWebACLResponse.error) Result.t Lwt.t
 val get_web_a_c_l_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetWebACLForResourceRequest.t ->
-        (GetWebACLForResourceResponse.t,
-          [ `AWS of GetWebACLForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetWebACLForResourceResponse.t, GetWebACLForResourceResponse.error)
+          Result.t Lwt.t
 val list_available_managed_rule_group_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAvailableManagedRuleGroupVersionsRequest.t ->
         (ListAvailableManagedRuleGroupVersionsResponse.t,
-          [ `AWS of ListAvailableManagedRuleGroupVersionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListAvailableManagedRuleGroupVersionsResponse.error) Result.t Lwt.t
 val list_available_managed_rule_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAvailableManagedRuleGroupsRequest.t ->
         (ListAvailableManagedRuleGroupsResponse.t,
-          [ `AWS of ListAvailableManagedRuleGroupsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListAvailableManagedRuleGroupsResponse.error) Result.t Lwt.t
 val list_i_p_sets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListIPSetsRequest.t ->
-        (ListIPSetsResponse.t,
-          [ `AWS of ListIPSetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListIPSetsResponse.t, ListIPSetsResponse.error) Result.t Lwt.t
 val list_logging_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListLoggingConfigurationsRequest.t ->
         (ListLoggingConfigurationsResponse.t,
-          [ `AWS of ListLoggingConfigurationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListLoggingConfigurationsResponse.error) Result.t Lwt.t
 val list_managed_rule_sets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListManagedRuleSetsRequest.t ->
-        (ListManagedRuleSetsResponse.t,
-          [ `AWS of ListManagedRuleSetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListManagedRuleSetsResponse.t, ListManagedRuleSetsResponse.error)
+          Result.t Lwt.t
 val list_mobile_sdk_releases :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListMobileSdkReleasesRequest.t ->
         (ListMobileSdkReleasesResponse.t,
-          [ `AWS of ListMobileSdkReleasesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListMobileSdkReleasesResponse.error) Result.t Lwt.t
 val list_regex_pattern_sets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRegexPatternSetsRequest.t ->
-        (ListRegexPatternSetsResponse.t,
-          [ `AWS of ListRegexPatternSetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListRegexPatternSetsResponse.t, ListRegexPatternSetsResponse.error)
+          Result.t Lwt.t
 val list_resources_for_web_a_c_l :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListResourcesForWebACLRequest.t ->
         (ListResourcesForWebACLResponse.t,
-          [ `AWS of ListResourcesForWebACLResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListResourcesForWebACLResponse.error) Result.t Lwt.t
 val list_rule_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRuleGroupsRequest.t ->
-        (ListRuleGroupsResponse.t,
-          [ `AWS of ListRuleGroupsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListRuleGroupsResponse.t, ListRuleGroupsResponse.error) Result.t
+          Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val list_web_a_c_ls :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListWebACLsRequest.t ->
-        (ListWebACLsResponse.t,
-          [ `AWS of ListWebACLsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListWebACLsResponse.t, ListWebACLsResponse.error) Result.t Lwt.t
 val put_logging_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutLoggingConfigurationRequest.t ->
         (PutLoggingConfigurationResponse.t,
-          [ `AWS of PutLoggingConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutLoggingConfigurationResponse.error) Result.t Lwt.t
 val put_managed_rule_set_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutManagedRuleSetVersionsRequest.t ->
         (PutManagedRuleSetVersionsResponse.t,
-          [ `AWS of PutManagedRuleSetVersionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutManagedRuleSetVersionsResponse.error) Result.t Lwt.t
 val put_permission_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutPermissionPolicyRequest.t ->
-        (PutPermissionPolicyResponse.t,
-          [ `AWS of PutPermissionPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutPermissionPolicyResponse.t, PutPermissionPolicyResponse.error)
+          Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_i_p_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateIPSetRequest.t ->
-        (UpdateIPSetResponse.t,
-          [ `AWS of UpdateIPSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateIPSetResponse.t, UpdateIPSetResponse.error) Result.t Lwt.t
 val update_managed_rule_set_version_expiry_date :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateManagedRuleSetVersionExpiryDateRequest.t ->
         (UpdateManagedRuleSetVersionExpiryDateResponse.t,
-          [ `AWS of UpdateManagedRuleSetVersionExpiryDateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateManagedRuleSetVersionExpiryDateResponse.error) Result.t Lwt.t
 val update_regex_pattern_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateRegexPatternSetRequest.t ->
         (UpdateRegexPatternSetResponse.t,
-          [ `AWS of UpdateRegexPatternSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateRegexPatternSetResponse.error) Result.t Lwt.t
 val update_rule_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateRuleGroupRequest.t ->
-        (UpdateRuleGroupResponse.t,
-          [ `AWS of UpdateRuleGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateRuleGroupResponse.t, UpdateRuleGroupResponse.error) Result.t
+          Lwt.t
 val update_web_a_c_l :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateWebACLRequest.t ->
-        (UpdateWebACLResponse.t,
-          [ `AWS of UpdateWebACLResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateWebACLResponse.t, UpdateWebACLResponse.error) Result.t Lwt.t

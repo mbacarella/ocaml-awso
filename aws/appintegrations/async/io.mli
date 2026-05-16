@@ -5,118 +5,90 @@ val create_data_integration :
     ?cfg:Awso.Cfg.t ->
       CreateDataIntegrationRequest.t ->
         (CreateDataIntegrationResponse.t,
-          [ `AWS of CreateDataIntegrationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateDataIntegrationResponse.error) Result.t Async.Deferred.t
 val create_event_integration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateEventIntegrationRequest.t ->
         (CreateEventIntegrationResponse.t,
-          [ `AWS of CreateEventIntegrationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateEventIntegrationResponse.error) Result.t Async.Deferred.t
 val delete_data_integration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDataIntegrationRequest.t ->
         (DeleteDataIntegrationResponse.t,
-          [ `AWS of DeleteDataIntegrationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeleteDataIntegrationResponse.error) Result.t Async.Deferred.t
 val delete_event_integration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteEventIntegrationRequest.t ->
         (DeleteEventIntegrationResponse.t,
-          [ `AWS of DeleteEventIntegrationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeleteEventIntegrationResponse.error) Result.t Async.Deferred.t
 val get_data_integration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDataIntegrationRequest.t ->
-        (GetDataIntegrationResponse.t,
-          [ `AWS of GetDataIntegrationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetDataIntegrationResponse.t, GetDataIntegrationResponse.error)
+          Result.t Async.Deferred.t
 val get_event_integration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEventIntegrationRequest.t ->
-        (GetEventIntegrationResponse.t,
-          [ `AWS of GetEventIntegrationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetEventIntegrationResponse.t, GetEventIntegrationResponse.error)
+          Result.t Async.Deferred.t
 val list_data_integration_associations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDataIntegrationAssociationsRequest.t ->
         (ListDataIntegrationAssociationsResponse.t,
-          [ `AWS of ListDataIntegrationAssociationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListDataIntegrationAssociationsResponse.error) Result.t
           Async.Deferred.t
 val list_data_integrations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDataIntegrationsRequest.t ->
-        (ListDataIntegrationsResponse.t,
-          [ `AWS of ListDataIntegrationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListDataIntegrationsResponse.t, ListDataIntegrationsResponse.error)
+          Result.t Async.Deferred.t
 val list_event_integration_associations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEventIntegrationAssociationsRequest.t ->
         (ListEventIntegrationAssociationsResponse.t,
-          [ `AWS of ListEventIntegrationAssociationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListEventIntegrationAssociationsResponse.error) Result.t
           Async.Deferred.t
 val list_event_integrations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEventIntegrationsRequest.t ->
         (ListEventIntegrationsResponse.t,
-          [ `AWS of ListEventIntegrationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListEventIntegrationsResponse.error) Result.t Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
 val update_data_integration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDataIntegrationRequest.t ->
         (UpdateDataIntegrationResponse.t,
-          [ `AWS of UpdateDataIntegrationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateDataIntegrationResponse.error) Result.t Async.Deferred.t
 val update_event_integration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateEventIntegrationRequest.t ->
         (UpdateEventIntegrationResponse.t,
-          [ `AWS of UpdateEventIntegrationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateEventIntegrationResponse.error) Result.t Async.Deferred.t

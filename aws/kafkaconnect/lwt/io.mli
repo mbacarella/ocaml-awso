@@ -4,83 +4,71 @@ val create_connector :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateConnectorRequest.t ->
-        (CreateConnectorResponse.t,
-          [ `AWS of CreateConnectorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateConnectorResponse.t, CreateConnectorResponse.error) Result.t
+          Lwt.t
 val create_custom_plugin :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateCustomPluginRequest.t ->
-        (CreateCustomPluginResponse.t,
-          [ `AWS of CreateCustomPluginResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateCustomPluginResponse.t, CreateCustomPluginResponse.error)
+          Result.t Lwt.t
 val create_worker_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateWorkerConfigurationRequest.t ->
         (CreateWorkerConfigurationResponse.t,
-          [ `AWS of CreateWorkerConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateWorkerConfigurationResponse.error) Result.t Lwt.t
 val delete_connector :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteConnectorRequest.t ->
-        (DeleteConnectorResponse.t,
-          [ `AWS of DeleteConnectorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteConnectorResponse.t, DeleteConnectorResponse.error) Result.t
+          Lwt.t
 val delete_custom_plugin :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteCustomPluginRequest.t ->
-        (DeleteCustomPluginResponse.t,
-          [ `AWS of DeleteCustomPluginResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteCustomPluginResponse.t, DeleteCustomPluginResponse.error)
+          Result.t Lwt.t
 val describe_connector :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeConnectorRequest.t ->
-        (DescribeConnectorResponse.t,
-          [ `AWS of DescribeConnectorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeConnectorResponse.t, DescribeConnectorResponse.error)
+          Result.t Lwt.t
 val describe_custom_plugin :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeCustomPluginRequest.t ->
-        (DescribeCustomPluginResponse.t,
-          [ `AWS of DescribeCustomPluginResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeCustomPluginResponse.t, DescribeCustomPluginResponse.error)
+          Result.t Lwt.t
 val describe_worker_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeWorkerConfigurationRequest.t ->
         (DescribeWorkerConfigurationResponse.t,
-          [ `AWS of DescribeWorkerConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeWorkerConfigurationResponse.error) Result.t Lwt.t
 val list_connectors :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListConnectorsRequest.t ->
-        (ListConnectorsResponse.t,
-          [ `AWS of ListConnectorsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListConnectorsResponse.t, ListConnectorsResponse.error) Result.t
+          Lwt.t
 val list_custom_plugins :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCustomPluginsRequest.t ->
-        (ListCustomPluginsResponse.t,
-          [ `AWS of ListCustomPluginsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListCustomPluginsResponse.t, ListCustomPluginsResponse.error)
+          Result.t Lwt.t
 val list_worker_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListWorkerConfigurationsRequest.t ->
         (ListWorkerConfigurationsResponse.t,
-          [ `AWS of ListWorkerConfigurationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListWorkerConfigurationsResponse.error) Result.t Lwt.t
 val update_connector :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateConnectorRequest.t ->
-        (UpdateConnectorResponse.t,
-          [ `AWS of UpdateConnectorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateConnectorResponse.t, UpdateConnectorResponse.error) Result.t
+          Lwt.t

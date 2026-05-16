@@ -5,19 +5,15 @@ val create_home_region_control :
     ?cfg:Awso.Cfg.t ->
       CreateHomeRegionControlRequest.t ->
         (CreateHomeRegionControlResult.t,
-          [ `AWS of CreateHomeRegionControlResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateHomeRegionControlResult.error) Result.t Lwt.t
 val describe_home_region_controls :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeHomeRegionControlsRequest.t ->
         (DescribeHomeRegionControlsResult.t,
-          [ `AWS of DescribeHomeRegionControlsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeHomeRegionControlsResult.error) Result.t Lwt.t
 val get_home_region :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetHomeRegionRequest.t ->
-        (GetHomeRegionResult.t,
-          [ `AWS of GetHomeRegionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetHomeRegionResult.t, GetHomeRegionResult.error) Result.t Lwt.t

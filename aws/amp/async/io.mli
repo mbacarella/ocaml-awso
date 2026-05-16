@@ -5,126 +5,97 @@ val create_alert_manager_definition :
     ?cfg:Awso.Cfg.t ->
       CreateAlertManagerDefinitionRequest.t ->
         (CreateAlertManagerDefinitionResponse.t,
-          [ `AWS of CreateAlertManagerDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          CreateAlertManagerDefinitionResponse.error) Result.t
           Async.Deferred.t
 val create_rule_groups_namespace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRuleGroupsNamespaceRequest.t ->
         (CreateRuleGroupsNamespaceResponse.t,
-          [ `AWS of CreateRuleGroupsNamespaceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateRuleGroupsNamespaceResponse.error) Result.t Async.Deferred.t
 val create_workspace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateWorkspaceRequest.t ->
-        (CreateWorkspaceResponse.t,
-          [ `AWS of CreateWorkspaceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateWorkspaceResponse.t, CreateWorkspaceResponse.error) Result.t
           Async.Deferred.t
 val delete_alert_manager_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAlertManagerDefinitionRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val delete_rule_groups_namespace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRuleGroupsNamespaceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val delete_workspace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteWorkspaceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteWorkspaceRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val describe_alert_manager_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAlertManagerDefinitionRequest.t ->
         (DescribeAlertManagerDefinitionResponse.t,
-          [ `AWS of DescribeAlertManagerDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeAlertManagerDefinitionResponse.error) Result.t
           Async.Deferred.t
 val describe_rule_groups_namespace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRuleGroupsNamespaceRequest.t ->
         (DescribeRuleGroupsNamespaceResponse.t,
-          [ `AWS of DescribeRuleGroupsNamespaceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeRuleGroupsNamespaceResponse.error) Result.t
           Async.Deferred.t
 val describe_workspace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeWorkspaceRequest.t ->
-        (DescribeWorkspaceResponse.t,
-          [ `AWS of DescribeWorkspaceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeWorkspaceResponse.t, DescribeWorkspaceResponse.error)
+          Result.t Async.Deferred.t
 val list_rule_groups_namespaces :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRuleGroupsNamespacesRequest.t ->
         (ListRuleGroupsNamespacesResponse.t,
-          [ `AWS of ListRuleGroupsNamespacesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListRuleGroupsNamespacesResponse.error) Result.t Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val list_workspaces :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListWorkspacesRequest.t ->
-        (ListWorkspacesResponse.t,
-          [ `AWS of ListWorkspacesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListWorkspacesResponse.t, ListWorkspacesResponse.error) Result.t
           Async.Deferred.t
 val put_alert_manager_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutAlertManagerDefinitionRequest.t ->
         (PutAlertManagerDefinitionResponse.t,
-          [ `AWS of PutAlertManagerDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          PutAlertManagerDefinitionResponse.error) Result.t Async.Deferred.t
 val put_rule_groups_namespace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutRuleGroupsNamespaceRequest.t ->
         (PutRuleGroupsNamespaceResponse.t,
-          [ `AWS of PutRuleGroupsNamespaceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          PutRuleGroupsNamespaceResponse.error) Result.t Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
 val update_workspace_alias :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UpdateWorkspaceAliasRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      UpdateWorkspaceAliasRequest.t -> (unit, unit) Result.t Async.Deferred.t

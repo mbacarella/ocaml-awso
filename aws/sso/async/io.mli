@@ -4,29 +4,21 @@ val get_role_credentials :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRoleCredentialsRequest.t ->
-        (GetRoleCredentialsResponse.t,
-          [ `AWS of GetRoleCredentialsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetRoleCredentialsResponse.t, GetRoleCredentialsResponse.error)
+          Result.t Async.Deferred.t
 val list_account_roles :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAccountRolesRequest.t ->
-        (ListAccountRolesResponse.t,
-          [ `AWS of ListAccountRolesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListAccountRolesResponse.t, ListAccountRolesResponse.error) Result.t
           Async.Deferred.t
 val list_accounts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAccountsRequest.t ->
-        (ListAccountsResponse.t,
-          [ `AWS of ListAccountsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListAccountsResponse.t, ListAccountsResponse.error) Result.t
           Async.Deferred.t
 val logout :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      LogoutRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      LogoutRequest.t -> (unit, unit) Result.t Async.Deferred.t

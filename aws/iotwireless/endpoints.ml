@@ -1440,783 +1440,819 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpdateWirelessDevice -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateWirelessGateway -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | AssociateAwsAccountWithPartnerAccount ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (AssociateAwsAccountWithPartnerAccountResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                AssociateAwsAccountWithPartnerAccountResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (AssociateAwsAccountWithPartnerAccountResponse.of_json
-                (response_to_json resp)))
+                AssociateAwsAccountWithPartnerAccountResponse.error_of_json))
   | AssociateMulticastGroupWithFuotaTask ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some AssociateMulticastGroupWithFuotaTaskResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (AssociateMulticastGroupWithFuotaTaskResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (AssociateMulticastGroupWithFuotaTaskResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some AssociateMulticastGroupWithFuotaTaskResponse.error_of_json))
   | AssociateWirelessDeviceWithFuotaTask ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some AssociateWirelessDeviceWithFuotaTaskResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (AssociateWirelessDeviceWithFuotaTaskResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (AssociateWirelessDeviceWithFuotaTaskResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some AssociateWirelessDeviceWithFuotaTaskResponse.error_of_json))
   | AssociateWirelessDeviceWithMulticastGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (AssociateWirelessDeviceWithMulticastGroupResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
              (Some
-                AssociateWirelessDeviceWithMulticastGroupResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (AssociateWirelessDeviceWithMulticastGroupResponse.of_header_and_body
-                (headers, ())))
+                AssociateWirelessDeviceWithMulticastGroupResponse.error_of_json))
   | AssociateWirelessDeviceWithThing ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some AssociateWirelessDeviceWithThingResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (AssociateWirelessDeviceWithThingResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (AssociateWirelessDeviceWithThingResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some AssociateWirelessDeviceWithThingResponse.error_of_json))
   | AssociateWirelessGatewayWithCertificate ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (AssociateWirelessGatewayWithCertificateResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                AssociateWirelessGatewayWithCertificateResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (AssociateWirelessGatewayWithCertificateResponse.of_json
-                (response_to_json resp)))
+                AssociateWirelessGatewayWithCertificateResponse.error_of_json))
   | AssociateWirelessGatewayWithThing ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some AssociateWirelessGatewayWithThingResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (AssociateWirelessGatewayWithThingResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (AssociateWirelessGatewayWithThingResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some AssociateWirelessGatewayWithThingResponse.error_of_json))
   | CancelMulticastGroupSession ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CancelMulticastGroupSessionResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (CancelMulticastGroupSessionResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (CancelMulticastGroupSessionResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some CancelMulticastGroupSessionResponse.error_of_json))
   | CreateDestination ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateDestinationResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateDestinationResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateDestinationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateDestinationResponse.error_of_json))
   | CreateDeviceProfile ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateDeviceProfileResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateDeviceProfileResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateDeviceProfileResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateDeviceProfileResponse.error_of_json))
   | CreateFuotaTask ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateFuotaTaskResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateFuotaTaskResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateFuotaTaskResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateFuotaTaskResponse.error_of_json))
   | CreateMulticastGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateMulticastGroupResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateMulticastGroupResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateMulticastGroupResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateMulticastGroupResponse.error_of_json))
   | CreateServiceProfile ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateServiceProfileResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateServiceProfileResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateServiceProfileResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateServiceProfileResponse.error_of_json))
   | CreateWirelessDevice ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateWirelessDeviceResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateWirelessDeviceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateWirelessDeviceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateWirelessDeviceResponse.error_of_json))
   | CreateWirelessGateway ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateWirelessGatewayResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateWirelessGatewayResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateWirelessGatewayResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateWirelessGatewayResponse.error_of_json))
   | CreateWirelessGatewayTask ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateWirelessGatewayTaskResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateWirelessGatewayTaskResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (CreateWirelessGatewayTaskResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateWirelessGatewayTaskResponse.error_of_json))
   | CreateWirelessGatewayTaskDefinition ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateWirelessGatewayTaskDefinitionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateWirelessGatewayTaskDefinitionResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (CreateWirelessGatewayTaskDefinitionResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateWirelessGatewayTaskDefinitionResponse.error_of_json))
   | DeleteDestination ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteDestinationResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteDestinationResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteDestinationResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteDestinationResponse.error_of_json))
   | DeleteDeviceProfile ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteDeviceProfileResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteDeviceProfileResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteDeviceProfileResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteDeviceProfileResponse.error_of_json))
   | DeleteFuotaTask ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteFuotaTaskResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteFuotaTaskResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteFuotaTaskResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some DeleteFuotaTaskResponse.error_of_json))
   | DeleteMulticastGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteMulticastGroupResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteMulticastGroupResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteMulticastGroupResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteMulticastGroupResponse.error_of_json))
   | DeleteQueuedMessages ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteQueuedMessagesResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteQueuedMessagesResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteQueuedMessagesResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteQueuedMessagesResponse.error_of_json))
   | DeleteServiceProfile ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteServiceProfileResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteServiceProfileResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteServiceProfileResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteServiceProfileResponse.error_of_json))
   | DeleteWirelessDevice ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteWirelessDeviceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteWirelessDeviceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteWirelessDeviceResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteWirelessDeviceResponse.error_of_json))
   | DeleteWirelessGateway ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteWirelessGatewayResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DeleteWirelessGatewayResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteWirelessGatewayResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteWirelessGatewayResponse.error_of_json))
   | DeleteWirelessGatewayTask ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteWirelessGatewayTaskResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DeleteWirelessGatewayTaskResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeleteWirelessGatewayTaskResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteWirelessGatewayTaskResponse.error_of_json))
   | DeleteWirelessGatewayTaskDefinition ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteWirelessGatewayTaskDefinitionResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DeleteWirelessGatewayTaskDefinitionResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeleteWirelessGatewayTaskDefinitionResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteWirelessGatewayTaskDefinitionResponse.error_of_json))
   | DisassociateAwsAccountFromPartnerAccount ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DisassociateAwsAccountFromPartnerAccountResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
              (Some
-                DisassociateAwsAccountFromPartnerAccountResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DisassociateAwsAccountFromPartnerAccountResponse.of_header_and_body
-                (headers, ())))
+                DisassociateAwsAccountFromPartnerAccountResponse.error_of_json))
   | DisassociateMulticastGroupFromFuotaTask ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DisassociateMulticastGroupFromFuotaTaskResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
              (Some
-                DisassociateMulticastGroupFromFuotaTaskResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DisassociateMulticastGroupFromFuotaTaskResponse.of_header_and_body
-                (headers, ())))
+                DisassociateMulticastGroupFromFuotaTaskResponse.error_of_json))
   | DisassociateWirelessDeviceFromFuotaTask ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DisassociateWirelessDeviceFromFuotaTaskResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
              (Some
-                DisassociateWirelessDeviceFromFuotaTaskResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DisassociateWirelessDeviceFromFuotaTaskResponse.of_header_and_body
-                (headers, ())))
+                DisassociateWirelessDeviceFromFuotaTaskResponse.error_of_json))
   | DisassociateWirelessDeviceFromMulticastGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DisassociateWirelessDeviceFromMulticastGroupResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
              (Some
-                DisassociateWirelessDeviceFromMulticastGroupResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DisassociateWirelessDeviceFromMulticastGroupResponse.of_header_and_body
-                (headers, ())))
+                DisassociateWirelessDeviceFromMulticastGroupResponse.error_of_json))
   | DisassociateWirelessDeviceFromThing ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DisassociateWirelessDeviceFromThingResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DisassociateWirelessDeviceFromThingResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DisassociateWirelessDeviceFromThingResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DisassociateWirelessDeviceFromThingResponse.error_of_json))
   | DisassociateWirelessGatewayFromCertificate ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DisassociateWirelessGatewayFromCertificateResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
              (Some
-                DisassociateWirelessGatewayFromCertificateResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DisassociateWirelessGatewayFromCertificateResponse.of_header_and_body
-                (headers, ())))
+                DisassociateWirelessGatewayFromCertificateResponse.error_of_json))
   | DisassociateWirelessGatewayFromThing ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DisassociateWirelessGatewayFromThingResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DisassociateWirelessGatewayFromThingResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DisassociateWirelessGatewayFromThingResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DisassociateWirelessGatewayFromThingResponse.error_of_json))
   | GetDestination ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetDestinationResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetDestinationResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetDestinationResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetDestinationResponse.error_of_json))
   | GetDeviceProfile ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetDeviceProfileResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetDeviceProfileResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetDeviceProfileResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetDeviceProfileResponse.error_of_json))
   | GetFuotaTask ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetFuotaTaskResponse.error_of_json)
-       | Ok resp -> Ok (GetFuotaTaskResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetFuotaTaskResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetFuotaTaskResponse.error_of_json))
   | GetLogLevelsByResourceTypes ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetLogLevelsByResourceTypesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetLogLevelsByResourceTypesResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetLogLevelsByResourceTypesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetLogLevelsByResourceTypesResponse.error_of_json))
   | GetMulticastGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetMulticastGroupResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetMulticastGroupResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetMulticastGroupResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetMulticastGroupResponse.error_of_json))
   | GetMulticastGroupSession ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetMulticastGroupSessionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetMulticastGroupSessionResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (GetMulticastGroupSessionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetMulticastGroupSessionResponse.error_of_json))
   | GetNetworkAnalyzerConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetNetworkAnalyzerConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetNetworkAnalyzerConfigurationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetNetworkAnalyzerConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetNetworkAnalyzerConfigurationResponse.error_of_json))
   | GetPartnerAccount ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetPartnerAccountResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetPartnerAccountResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetPartnerAccountResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetPartnerAccountResponse.error_of_json))
   | GetResourceEventConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetResourceEventConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetResourceEventConfigurationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetResourceEventConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetResourceEventConfigurationResponse.error_of_json))
   | GetResourceLogLevel ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetResourceLogLevelResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetResourceLogLevelResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetResourceLogLevelResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetResourceLogLevelResponse.error_of_json))
   | GetServiceEndpoint ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetServiceEndpointResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetServiceEndpointResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetServiceEndpointResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetServiceEndpointResponse.error_of_json))
   | GetServiceProfile ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetServiceProfileResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetServiceProfileResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetServiceProfileResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetServiceProfileResponse.error_of_json))
   | GetWirelessDevice ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetWirelessDeviceResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetWirelessDeviceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetWirelessDeviceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetWirelessDeviceResponse.error_of_json))
   | GetWirelessDeviceStatistics ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetWirelessDeviceStatisticsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetWirelessDeviceStatisticsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetWirelessDeviceStatisticsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetWirelessDeviceStatisticsResponse.error_of_json))
   | GetWirelessGateway ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetWirelessGatewayResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetWirelessGatewayResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetWirelessGatewayResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetWirelessGatewayResponse.error_of_json))
   | GetWirelessGatewayCertificate ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetWirelessGatewayCertificateResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetWirelessGatewayCertificateResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetWirelessGatewayCertificateResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetWirelessGatewayCertificateResponse.error_of_json))
   | GetWirelessGatewayFirmwareInformation ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (GetWirelessGatewayFirmwareInformationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                GetWirelessGatewayFirmwareInformationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetWirelessGatewayFirmwareInformationResponse.of_json
-                (response_to_json resp)))
+                GetWirelessGatewayFirmwareInformationResponse.error_of_json))
   | GetWirelessGatewayStatistics ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetWirelessGatewayStatisticsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetWirelessGatewayStatisticsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetWirelessGatewayStatisticsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetWirelessGatewayStatisticsResponse.error_of_json))
   | GetWirelessGatewayTask ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetWirelessGatewayTaskResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetWirelessGatewayTaskResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (GetWirelessGatewayTaskResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetWirelessGatewayTaskResponse.error_of_json))
   | GetWirelessGatewayTaskDefinition ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetWirelessGatewayTaskDefinitionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetWirelessGatewayTaskDefinitionResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetWirelessGatewayTaskDefinitionResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetWirelessGatewayTaskDefinitionResponse.error_of_json))
   | ListDestinations ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListDestinationsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListDestinationsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListDestinationsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListDestinationsResponse.error_of_json))
   | ListDeviceProfiles ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListDeviceProfilesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListDeviceProfilesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListDeviceProfilesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListDeviceProfilesResponse.error_of_json))
   | ListFuotaTasks ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListFuotaTasksResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListFuotaTasksResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListFuotaTasksResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListFuotaTasksResponse.error_of_json))
   | ListMulticastGroups ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListMulticastGroupsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListMulticastGroupsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListMulticastGroupsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListMulticastGroupsResponse.error_of_json))
   | ListMulticastGroupsByFuotaTask ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListMulticastGroupsByFuotaTaskResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListMulticastGroupsByFuotaTaskResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListMulticastGroupsByFuotaTaskResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListMulticastGroupsByFuotaTaskResponse.error_of_json))
   | ListPartnerAccounts ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListPartnerAccountsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListPartnerAccountsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListPartnerAccountsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListPartnerAccountsResponse.error_of_json))
   | ListQueuedMessages ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListQueuedMessagesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListQueuedMessagesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListQueuedMessagesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListQueuedMessagesResponse.error_of_json))
   | ListServiceProfiles ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListServiceProfilesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListServiceProfilesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListServiceProfilesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListServiceProfilesResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | ListWirelessDevices ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListWirelessDevicesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListWirelessDevicesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListWirelessDevicesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListWirelessDevicesResponse.error_of_json))
   | ListWirelessGatewayTaskDefinitions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListWirelessGatewayTaskDefinitionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListWirelessGatewayTaskDefinitionsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListWirelessGatewayTaskDefinitionsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListWirelessGatewayTaskDefinitionsResponse.error_of_json))
   | ListWirelessGateways ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListWirelessGatewaysResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListWirelessGatewaysResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListWirelessGatewaysResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListWirelessGatewaysResponse.error_of_json))
   | PutResourceLogLevel ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutResourceLogLevelResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (PutResourceLogLevelResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (PutResourceLogLevelResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some PutResourceLogLevelResponse.error_of_json))
   | ResetAllResourceLogLevels ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ResetAllResourceLogLevelsResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (ResetAllResourceLogLevelsResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (ResetAllResourceLogLevelsResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some ResetAllResourceLogLevelsResponse.error_of_json))
   | ResetResourceLogLevel ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ResetResourceLogLevelResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (ResetResourceLogLevelResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (ResetResourceLogLevelResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some ResetResourceLogLevelResponse.error_of_json))
   | SendDataToMulticastGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some SendDataToMulticastGroupResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (SendDataToMulticastGroupResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (SendDataToMulticastGroupResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some SendDataToMulticastGroupResponse.error_of_json))
   | SendDataToWirelessDevice ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some SendDataToWirelessDeviceResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (SendDataToWirelessDeviceResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (SendDataToWirelessDeviceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some SendDataToWirelessDeviceResponse.error_of_json))
   | StartBulkAssociateWirelessDeviceWithMulticastGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (StartBulkAssociateWirelessDeviceWithMulticastGroupResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
              (Some
-                StartBulkAssociateWirelessDeviceWithMulticastGroupResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (StartBulkAssociateWirelessDeviceWithMulticastGroupResponse.of_header_and_body
-                (headers, ())))
+                StartBulkAssociateWirelessDeviceWithMulticastGroupResponse.error_of_json))
   | StartBulkDisassociateWirelessDeviceFromMulticastGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (StartBulkDisassociateWirelessDeviceFromMulticastGroupResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
              (Some
-                StartBulkDisassociateWirelessDeviceFromMulticastGroupResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (StartBulkDisassociateWirelessDeviceFromMulticastGroupResponse.of_header_and_body
-                (headers, ())))
+                StartBulkDisassociateWirelessDeviceFromMulticastGroupResponse.error_of_json))
   | StartFuotaTask ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StartFuotaTaskResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (StartFuotaTaskResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (StartFuotaTaskResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some StartFuotaTaskResponse.error_of_json))
   | StartMulticastGroupSession ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some StartMulticastGroupSessionResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (StartMulticastGroupSessionResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (StartMulticastGroupSessionResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some StartMulticastGroupSessionResponse.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | TestWirelessDevice ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TestWirelessDeviceResponse.error_of_json)
-       | Ok resp ->
-           Ok (TestWirelessDeviceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (TestWirelessDeviceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some TestWirelessDeviceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UntagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateDestination ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateDestinationResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UpdateDestinationResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateDestinationResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some UpdateDestinationResponse.error_of_json))
   | UpdateFuotaTask ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateFuotaTaskResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UpdateFuotaTaskResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateFuotaTaskResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some UpdateFuotaTaskResponse.error_of_json))
   | UpdateLogLevelsByResourceTypes ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateLogLevelsByResourceTypesResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (UpdateLogLevelsByResourceTypesResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateLogLevelsByResourceTypesResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateLogLevelsByResourceTypesResponse.error_of_json))
   | UpdateMulticastGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateMulticastGroupResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UpdateMulticastGroupResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateMulticastGroupResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some UpdateMulticastGroupResponse.error_of_json))
   | UpdateNetworkAnalyzerConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateNetworkAnalyzerConfigurationResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (UpdateNetworkAnalyzerConfigurationResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateNetworkAnalyzerConfigurationResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateNetworkAnalyzerConfigurationResponse.error_of_json))
   | UpdatePartnerAccount ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdatePartnerAccountResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UpdatePartnerAccountResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdatePartnerAccountResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some UpdatePartnerAccountResponse.error_of_json))
   | UpdateResourceEventConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateResourceEventConfigurationResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (UpdateResourceEventConfigurationResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateResourceEventConfigurationResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateResourceEventConfigurationResponse.error_of_json))
   | UpdateWirelessDevice ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateWirelessDeviceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UpdateWirelessDeviceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateWirelessDeviceResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some UpdateWirelessDeviceResponse.error_of_json))
   | UpdateWirelessGateway ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateWirelessGatewayResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (UpdateWirelessGatewayResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateWirelessGatewayResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some UpdateWirelessGatewayResponse.error_of_json))

@@ -93,7 +93,11 @@ val timestamp_of_json : Yojson.Safe.t -> string
 
 (** Convert a JSON value to a list (or fail with an exception mentioning the
     [kind] of value being parsed). *)
-val list_of_json : kind:string -> of_json:(Yojson.Safe.t -> 'a) -> [> Yojson.Safe.t ] -> 'a list
+val list_of_json
+  :  kind:string
+  -> of_json:(Yojson.Safe.t -> 'a)
+  -> [> Yojson.Safe.t ]
+  -> 'a list
 
 (** Convert a JSON object to an association list (or fail with an exception). *)
 val object_of_json

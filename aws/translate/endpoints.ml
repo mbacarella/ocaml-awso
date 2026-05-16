@@ -193,120 +193,130 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             "AWSShineFrontendService_20170701.UpdateParallelData")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    let generic_error () = Error (`Transport err) in
-    match err with
-    | `Too_many_redirects -> generic_error ()
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-        (match (error_of_json, ((code >= 400) && (code <= 599))) with
-         | (Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             (match json |> (Yojson.Safe.Util.member "__type") with
-              | `String error_type ->
-                  Error (`AWS (error_of_json error_type json))
-              | `Null -> generic_error ()
-              | _ ->
-                  failwith
-                    (sprintf "Error '__type' did not have string type: %s"
-                       body))
-         | (None, _) | (_, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = None }) in
+    match (error_of_json, ((code >= 400) && (code <= 599))) with
+    | (Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        (match json |> (Yojson.Safe.Util.member "__type") with
+         | `String error_type -> error_of_json error_type json
+         | `Null -> bail ()
+         | _ ->
+             failwith
+               (sprintf "Error '__type' did not have string type: %s" body))
+    | (None, _) | (_, false) -> bail () in
+  let _ = parse_aws_error in
+  let _ = resp in
   match endpoint with
   | CreateParallelData ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateParallelDataResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateParallelDataResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateParallelDataResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateParallelDataResponse.error_of_json))
   | DeleteParallelData ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteParallelDataResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteParallelDataResponse.of_json json))
-  | DeleteTerminology -> Ok ()
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteParallelDataResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteParallelDataResponse.error_of_json))
+  | DeleteTerminology ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DescribeTextTranslationJob ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeTextTranslationJobResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeTextTranslationJobResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeTextTranslationJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeTextTranslationJobResponse.error_of_json))
   | GetParallelData ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetParallelDataResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetParallelDataResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetParallelDataResponse.of_json json)
+      else
+        Error (parse_aws_error (Some GetParallelDataResponse.error_of_json))
   | GetTerminology ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetTerminologyResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetTerminologyResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetTerminologyResponse.of_json json)
+      else
+        Error (parse_aws_error (Some GetTerminologyResponse.error_of_json))
   | ImportTerminology ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ImportTerminologyResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ImportTerminologyResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ImportTerminologyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ImportTerminologyResponse.error_of_json))
   | ListParallelData ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListParallelDataResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListParallelDataResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListParallelDataResponse.of_json json)
+      else
+        Error (parse_aws_error (Some ListParallelDataResponse.error_of_json))
   | ListTerminologies ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTerminologiesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListTerminologiesResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListTerminologiesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListTerminologiesResponse.error_of_json))
   | ListTextTranslationJobs ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListTextTranslationJobsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListTextTranslationJobsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListTextTranslationJobsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListTextTranslationJobsResponse.error_of_json))
   | StartTextTranslationJob ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some StartTextTranslationJobResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (StartTextTranslationJobResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartTextTranslationJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StartTextTranslationJobResponse.error_of_json))
   | StopTextTranslationJob ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some StopTextTranslationJobResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (StopTextTranslationJobResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StopTextTranslationJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StopTextTranslationJobResponse.error_of_json))
   | TranslateText ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TranslateTextResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (TranslateTextResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (TranslateTextResponse.of_json json)
+      else Error (parse_aws_error (Some TranslateTextResponse.error_of_json))
   | UpdateParallelData ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateParallelDataResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateParallelDataResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateParallelDataResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateParallelDataResponse.error_of_json))

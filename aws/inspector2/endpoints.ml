@@ -798,242 +798,239 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | AssociateMember ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some AssociateMemberResponse.error_of_json)
-       | Ok resp ->
-           Ok (AssociateMemberResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (AssociateMemberResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some AssociateMemberResponse.error_of_json))
   | BatchGetAccountStatus ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some BatchGetAccountStatusResponse.error_of_json)
-       | Ok resp ->
-           Ok (BatchGetAccountStatusResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (BatchGetAccountStatusResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some BatchGetAccountStatusResponse.error_of_json))
   | BatchGetFreeTrialInfo ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some BatchGetFreeTrialInfoResponse.error_of_json)
-       | Ok resp ->
-           Ok (BatchGetFreeTrialInfoResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (BatchGetFreeTrialInfoResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some BatchGetFreeTrialInfoResponse.error_of_json))
   | CancelFindingsReport ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CancelFindingsReportResponse.error_of_json)
-       | Ok resp ->
-           Ok (CancelFindingsReportResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CancelFindingsReportResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CancelFindingsReportResponse.error_of_json))
   | CreateFilter ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateFilterResponse.error_of_json)
-       | Ok resp -> Ok (CreateFilterResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateFilterResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateFilterResponse.error_of_json))
   | CreateFindingsReport ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateFindingsReportResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateFindingsReportResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateFindingsReportResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateFindingsReportResponse.error_of_json))
   | DeleteFilter ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteFilterResponse.error_of_json)
-       | Ok resp -> Ok (DeleteFilterResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteFilterResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteFilterResponse.error_of_json))
   | DescribeOrganizationConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeOrganizationConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeOrganizationConfigurationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeOrganizationConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeOrganizationConfigurationResponse.error_of_json))
   | Disable ->
-      (match resp with
-       | Error err -> handle_error err (Some DisableResponse.error_of_json)
-       | Ok resp -> Ok (DisableResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DisableResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DisableResponse.error_of_json))
   | DisableDelegatedAdminAccount ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DisableDelegatedAdminAccountResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DisableDelegatedAdminAccountResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DisableDelegatedAdminAccountResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DisableDelegatedAdminAccountResponse.error_of_json))
   | DisassociateMember ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DisassociateMemberResponse.error_of_json)
-       | Ok resp ->
-           Ok (DisassociateMemberResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DisassociateMemberResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DisassociateMemberResponse.error_of_json))
   | Enable ->
-      (match resp with
-       | Error err -> handle_error err (Some EnableResponse.error_of_json)
-       | Ok resp -> Ok (EnableResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (EnableResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some EnableResponse.error_of_json))
   | EnableDelegatedAdminAccount ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some EnableDelegatedAdminAccountResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (EnableDelegatedAdminAccountResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (EnableDelegatedAdminAccountResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some EnableDelegatedAdminAccountResponse.error_of_json))
   | GetDelegatedAdminAccount ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetDelegatedAdminAccountResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetDelegatedAdminAccountResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (GetDelegatedAdminAccountResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetDelegatedAdminAccountResponse.error_of_json))
   | GetFindingsReportStatus ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetFindingsReportStatusResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetFindingsReportStatusResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (GetFindingsReportStatusResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetFindingsReportStatusResponse.error_of_json))
   | GetMember ->
-      (match resp with
-       | Error err -> handle_error err (Some GetMemberResponse.error_of_json)
-       | Ok resp -> Ok (GetMemberResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetMemberResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetMemberResponse.error_of_json))
   | ListAccountPermissions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListAccountPermissionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListAccountPermissionsResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListAccountPermissionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListAccountPermissionsResponse.error_of_json))
   | ListCoverage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListCoverageResponse.error_of_json)
-       | Ok resp -> Ok (ListCoverageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListCoverageResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListCoverageResponse.error_of_json))
   | ListCoverageStatistics ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListCoverageStatisticsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListCoverageStatisticsResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListCoverageStatisticsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListCoverageStatisticsResponse.error_of_json))
   | ListDelegatedAdminAccounts ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListDelegatedAdminAccountsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListDelegatedAdminAccountsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListDelegatedAdminAccountsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListDelegatedAdminAccountsResponse.error_of_json))
   | ListFilters ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListFiltersResponse.error_of_json)
-       | Ok resp -> Ok (ListFiltersResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListFiltersResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListFiltersResponse.error_of_json))
   | ListFindingAggregations ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListFindingAggregationsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListFindingAggregationsResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListFindingAggregationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListFindingAggregationsResponse.error_of_json))
   | ListFindings ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListFindingsResponse.error_of_json)
-       | Ok resp -> Ok (ListFindingsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListFindingsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListFindingsResponse.error_of_json))
   | ListMembers ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListMembersResponse.error_of_json)
-       | Ok resp -> Ok (ListMembersResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListMembersResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListMembersResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | ListUsageTotals ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListUsageTotalsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListUsageTotalsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListUsageTotalsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListUsageTotalsResponse.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UntagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateFilter ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateFilterResponse.error_of_json)
-       | Ok resp -> Ok (UpdateFilterResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateFilterResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateFilterResponse.error_of_json))
   | UpdateOrganizationConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateOrganizationConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateOrganizationConfigurationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (UpdateOrganizationConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateOrganizationConfigurationResponse.error_of_json))

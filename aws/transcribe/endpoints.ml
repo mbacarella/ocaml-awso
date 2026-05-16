@@ -486,281 +486,306 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target", "Transcribe.UpdateVocabularyFilter")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    let generic_error () = Error (`Transport err) in
-    match err with
-    | `Too_many_redirects -> generic_error ()
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-        (match (error_of_json, ((code >= 400) && (code <= 599))) with
-         | (Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             (match json |> (Yojson.Safe.Util.member "__type") with
-              | `String error_type ->
-                  Error (`AWS (error_of_json error_type json))
-              | `Null -> generic_error ()
-              | _ ->
-                  failwith
-                    (sprintf "Error '__type' did not have string type: %s"
-                       body))
-         | (None, _) | (_, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = None }) in
+    match (error_of_json, ((code >= 400) && (code <= 599))) with
+    | (Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        (match json |> (Yojson.Safe.Util.member "__type") with
+         | `String error_type -> error_of_json error_type json
+         | `Null -> bail ()
+         | _ ->
+             failwith
+               (sprintf "Error '__type' did not have string type: %s" body))
+    | (None, _) | (_, false) -> bail () in
+  let _ = parse_aws_error in
+  let _ = resp in
   match endpoint with
   | CreateCallAnalyticsCategory ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateCallAnalyticsCategoryResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateCallAnalyticsCategoryResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateCallAnalyticsCategoryResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateCallAnalyticsCategoryResponse.error_of_json))
   | CreateLanguageModel ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateLanguageModelResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateLanguageModelResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateLanguageModelResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateLanguageModelResponse.error_of_json))
   | CreateMedicalVocabulary ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateMedicalVocabularyResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateMedicalVocabularyResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateMedicalVocabularyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateMedicalVocabularyResponse.error_of_json))
   | CreateVocabulary ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateVocabularyResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateVocabularyResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateVocabularyResponse.of_json json)
+      else
+        Error (parse_aws_error (Some CreateVocabularyResponse.error_of_json))
   | CreateVocabularyFilter ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateVocabularyFilterResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateVocabularyFilterResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateVocabularyFilterResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateVocabularyFilterResponse.error_of_json))
   | DeleteCallAnalyticsCategory ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteCallAnalyticsCategoryResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteCallAnalyticsCategoryResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteCallAnalyticsCategoryResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteCallAnalyticsCategoryResponse.error_of_json))
   | DeleteCallAnalyticsJob ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteCallAnalyticsJobResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteCallAnalyticsJobResponse.of_json json))
-  | DeleteLanguageModel -> Ok ()
-  | DeleteMedicalTranscriptionJob -> Ok ()
-  | DeleteMedicalVocabulary -> Ok ()
-  | DeleteTranscriptionJob -> Ok ()
-  | DeleteVocabulary -> Ok ()
-  | DeleteVocabularyFilter -> Ok ()
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteCallAnalyticsJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteCallAnalyticsJobResponse.error_of_json))
+  | DeleteLanguageModel ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteMedicalTranscriptionJob ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteMedicalVocabulary ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteTranscriptionJob ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteVocabulary ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteVocabularyFilter ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DescribeLanguageModel ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeLanguageModelResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeLanguageModelResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeLanguageModelResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeLanguageModelResponse.error_of_json))
   | GetCallAnalyticsCategory ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetCallAnalyticsCategoryResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetCallAnalyticsCategoryResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetCallAnalyticsCategoryResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetCallAnalyticsCategoryResponse.error_of_json))
   | GetCallAnalyticsJob ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetCallAnalyticsJobResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetCallAnalyticsJobResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetCallAnalyticsJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetCallAnalyticsJobResponse.error_of_json))
   | GetMedicalTranscriptionJob ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetMedicalTranscriptionJobResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetMedicalTranscriptionJobResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetMedicalTranscriptionJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetMedicalTranscriptionJobResponse.error_of_json))
   | GetMedicalVocabulary ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetMedicalVocabularyResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetMedicalVocabularyResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetMedicalVocabularyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetMedicalVocabularyResponse.error_of_json))
   | GetTranscriptionJob ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetTranscriptionJobResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetTranscriptionJobResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetTranscriptionJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetTranscriptionJobResponse.error_of_json))
   | GetVocabulary ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetVocabularyResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetVocabularyResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetVocabularyResponse.of_json json)
+      else Error (parse_aws_error (Some GetVocabularyResponse.error_of_json))
   | GetVocabularyFilter ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetVocabularyFilterResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetVocabularyFilterResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetVocabularyFilterResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetVocabularyFilterResponse.error_of_json))
   | ListCallAnalyticsCategories ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListCallAnalyticsCategoriesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListCallAnalyticsCategoriesResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListCallAnalyticsCategoriesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListCallAnalyticsCategoriesResponse.error_of_json))
   | ListCallAnalyticsJobs ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListCallAnalyticsJobsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListCallAnalyticsJobsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListCallAnalyticsJobsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListCallAnalyticsJobsResponse.error_of_json))
   | ListLanguageModels ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListLanguageModelsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListLanguageModelsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListLanguageModelsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListLanguageModelsResponse.error_of_json))
   | ListMedicalTranscriptionJobs ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListMedicalTranscriptionJobsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListMedicalTranscriptionJobsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListMedicalTranscriptionJobsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListMedicalTranscriptionJobsResponse.error_of_json))
   | ListMedicalVocabularies ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListMedicalVocabulariesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListMedicalVocabulariesResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListMedicalVocabulariesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListMedicalVocabulariesResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListTagsForResourceResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListTagsForResourceResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | ListTranscriptionJobs ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListTranscriptionJobsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListTranscriptionJobsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListTranscriptionJobsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListTranscriptionJobsResponse.error_of_json))
   | ListVocabularies ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListVocabulariesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListVocabulariesResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListVocabulariesResponse.of_json json)
+      else
+        Error (parse_aws_error (Some ListVocabulariesResponse.error_of_json))
   | ListVocabularyFilters ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListVocabularyFiltersResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListVocabularyFiltersResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListVocabularyFiltersResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListVocabularyFiltersResponse.error_of_json))
   | StartCallAnalyticsJob ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some StartCallAnalyticsJobResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (StartCallAnalyticsJobResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartCallAnalyticsJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some StartCallAnalyticsJobResponse.error_of_json))
   | StartMedicalTranscriptionJob ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some StartMedicalTranscriptionJobResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (StartMedicalTranscriptionJobResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartMedicalTranscriptionJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StartMedicalTranscriptionJobResponse.error_of_json))
   | StartTranscriptionJob ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some StartTranscriptionJobResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (StartTranscriptionJobResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartTranscriptionJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some StartTranscriptionJobResponse.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (TagResourceResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (TagResourceResponse.of_json json)
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UntagResourceResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UntagResourceResponse.of_json json)
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateCallAnalyticsCategory ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateCallAnalyticsCategoryResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateCallAnalyticsCategoryResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateCallAnalyticsCategoryResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateCallAnalyticsCategoryResponse.error_of_json))
   | UpdateMedicalVocabulary ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateMedicalVocabularyResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateMedicalVocabularyResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateMedicalVocabularyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateMedicalVocabularyResponse.error_of_json))
   | UpdateVocabulary ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateVocabularyResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateVocabularyResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateVocabularyResponse.of_json json)
+      else
+        Error (parse_aws_error (Some UpdateVocabularyResponse.error_of_json))
   | UpdateVocabularyFilter ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateVocabularyFilterResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateVocabularyFilterResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateVocabularyFilterResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateVocabularyFilterResponse.error_of_json))

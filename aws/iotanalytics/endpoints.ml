@@ -594,209 +594,210 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpdateDatastore -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdatePipeline -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | BatchPutMessage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some BatchPutMessageResponse.error_of_json)
-       | Ok resp ->
-           Ok (BatchPutMessageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (BatchPutMessageResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some BatchPutMessageResponse.error_of_json))
   | CancelPipelineReprocessing ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CancelPipelineReprocessingResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (CancelPipelineReprocessingResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (CancelPipelineReprocessingResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some CancelPipelineReprocessingResponse.error_of_json))
   | CreateChannel ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateChannelResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateChannelResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateChannelResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateChannelResponse.error_of_json))
   | CreateDataset ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateDatasetResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateDatasetResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateDatasetResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateDatasetResponse.error_of_json))
   | CreateDatasetContent ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateDatasetContentResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateDatasetContentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateDatasetContentResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateDatasetContentResponse.error_of_json))
   | CreateDatastore ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateDatastoreResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateDatastoreResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateDatastoreResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateDatastoreResponse.error_of_json))
   | CreatePipeline ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreatePipelineResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreatePipelineResponse.of_json (response_to_json resp)))
-  | DeleteChannel -> Ok ()
-  | DeleteDataset -> Ok ()
-  | DeleteDatasetContent -> Ok ()
-  | DeleteDatastore -> Ok ()
-  | DeletePipeline -> Ok ()
+      if is_success
+      then Ok (CreatePipelineResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreatePipelineResponse.error_of_json))
+  | DeleteChannel ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteDataset ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteDatasetContent ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteDatastore ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeletePipeline ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DescribeChannel ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeChannelResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeChannelResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeChannelResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeChannelResponse.error_of_json))
   | DescribeDataset ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeDatasetResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeDatasetResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeDatasetResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeDatasetResponse.error_of_json))
   | DescribeDatastore ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeDatastoreResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeDatastoreResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeDatastoreResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeDatastoreResponse.error_of_json))
   | DescribeLoggingOptions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeLoggingOptionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeLoggingOptionsResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (DescribeLoggingOptionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeLoggingOptionsResponse.error_of_json))
   | DescribePipeline ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribePipelineResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribePipelineResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribePipelineResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribePipelineResponse.error_of_json))
   | GetDatasetContent ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetDatasetContentResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetDatasetContentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetDatasetContentResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetDatasetContentResponse.error_of_json))
   | ListChannels ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListChannelsResponse.error_of_json)
-       | Ok resp -> Ok (ListChannelsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListChannelsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListChannelsResponse.error_of_json))
   | ListDatasetContents ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListDatasetContentsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListDatasetContentsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListDatasetContentsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListDatasetContentsResponse.error_of_json))
   | ListDatasets ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListDatasetsResponse.error_of_json)
-       | Ok resp -> Ok (ListDatasetsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListDatasetsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListDatasetsResponse.error_of_json))
   | ListDatastores ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListDatastoresResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListDatastoresResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListDatastoresResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListDatastoresResponse.error_of_json))
   | ListPipelines ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListPipelinesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListPipelinesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListPipelinesResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListPipelinesResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
-  | PutLoggingOptions -> Ok ()
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
+  | PutLoggingOptions ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | RunPipelineActivity ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RunPipelineActivityResponse.error_of_json)
-       | Ok resp ->
-           Ok (RunPipelineActivityResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (RunPipelineActivityResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some RunPipelineActivityResponse.error_of_json))
   | SampleChannelData ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some SampleChannelDataResponse.error_of_json)
-       | Ok resp ->
-           Ok (SampleChannelDataResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (SampleChannelDataResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some SampleChannelDataResponse.error_of_json))
   | StartPipelineReprocessing ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some StartPipelineReprocessingResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (StartPipelineReprocessingResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (StartPipelineReprocessingResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some StartPipelineReprocessingResponse.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UntagResourceResponse.of_header_and_body (headers, ())))
-  | UpdateChannel -> Ok ()
-  | UpdateDataset -> Ok ()
-  | UpdateDatastore -> Ok ()
-  | UpdatePipeline -> Ok ()
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
+  | UpdateChannel ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateDataset ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateDatastore ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UpdatePipeline ->
+      if is_success then Ok () else Error (parse_aws_error None)

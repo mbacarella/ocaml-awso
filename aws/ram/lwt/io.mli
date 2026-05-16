@@ -5,173 +5,144 @@ val accept_resource_share_invitation :
     ?cfg:Awso.Cfg.t ->
       AcceptResourceShareInvitationRequest.t ->
         (AcceptResourceShareInvitationResponse.t,
-          [ `AWS of AcceptResourceShareInvitationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AcceptResourceShareInvitationResponse.error) Result.t Lwt.t
 val associate_resource_share :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateResourceShareRequest.t ->
         (AssociateResourceShareResponse.t,
-          [ `AWS of AssociateResourceShareResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssociateResourceShareResponse.error) Result.t Lwt.t
 val associate_resource_share_permission :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateResourceSharePermissionRequest.t ->
         (AssociateResourceSharePermissionResponse.t,
-          [ `AWS of AssociateResourceSharePermissionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssociateResourceSharePermissionResponse.error) Result.t Lwt.t
 val create_resource_share :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateResourceShareRequest.t ->
-        (CreateResourceShareResponse.t,
-          [ `AWS of CreateResourceShareResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateResourceShareResponse.t, CreateResourceShareResponse.error)
+          Result.t Lwt.t
 val delete_resource_share :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteResourceShareRequest.t ->
-        (DeleteResourceShareResponse.t,
-          [ `AWS of DeleteResourceShareResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteResourceShareResponse.t, DeleteResourceShareResponse.error)
+          Result.t Lwt.t
 val disassociate_resource_share :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateResourceShareRequest.t ->
         (DisassociateResourceShareResponse.t,
-          [ `AWS of DisassociateResourceShareResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateResourceShareResponse.error) Result.t Lwt.t
 val disassociate_resource_share_permission :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateResourceSharePermissionRequest.t ->
         (DisassociateResourceSharePermissionResponse.t,
-          [ `AWS of DisassociateResourceSharePermissionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateResourceSharePermissionResponse.error) Result.t Lwt.t
 val enable_sharing_with_aws_organization :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EnableSharingWithAwsOrganizationRequest.t ->
         (EnableSharingWithAwsOrganizationResponse.t,
-          [ `AWS of EnableSharingWithAwsOrganizationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          EnableSharingWithAwsOrganizationResponse.error) Result.t Lwt.t
 val get_permission :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPermissionRequest.t ->
-        (GetPermissionResponse.t,
-          [ `AWS of GetPermissionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetPermissionResponse.t, GetPermissionResponse.error) Result.t Lwt.t
 val get_resource_policies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetResourcePoliciesRequest.t ->
-        (GetResourcePoliciesResponse.t,
-          [ `AWS of GetResourcePoliciesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetResourcePoliciesResponse.t, GetResourcePoliciesResponse.error)
+          Result.t Lwt.t
 val get_resource_share_associations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetResourceShareAssociationsRequest.t ->
         (GetResourceShareAssociationsResponse.t,
-          [ `AWS of GetResourceShareAssociationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetResourceShareAssociationsResponse.error) Result.t Lwt.t
 val get_resource_share_invitations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetResourceShareInvitationsRequest.t ->
         (GetResourceShareInvitationsResponse.t,
-          [ `AWS of GetResourceShareInvitationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetResourceShareInvitationsResponse.error) Result.t Lwt.t
 val get_resource_shares :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetResourceSharesRequest.t ->
-        (GetResourceSharesResponse.t,
-          [ `AWS of GetResourceSharesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetResourceSharesResponse.t, GetResourceSharesResponse.error)
+          Result.t Lwt.t
 val list_pending_invitation_resources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPendingInvitationResourcesRequest.t ->
         (ListPendingInvitationResourcesResponse.t,
-          [ `AWS of ListPendingInvitationResourcesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListPendingInvitationResourcesResponse.error) Result.t Lwt.t
 val list_permission_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPermissionVersionsRequest.t ->
         (ListPermissionVersionsResponse.t,
-          [ `AWS of ListPermissionVersionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListPermissionVersionsResponse.error) Result.t Lwt.t
 val list_permissions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPermissionsRequest.t ->
-        (ListPermissionsResponse.t,
-          [ `AWS of ListPermissionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListPermissionsResponse.t, ListPermissionsResponse.error) Result.t
+          Lwt.t
 val list_principals :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPrincipalsRequest.t ->
-        (ListPrincipalsResponse.t,
-          [ `AWS of ListPrincipalsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListPrincipalsResponse.t, ListPrincipalsResponse.error) Result.t
+          Lwt.t
 val list_resource_share_permissions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListResourceSharePermissionsRequest.t ->
         (ListResourceSharePermissionsResponse.t,
-          [ `AWS of ListResourceSharePermissionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListResourceSharePermissionsResponse.error) Result.t Lwt.t
 val list_resource_types :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListResourceTypesRequest.t ->
-        (ListResourceTypesResponse.t,
-          [ `AWS of ListResourceTypesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListResourceTypesResponse.t, ListResourceTypesResponse.error)
+          Result.t Lwt.t
 val list_resources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListResourcesRequest.t ->
-        (ListResourcesResponse.t,
-          [ `AWS of ListResourcesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListResourcesResponse.t, ListResourcesResponse.error) Result.t Lwt.t
 val promote_resource_share_created_from_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PromoteResourceShareCreatedFromPolicyRequest.t ->
         (PromoteResourceShareCreatedFromPolicyResponse.t,
-          [ `AWS of PromoteResourceShareCreatedFromPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PromoteResourceShareCreatedFromPolicyResponse.error) Result.t Lwt.t
 val reject_resource_share_invitation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RejectResourceShareInvitationRequest.t ->
         (RejectResourceShareInvitationResponse.t,
-          [ `AWS of RejectResourceShareInvitationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          RejectResourceShareInvitationResponse.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_resource_share :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateResourceShareRequest.t ->
-        (UpdateResourceShareResponse.t,
-          [ `AWS of UpdateResourceShareResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateResourceShareResponse.t, UpdateResourceShareResponse.error)
+          Result.t Lwt.t

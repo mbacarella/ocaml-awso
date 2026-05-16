@@ -5,265 +5,217 @@ val create_call_analytics_category :
     ?cfg:Awso.Cfg.t ->
       CreateCallAnalyticsCategoryRequest.t ->
         (CreateCallAnalyticsCategoryResponse.t,
-          [ `AWS of CreateCallAnalyticsCategoryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateCallAnalyticsCategoryResponse.error) Result.t Lwt.t
 val create_language_model :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateLanguageModelRequest.t ->
-        (CreateLanguageModelResponse.t,
-          [ `AWS of CreateLanguageModelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateLanguageModelResponse.t, CreateLanguageModelResponse.error)
+          Result.t Lwt.t
 val create_medical_vocabulary :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateMedicalVocabularyRequest.t ->
         (CreateMedicalVocabularyResponse.t,
-          [ `AWS of CreateMedicalVocabularyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateMedicalVocabularyResponse.error) Result.t Lwt.t
 val create_vocabulary :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateVocabularyRequest.t ->
-        (CreateVocabularyResponse.t,
-          [ `AWS of CreateVocabularyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateVocabularyResponse.t, CreateVocabularyResponse.error) Result.t
+          Lwt.t
 val create_vocabulary_filter :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateVocabularyFilterRequest.t ->
         (CreateVocabularyFilterResponse.t,
-          [ `AWS of CreateVocabularyFilterResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateVocabularyFilterResponse.error) Result.t Lwt.t
 val delete_call_analytics_category :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteCallAnalyticsCategoryRequest.t ->
         (DeleteCallAnalyticsCategoryResponse.t,
-          [ `AWS of DeleteCallAnalyticsCategoryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteCallAnalyticsCategoryResponse.error) Result.t Lwt.t
 val delete_call_analytics_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteCallAnalyticsJobRequest.t ->
         (DeleteCallAnalyticsJobResponse.t,
-          [ `AWS of DeleteCallAnalyticsJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteCallAnalyticsJobResponse.error) Result.t Lwt.t
 val delete_language_model :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteLanguageModelRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteLanguageModelRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_medical_transcription_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteMedicalTranscriptionJobRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteMedicalTranscriptionJobRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_medical_vocabulary :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteMedicalVocabularyRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteMedicalVocabularyRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_transcription_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteTranscriptionJobRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteTranscriptionJobRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_vocabulary :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteVocabularyRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteVocabularyRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_vocabulary_filter :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteVocabularyFilterRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteVocabularyFilterRequest.t -> (unit, unit) Result.t Lwt.t
 val describe_language_model :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeLanguageModelRequest.t ->
         (DescribeLanguageModelResponse.t,
-          [ `AWS of DescribeLanguageModelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeLanguageModelResponse.error) Result.t Lwt.t
 val get_call_analytics_category :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCallAnalyticsCategoryRequest.t ->
         (GetCallAnalyticsCategoryResponse.t,
-          [ `AWS of GetCallAnalyticsCategoryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetCallAnalyticsCategoryResponse.error) Result.t Lwt.t
 val get_call_analytics_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCallAnalyticsJobRequest.t ->
-        (GetCallAnalyticsJobResponse.t,
-          [ `AWS of GetCallAnalyticsJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetCallAnalyticsJobResponse.t, GetCallAnalyticsJobResponse.error)
+          Result.t Lwt.t
 val get_medical_transcription_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMedicalTranscriptionJobRequest.t ->
         (GetMedicalTranscriptionJobResponse.t,
-          [ `AWS of GetMedicalTranscriptionJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetMedicalTranscriptionJobResponse.error) Result.t Lwt.t
 val get_medical_vocabulary :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMedicalVocabularyRequest.t ->
-        (GetMedicalVocabularyResponse.t,
-          [ `AWS of GetMedicalVocabularyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetMedicalVocabularyResponse.t, GetMedicalVocabularyResponse.error)
+          Result.t Lwt.t
 val get_transcription_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTranscriptionJobRequest.t ->
-        (GetTranscriptionJobResponse.t,
-          [ `AWS of GetTranscriptionJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetTranscriptionJobResponse.t, GetTranscriptionJobResponse.error)
+          Result.t Lwt.t
 val get_vocabulary :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetVocabularyRequest.t ->
-        (GetVocabularyResponse.t,
-          [ `AWS of GetVocabularyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetVocabularyResponse.t, GetVocabularyResponse.error) Result.t Lwt.t
 val get_vocabulary_filter :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetVocabularyFilterRequest.t ->
-        (GetVocabularyFilterResponse.t,
-          [ `AWS of GetVocabularyFilterResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetVocabularyFilterResponse.t, GetVocabularyFilterResponse.error)
+          Result.t Lwt.t
 val list_call_analytics_categories :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCallAnalyticsCategoriesRequest.t ->
         (ListCallAnalyticsCategoriesResponse.t,
-          [ `AWS of ListCallAnalyticsCategoriesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListCallAnalyticsCategoriesResponse.error) Result.t Lwt.t
 val list_call_analytics_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCallAnalyticsJobsRequest.t ->
         (ListCallAnalyticsJobsResponse.t,
-          [ `AWS of ListCallAnalyticsJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListCallAnalyticsJobsResponse.error) Result.t Lwt.t
 val list_language_models :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListLanguageModelsRequest.t ->
-        (ListLanguageModelsResponse.t,
-          [ `AWS of ListLanguageModelsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListLanguageModelsResponse.t, ListLanguageModelsResponse.error)
+          Result.t Lwt.t
 val list_medical_transcription_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListMedicalTranscriptionJobsRequest.t ->
         (ListMedicalTranscriptionJobsResponse.t,
-          [ `AWS of ListMedicalTranscriptionJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListMedicalTranscriptionJobsResponse.error) Result.t Lwt.t
 val list_medical_vocabularies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListMedicalVocabulariesRequest.t ->
         (ListMedicalVocabulariesResponse.t,
-          [ `AWS of ListMedicalVocabulariesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListMedicalVocabulariesResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val list_transcription_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTranscriptionJobsRequest.t ->
         (ListTranscriptionJobsResponse.t,
-          [ `AWS of ListTranscriptionJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListTranscriptionJobsResponse.error) Result.t Lwt.t
 val list_vocabularies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListVocabulariesRequest.t ->
-        (ListVocabulariesResponse.t,
-          [ `AWS of ListVocabulariesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListVocabulariesResponse.t, ListVocabulariesResponse.error) Result.t
+          Lwt.t
 val list_vocabulary_filters :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListVocabularyFiltersRequest.t ->
         (ListVocabularyFiltersResponse.t,
-          [ `AWS of ListVocabularyFiltersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListVocabularyFiltersResponse.error) Result.t Lwt.t
 val start_call_analytics_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartCallAnalyticsJobRequest.t ->
         (StartCallAnalyticsJobResponse.t,
-          [ `AWS of StartCallAnalyticsJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartCallAnalyticsJobResponse.error) Result.t Lwt.t
 val start_medical_transcription_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartMedicalTranscriptionJobRequest.t ->
         (StartMedicalTranscriptionJobResponse.t,
-          [ `AWS of StartMedicalTranscriptionJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartMedicalTranscriptionJobResponse.error) Result.t Lwt.t
 val start_transcription_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartTranscriptionJobRequest.t ->
         (StartTranscriptionJobResponse.t,
-          [ `AWS of StartTranscriptionJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartTranscriptionJobResponse.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_call_analytics_category :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateCallAnalyticsCategoryRequest.t ->
         (UpdateCallAnalyticsCategoryResponse.t,
-          [ `AWS of UpdateCallAnalyticsCategoryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateCallAnalyticsCategoryResponse.error) Result.t Lwt.t
 val update_medical_vocabulary :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateMedicalVocabularyRequest.t ->
         (UpdateMedicalVocabularyResponse.t,
-          [ `AWS of UpdateMedicalVocabularyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateMedicalVocabularyResponse.error) Result.t Lwt.t
 val update_vocabulary :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateVocabularyRequest.t ->
-        (UpdateVocabularyResponse.t,
-          [ `AWS of UpdateVocabularyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateVocabularyResponse.t, UpdateVocabularyResponse.error) Result.t
+          Lwt.t
 val update_vocabulary_filter :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateVocabularyFilterRequest.t ->
         (UpdateVocabularyFilterResponse.t,
-          [ `AWS of UpdateVocabularyFilterResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateVocabularyFilterResponse.error) Result.t Lwt.t

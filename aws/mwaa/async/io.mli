@@ -4,87 +4,65 @@ val create_cli_token :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateCliTokenRequest.t ->
-        (CreateCliTokenResponse.t,
-          [ `AWS of CreateCliTokenResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateCliTokenResponse.t, CreateCliTokenResponse.error) Result.t
           Async.Deferred.t
 val create_environment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateEnvironmentInput.t ->
-        (CreateEnvironmentOutput.t,
-          [ `AWS of CreateEnvironmentOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateEnvironmentOutput.t, CreateEnvironmentOutput.error) Result.t
           Async.Deferred.t
 val create_web_login_token :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateWebLoginTokenRequest.t ->
-        (CreateWebLoginTokenResponse.t,
-          [ `AWS of CreateWebLoginTokenResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateWebLoginTokenResponse.t, CreateWebLoginTokenResponse.error)
+          Result.t Async.Deferred.t
 val delete_environment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteEnvironmentInput.t ->
-        (DeleteEnvironmentOutput.t,
-          [ `AWS of DeleteEnvironmentOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteEnvironmentOutput.t, DeleteEnvironmentOutput.error) Result.t
           Async.Deferred.t
 val get_environment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEnvironmentInput.t ->
-        (GetEnvironmentOutput.t,
-          [ `AWS of GetEnvironmentOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetEnvironmentOutput.t, GetEnvironmentOutput.error) Result.t
           Async.Deferred.t
 val list_environments :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEnvironmentsInput.t ->
-        (ListEnvironmentsOutput.t,
-          [ `AWS of ListEnvironmentsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListEnvironmentsOutput.t, ListEnvironmentsOutput.error) Result.t
           Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceInput.t ->
-        (ListTagsForResourceOutput.t,
-          [ `AWS of ListTagsForResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceOutput.t, ListTagsForResourceOutput.error)
+          Result.t Async.Deferred.t
 val publish_metrics :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PublishMetricsInput.t ->
-        (PublishMetricsOutput.t,
-          [ `AWS of PublishMetricsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (PublishMetricsOutput.t, PublishMetricsOutput.error) Result.t
           Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceInput.t ->
-        (TagResourceOutput.t,
-          [ `AWS of TagResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceOutput.t, TagResourceOutput.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceInput.t ->
-        (UntagResourceOutput.t,
-          [ `AWS of UntagResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceOutput.t, UntagResourceOutput.error) Result.t
           Async.Deferred.t
 val update_environment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateEnvironmentInput.t ->
-        (UpdateEnvironmentOutput.t,
-          [ `AWS of UpdateEnvironmentOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateEnvironmentOutput.t, UpdateEnvironmentOutput.error) Result.t
           Async.Deferred.t

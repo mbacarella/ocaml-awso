@@ -4,160 +4,132 @@ val create_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateClusterRequest.t ->
-        (CreateClusterResponse.t,
-          [ `AWS of CreateClusterResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateClusterResponse.t, CreateClusterResponse.error) Result.t Lwt.t
 val create_control_panel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateControlPanelRequest.t ->
-        (CreateControlPanelResponse.t,
-          [ `AWS of CreateControlPanelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateControlPanelResponse.t, CreateControlPanelResponse.error)
+          Result.t Lwt.t
 val create_routing_control :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRoutingControlRequest.t ->
-        (CreateRoutingControlResponse.t,
-          [ `AWS of CreateRoutingControlResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateRoutingControlResponse.t, CreateRoutingControlResponse.error)
+          Result.t Lwt.t
 val create_safety_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSafetyRuleRequest.t ->
-        (CreateSafetyRuleResponse.t,
-          [ `AWS of CreateSafetyRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateSafetyRuleResponse.t, CreateSafetyRuleResponse.error) Result.t
+          Lwt.t
 val delete_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteClusterRequest.t ->
-        (DeleteClusterResponse.t,
-          [ `AWS of DeleteClusterResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteClusterResponse.t, DeleteClusterResponse.error) Result.t Lwt.t
 val delete_control_panel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteControlPanelRequest.t ->
-        (DeleteControlPanelResponse.t,
-          [ `AWS of DeleteControlPanelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteControlPanelResponse.t, DeleteControlPanelResponse.error)
+          Result.t Lwt.t
 val delete_routing_control :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRoutingControlRequest.t ->
-        (DeleteRoutingControlResponse.t,
-          [ `AWS of DeleteRoutingControlResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteRoutingControlResponse.t, DeleteRoutingControlResponse.error)
+          Result.t Lwt.t
 val delete_safety_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSafetyRuleRequest.t ->
-        (DeleteSafetyRuleResponse.t,
-          [ `AWS of DeleteSafetyRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteSafetyRuleResponse.t, DeleteSafetyRuleResponse.error) Result.t
+          Lwt.t
 val describe_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeClusterRequest.t ->
-        (DescribeClusterResponse.t,
-          [ `AWS of DescribeClusterResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeClusterResponse.t, DescribeClusterResponse.error) Result.t
+          Lwt.t
 val describe_control_panel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeControlPanelRequest.t ->
-        (DescribeControlPanelResponse.t,
-          [ `AWS of DescribeControlPanelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeControlPanelResponse.t, DescribeControlPanelResponse.error)
+          Result.t Lwt.t
 val describe_routing_control :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRoutingControlRequest.t ->
         (DescribeRoutingControlResponse.t,
-          [ `AWS of DescribeRoutingControlResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeRoutingControlResponse.error) Result.t Lwt.t
 val describe_safety_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSafetyRuleRequest.t ->
-        (DescribeSafetyRuleResponse.t,
-          [ `AWS of DescribeSafetyRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeSafetyRuleResponse.t, DescribeSafetyRuleResponse.error)
+          Result.t Lwt.t
 val list_associated_route53_health_checks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAssociatedRoute53HealthChecksRequest.t ->
         (ListAssociatedRoute53HealthChecksResponse.t,
-          [ `AWS of ListAssociatedRoute53HealthChecksResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListAssociatedRoute53HealthChecksResponse.error) Result.t Lwt.t
 val list_clusters :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListClustersRequest.t ->
-        (ListClustersResponse.t,
-          [ `AWS of ListClustersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListClustersResponse.t, ListClustersResponse.error) Result.t Lwt.t
 val list_control_panels :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListControlPanelsRequest.t ->
-        (ListControlPanelsResponse.t,
-          [ `AWS of ListControlPanelsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListControlPanelsResponse.t, ListControlPanelsResponse.error)
+          Result.t Lwt.t
 val list_routing_controls :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRoutingControlsRequest.t ->
-        (ListRoutingControlsResponse.t,
-          [ `AWS of ListRoutingControlsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListRoutingControlsResponse.t, ListRoutingControlsResponse.error)
+          Result.t Lwt.t
 val list_safety_rules :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSafetyRulesRequest.t ->
-        (ListSafetyRulesResponse.t,
-          [ `AWS of ListSafetyRulesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListSafetyRulesResponse.t, ListSafetyRulesResponse.error) Result.t
+          Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_control_panel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateControlPanelRequest.t ->
-        (UpdateControlPanelResponse.t,
-          [ `AWS of UpdateControlPanelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateControlPanelResponse.t, UpdateControlPanelResponse.error)
+          Result.t Lwt.t
 val update_routing_control :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateRoutingControlRequest.t ->
-        (UpdateRoutingControlResponse.t,
-          [ `AWS of UpdateRoutingControlResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateRoutingControlResponse.t, UpdateRoutingControlResponse.error)
+          Result.t Lwt.t
 val update_safety_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSafetyRuleRequest.t ->
-        (UpdateSafetyRuleResponse.t,
-          [ `AWS of UpdateSafetyRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateSafetyRuleResponse.t, UpdateSafetyRuleResponse.error) Result.t
+          Lwt.t

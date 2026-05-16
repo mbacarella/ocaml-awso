@@ -4,88 +4,64 @@ val cancel_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelTaskInput.t ->
-        (CancelTaskOutput.t,
-          [ `AWS of CancelTaskOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CancelTaskOutput.t, CancelTaskOutput.error) Result.t Lwt.t
 val create_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTaskInput.t ->
-        (CreateTaskOutput.t,
-          [ `AWS of CreateTaskOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateTaskOutput.t, CreateTaskOutput.error) Result.t Lwt.t
 val describe_device :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDeviceInput.t ->
-        (DescribeDeviceOutput.t,
-          [ `AWS of DescribeDeviceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeDeviceOutput.t, DescribeDeviceOutput.error) Result.t Lwt.t
 val describe_device_ec2_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDeviceEc2Input.t ->
-        (DescribeDeviceEc2Output.t,
-          [ `AWS of DescribeDeviceEc2Output.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeDeviceEc2Output.t, DescribeDeviceEc2Output.error) Result.t
+          Lwt.t
 val describe_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeExecutionInput.t ->
-        (DescribeExecutionOutput.t,
-          [ `AWS of DescribeExecutionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeExecutionOutput.t, DescribeExecutionOutput.error) Result.t
+          Lwt.t
 val describe_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTaskInput.t ->
-        (DescribeTaskOutput.t,
-          [ `AWS of DescribeTaskOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeTaskOutput.t, DescribeTaskOutput.error) Result.t Lwt.t
 val list_device_resources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDeviceResourcesInput.t ->
-        (ListDeviceResourcesOutput.t,
-          [ `AWS of ListDeviceResourcesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListDeviceResourcesOutput.t, ListDeviceResourcesOutput.error)
+          Result.t Lwt.t
 val list_devices :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDevicesInput.t ->
-        (ListDevicesOutput.t,
-          [ `AWS of ListDevicesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListDevicesOutput.t, ListDevicesOutput.error) Result.t Lwt.t
 val list_executions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListExecutionsInput.t ->
-        (ListExecutionsOutput.t,
-          [ `AWS of ListExecutionsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListExecutionsOutput.t, ListExecutionsOutput.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceInput.t ->
-        (ListTagsForResourceOutput.t,
-          [ `AWS of ListTagsForResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceOutput.t, ListTagsForResourceOutput.error)
+          Result.t Lwt.t
 val list_tasks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTasksInput.t ->
-        (ListTasksOutput.t,
-          [ `AWS of ListTasksOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTasksOutput.t, ListTasksOutput.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      TagResourceInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> TagResourceInput.t -> (unit, unit) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      UntagResourceInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> UntagResourceInput.t -> (unit, unit) Result.t Lwt.t

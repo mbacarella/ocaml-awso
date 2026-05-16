@@ -3,319 +3,257 @@ open Awso_codedeploy.Values
 val add_tags_to_on_premises_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      AddTagsToOnPremisesInstancesInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      AddTagsToOnPremisesInstancesInput.t -> (unit, unit) Result.t Lwt.t
 val batch_get_application_revisions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchGetApplicationRevisionsInput.t ->
         (BatchGetApplicationRevisionsOutput.t,
-          [ `AWS of BatchGetApplicationRevisionsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          BatchGetApplicationRevisionsOutput.error) Result.t Lwt.t
 val batch_get_applications :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchGetApplicationsInput.t ->
-        (BatchGetApplicationsOutput.t,
-          [ `AWS of BatchGetApplicationsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (BatchGetApplicationsOutput.t, BatchGetApplicationsOutput.error)
+          Result.t Lwt.t
 val batch_get_deployment_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchGetDeploymentGroupsInput.t ->
         (BatchGetDeploymentGroupsOutput.t,
-          [ `AWS of BatchGetDeploymentGroupsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          BatchGetDeploymentGroupsOutput.error) Result.t Lwt.t
 val batch_get_deployment_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchGetDeploymentInstancesInput.t ->
         (BatchGetDeploymentInstancesOutput.t,
-          [ `AWS of BatchGetDeploymentInstancesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          BatchGetDeploymentInstancesOutput.error) Result.t Lwt.t
 val batch_get_deployment_targets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchGetDeploymentTargetsInput.t ->
         (BatchGetDeploymentTargetsOutput.t,
-          [ `AWS of BatchGetDeploymentTargetsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          BatchGetDeploymentTargetsOutput.error) Result.t Lwt.t
 val batch_get_deployments :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchGetDeploymentsInput.t ->
-        (BatchGetDeploymentsOutput.t,
-          [ `AWS of BatchGetDeploymentsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (BatchGetDeploymentsOutput.t, BatchGetDeploymentsOutput.error)
+          Result.t Lwt.t
 val batch_get_on_premises_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchGetOnPremisesInstancesInput.t ->
         (BatchGetOnPremisesInstancesOutput.t,
-          [ `AWS of BatchGetOnPremisesInstancesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          BatchGetOnPremisesInstancesOutput.error) Result.t Lwt.t
 val continue_deployment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      ContinueDeploymentInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      ContinueDeploymentInput.t -> (unit, unit) Result.t Lwt.t
 val create_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateApplicationInput.t ->
-        (CreateApplicationOutput.t,
-          [ `AWS of CreateApplicationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateApplicationOutput.t, CreateApplicationOutput.error) Result.t
+          Lwt.t
 val create_deployment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDeploymentInput.t ->
-        (CreateDeploymentOutput.t,
-          [ `AWS of CreateDeploymentOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateDeploymentOutput.t, CreateDeploymentOutput.error) Result.t
+          Lwt.t
 val create_deployment_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDeploymentConfigInput.t ->
-        (CreateDeploymentConfigOutput.t,
-          [ `AWS of CreateDeploymentConfigOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateDeploymentConfigOutput.t, CreateDeploymentConfigOutput.error)
+          Result.t Lwt.t
 val create_deployment_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDeploymentGroupInput.t ->
-        (CreateDeploymentGroupOutput.t,
-          [ `AWS of CreateDeploymentGroupOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateDeploymentGroupOutput.t, CreateDeploymentGroupOutput.error)
+          Result.t Lwt.t
 val delete_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteApplicationInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteApplicationInput.t -> (unit, unit) Result.t Lwt.t
 val delete_deployment_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteDeploymentConfigInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteDeploymentConfigInput.t -> (unit, unit) Result.t Lwt.t
 val delete_deployment_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDeploymentGroupInput.t ->
-        (DeleteDeploymentGroupOutput.t,
-          [ `AWS of DeleteDeploymentGroupOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteDeploymentGroupOutput.t, DeleteDeploymentGroupOutput.error)
+          Result.t Lwt.t
 val delete_git_hub_account_token :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteGitHubAccountTokenInput.t ->
         (DeleteGitHubAccountTokenOutput.t,
-          [ `AWS of DeleteGitHubAccountTokenOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteGitHubAccountTokenOutput.error) Result.t Lwt.t
 val delete_resources_by_external_id :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteResourcesByExternalIdInput.t ->
         (DeleteResourcesByExternalIdOutput.t,
-          [ `AWS of DeleteResourcesByExternalIdOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteResourcesByExternalIdOutput.error) Result.t Lwt.t
 val deregister_on_premises_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeregisterOnPremisesInstanceInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeregisterOnPremisesInstanceInput.t -> (unit, unit) Result.t Lwt.t
 val get_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetApplicationInput.t ->
-        (GetApplicationOutput.t,
-          [ `AWS of GetApplicationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetApplicationOutput.t, GetApplicationOutput.error) Result.t Lwt.t
 val get_application_revision :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetApplicationRevisionInput.t ->
-        (GetApplicationRevisionOutput.t,
-          [ `AWS of GetApplicationRevisionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetApplicationRevisionOutput.t, GetApplicationRevisionOutput.error)
+          Result.t Lwt.t
 val get_deployment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDeploymentInput.t ->
-        (GetDeploymentOutput.t,
-          [ `AWS of GetDeploymentOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetDeploymentOutput.t, GetDeploymentOutput.error) Result.t Lwt.t
 val get_deployment_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDeploymentConfigInput.t ->
-        (GetDeploymentConfigOutput.t,
-          [ `AWS of GetDeploymentConfigOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetDeploymentConfigOutput.t, GetDeploymentConfigOutput.error)
+          Result.t Lwt.t
 val get_deployment_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDeploymentGroupInput.t ->
-        (GetDeploymentGroupOutput.t,
-          [ `AWS of GetDeploymentGroupOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetDeploymentGroupOutput.t, GetDeploymentGroupOutput.error) Result.t
+          Lwt.t
 val get_deployment_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDeploymentInstanceInput.t ->
-        (GetDeploymentInstanceOutput.t,
-          [ `AWS of GetDeploymentInstanceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetDeploymentInstanceOutput.t, GetDeploymentInstanceOutput.error)
+          Result.t Lwt.t
 val get_deployment_target :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDeploymentTargetInput.t ->
-        (GetDeploymentTargetOutput.t,
-          [ `AWS of GetDeploymentTargetOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetDeploymentTargetOutput.t, GetDeploymentTargetOutput.error)
+          Result.t Lwt.t
 val get_on_premises_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetOnPremisesInstanceInput.t ->
-        (GetOnPremisesInstanceOutput.t,
-          [ `AWS of GetOnPremisesInstanceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetOnPremisesInstanceOutput.t, GetOnPremisesInstanceOutput.error)
+          Result.t Lwt.t
 val list_application_revisions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListApplicationRevisionsInput.t ->
         (ListApplicationRevisionsOutput.t,
-          [ `AWS of ListApplicationRevisionsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListApplicationRevisionsOutput.error) Result.t Lwt.t
 val list_applications :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListApplicationsInput.t ->
-        (ListApplicationsOutput.t,
-          [ `AWS of ListApplicationsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListApplicationsOutput.t, ListApplicationsOutput.error) Result.t
+          Lwt.t
 val list_deployment_configs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDeploymentConfigsInput.t ->
-        (ListDeploymentConfigsOutput.t,
-          [ `AWS of ListDeploymentConfigsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListDeploymentConfigsOutput.t, ListDeploymentConfigsOutput.error)
+          Result.t Lwt.t
 val list_deployment_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDeploymentGroupsInput.t ->
-        (ListDeploymentGroupsOutput.t,
-          [ `AWS of ListDeploymentGroupsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListDeploymentGroupsOutput.t, ListDeploymentGroupsOutput.error)
+          Result.t Lwt.t
 val list_deployment_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDeploymentInstancesInput.t ->
         (ListDeploymentInstancesOutput.t,
-          [ `AWS of ListDeploymentInstancesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListDeploymentInstancesOutput.error) Result.t Lwt.t
 val list_deployment_targets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDeploymentTargetsInput.t ->
-        (ListDeploymentTargetsOutput.t,
-          [ `AWS of ListDeploymentTargetsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListDeploymentTargetsOutput.t, ListDeploymentTargetsOutput.error)
+          Result.t Lwt.t
 val list_deployments :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDeploymentsInput.t ->
-        (ListDeploymentsOutput.t,
-          [ `AWS of ListDeploymentsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListDeploymentsOutput.t, ListDeploymentsOutput.error) Result.t Lwt.t
 val list_git_hub_account_token_names :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListGitHubAccountTokenNamesInput.t ->
         (ListGitHubAccountTokenNamesOutput.t,
-          [ `AWS of ListGitHubAccountTokenNamesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListGitHubAccountTokenNamesOutput.error) Result.t Lwt.t
 val list_on_premises_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListOnPremisesInstancesInput.t ->
         (ListOnPremisesInstancesOutput.t,
-          [ `AWS of ListOnPremisesInstancesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListOnPremisesInstancesOutput.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceInput.t ->
-        (ListTagsForResourceOutput.t,
-          [ `AWS of ListTagsForResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceOutput.t, ListTagsForResourceOutput.error)
+          Result.t Lwt.t
 val put_lifecycle_event_hook_execution_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutLifecycleEventHookExecutionStatusInput.t ->
         (PutLifecycleEventHookExecutionStatusOutput.t,
-          [ `AWS of PutLifecycleEventHookExecutionStatusOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutLifecycleEventHookExecutionStatusOutput.error) Result.t Lwt.t
 val register_application_revision :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      RegisterApplicationRevisionInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      RegisterApplicationRevisionInput.t -> (unit, unit) Result.t Lwt.t
 val register_on_premises_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      RegisterOnPremisesInstanceInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      RegisterOnPremisesInstanceInput.t -> (unit, unit) Result.t Lwt.t
 val remove_tags_from_on_premises_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      RemoveTagsFromOnPremisesInstancesInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      RemoveTagsFromOnPremisesInstancesInput.t -> (unit, unit) Result.t Lwt.t
 val skip_wait_time_for_instance_termination :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SkipWaitTimeForInstanceTerminationInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+        (unit, unit) Result.t Lwt.t
 val stop_deployment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopDeploymentInput.t ->
-        (StopDeploymentOutput.t,
-          [ `AWS of StopDeploymentOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StopDeploymentOutput.t, StopDeploymentOutput.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceInput.t ->
-        (TagResourceOutput.t,
-          [ `AWS of TagResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceOutput.t, TagResourceOutput.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceInput.t ->
-        (UntagResourceOutput.t,
-          [ `AWS of UntagResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceOutput.t, UntagResourceOutput.error) Result.t Lwt.t
 val update_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UpdateApplicationInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      UpdateApplicationInput.t -> (unit, unit) Result.t Lwt.t
 val update_deployment_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDeploymentGroupInput.t ->
-        (UpdateDeploymentGroupOutput.t,
-          [ `AWS of UpdateDeploymentGroupOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateDeploymentGroupOutput.t, UpdateDeploymentGroupOutput.error)
+          Result.t Lwt.t

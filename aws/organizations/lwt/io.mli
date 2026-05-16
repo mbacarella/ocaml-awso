@@ -4,348 +4,265 @@ val accept_handshake :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AcceptHandshakeRequest.t ->
-        (AcceptHandshakeResponse.t,
-          [ `AWS of AcceptHandshakeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AcceptHandshakeResponse.t, AcceptHandshakeResponse.error) Result.t
+          Lwt.t
 val attach_policy :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      AttachPolicyRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> AttachPolicyRequest.t -> (unit, unit) Result.t Lwt.t
 val cancel_handshake :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelHandshakeRequest.t ->
-        (CancelHandshakeResponse.t,
-          [ `AWS of CancelHandshakeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CancelHandshakeResponse.t, CancelHandshakeResponse.error) Result.t
+          Lwt.t
 val close_account :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      CloseAccountRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> CloseAccountRequest.t -> (unit, unit) Result.t Lwt.t
 val create_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAccountRequest.t ->
-        (CreateAccountResponse.t,
-          [ `AWS of CreateAccountResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateAccountResponse.t, CreateAccountResponse.error) Result.t Lwt.t
 val create_gov_cloud_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateGovCloudAccountRequest.t ->
         (CreateGovCloudAccountResponse.t,
-          [ `AWS of CreateGovCloudAccountResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateGovCloudAccountResponse.error) Result.t Lwt.t
 val create_organization :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateOrganizationRequest.t ->
-        (CreateOrganizationResponse.t,
-          [ `AWS of CreateOrganizationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateOrganizationResponse.t, CreateOrganizationResponse.error)
+          Result.t Lwt.t
 val create_organizational_unit :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateOrganizationalUnitRequest.t ->
         (CreateOrganizationalUnitResponse.t,
-          [ `AWS of CreateOrganizationalUnitResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateOrganizationalUnitResponse.error) Result.t Lwt.t
 val create_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePolicyRequest.t ->
-        (CreatePolicyResponse.t,
-          [ `AWS of CreatePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreatePolicyResponse.t, CreatePolicyResponse.error) Result.t Lwt.t
 val decline_handshake :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeclineHandshakeRequest.t ->
-        (DeclineHandshakeResponse.t,
-          [ `AWS of DeclineHandshakeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeclineHandshakeResponse.t, DeclineHandshakeResponse.error) Result.t
+          Lwt.t
 val delete_organization :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      unit ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> unit -> (unit, unit) Result.t Lwt.t
 val delete_organizational_unit :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteOrganizationalUnitRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteOrganizationalUnitRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_policy :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeletePolicyRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeletePolicyRequest.t -> (unit, unit) Result.t Lwt.t
 val deregister_delegated_administrator :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeregisterDelegatedAdministratorRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+        (unit, unit) Result.t Lwt.t
 val describe_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAccountRequest.t ->
-        (DescribeAccountResponse.t,
-          [ `AWS of DescribeAccountResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeAccountResponse.t, DescribeAccountResponse.error) Result.t
+          Lwt.t
 val describe_create_account_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeCreateAccountStatusRequest.t ->
         (DescribeCreateAccountStatusResponse.t,
-          [ `AWS of DescribeCreateAccountStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeCreateAccountStatusResponse.error) Result.t Lwt.t
 val describe_effective_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEffectivePolicyRequest.t ->
         (DescribeEffectivePolicyResponse.t,
-          [ `AWS of DescribeEffectivePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeEffectivePolicyResponse.error) Result.t Lwt.t
 val describe_handshake :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeHandshakeRequest.t ->
-        (DescribeHandshakeResponse.t,
-          [ `AWS of DescribeHandshakeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeHandshakeResponse.t, DescribeHandshakeResponse.error)
+          Result.t Lwt.t
 val describe_organization :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       unit ->
-        (DescribeOrganizationResponse.t,
-          [ `AWS of DescribeOrganizationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeOrganizationResponse.t, DescribeOrganizationResponse.error)
+          Result.t Lwt.t
 val describe_organizational_unit :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeOrganizationalUnitRequest.t ->
         (DescribeOrganizationalUnitResponse.t,
-          [ `AWS of DescribeOrganizationalUnitResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeOrganizationalUnitResponse.error) Result.t Lwt.t
 val describe_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePolicyRequest.t ->
-        (DescribePolicyResponse.t,
-          [ `AWS of DescribePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribePolicyResponse.t, DescribePolicyResponse.error) Result.t
+          Lwt.t
 val detach_policy :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DetachPolicyRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DetachPolicyRequest.t -> (unit, unit) Result.t Lwt.t
 val disable_a_w_s_service_access :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DisableAWSServiceAccessRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DisableAWSServiceAccessRequest.t -> (unit, unit) Result.t Lwt.t
 val disable_policy_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisablePolicyTypeRequest.t ->
-        (DisablePolicyTypeResponse.t,
-          [ `AWS of DisablePolicyTypeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DisablePolicyTypeResponse.t, DisablePolicyTypeResponse.error)
+          Result.t Lwt.t
 val enable_a_w_s_service_access :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      EnableAWSServiceAccessRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      EnableAWSServiceAccessRequest.t -> (unit, unit) Result.t Lwt.t
 val enable_all_features :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EnableAllFeaturesRequest.t ->
-        (EnableAllFeaturesResponse.t,
-          [ `AWS of EnableAllFeaturesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (EnableAllFeaturesResponse.t, EnableAllFeaturesResponse.error)
+          Result.t Lwt.t
 val enable_policy_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EnablePolicyTypeRequest.t ->
-        (EnablePolicyTypeResponse.t,
-          [ `AWS of EnablePolicyTypeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (EnablePolicyTypeResponse.t, EnablePolicyTypeResponse.error) Result.t
+          Lwt.t
 val invite_account_to_organization :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       InviteAccountToOrganizationRequest.t ->
         (InviteAccountToOrganizationResponse.t,
-          [ `AWS of InviteAccountToOrganizationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          InviteAccountToOrganizationResponse.error) Result.t Lwt.t
 val leave_organization :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      unit ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> unit -> (unit, unit) Result.t Lwt.t
 val list_a_w_s_service_access_for_organization :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAWSServiceAccessForOrganizationRequest.t ->
         (ListAWSServiceAccessForOrganizationResponse.t,
-          [ `AWS of ListAWSServiceAccessForOrganizationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListAWSServiceAccessForOrganizationResponse.error) Result.t Lwt.t
 val list_accounts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAccountsRequest.t ->
-        (ListAccountsResponse.t,
-          [ `AWS of ListAccountsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListAccountsResponse.t, ListAccountsResponse.error) Result.t Lwt.t
 val list_accounts_for_parent :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAccountsForParentRequest.t ->
         (ListAccountsForParentResponse.t,
-          [ `AWS of ListAccountsForParentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListAccountsForParentResponse.error) Result.t Lwt.t
 val list_children :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListChildrenRequest.t ->
-        (ListChildrenResponse.t,
-          [ `AWS of ListChildrenResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListChildrenResponse.t, ListChildrenResponse.error) Result.t Lwt.t
 val list_create_account_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCreateAccountStatusRequest.t ->
         (ListCreateAccountStatusResponse.t,
-          [ `AWS of ListCreateAccountStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListCreateAccountStatusResponse.error) Result.t Lwt.t
 val list_delegated_administrators :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDelegatedAdministratorsRequest.t ->
         (ListDelegatedAdministratorsResponse.t,
-          [ `AWS of ListDelegatedAdministratorsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListDelegatedAdministratorsResponse.error) Result.t Lwt.t
 val list_delegated_services_for_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDelegatedServicesForAccountRequest.t ->
         (ListDelegatedServicesForAccountResponse.t,
-          [ `AWS of ListDelegatedServicesForAccountResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListDelegatedServicesForAccountResponse.error) Result.t Lwt.t
 val list_handshakes_for_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListHandshakesForAccountRequest.t ->
         (ListHandshakesForAccountResponse.t,
-          [ `AWS of ListHandshakesForAccountResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListHandshakesForAccountResponse.error) Result.t Lwt.t
 val list_handshakes_for_organization :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListHandshakesForOrganizationRequest.t ->
         (ListHandshakesForOrganizationResponse.t,
-          [ `AWS of ListHandshakesForOrganizationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListHandshakesForOrganizationResponse.error) Result.t Lwt.t
 val list_organizational_units_for_parent :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListOrganizationalUnitsForParentRequest.t ->
         (ListOrganizationalUnitsForParentResponse.t,
-          [ `AWS of ListOrganizationalUnitsForParentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListOrganizationalUnitsForParentResponse.error) Result.t Lwt.t
 val list_parents :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListParentsRequest.t ->
-        (ListParentsResponse.t,
-          [ `AWS of ListParentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListParentsResponse.t, ListParentsResponse.error) Result.t Lwt.t
 val list_policies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPoliciesRequest.t ->
-        (ListPoliciesResponse.t,
-          [ `AWS of ListPoliciesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListPoliciesResponse.t, ListPoliciesResponse.error) Result.t Lwt.t
 val list_policies_for_target :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPoliciesForTargetRequest.t ->
         (ListPoliciesForTargetResponse.t,
-          [ `AWS of ListPoliciesForTargetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListPoliciesForTargetResponse.error) Result.t Lwt.t
 val list_roots :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRootsRequest.t ->
-        (ListRootsResponse.t,
-          [ `AWS of ListRootsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListRootsResponse.t, ListRootsResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val list_targets_for_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTargetsForPolicyRequest.t ->
-        (ListTargetsForPolicyResponse.t,
-          [ `AWS of ListTargetsForPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTargetsForPolicyResponse.t, ListTargetsForPolicyResponse.error)
+          Result.t Lwt.t
 val move_account :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      MoveAccountRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> MoveAccountRequest.t -> (unit, unit) Result.t Lwt.t
 val register_delegated_administrator :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      RegisterDelegatedAdministratorRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      RegisterDelegatedAdministratorRequest.t -> (unit, unit) Result.t Lwt.t
 val remove_account_from_organization :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      RemoveAccountFromOrganizationRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      RemoveAccountFromOrganizationRequest.t -> (unit, unit) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      TagResourceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> TagResourceRequest.t -> (unit, unit) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      UntagResourceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> UntagResourceRequest.t -> (unit, unit) Result.t Lwt.t
 val update_organizational_unit :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateOrganizationalUnitRequest.t ->
         (UpdateOrganizationalUnitResponse.t,
-          [ `AWS of UpdateOrganizationalUnitResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateOrganizationalUnitResponse.error) Result.t Lwt.t
 val update_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePolicyRequest.t ->
-        (UpdatePolicyResponse.t,
-          [ `AWS of UpdatePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdatePolicyResponse.t, UpdatePolicyResponse.error) Result.t Lwt.t

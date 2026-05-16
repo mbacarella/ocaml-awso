@@ -3,434 +3,354 @@ open Awso_neptune.Values
 val add_role_to_d_b_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      AddRoleToDBClusterMessage.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      AddRoleToDBClusterMessage.t -> (unit, unit) Result.t Lwt.t
 val add_source_identifier_to_subscription :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AddSourceIdentifierToSubscriptionMessage.t ->
         (AddSourceIdentifierToSubscriptionResult.t,
-          [ `AWS of AddSourceIdentifierToSubscriptionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AddSourceIdentifierToSubscriptionResult.error) Result.t Lwt.t
 val add_tags_to_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      AddTagsToResourceMessage.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      AddTagsToResourceMessage.t -> (unit, unit) Result.t Lwt.t
 val apply_pending_maintenance_action :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ApplyPendingMaintenanceActionMessage.t ->
         (ApplyPendingMaintenanceActionResult.t,
-          [ `AWS of ApplyPendingMaintenanceActionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ApplyPendingMaintenanceActionResult.error) Result.t Lwt.t
 val copy_d_b_cluster_parameter_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CopyDBClusterParameterGroupMessage.t ->
         (CopyDBClusterParameterGroupResult.t,
-          [ `AWS of CopyDBClusterParameterGroupResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CopyDBClusterParameterGroupResult.error) Result.t Lwt.t
 val copy_d_b_cluster_snapshot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CopyDBClusterSnapshotMessage.t ->
-        (CopyDBClusterSnapshotResult.t,
-          [ `AWS of CopyDBClusterSnapshotResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CopyDBClusterSnapshotResult.t, CopyDBClusterSnapshotResult.error)
+          Result.t Lwt.t
 val copy_d_b_parameter_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CopyDBParameterGroupMessage.t ->
-        (CopyDBParameterGroupResult.t,
-          [ `AWS of CopyDBParameterGroupResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CopyDBParameterGroupResult.t, CopyDBParameterGroupResult.error)
+          Result.t Lwt.t
 val create_d_b_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDBClusterMessage.t ->
-        (CreateDBClusterResult.t,
-          [ `AWS of CreateDBClusterResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateDBClusterResult.t, CreateDBClusterResult.error) Result.t Lwt.t
 val create_d_b_cluster_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDBClusterEndpointMessage.t ->
         (CreateDBClusterEndpointOutput.t,
-          [ `AWS of CreateDBClusterEndpointOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateDBClusterEndpointOutput.error) Result.t Lwt.t
 val create_d_b_cluster_parameter_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDBClusterParameterGroupMessage.t ->
         (CreateDBClusterParameterGroupResult.t,
-          [ `AWS of CreateDBClusterParameterGroupResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateDBClusterParameterGroupResult.error) Result.t Lwt.t
 val create_d_b_cluster_snapshot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDBClusterSnapshotMessage.t ->
         (CreateDBClusterSnapshotResult.t,
-          [ `AWS of CreateDBClusterSnapshotResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateDBClusterSnapshotResult.error) Result.t Lwt.t
 val create_d_b_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDBInstanceMessage.t ->
-        (CreateDBInstanceResult.t,
-          [ `AWS of CreateDBInstanceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateDBInstanceResult.t, CreateDBInstanceResult.error) Result.t
+          Lwt.t
 val create_d_b_parameter_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDBParameterGroupMessage.t ->
-        (CreateDBParameterGroupResult.t,
-          [ `AWS of CreateDBParameterGroupResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateDBParameterGroupResult.t, CreateDBParameterGroupResult.error)
+          Result.t Lwt.t
 val create_d_b_subnet_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDBSubnetGroupMessage.t ->
-        (CreateDBSubnetGroupResult.t,
-          [ `AWS of CreateDBSubnetGroupResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateDBSubnetGroupResult.t, CreateDBSubnetGroupResult.error)
+          Result.t Lwt.t
 val create_event_subscription :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateEventSubscriptionMessage.t ->
         (CreateEventSubscriptionResult.t,
-          [ `AWS of CreateEventSubscriptionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateEventSubscriptionResult.error) Result.t Lwt.t
 val delete_d_b_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDBClusterMessage.t ->
-        (DeleteDBClusterResult.t,
-          [ `AWS of DeleteDBClusterResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteDBClusterResult.t, DeleteDBClusterResult.error) Result.t Lwt.t
 val delete_d_b_cluster_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDBClusterEndpointMessage.t ->
         (DeleteDBClusterEndpointOutput.t,
-          [ `AWS of DeleteDBClusterEndpointOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteDBClusterEndpointOutput.error) Result.t Lwt.t
 val delete_d_b_cluster_parameter_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteDBClusterParameterGroupMessage.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteDBClusterParameterGroupMessage.t -> (unit, unit) Result.t Lwt.t
 val delete_d_b_cluster_snapshot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDBClusterSnapshotMessage.t ->
         (DeleteDBClusterSnapshotResult.t,
-          [ `AWS of DeleteDBClusterSnapshotResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteDBClusterSnapshotResult.error) Result.t Lwt.t
 val delete_d_b_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDBInstanceMessage.t ->
-        (DeleteDBInstanceResult.t,
-          [ `AWS of DeleteDBInstanceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteDBInstanceResult.t, DeleteDBInstanceResult.error) Result.t
+          Lwt.t
 val delete_d_b_parameter_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteDBParameterGroupMessage.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteDBParameterGroupMessage.t -> (unit, unit) Result.t Lwt.t
 val delete_d_b_subnet_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteDBSubnetGroupMessage.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteDBSubnetGroupMessage.t -> (unit, unit) Result.t Lwt.t
 val delete_event_subscription :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteEventSubscriptionMessage.t ->
         (DeleteEventSubscriptionResult.t,
-          [ `AWS of DeleteEventSubscriptionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteEventSubscriptionResult.error) Result.t Lwt.t
 val describe_d_b_cluster_endpoints :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDBClusterEndpointsMessage.t ->
-        (DBClusterEndpointMessage.t,
-          [ `AWS of DBClusterEndpointMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DBClusterEndpointMessage.t, DBClusterEndpointMessage.error) Result.t
+          Lwt.t
 val describe_d_b_cluster_parameter_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDBClusterParameterGroupsMessage.t ->
         (DBClusterParameterGroupsMessage.t,
-          [ `AWS of DBClusterParameterGroupsMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DBClusterParameterGroupsMessage.error) Result.t Lwt.t
 val describe_d_b_cluster_parameters :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDBClusterParametersMessage.t ->
         (DBClusterParameterGroupDetails.t,
-          [ `AWS of DBClusterParameterGroupDetails.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DBClusterParameterGroupDetails.error) Result.t Lwt.t
 val describe_d_b_cluster_snapshot_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDBClusterSnapshotAttributesMessage.t ->
         (DescribeDBClusterSnapshotAttributesResult.t,
-          [ `AWS of DescribeDBClusterSnapshotAttributesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeDBClusterSnapshotAttributesResult.error) Result.t Lwt.t
 val describe_d_b_cluster_snapshots :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDBClusterSnapshotsMessage.t ->
-        (DBClusterSnapshotMessage.t,
-          [ `AWS of DBClusterSnapshotMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DBClusterSnapshotMessage.t, DBClusterSnapshotMessage.error) Result.t
+          Lwt.t
 val describe_d_b_clusters :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDBClustersMessage.t ->
-        (DBClusterMessage.t,
-          [ `AWS of DBClusterMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DBClusterMessage.t, DBClusterMessage.error) Result.t Lwt.t
 val describe_d_b_engine_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDBEngineVersionsMessage.t ->
-        (DBEngineVersionMessage.t,
-          [ `AWS of DBEngineVersionMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DBEngineVersionMessage.t, DBEngineVersionMessage.error) Result.t
+          Lwt.t
 val describe_d_b_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDBInstancesMessage.t ->
-        (DBInstanceMessage.t,
-          [ `AWS of DBInstanceMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DBInstanceMessage.t, DBInstanceMessage.error) Result.t Lwt.t
 val describe_d_b_parameter_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDBParameterGroupsMessage.t ->
-        (DBParameterGroupsMessage.t,
-          [ `AWS of DBParameterGroupsMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DBParameterGroupsMessage.t, DBParameterGroupsMessage.error) Result.t
+          Lwt.t
 val describe_d_b_parameters :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDBParametersMessage.t ->
-        (DBParameterGroupDetails.t,
-          [ `AWS of DBParameterGroupDetails.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DBParameterGroupDetails.t, DBParameterGroupDetails.error) Result.t
+          Lwt.t
 val describe_d_b_subnet_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDBSubnetGroupsMessage.t ->
-        (DBSubnetGroupMessage.t,
-          [ `AWS of DBSubnetGroupMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DBSubnetGroupMessage.t, DBSubnetGroupMessage.error) Result.t Lwt.t
 val describe_engine_default_cluster_parameters :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEngineDefaultClusterParametersMessage.t ->
         (DescribeEngineDefaultClusterParametersResult.t,
-          [ `AWS of DescribeEngineDefaultClusterParametersResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeEngineDefaultClusterParametersResult.error) Result.t Lwt.t
 val describe_engine_default_parameters :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEngineDefaultParametersMessage.t ->
         (DescribeEngineDefaultParametersResult.t,
-          [ `AWS of DescribeEngineDefaultParametersResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeEngineDefaultParametersResult.error) Result.t Lwt.t
 val describe_event_categories :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEventCategoriesMessage.t ->
-        (EventCategoriesMessage.t,
-          [ `AWS of EventCategoriesMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (EventCategoriesMessage.t, EventCategoriesMessage.error) Result.t
+          Lwt.t
 val describe_event_subscriptions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEventSubscriptionsMessage.t ->
-        (EventSubscriptionsMessage.t,
-          [ `AWS of EventSubscriptionsMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (EventSubscriptionsMessage.t, EventSubscriptionsMessage.error)
+          Result.t Lwt.t
 val describe_events :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEventsMessage.t ->
-        (EventsMessage.t,
-          [ `AWS of EventsMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (EventsMessage.t, EventsMessage.error) Result.t Lwt.t
 val describe_orderable_d_b_instance_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeOrderableDBInstanceOptionsMessage.t ->
         (OrderableDBInstanceOptionsMessage.t,
-          [ `AWS of OrderableDBInstanceOptionsMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          OrderableDBInstanceOptionsMessage.error) Result.t Lwt.t
 val describe_pending_maintenance_actions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePendingMaintenanceActionsMessage.t ->
         (PendingMaintenanceActionsMessage.t,
-          [ `AWS of PendingMaintenanceActionsMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PendingMaintenanceActionsMessage.error) Result.t Lwt.t
 val describe_valid_d_b_instance_modifications :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeValidDBInstanceModificationsMessage.t ->
         (DescribeValidDBInstanceModificationsResult.t,
-          [ `AWS of DescribeValidDBInstanceModificationsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeValidDBInstanceModificationsResult.error) Result.t Lwt.t
 val failover_d_b_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       FailoverDBClusterMessage.t ->
-        (FailoverDBClusterResult.t,
-          [ `AWS of FailoverDBClusterResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (FailoverDBClusterResult.t, FailoverDBClusterResult.error) Result.t
+          Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceMessage.t ->
-        (TagListMessage.t,
-          [ `AWS of TagListMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagListMessage.t, TagListMessage.error) Result.t Lwt.t
 val modify_d_b_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyDBClusterMessage.t ->
-        (ModifyDBClusterResult.t,
-          [ `AWS of ModifyDBClusterResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ModifyDBClusterResult.t, ModifyDBClusterResult.error) Result.t Lwt.t
 val modify_d_b_cluster_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyDBClusterEndpointMessage.t ->
         (ModifyDBClusterEndpointOutput.t,
-          [ `AWS of ModifyDBClusterEndpointOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ModifyDBClusterEndpointOutput.error) Result.t Lwt.t
 val modify_d_b_cluster_parameter_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyDBClusterParameterGroupMessage.t ->
         (DBClusterParameterGroupNameMessage.t,
-          [ `AWS of DBClusterParameterGroupNameMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DBClusterParameterGroupNameMessage.error) Result.t Lwt.t
 val modify_d_b_cluster_snapshot_attribute :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyDBClusterSnapshotAttributeMessage.t ->
         (ModifyDBClusterSnapshotAttributeResult.t,
-          [ `AWS of ModifyDBClusterSnapshotAttributeResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ModifyDBClusterSnapshotAttributeResult.error) Result.t Lwt.t
 val modify_d_b_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyDBInstanceMessage.t ->
-        (ModifyDBInstanceResult.t,
-          [ `AWS of ModifyDBInstanceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ModifyDBInstanceResult.t, ModifyDBInstanceResult.error) Result.t
+          Lwt.t
 val modify_d_b_parameter_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyDBParameterGroupMessage.t ->
-        (DBParameterGroupNameMessage.t,
-          [ `AWS of DBParameterGroupNameMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DBParameterGroupNameMessage.t, DBParameterGroupNameMessage.error)
+          Result.t Lwt.t
 val modify_d_b_subnet_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyDBSubnetGroupMessage.t ->
-        (ModifyDBSubnetGroupResult.t,
-          [ `AWS of ModifyDBSubnetGroupResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ModifyDBSubnetGroupResult.t, ModifyDBSubnetGroupResult.error)
+          Result.t Lwt.t
 val modify_event_subscription :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyEventSubscriptionMessage.t ->
         (ModifyEventSubscriptionResult.t,
-          [ `AWS of ModifyEventSubscriptionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ModifyEventSubscriptionResult.error) Result.t Lwt.t
 val promote_read_replica_d_b_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PromoteReadReplicaDBClusterMessage.t ->
         (PromoteReadReplicaDBClusterResult.t,
-          [ `AWS of PromoteReadReplicaDBClusterResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PromoteReadReplicaDBClusterResult.error) Result.t Lwt.t
 val reboot_d_b_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RebootDBInstanceMessage.t ->
-        (RebootDBInstanceResult.t,
-          [ `AWS of RebootDBInstanceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RebootDBInstanceResult.t, RebootDBInstanceResult.error) Result.t
+          Lwt.t
 val remove_role_from_d_b_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      RemoveRoleFromDBClusterMessage.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      RemoveRoleFromDBClusterMessage.t -> (unit, unit) Result.t Lwt.t
 val remove_source_identifier_from_subscription :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RemoveSourceIdentifierFromSubscriptionMessage.t ->
         (RemoveSourceIdentifierFromSubscriptionResult.t,
-          [ `AWS of RemoveSourceIdentifierFromSubscriptionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          RemoveSourceIdentifierFromSubscriptionResult.error) Result.t Lwt.t
 val remove_tags_from_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      RemoveTagsFromResourceMessage.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      RemoveTagsFromResourceMessage.t -> (unit, unit) Result.t Lwt.t
 val reset_d_b_cluster_parameter_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ResetDBClusterParameterGroupMessage.t ->
         (DBClusterParameterGroupNameMessage.t,
-          [ `AWS of DBClusterParameterGroupNameMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DBClusterParameterGroupNameMessage.error) Result.t Lwt.t
 val reset_d_b_parameter_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ResetDBParameterGroupMessage.t ->
-        (DBParameterGroupNameMessage.t,
-          [ `AWS of DBParameterGroupNameMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DBParameterGroupNameMessage.t, DBParameterGroupNameMessage.error)
+          Result.t Lwt.t
 val restore_d_b_cluster_from_snapshot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RestoreDBClusterFromSnapshotMessage.t ->
         (RestoreDBClusterFromSnapshotResult.t,
-          [ `AWS of RestoreDBClusterFromSnapshotResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          RestoreDBClusterFromSnapshotResult.error) Result.t Lwt.t
 val restore_d_b_cluster_to_point_in_time :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RestoreDBClusterToPointInTimeMessage.t ->
         (RestoreDBClusterToPointInTimeResult.t,
-          [ `AWS of RestoreDBClusterToPointInTimeResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          RestoreDBClusterToPointInTimeResult.error) Result.t Lwt.t
 val start_d_b_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartDBClusterMessage.t ->
-        (StartDBClusterResult.t,
-          [ `AWS of StartDBClusterResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartDBClusterResult.t, StartDBClusterResult.error) Result.t Lwt.t
 val stop_d_b_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopDBClusterMessage.t ->
-        (StopDBClusterResult.t,
-          [ `AWS of StopDBClusterResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StopDBClusterResult.t, StopDBClusterResult.error) Result.t Lwt.t

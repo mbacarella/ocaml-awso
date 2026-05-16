@@ -5,13 +5,13 @@ let to_request data =
   let e =
     data
     |> Endpoint.cases ~f:(fun endpoint ->
-         match Endpoint.payload endpoint with
-         | None -> [%expr Awso.Http.Request.make (method_of_endpoint endp)]
-         | Some payload ->
-           Payload.convert_rest_xml
-             payload
-             ~endpoint_name:(Endpoint.name endpoint)
-             [%expr req])
+      match Endpoint.payload endpoint with
+      | None -> [%expr Awso.Http.Request.make (method_of_endpoint endp)]
+      | Some payload ->
+        Payload.convert_rest_xml
+          payload
+          ~endpoint_name:(Endpoint.name endpoint)
+          [%expr req])
     |> Ast_helper.Exp.match_ [%expr endp]
   in
   let loc = !Ast_helper.default_loc in
@@ -99,109 +99,103 @@ let of_response (service : Botodata.service) data =
   let body =
     data
     |> Endpoint.cases ~f:(fun endpoint ->
-         let error_of_xml =
-           Service_endpoints_common.make_error_expression
-             ~loc
-             ~label:"error_of_xml"
-             endpoint
-         in
-         match Endpoint.result_decoder endpoint with
-         | None -> [%expr Ok ()]
-         | Some Json -> assert false
-         | Some Xml ->
-           let of_xml =
-             Endpoint.in_result_module endpoint "of_xml"
-             |> Option.value_exn
-                  ~message:"no result module"
-                  ~error:"no result module for endpoint"
-           in
-           [%expr
-             match resp with
-             | Error err -> handle_error err [%e error_of_xml]
-             | Ok resp -> Ok ([%e of_xml] (response_to_xml resp))]
-         | Some (Of_header_and_body payload_opt) -> (
-           let of_header_and_body =
-             Endpoint.in_result_module endpoint "of_header_and_body"
-             |> Option.value_exn
-                  ~message:"no result module"
-                  ~error:"no result module for endpoint"
-           in
-           match payload_opt with
-           | Some payload ->
-             let payload =
-               let open Option.Let_syntax in
-               (let%bind op = Endpoint.op endpoint in
-                let%bind op_output = op.output in
-                let%bind shape_member =
-                  match%bind
-                    List.Assoc.find ~equal:String.equal service.shapes op_output.shape
-                  with
-                  | Structure_shape ss ->
-                    List.Assoc.find ~equal:String.equal ss.members payload
-                  | _ -> None
-                in
-                Some shape_member.shape)
-               |> Option.value ~default:payload
+      let error_of_xml =
+        Service_endpoints_common.make_error_expression ~loc ~label:"error_of_xml" endpoint
+      in
+      match Endpoint.result_decoder endpoint with
+      | None ->
+        [%expr if is_success then Ok () else Error (parse_aws_error [%e error_of_xml])]
+      | Some Json -> assert false
+      | Some Xml ->
+        let of_xml =
+          Endpoint.in_result_module endpoint "of_xml"
+          |> Option.value_exn
+               ~message:"no result module"
+               ~error:"no result module for endpoint"
+        in
+        [%expr
+          if is_success
+          then Ok ([%e of_xml] (response_to_xml resp))
+          else Error (parse_aws_error [%e error_of_xml])]
+      | Some (Of_header_and_body payload_opt) -> (
+        let of_header_and_body =
+          Endpoint.in_result_module endpoint "of_header_and_body"
+          |> Option.value_exn
+               ~message:"no result module"
+               ~error:"no result module for endpoint"
+        in
+        match payload_opt with
+        | Some payload ->
+          let payload =
+            let open Option.Let_syntax in
+            (let%bind op = Endpoint.op endpoint in
+             let%bind op_output = op.output in
+             let%bind shape_member =
+               match%bind
+                 List.Assoc.find ~equal:String.equal service.shapes op_output.shape
+               with
+               | Structure_shape ss ->
+                 List.Assoc.find ~equal:String.equal ss.members payload
+               | _ -> None
              in
-             let of_string = Ast_convenience.evar (sprintf "%s.of_string" payload) in
-             [%expr
-               match resp with
-               | Error err -> handle_error err [%e error_of_xml]
-               | Ok resp ->
-                 let body =
-                   [%e of_string] (Awso.Http.Response.body resp)
-                 in
-                 let headers =
-                   Awso.Http.Headers.to_list (Awso.Http.Response.headers resp)
-                 in
-                 Ok ([%e of_header_and_body] (headers, body))]
-           | None ->
-             [%expr
-               match resp with
-               | Error err -> handle_error err [%e error_of_xml]
-               | Ok resp ->
-                 let headers =
-                   Awso.Http.Headers.to_list (Awso.Http.Response.headers resp)
-                 in
-                 Ok ([%e of_header_and_body] (headers, ()))]))
+             Some shape_member.shape)
+            |> Option.value ~default:payload
+          in
+          let of_string = Ast_convenience.evar (sprintf "%s.of_string" payload) in
+          [%expr
+            if is_success
+            then (
+              let body = [%e of_string] (Awso.Http.Response.body resp) in
+              let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+              Ok ([%e of_header_and_body] (headers, body)))
+            else Error (parse_aws_error [%e error_of_xml])]
+        | None ->
+          [%expr
+            if is_success
+            then (
+              let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+              Ok ([%e of_header_and_body] (headers, ())))
+            else Error (parse_aws_error [%e error_of_xml])]))
     |> Ast_helper.Exp.match_ [%expr endpoint]
   in
   [%stri
-    let of_response
-      (type i o e)
-      (endpoint : (i, o, e) t)
-      (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result)
-      : (o, [ `AWS of e | `Transport of Awso.Http.Io.Error.call ]) result
+    let of_response (type i o e) (endpoint : (i, o, e) t) (resp : Awso.Http.Response.t)
+      : (o, e) result
       =
-      let handle_error err error_of_xml =
-        let generic_error () = Error (`Transport err) in
-        match err with
-        | `Too_many_redirects -> generic_error ()
-        | `Bad_response { Awso.Http.Io.Error.code; body; x_amzn_error_type = _ } -> (
-          match error_of_xml, code >= 400 && code <= 599 with
-          | None, _ | _, false -> generic_error ()
-          | Some error_of_xml, true -> (
-            match Awso.Xml.parse_response body with
-            | `Data _ -> generic_error ()
-            | `El (((_, "Error"), _), _) as xml -> (
-              try
-                let error_code =
-                  match Awso.Xml.child_exn xml "Code" with
-                  | `Data error_code -> error_code
-                  | `El (_, children) ->
-                    List.map children ~f:(function
-                      | `Data s -> s
-                      | `El _ -> "")
-                    |> String.concat ~sep:""
-                in
-                Error (`AWS (error_of_xml (String.strip error_code) xml))
-              with
-              | Failure _ -> generic_error ())
-            | `El _ -> generic_error ()))
+      let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+      let is_success = code >= 200 && code < 300 in
+      let parse_aws_error error_of_xml =
+        let body = Awso.Http.Response.body resp in
+        let bail () =
+          raise
+            (Awso.Http.Io.Error.Bad_response
+               { Awso.Http.Io.Error.code; body; x_amzn_error_type = None })
+        in
+        match error_of_xml, code >= 400 && code <= 599 with
+        | None, _ | _, false -> bail ()
+        | Some error_of_xml, true -> (
+          match Awso.Xml.parse_response body with
+          | `Data _ -> bail ()
+          | `El (((_, "Error"), _), _) as xml -> (
+            try
+              let error_code =
+                match Awso.Xml.child_exn xml "Code" with
+                | `Data error_code -> error_code
+                | `El (_, children) ->
+                  List.map children ~f:(function
+                    | `Data s -> s
+                    | `El _ -> "")
+                  |> String.concat ~sep:""
+              in
+              error_of_xml (String.strip error_code) xml
+            with
+            | Failure _ -> bail ())
+          | `El _ -> bail ())
       in
-      let response_to_xml resp =
-        Awso.Xml.parse_response (Awso.Http.Response.body resp)
-      in
+      let response_to_xml resp = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+      let _ = parse_aws_error in
+      let _ = response_to_xml in
+      let _ = resp in
       [%e body]
     ;;]
 ;;
@@ -234,55 +228,58 @@ let%expect_test "of_response" =
   [%expect
     {|
     let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-      (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-      (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-      let handle_error err error_of_xml =
-        let generic_error () = Error (`Transport err) in
-        match err with
-        | `Too_many_redirects -> generic_error ()
-        | `Bad_response
-            { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-            (match (error_of_xml, ((code >= 400) && (code <= 599))) with
-             | (None, _) | (_, false) -> generic_error ()
-             | (Some error_of_xml, true) ->
-                 (match Awso.Xml.parse_response body with
-                  | `Data _ -> generic_error ()
-                  | `El (((_, "Error"), _), _) as xml ->
-                      (try
-                         let error_code =
-                           match Awso.Xml.child_exn xml "Code" with
-                           | `Data error_code -> error_code
-                           | `El (_, children) ->
-                               (List.map children
-                                  ~f:(function | `Data s -> s | `El _ -> ""))
-                                 |> (String.concat ~sep:"") in
-                         Error
-                           (`AWS (error_of_xml (String.strip error_code) xml))
-                       with | Failure _ -> generic_error ())
-                  | `El _ -> generic_error ())) in
+      (resp : Awso.Http.Response.t) : (o, e) result=
+      let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+      let is_success = (code >= 200) && (code < 300) in
+      let parse_aws_error error_of_xml =
+        let body = Awso.Http.Response.body resp in
+        let bail () =
+          raise
+            (Awso.Http.Io.Error.Bad_response
+               { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = None }) in
+        match (error_of_xml, ((code >= 400) && (code <= 599))) with
+        | (None, _) | (_, false) -> bail ()
+        | (Some error_of_xml, true) ->
+            (match Awso.Xml.parse_response body with
+             | `Data _ -> bail ()
+             | `El (((_, "Error"), _), _) as xml ->
+                 (try
+                    let error_code =
+                      match Awso.Xml.child_exn xml "Code" with
+                      | `Data error_code -> error_code
+                      | `El (_, children) ->
+                          (List.map children
+                             ~f:(function | `Data s -> s | `El _ -> ""))
+                            |> (String.concat ~sep:"") in
+                    error_of_xml (String.strip error_code) xml
+                  with | Failure _ -> bail ())
+             | `El _ -> bail ()) in
       let response_to_xml resp =
         Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+      let _ = parse_aws_error in
+      let _ = response_to_xml in
+      let _ = resp in
       match endpoint with
       | Of_header_and_no_body ->
-          (match resp with
-           | Error err -> handle_error err None
-           | Ok resp ->
-               let headers =
-                 Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-               Ok (Result.of_header_and_body (headers, ())))
+          if is_success
+          then
+            let headers =
+              Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+            Ok (Result.of_header_and_body (headers, ()))
+          else Error (parse_aws_error None)
       | Direct ->
-          (match resp with
-           | Error err -> handle_error err None
-           | Ok resp -> Ok (DirectResult.of_xml (response_to_xml resp)))
+          if is_success
+          then Ok (DirectResult.of_xml (response_to_xml resp))
+          else Error (parse_aws_error None)
       | Of_header_and_body ->
-          (match resp with
-           | Error err -> handle_error err None
-           | Ok resp ->
-               let body = Payload_module.of_string (Awso.Http.Response.body resp) in
-               let headers =
-                 Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-               Ok (Result_of_header_and_body.of_header_and_body (headers, body)))
-      | No_output -> Ok ()
+          if is_success
+          then
+            let body = Payload_module.of_string (Awso.Http.Response.body resp) in
+            let headers =
+              Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+            Ok (Result_of_header_and_body.of_header_and_body (headers, body))
+          else Error (parse_aws_error None)
+      | No_output -> if is_success then Ok () else Error (parse_aws_error None)
     |}]
 ;;
 

@@ -4,183 +4,135 @@ val cancel_order :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelOrderInput.t ->
-        (CancelOrderOutput.t,
-          [ `AWS of CancelOrderOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CancelOrderOutput.t, CancelOrderOutput.error) Result.t
           Async.Deferred.t
 val create_order :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateOrderInput.t ->
-        (CreateOrderOutput.t,
-          [ `AWS of CreateOrderOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateOrderOutput.t, CreateOrderOutput.error) Result.t
           Async.Deferred.t
 val create_outpost :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateOutpostInput.t ->
-        (CreateOutpostOutput.t,
-          [ `AWS of CreateOutpostOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateOutpostOutput.t, CreateOutpostOutput.error) Result.t
           Async.Deferred.t
 val create_site :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSiteInput.t ->
-        (CreateSiteOutput.t,
-          [ `AWS of CreateSiteOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateSiteOutput.t, CreateSiteOutput.error) Result.t
           Async.Deferred.t
 val delete_outpost :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteOutpostInput.t ->
-        (DeleteOutpostOutput.t,
-          [ `AWS of DeleteOutpostOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteOutpostOutput.t, DeleteOutpostOutput.error) Result.t
           Async.Deferred.t
 val delete_site :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSiteInput.t ->
-        (DeleteSiteOutput.t,
-          [ `AWS of DeleteSiteOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteSiteOutput.t, DeleteSiteOutput.error) Result.t
           Async.Deferred.t
 val get_catalog_item :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCatalogItemInput.t ->
-        (GetCatalogItemOutput.t,
-          [ `AWS of GetCatalogItemOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetCatalogItemOutput.t, GetCatalogItemOutput.error) Result.t
           Async.Deferred.t
 val get_order :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetOrderInput.t ->
-        (GetOrderOutput.t,
-          [ `AWS of GetOrderOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetOrderOutput.t, GetOrderOutput.error) Result.t Async.Deferred.t
 val get_outpost :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetOutpostInput.t ->
-        (GetOutpostOutput.t,
-          [ `AWS of GetOutpostOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetOutpostOutput.t, GetOutpostOutput.error) Result.t
           Async.Deferred.t
 val get_outpost_instance_types :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetOutpostInstanceTypesInput.t ->
         (GetOutpostInstanceTypesOutput.t,
-          [ `AWS of GetOutpostInstanceTypesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetOutpostInstanceTypesOutput.error) Result.t Async.Deferred.t
 val get_site :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSiteInput.t ->
-        (GetSiteOutput.t,
-          [ `AWS of GetSiteOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetSiteOutput.t, GetSiteOutput.error) Result.t Async.Deferred.t
 val get_site_address :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSiteAddressInput.t ->
-        (GetSiteAddressOutput.t,
-          [ `AWS of GetSiteAddressOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetSiteAddressOutput.t, GetSiteAddressOutput.error) Result.t
           Async.Deferred.t
 val list_catalog_items :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCatalogItemsInput.t ->
-        (ListCatalogItemsOutput.t,
-          [ `AWS of ListCatalogItemsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListCatalogItemsOutput.t, ListCatalogItemsOutput.error) Result.t
           Async.Deferred.t
 val list_orders :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListOrdersInput.t ->
-        (ListOrdersOutput.t,
-          [ `AWS of ListOrdersOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListOrdersOutput.t, ListOrdersOutput.error) Result.t
           Async.Deferred.t
 val list_outposts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListOutpostsInput.t ->
-        (ListOutpostsOutput.t,
-          [ `AWS of ListOutpostsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListOutpostsOutput.t, ListOutpostsOutput.error) Result.t
           Async.Deferred.t
 val list_sites :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSitesInput.t ->
-        (ListSitesOutput.t,
-          [ `AWS of ListSitesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListSitesOutput.t, ListSitesOutput.error) Result.t Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
 val update_outpost :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateOutpostInput.t ->
-        (UpdateOutpostOutput.t,
-          [ `AWS of UpdateOutpostOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateOutpostOutput.t, UpdateOutpostOutput.error) Result.t
           Async.Deferred.t
 val update_site :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSiteInput.t ->
-        (UpdateSiteOutput.t,
-          [ `AWS of UpdateSiteOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateSiteOutput.t, UpdateSiteOutput.error) Result.t
           Async.Deferred.t
 val update_site_address :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSiteAddressInput.t ->
-        (UpdateSiteAddressOutput.t,
-          [ `AWS of UpdateSiteAddressOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateSiteAddressOutput.t, UpdateSiteAddressOutput.error) Result.t
           Async.Deferred.t
 val update_site_rack_physical_properties :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSiteRackPhysicalPropertiesInput.t ->
         (UpdateSiteRackPhysicalPropertiesOutput.t,
-          [ `AWS of UpdateSiteRackPhysicalPropertiesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          UpdateSiteRackPhysicalPropertiesOutput.error) Result.t
           Async.Deferred.t

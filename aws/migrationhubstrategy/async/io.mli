@@ -5,158 +5,123 @@ val get_application_component_details :
     ?cfg:Awso.Cfg.t ->
       GetApplicationComponentDetailsRequest.t ->
         (GetApplicationComponentDetailsResponse.t,
-          [ `AWS of GetApplicationComponentDetailsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetApplicationComponentDetailsResponse.error) Result.t
           Async.Deferred.t
 val get_application_component_strategies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetApplicationComponentStrategiesRequest.t ->
         (GetApplicationComponentStrategiesResponse.t,
-          [ `AWS of GetApplicationComponentStrategiesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetApplicationComponentStrategiesResponse.error) Result.t
           Async.Deferred.t
 val get_assessment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAssessmentRequest.t ->
-        (GetAssessmentResponse.t,
-          [ `AWS of GetAssessmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetAssessmentResponse.t, GetAssessmentResponse.error) Result.t
           Async.Deferred.t
 val get_import_file_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetImportFileTaskRequest.t ->
-        (GetImportFileTaskResponse.t,
-          [ `AWS of GetImportFileTaskResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetImportFileTaskResponse.t, GetImportFileTaskResponse.error)
+          Result.t Async.Deferred.t
 val get_portfolio_preferences :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPortfolioPreferencesRequest.t ->
         (GetPortfolioPreferencesResponse.t,
-          [ `AWS of GetPortfolioPreferencesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetPortfolioPreferencesResponse.error) Result.t Async.Deferred.t
 val get_portfolio_summary :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPortfolioSummaryRequest.t ->
-        (GetPortfolioSummaryResponse.t,
-          [ `AWS of GetPortfolioSummaryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetPortfolioSummaryResponse.t, GetPortfolioSummaryResponse.error)
+          Result.t Async.Deferred.t
 val get_recommendation_report_details :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRecommendationReportDetailsRequest.t ->
         (GetRecommendationReportDetailsResponse.t,
-          [ `AWS of GetRecommendationReportDetailsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetRecommendationReportDetailsResponse.error) Result.t
           Async.Deferred.t
 val get_server_details :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetServerDetailsRequest.t ->
-        (GetServerDetailsResponse.t,
-          [ `AWS of GetServerDetailsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetServerDetailsResponse.t, GetServerDetailsResponse.error) Result.t
           Async.Deferred.t
 val get_server_strategies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetServerStrategiesRequest.t ->
-        (GetServerStrategiesResponse.t,
-          [ `AWS of GetServerStrategiesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetServerStrategiesResponse.t, GetServerStrategiesResponse.error)
+          Result.t Async.Deferred.t
 val list_application_components :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListApplicationComponentsRequest.t ->
         (ListApplicationComponentsResponse.t,
-          [ `AWS of ListApplicationComponentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListApplicationComponentsResponse.error) Result.t Async.Deferred.t
 val list_collectors :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCollectorsRequest.t ->
-        (ListCollectorsResponse.t,
-          [ `AWS of ListCollectorsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListCollectorsResponse.t, ListCollectorsResponse.error) Result.t
           Async.Deferred.t
 val list_import_file_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListImportFileTaskRequest.t ->
-        (ListImportFileTaskResponse.t,
-          [ `AWS of ListImportFileTaskResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListImportFileTaskResponse.t, ListImportFileTaskResponse.error)
+          Result.t Async.Deferred.t
 val list_servers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListServersRequest.t ->
-        (ListServersResponse.t,
-          [ `AWS of ListServersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListServersResponse.t, ListServersResponse.error) Result.t
           Async.Deferred.t
 val put_portfolio_preferences :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutPortfolioPreferencesRequest.t ->
         (PutPortfolioPreferencesResponse.t,
-          [ `AWS of PutPortfolioPreferencesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          PutPortfolioPreferencesResponse.error) Result.t Async.Deferred.t
 val start_assessment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartAssessmentRequest.t ->
-        (StartAssessmentResponse.t,
-          [ `AWS of StartAssessmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StartAssessmentResponse.t, StartAssessmentResponse.error) Result.t
           Async.Deferred.t
 val start_import_file_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartImportFileTaskRequest.t ->
-        (StartImportFileTaskResponse.t,
-          [ `AWS of StartImportFileTaskResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (StartImportFileTaskResponse.t, StartImportFileTaskResponse.error)
+          Result.t Async.Deferred.t
 val start_recommendation_report_generation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartRecommendationReportGenerationRequest.t ->
         (StartRecommendationReportGenerationResponse.t,
-          [ `AWS of StartRecommendationReportGenerationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          StartRecommendationReportGenerationResponse.error) Result.t
           Async.Deferred.t
 val stop_assessment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopAssessmentRequest.t ->
-        (StopAssessmentResponse.t,
-          [ `AWS of StopAssessmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StopAssessmentResponse.t, StopAssessmentResponse.error) Result.t
           Async.Deferred.t
 val update_application_component_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateApplicationComponentConfigRequest.t ->
         (UpdateApplicationComponentConfigResponse.t,
-          [ `AWS of UpdateApplicationComponentConfigResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          UpdateApplicationComponentConfigResponse.error) Result.t
           Async.Deferred.t
 val update_server_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateServerConfigRequest.t ->
-        (UpdateServerConfigResponse.t,
-          [ `AWS of UpdateServerConfigResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateServerConfigResponse.t, UpdateServerConfigResponse.error)
+          Result.t Async.Deferred.t

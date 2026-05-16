@@ -4,96 +4,80 @@ val create_parallel_data :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateParallelDataRequest.t ->
-        (CreateParallelDataResponse.t,
-          [ `AWS of CreateParallelDataResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateParallelDataResponse.t, CreateParallelDataResponse.error)
+          Result.t Lwt.t
 val delete_parallel_data :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteParallelDataRequest.t ->
-        (DeleteParallelDataResponse.t,
-          [ `AWS of DeleteParallelDataResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteParallelDataResponse.t, DeleteParallelDataResponse.error)
+          Result.t Lwt.t
 val delete_terminology :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteTerminologyRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteTerminologyRequest.t -> (unit, unit) Result.t Lwt.t
 val describe_text_translation_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTextTranslationJobRequest.t ->
         (DescribeTextTranslationJobResponse.t,
-          [ `AWS of DescribeTextTranslationJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeTextTranslationJobResponse.error) Result.t Lwt.t
 val get_parallel_data :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetParallelDataRequest.t ->
-        (GetParallelDataResponse.t,
-          [ `AWS of GetParallelDataResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetParallelDataResponse.t, GetParallelDataResponse.error) Result.t
+          Lwt.t
 val get_terminology :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTerminologyRequest.t ->
-        (GetTerminologyResponse.t,
-          [ `AWS of GetTerminologyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetTerminologyResponse.t, GetTerminologyResponse.error) Result.t
+          Lwt.t
 val import_terminology :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ImportTerminologyRequest.t ->
-        (ImportTerminologyResponse.t,
-          [ `AWS of ImportTerminologyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ImportTerminologyResponse.t, ImportTerminologyResponse.error)
+          Result.t Lwt.t
 val list_parallel_data :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListParallelDataRequest.t ->
-        (ListParallelDataResponse.t,
-          [ `AWS of ListParallelDataResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListParallelDataResponse.t, ListParallelDataResponse.error) Result.t
+          Lwt.t
 val list_terminologies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTerminologiesRequest.t ->
-        (ListTerminologiesResponse.t,
-          [ `AWS of ListTerminologiesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTerminologiesResponse.t, ListTerminologiesResponse.error)
+          Result.t Lwt.t
 val list_text_translation_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTextTranslationJobsRequest.t ->
         (ListTextTranslationJobsResponse.t,
-          [ `AWS of ListTextTranslationJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListTextTranslationJobsResponse.error) Result.t Lwt.t
 val start_text_translation_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartTextTranslationJobRequest.t ->
         (StartTextTranslationJobResponse.t,
-          [ `AWS of StartTextTranslationJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartTextTranslationJobResponse.error) Result.t Lwt.t
 val stop_text_translation_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopTextTranslationJobRequest.t ->
         (StopTextTranslationJobResponse.t,
-          [ `AWS of StopTextTranslationJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StopTextTranslationJobResponse.error) Result.t Lwt.t
 val translate_text :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TranslateTextRequest.t ->
-        (TranslateTextResponse.t,
-          [ `AWS of TranslateTextResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TranslateTextResponse.t, TranslateTextResponse.error) Result.t Lwt.t
 val update_parallel_data :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateParallelDataRequest.t ->
-        (UpdateParallelDataResponse.t,
-          [ `AWS of UpdateParallelDataResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateParallelDataResponse.t, UpdateParallelDataResponse.error)
+          Result.t Lwt.t

@@ -4,160 +4,127 @@ val create_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateApplicationRequest.t ->
-        (CreateApplicationResponse.t,
-          [ `AWS of CreateApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateApplicationResponse.t, CreateApplicationResponse.error)
+          Result.t Lwt.t
 val create_environment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateEnvironmentRequest.t ->
-        (CreateEnvironmentResponse.t,
-          [ `AWS of CreateEnvironmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateEnvironmentResponse.t, CreateEnvironmentResponse.error)
+          Result.t Lwt.t
 val create_route :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRouteRequest.t ->
-        (CreateRouteResponse.t,
-          [ `AWS of CreateRouteResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateRouteResponse.t, CreateRouteResponse.error) Result.t Lwt.t
 val create_service :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateServiceRequest.t ->
-        (CreateServiceResponse.t,
-          [ `AWS of CreateServiceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateServiceResponse.t, CreateServiceResponse.error) Result.t Lwt.t
 val delete_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteApplicationRequest.t ->
-        (DeleteApplicationResponse.t,
-          [ `AWS of DeleteApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteApplicationResponse.t, DeleteApplicationResponse.error)
+          Result.t Lwt.t
 val delete_environment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteEnvironmentRequest.t ->
-        (DeleteEnvironmentResponse.t,
-          [ `AWS of DeleteEnvironmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteEnvironmentResponse.t, DeleteEnvironmentResponse.error)
+          Result.t Lwt.t
 val delete_resource_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteResourcePolicyRequest.t ->
-        (DeleteResourcePolicyResponse.t,
-          [ `AWS of DeleteResourcePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteResourcePolicyResponse.t, DeleteResourcePolicyResponse.error)
+          Result.t Lwt.t
 val delete_route :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRouteRequest.t ->
-        (DeleteRouteResponse.t,
-          [ `AWS of DeleteRouteResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteRouteResponse.t, DeleteRouteResponse.error) Result.t Lwt.t
 val delete_service :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteServiceRequest.t ->
-        (DeleteServiceResponse.t,
-          [ `AWS of DeleteServiceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteServiceResponse.t, DeleteServiceResponse.error) Result.t Lwt.t
 val get_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetApplicationRequest.t ->
-        (GetApplicationResponse.t,
-          [ `AWS of GetApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetApplicationResponse.t, GetApplicationResponse.error) Result.t
+          Lwt.t
 val get_environment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEnvironmentRequest.t ->
-        (GetEnvironmentResponse.t,
-          [ `AWS of GetEnvironmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetEnvironmentResponse.t, GetEnvironmentResponse.error) Result.t
+          Lwt.t
 val get_resource_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetResourcePolicyRequest.t ->
-        (GetResourcePolicyResponse.t,
-          [ `AWS of GetResourcePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetResourcePolicyResponse.t, GetResourcePolicyResponse.error)
+          Result.t Lwt.t
 val get_route :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRouteRequest.t ->
-        (GetRouteResponse.t,
-          [ `AWS of GetRouteResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetRouteResponse.t, GetRouteResponse.error) Result.t Lwt.t
 val get_service :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetServiceRequest.t ->
-        (GetServiceResponse.t,
-          [ `AWS of GetServiceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetServiceResponse.t, GetServiceResponse.error) Result.t Lwt.t
 val list_applications :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListApplicationsRequest.t ->
-        (ListApplicationsResponse.t,
-          [ `AWS of ListApplicationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListApplicationsResponse.t, ListApplicationsResponse.error) Result.t
+          Lwt.t
 val list_environment_vpcs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEnvironmentVpcsRequest.t ->
-        (ListEnvironmentVpcsResponse.t,
-          [ `AWS of ListEnvironmentVpcsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListEnvironmentVpcsResponse.t, ListEnvironmentVpcsResponse.error)
+          Result.t Lwt.t
 val list_environments :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEnvironmentsRequest.t ->
-        (ListEnvironmentsResponse.t,
-          [ `AWS of ListEnvironmentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListEnvironmentsResponse.t, ListEnvironmentsResponse.error) Result.t
+          Lwt.t
 val list_routes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRoutesRequest.t ->
-        (ListRoutesResponse.t,
-          [ `AWS of ListRoutesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListRoutesResponse.t, ListRoutesResponse.error) Result.t Lwt.t
 val list_services :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListServicesRequest.t ->
-        (ListServicesResponse.t,
-          [ `AWS of ListServicesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListServicesResponse.t, ListServicesResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val put_resource_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutResourcePolicyRequest.t ->
-        (PutResourcePolicyResponse.t,
-          [ `AWS of PutResourcePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutResourcePolicyResponse.t, PutResourcePolicyResponse.error)
+          Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t

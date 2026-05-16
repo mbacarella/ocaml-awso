@@ -4,1423 +4,1077 @@ val batch_create_partition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchCreatePartitionRequest.t ->
-        (BatchCreatePartitionResponse.t,
-          [ `AWS of BatchCreatePartitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (BatchCreatePartitionResponse.t, BatchCreatePartitionResponse.error)
+          Result.t Async.Deferred.t
 val batch_delete_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchDeleteConnectionRequest.t ->
         (BatchDeleteConnectionResponse.t,
-          [ `AWS of BatchDeleteConnectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          BatchDeleteConnectionResponse.error) Result.t Async.Deferred.t
 val batch_delete_partition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchDeletePartitionRequest.t ->
-        (BatchDeletePartitionResponse.t,
-          [ `AWS of BatchDeletePartitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (BatchDeletePartitionResponse.t, BatchDeletePartitionResponse.error)
+          Result.t Async.Deferred.t
 val batch_delete_table :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchDeleteTableRequest.t ->
-        (BatchDeleteTableResponse.t,
-          [ `AWS of BatchDeleteTableResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (BatchDeleteTableResponse.t, BatchDeleteTableResponse.error) Result.t
           Async.Deferred.t
 val batch_delete_table_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchDeleteTableVersionRequest.t ->
         (BatchDeleteTableVersionResponse.t,
-          [ `AWS of BatchDeleteTableVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          BatchDeleteTableVersionResponse.error) Result.t Async.Deferred.t
 val batch_get_blueprints :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchGetBlueprintsRequest.t ->
-        (BatchGetBlueprintsResponse.t,
-          [ `AWS of BatchGetBlueprintsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (BatchGetBlueprintsResponse.t, BatchGetBlueprintsResponse.error)
+          Result.t Async.Deferred.t
 val batch_get_crawlers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchGetCrawlersRequest.t ->
-        (BatchGetCrawlersResponse.t,
-          [ `AWS of BatchGetCrawlersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (BatchGetCrawlersResponse.t, BatchGetCrawlersResponse.error) Result.t
           Async.Deferred.t
 val batch_get_dev_endpoints :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchGetDevEndpointsRequest.t ->
-        (BatchGetDevEndpointsResponse.t,
-          [ `AWS of BatchGetDevEndpointsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (BatchGetDevEndpointsResponse.t, BatchGetDevEndpointsResponse.error)
+          Result.t Async.Deferred.t
 val batch_get_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchGetJobsRequest.t ->
-        (BatchGetJobsResponse.t,
-          [ `AWS of BatchGetJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (BatchGetJobsResponse.t, BatchGetJobsResponse.error) Result.t
           Async.Deferred.t
 val batch_get_partition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchGetPartitionRequest.t ->
-        (BatchGetPartitionResponse.t,
-          [ `AWS of BatchGetPartitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (BatchGetPartitionResponse.t, BatchGetPartitionResponse.error)
+          Result.t Async.Deferred.t
 val batch_get_triggers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchGetTriggersRequest.t ->
-        (BatchGetTriggersResponse.t,
-          [ `AWS of BatchGetTriggersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (BatchGetTriggersResponse.t, BatchGetTriggersResponse.error) Result.t
           Async.Deferred.t
 val batch_get_workflows :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchGetWorkflowsRequest.t ->
-        (BatchGetWorkflowsResponse.t,
-          [ `AWS of BatchGetWorkflowsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (BatchGetWorkflowsResponse.t, BatchGetWorkflowsResponse.error)
+          Result.t Async.Deferred.t
 val batch_stop_job_run :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchStopJobRunRequest.t ->
-        (BatchStopJobRunResponse.t,
-          [ `AWS of BatchStopJobRunResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (BatchStopJobRunResponse.t, BatchStopJobRunResponse.error) Result.t
           Async.Deferred.t
 val batch_update_partition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchUpdatePartitionRequest.t ->
-        (BatchUpdatePartitionResponse.t,
-          [ `AWS of BatchUpdatePartitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (BatchUpdatePartitionResponse.t, BatchUpdatePartitionResponse.error)
+          Result.t Async.Deferred.t
 val cancel_m_l_task_run :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelMLTaskRunRequest.t ->
-        (CancelMLTaskRunResponse.t,
-          [ `AWS of CancelMLTaskRunResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CancelMLTaskRunResponse.t, CancelMLTaskRunResponse.error) Result.t
           Async.Deferred.t
 val cancel_statement :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelStatementRequest.t ->
-        (CancelStatementResponse.t,
-          [ `AWS of CancelStatementResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CancelStatementResponse.t, CancelStatementResponse.error) Result.t
           Async.Deferred.t
 val check_schema_version_validity :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CheckSchemaVersionValidityInput.t ->
         (CheckSchemaVersionValidityResponse.t,
-          [ `AWS of CheckSchemaVersionValidityResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CheckSchemaVersionValidityResponse.error) Result.t Async.Deferred.t
 val create_blueprint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateBlueprintRequest.t ->
-        (CreateBlueprintResponse.t,
-          [ `AWS of CreateBlueprintResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateBlueprintResponse.t, CreateBlueprintResponse.error) Result.t
           Async.Deferred.t
 val create_classifier :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateClassifierRequest.t ->
-        (CreateClassifierResponse.t,
-          [ `AWS of CreateClassifierResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateClassifierResponse.t, CreateClassifierResponse.error) Result.t
           Async.Deferred.t
 val create_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateConnectionRequest.t ->
-        (CreateConnectionResponse.t,
-          [ `AWS of CreateConnectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateConnectionResponse.t, CreateConnectionResponse.error) Result.t
           Async.Deferred.t
 val create_crawler :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateCrawlerRequest.t ->
-        (CreateCrawlerResponse.t,
-          [ `AWS of CreateCrawlerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateCrawlerResponse.t, CreateCrawlerResponse.error) Result.t
           Async.Deferred.t
 val create_database :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDatabaseRequest.t ->
-        (CreateDatabaseResponse.t,
-          [ `AWS of CreateDatabaseResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateDatabaseResponse.t, CreateDatabaseResponse.error) Result.t
           Async.Deferred.t
 val create_dev_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDevEndpointRequest.t ->
-        (CreateDevEndpointResponse.t,
-          [ `AWS of CreateDevEndpointResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateDevEndpointResponse.t, CreateDevEndpointResponse.error)
+          Result.t Async.Deferred.t
 val create_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateJobRequest.t ->
-        (CreateJobResponse.t,
-          [ `AWS of CreateJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateJobResponse.t, CreateJobResponse.error) Result.t
           Async.Deferred.t
 val create_m_l_transform :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateMLTransformRequest.t ->
-        (CreateMLTransformResponse.t,
-          [ `AWS of CreateMLTransformResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateMLTransformResponse.t, CreateMLTransformResponse.error)
+          Result.t Async.Deferred.t
 val create_partition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePartitionRequest.t ->
-        (CreatePartitionResponse.t,
-          [ `AWS of CreatePartitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreatePartitionResponse.t, CreatePartitionResponse.error) Result.t
           Async.Deferred.t
 val create_partition_index :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePartitionIndexRequest.t ->
-        (CreatePartitionIndexResponse.t,
-          [ `AWS of CreatePartitionIndexResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreatePartitionIndexResponse.t, CreatePartitionIndexResponse.error)
+          Result.t Async.Deferred.t
 val create_registry :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRegistryInput.t ->
-        (CreateRegistryResponse.t,
-          [ `AWS of CreateRegistryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateRegistryResponse.t, CreateRegistryResponse.error) Result.t
           Async.Deferred.t
 val create_schema :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSchemaInput.t ->
-        (CreateSchemaResponse.t,
-          [ `AWS of CreateSchemaResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateSchemaResponse.t, CreateSchemaResponse.error) Result.t
           Async.Deferred.t
 val create_script :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateScriptRequest.t ->
-        (CreateScriptResponse.t,
-          [ `AWS of CreateScriptResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateScriptResponse.t, CreateScriptResponse.error) Result.t
           Async.Deferred.t
 val create_security_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSecurityConfigurationRequest.t ->
         (CreateSecurityConfigurationResponse.t,
-          [ `AWS of CreateSecurityConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          CreateSecurityConfigurationResponse.error) Result.t
           Async.Deferred.t
 val create_session :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSessionRequest.t ->
-        (CreateSessionResponse.t,
-          [ `AWS of CreateSessionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateSessionResponse.t, CreateSessionResponse.error) Result.t
           Async.Deferred.t
 val create_table :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTableRequest.t ->
-        (CreateTableResponse.t,
-          [ `AWS of CreateTableResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateTableResponse.t, CreateTableResponse.error) Result.t
           Async.Deferred.t
 val create_trigger :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTriggerRequest.t ->
-        (CreateTriggerResponse.t,
-          [ `AWS of CreateTriggerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateTriggerResponse.t, CreateTriggerResponse.error) Result.t
           Async.Deferred.t
 val create_user_defined_function :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateUserDefinedFunctionRequest.t ->
         (CreateUserDefinedFunctionResponse.t,
-          [ `AWS of CreateUserDefinedFunctionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateUserDefinedFunctionResponse.error) Result.t Async.Deferred.t
 val create_workflow :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateWorkflowRequest.t ->
-        (CreateWorkflowResponse.t,
-          [ `AWS of CreateWorkflowResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateWorkflowResponse.t, CreateWorkflowResponse.error) Result.t
           Async.Deferred.t
 val delete_blueprint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteBlueprintRequest.t ->
-        (DeleteBlueprintResponse.t,
-          [ `AWS of DeleteBlueprintResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteBlueprintResponse.t, DeleteBlueprintResponse.error) Result.t
           Async.Deferred.t
 val delete_classifier :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteClassifierRequest.t ->
-        (DeleteClassifierResponse.t,
-          [ `AWS of DeleteClassifierResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteClassifierResponse.t, DeleteClassifierResponse.error) Result.t
           Async.Deferred.t
 val delete_column_statistics_for_partition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteColumnStatisticsForPartitionRequest.t ->
         (DeleteColumnStatisticsForPartitionResponse.t,
-          [ `AWS of DeleteColumnStatisticsForPartitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DeleteColumnStatisticsForPartitionResponse.error) Result.t
           Async.Deferred.t
 val delete_column_statistics_for_table :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteColumnStatisticsForTableRequest.t ->
         (DeleteColumnStatisticsForTableResponse.t,
-          [ `AWS of DeleteColumnStatisticsForTableResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DeleteColumnStatisticsForTableResponse.error) Result.t
           Async.Deferred.t
 val delete_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteConnectionRequest.t ->
-        (DeleteConnectionResponse.t,
-          [ `AWS of DeleteConnectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteConnectionResponse.t, DeleteConnectionResponse.error) Result.t
           Async.Deferred.t
 val delete_crawler :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteCrawlerRequest.t ->
-        (DeleteCrawlerResponse.t,
-          [ `AWS of DeleteCrawlerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteCrawlerResponse.t, DeleteCrawlerResponse.error) Result.t
           Async.Deferred.t
 val delete_database :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDatabaseRequest.t ->
-        (DeleteDatabaseResponse.t,
-          [ `AWS of DeleteDatabaseResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteDatabaseResponse.t, DeleteDatabaseResponse.error) Result.t
           Async.Deferred.t
 val delete_dev_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDevEndpointRequest.t ->
-        (DeleteDevEndpointResponse.t,
-          [ `AWS of DeleteDevEndpointResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteDevEndpointResponse.t, DeleteDevEndpointResponse.error)
+          Result.t Async.Deferred.t
 val delete_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteJobRequest.t ->
-        (DeleteJobResponse.t,
-          [ `AWS of DeleteJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteJobResponse.t, DeleteJobResponse.error) Result.t
           Async.Deferred.t
 val delete_m_l_transform :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteMLTransformRequest.t ->
-        (DeleteMLTransformResponse.t,
-          [ `AWS of DeleteMLTransformResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteMLTransformResponse.t, DeleteMLTransformResponse.error)
+          Result.t Async.Deferred.t
 val delete_partition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePartitionRequest.t ->
-        (DeletePartitionResponse.t,
-          [ `AWS of DeletePartitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeletePartitionResponse.t, DeletePartitionResponse.error) Result.t
           Async.Deferred.t
 val delete_partition_index :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePartitionIndexRequest.t ->
-        (DeletePartitionIndexResponse.t,
-          [ `AWS of DeletePartitionIndexResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeletePartitionIndexResponse.t, DeletePartitionIndexResponse.error)
+          Result.t Async.Deferred.t
 val delete_registry :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRegistryInput.t ->
-        (DeleteRegistryResponse.t,
-          [ `AWS of DeleteRegistryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteRegistryResponse.t, DeleteRegistryResponse.error) Result.t
           Async.Deferred.t
 val delete_resource_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteResourcePolicyRequest.t ->
-        (DeleteResourcePolicyResponse.t,
-          [ `AWS of DeleteResourcePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteResourcePolicyResponse.t, DeleteResourcePolicyResponse.error)
+          Result.t Async.Deferred.t
 val delete_schema :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSchemaInput.t ->
-        (DeleteSchemaResponse.t,
-          [ `AWS of DeleteSchemaResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteSchemaResponse.t, DeleteSchemaResponse.error) Result.t
           Async.Deferred.t
 val delete_schema_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSchemaVersionsInput.t ->
-        (DeleteSchemaVersionsResponse.t,
-          [ `AWS of DeleteSchemaVersionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteSchemaVersionsResponse.t, DeleteSchemaVersionsResponse.error)
+          Result.t Async.Deferred.t
 val delete_security_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSecurityConfigurationRequest.t ->
         (DeleteSecurityConfigurationResponse.t,
-          [ `AWS of DeleteSecurityConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DeleteSecurityConfigurationResponse.error) Result.t
           Async.Deferred.t
 val delete_session :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSessionRequest.t ->
-        (DeleteSessionResponse.t,
-          [ `AWS of DeleteSessionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteSessionResponse.t, DeleteSessionResponse.error) Result.t
           Async.Deferred.t
 val delete_table :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTableRequest.t ->
-        (DeleteTableResponse.t,
-          [ `AWS of DeleteTableResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteTableResponse.t, DeleteTableResponse.error) Result.t
           Async.Deferred.t
 val delete_table_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTableVersionRequest.t ->
-        (DeleteTableVersionResponse.t,
-          [ `AWS of DeleteTableVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteTableVersionResponse.t, DeleteTableVersionResponse.error)
+          Result.t Async.Deferred.t
 val delete_trigger :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTriggerRequest.t ->
-        (DeleteTriggerResponse.t,
-          [ `AWS of DeleteTriggerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteTriggerResponse.t, DeleteTriggerResponse.error) Result.t
           Async.Deferred.t
 val delete_user_defined_function :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteUserDefinedFunctionRequest.t ->
         (DeleteUserDefinedFunctionResponse.t,
-          [ `AWS of DeleteUserDefinedFunctionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeleteUserDefinedFunctionResponse.error) Result.t Async.Deferred.t
 val delete_workflow :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteWorkflowRequest.t ->
-        (DeleteWorkflowResponse.t,
-          [ `AWS of DeleteWorkflowResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteWorkflowResponse.t, DeleteWorkflowResponse.error) Result.t
           Async.Deferred.t
 val get_blueprint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBlueprintRequest.t ->
-        (GetBlueprintResponse.t,
-          [ `AWS of GetBlueprintResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetBlueprintResponse.t, GetBlueprintResponse.error) Result.t
           Async.Deferred.t
 val get_blueprint_run :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBlueprintRunRequest.t ->
-        (GetBlueprintRunResponse.t,
-          [ `AWS of GetBlueprintRunResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetBlueprintRunResponse.t, GetBlueprintRunResponse.error) Result.t
           Async.Deferred.t
 val get_blueprint_runs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBlueprintRunsRequest.t ->
-        (GetBlueprintRunsResponse.t,
-          [ `AWS of GetBlueprintRunsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetBlueprintRunsResponse.t, GetBlueprintRunsResponse.error) Result.t
           Async.Deferred.t
 val get_catalog_import_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCatalogImportStatusRequest.t ->
         (GetCatalogImportStatusResponse.t,
-          [ `AWS of GetCatalogImportStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetCatalogImportStatusResponse.error) Result.t Async.Deferred.t
 val get_classifier :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetClassifierRequest.t ->
-        (GetClassifierResponse.t,
-          [ `AWS of GetClassifierResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetClassifierResponse.t, GetClassifierResponse.error) Result.t
           Async.Deferred.t
 val get_classifiers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetClassifiersRequest.t ->
-        (GetClassifiersResponse.t,
-          [ `AWS of GetClassifiersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetClassifiersResponse.t, GetClassifiersResponse.error) Result.t
           Async.Deferred.t
 val get_column_statistics_for_partition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetColumnStatisticsForPartitionRequest.t ->
         (GetColumnStatisticsForPartitionResponse.t,
-          [ `AWS of GetColumnStatisticsForPartitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetColumnStatisticsForPartitionResponse.error) Result.t
           Async.Deferred.t
 val get_column_statistics_for_table :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetColumnStatisticsForTableRequest.t ->
         (GetColumnStatisticsForTableResponse.t,
-          [ `AWS of GetColumnStatisticsForTableResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetColumnStatisticsForTableResponse.error) Result.t
           Async.Deferred.t
 val get_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetConnectionRequest.t ->
-        (GetConnectionResponse.t,
-          [ `AWS of GetConnectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetConnectionResponse.t, GetConnectionResponse.error) Result.t
           Async.Deferred.t
 val get_connections :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetConnectionsRequest.t ->
-        (GetConnectionsResponse.t,
-          [ `AWS of GetConnectionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetConnectionsResponse.t, GetConnectionsResponse.error) Result.t
           Async.Deferred.t
 val get_crawler :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCrawlerRequest.t ->
-        (GetCrawlerResponse.t,
-          [ `AWS of GetCrawlerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetCrawlerResponse.t, GetCrawlerResponse.error) Result.t
           Async.Deferred.t
 val get_crawler_metrics :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCrawlerMetricsRequest.t ->
-        (GetCrawlerMetricsResponse.t,
-          [ `AWS of GetCrawlerMetricsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetCrawlerMetricsResponse.t, GetCrawlerMetricsResponse.error)
+          Result.t Async.Deferred.t
 val get_crawlers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCrawlersRequest.t ->
-        (GetCrawlersResponse.t,
-          [ `AWS of GetCrawlersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetCrawlersResponse.t, GetCrawlersResponse.error) Result.t
           Async.Deferred.t
 val get_data_catalog_encryption_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDataCatalogEncryptionSettingsRequest.t ->
         (GetDataCatalogEncryptionSettingsResponse.t,
-          [ `AWS of GetDataCatalogEncryptionSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetDataCatalogEncryptionSettingsResponse.error) Result.t
           Async.Deferred.t
 val get_database :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDatabaseRequest.t ->
-        (GetDatabaseResponse.t,
-          [ `AWS of GetDatabaseResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetDatabaseResponse.t, GetDatabaseResponse.error) Result.t
           Async.Deferred.t
 val get_databases :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDatabasesRequest.t ->
-        (GetDatabasesResponse.t,
-          [ `AWS of GetDatabasesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetDatabasesResponse.t, GetDatabasesResponse.error) Result.t
           Async.Deferred.t
 val get_dataflow_graph :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDataflowGraphRequest.t ->
-        (GetDataflowGraphResponse.t,
-          [ `AWS of GetDataflowGraphResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetDataflowGraphResponse.t, GetDataflowGraphResponse.error) Result.t
           Async.Deferred.t
 val get_dev_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDevEndpointRequest.t ->
-        (GetDevEndpointResponse.t,
-          [ `AWS of GetDevEndpointResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetDevEndpointResponse.t, GetDevEndpointResponse.error) Result.t
           Async.Deferred.t
 val get_dev_endpoints :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDevEndpointsRequest.t ->
-        (GetDevEndpointsResponse.t,
-          [ `AWS of GetDevEndpointsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetDevEndpointsResponse.t, GetDevEndpointsResponse.error) Result.t
           Async.Deferred.t
 val get_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetJobRequest.t ->
-        (GetJobResponse.t,
-          [ `AWS of GetJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetJobResponse.t, GetJobResponse.error) Result.t Async.Deferred.t
 val get_job_bookmark :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetJobBookmarkRequest.t ->
-        (GetJobBookmarkResponse.t,
-          [ `AWS of GetJobBookmarkResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetJobBookmarkResponse.t, GetJobBookmarkResponse.error) Result.t
           Async.Deferred.t
 val get_job_run :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetJobRunRequest.t ->
-        (GetJobRunResponse.t,
-          [ `AWS of GetJobRunResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetJobRunResponse.t, GetJobRunResponse.error) Result.t
           Async.Deferred.t
 val get_job_runs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetJobRunsRequest.t ->
-        (GetJobRunsResponse.t,
-          [ `AWS of GetJobRunsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetJobRunsResponse.t, GetJobRunsResponse.error) Result.t
           Async.Deferred.t
 val get_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetJobsRequest.t ->
-        (GetJobsResponse.t,
-          [ `AWS of GetJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetJobsResponse.t, GetJobsResponse.error) Result.t Async.Deferred.t
 val get_m_l_task_run :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMLTaskRunRequest.t ->
-        (GetMLTaskRunResponse.t,
-          [ `AWS of GetMLTaskRunResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetMLTaskRunResponse.t, GetMLTaskRunResponse.error) Result.t
           Async.Deferred.t
 val get_m_l_task_runs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMLTaskRunsRequest.t ->
-        (GetMLTaskRunsResponse.t,
-          [ `AWS of GetMLTaskRunsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetMLTaskRunsResponse.t, GetMLTaskRunsResponse.error) Result.t
           Async.Deferred.t
 val get_m_l_transform :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMLTransformRequest.t ->
-        (GetMLTransformResponse.t,
-          [ `AWS of GetMLTransformResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetMLTransformResponse.t, GetMLTransformResponse.error) Result.t
           Async.Deferred.t
 val get_m_l_transforms :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMLTransformsRequest.t ->
-        (GetMLTransformsResponse.t,
-          [ `AWS of GetMLTransformsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetMLTransformsResponse.t, GetMLTransformsResponse.error) Result.t
           Async.Deferred.t
 val get_mapping :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMappingRequest.t ->
-        (GetMappingResponse.t,
-          [ `AWS of GetMappingResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetMappingResponse.t, GetMappingResponse.error) Result.t
           Async.Deferred.t
 val get_partition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPartitionRequest.t ->
-        (GetPartitionResponse.t,
-          [ `AWS of GetPartitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetPartitionResponse.t, GetPartitionResponse.error) Result.t
           Async.Deferred.t
 val get_partition_indexes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPartitionIndexesRequest.t ->
-        (GetPartitionIndexesResponse.t,
-          [ `AWS of GetPartitionIndexesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetPartitionIndexesResponse.t, GetPartitionIndexesResponse.error)
+          Result.t Async.Deferred.t
 val get_partitions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPartitionsRequest.t ->
-        (GetPartitionsResponse.t,
-          [ `AWS of GetPartitionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetPartitionsResponse.t, GetPartitionsResponse.error) Result.t
           Async.Deferred.t
 val get_plan :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPlanRequest.t ->
-        (GetPlanResponse.t,
-          [ `AWS of GetPlanResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetPlanResponse.t, GetPlanResponse.error) Result.t Async.Deferred.t
 val get_registry :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRegistryInput.t ->
-        (GetRegistryResponse.t,
-          [ `AWS of GetRegistryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetRegistryResponse.t, GetRegistryResponse.error) Result.t
           Async.Deferred.t
 val get_resource_policies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetResourcePoliciesRequest.t ->
-        (GetResourcePoliciesResponse.t,
-          [ `AWS of GetResourcePoliciesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetResourcePoliciesResponse.t, GetResourcePoliciesResponse.error)
+          Result.t Async.Deferred.t
 val get_resource_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetResourcePolicyRequest.t ->
-        (GetResourcePolicyResponse.t,
-          [ `AWS of GetResourcePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetResourcePolicyResponse.t, GetResourcePolicyResponse.error)
+          Result.t Async.Deferred.t
 val get_schema :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSchemaInput.t ->
-        (GetSchemaResponse.t,
-          [ `AWS of GetSchemaResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetSchemaResponse.t, GetSchemaResponse.error) Result.t
           Async.Deferred.t
 val get_schema_by_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSchemaByDefinitionInput.t ->
         (GetSchemaByDefinitionResponse.t,
-          [ `AWS of GetSchemaByDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetSchemaByDefinitionResponse.error) Result.t Async.Deferred.t
 val get_schema_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSchemaVersionInput.t ->
-        (GetSchemaVersionResponse.t,
-          [ `AWS of GetSchemaVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetSchemaVersionResponse.t, GetSchemaVersionResponse.error) Result.t
           Async.Deferred.t
 val get_schema_versions_diff :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSchemaVersionsDiffInput.t ->
         (GetSchemaVersionsDiffResponse.t,
-          [ `AWS of GetSchemaVersionsDiffResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetSchemaVersionsDiffResponse.error) Result.t Async.Deferred.t
 val get_security_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSecurityConfigurationRequest.t ->
         (GetSecurityConfigurationResponse.t,
-          [ `AWS of GetSecurityConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetSecurityConfigurationResponse.error) Result.t Async.Deferred.t
 val get_security_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSecurityConfigurationsRequest.t ->
         (GetSecurityConfigurationsResponse.t,
-          [ `AWS of GetSecurityConfigurationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetSecurityConfigurationsResponse.error) Result.t Async.Deferred.t
 val get_session :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSessionRequest.t ->
-        (GetSessionResponse.t,
-          [ `AWS of GetSessionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetSessionResponse.t, GetSessionResponse.error) Result.t
           Async.Deferred.t
 val get_statement :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetStatementRequest.t ->
-        (GetStatementResponse.t,
-          [ `AWS of GetStatementResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetStatementResponse.t, GetStatementResponse.error) Result.t
           Async.Deferred.t
 val get_table :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTableRequest.t ->
-        (GetTableResponse.t,
-          [ `AWS of GetTableResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetTableResponse.t, GetTableResponse.error) Result.t
           Async.Deferred.t
 val get_table_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTableVersionRequest.t ->
-        (GetTableVersionResponse.t,
-          [ `AWS of GetTableVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetTableVersionResponse.t, GetTableVersionResponse.error) Result.t
           Async.Deferred.t
 val get_table_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTableVersionsRequest.t ->
-        (GetTableVersionsResponse.t,
-          [ `AWS of GetTableVersionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetTableVersionsResponse.t, GetTableVersionsResponse.error) Result.t
           Async.Deferred.t
 val get_tables :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTablesRequest.t ->
-        (GetTablesResponse.t,
-          [ `AWS of GetTablesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetTablesResponse.t, GetTablesResponse.error) Result.t
           Async.Deferred.t
 val get_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTagsRequest.t ->
-        (GetTagsResponse.t,
-          [ `AWS of GetTagsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetTagsResponse.t, GetTagsResponse.error) Result.t Async.Deferred.t
 val get_trigger :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTriggerRequest.t ->
-        (GetTriggerResponse.t,
-          [ `AWS of GetTriggerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetTriggerResponse.t, GetTriggerResponse.error) Result.t
           Async.Deferred.t
 val get_triggers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTriggersRequest.t ->
-        (GetTriggersResponse.t,
-          [ `AWS of GetTriggersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetTriggersResponse.t, GetTriggersResponse.error) Result.t
           Async.Deferred.t
 val get_unfiltered_partition_metadata :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetUnfilteredPartitionMetadataRequest.t ->
         (GetUnfilteredPartitionMetadataResponse.t,
-          [ `AWS of GetUnfilteredPartitionMetadataResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetUnfilteredPartitionMetadataResponse.error) Result.t
           Async.Deferred.t
 val get_unfiltered_partitions_metadata :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetUnfilteredPartitionsMetadataRequest.t ->
         (GetUnfilteredPartitionsMetadataResponse.t,
-          [ `AWS of GetUnfilteredPartitionsMetadataResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetUnfilteredPartitionsMetadataResponse.error) Result.t
           Async.Deferred.t
 val get_unfiltered_table_metadata :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetUnfilteredTableMetadataRequest.t ->
         (GetUnfilteredTableMetadataResponse.t,
-          [ `AWS of GetUnfilteredTableMetadataResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetUnfilteredTableMetadataResponse.error) Result.t Async.Deferred.t
 val get_user_defined_function :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetUserDefinedFunctionRequest.t ->
         (GetUserDefinedFunctionResponse.t,
-          [ `AWS of GetUserDefinedFunctionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetUserDefinedFunctionResponse.error) Result.t Async.Deferred.t
 val get_user_defined_functions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetUserDefinedFunctionsRequest.t ->
         (GetUserDefinedFunctionsResponse.t,
-          [ `AWS of GetUserDefinedFunctionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetUserDefinedFunctionsResponse.error) Result.t Async.Deferred.t
 val get_workflow :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetWorkflowRequest.t ->
-        (GetWorkflowResponse.t,
-          [ `AWS of GetWorkflowResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetWorkflowResponse.t, GetWorkflowResponse.error) Result.t
           Async.Deferred.t
 val get_workflow_run :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetWorkflowRunRequest.t ->
-        (GetWorkflowRunResponse.t,
-          [ `AWS of GetWorkflowRunResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetWorkflowRunResponse.t, GetWorkflowRunResponse.error) Result.t
           Async.Deferred.t
 val get_workflow_run_properties :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetWorkflowRunPropertiesRequest.t ->
         (GetWorkflowRunPropertiesResponse.t,
-          [ `AWS of GetWorkflowRunPropertiesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetWorkflowRunPropertiesResponse.error) Result.t Async.Deferred.t
 val get_workflow_runs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetWorkflowRunsRequest.t ->
-        (GetWorkflowRunsResponse.t,
-          [ `AWS of GetWorkflowRunsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetWorkflowRunsResponse.t, GetWorkflowRunsResponse.error) Result.t
           Async.Deferred.t
 val import_catalog_to_glue :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ImportCatalogToGlueRequest.t ->
-        (ImportCatalogToGlueResponse.t,
-          [ `AWS of ImportCatalogToGlueResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ImportCatalogToGlueResponse.t, ImportCatalogToGlueResponse.error)
+          Result.t Async.Deferred.t
 val list_blueprints :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListBlueprintsRequest.t ->
-        (ListBlueprintsResponse.t,
-          [ `AWS of ListBlueprintsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListBlueprintsResponse.t, ListBlueprintsResponse.error) Result.t
           Async.Deferred.t
 val list_crawlers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCrawlersRequest.t ->
-        (ListCrawlersResponse.t,
-          [ `AWS of ListCrawlersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListCrawlersResponse.t, ListCrawlersResponse.error) Result.t
           Async.Deferred.t
 val list_dev_endpoints :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDevEndpointsRequest.t ->
-        (ListDevEndpointsResponse.t,
-          [ `AWS of ListDevEndpointsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListDevEndpointsResponse.t, ListDevEndpointsResponse.error) Result.t
           Async.Deferred.t
 val list_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListJobsRequest.t ->
-        (ListJobsResponse.t,
-          [ `AWS of ListJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListJobsResponse.t, ListJobsResponse.error) Result.t
           Async.Deferred.t
 val list_m_l_transforms :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListMLTransformsRequest.t ->
-        (ListMLTransformsResponse.t,
-          [ `AWS of ListMLTransformsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListMLTransformsResponse.t, ListMLTransformsResponse.error) Result.t
           Async.Deferred.t
 val list_registries :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRegistriesInput.t ->
-        (ListRegistriesResponse.t,
-          [ `AWS of ListRegistriesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListRegistriesResponse.t, ListRegistriesResponse.error) Result.t
           Async.Deferred.t
 val list_schema_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSchemaVersionsInput.t ->
-        (ListSchemaVersionsResponse.t,
-          [ `AWS of ListSchemaVersionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListSchemaVersionsResponse.t, ListSchemaVersionsResponse.error)
+          Result.t Async.Deferred.t
 val list_schemas :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSchemasInput.t ->
-        (ListSchemasResponse.t,
-          [ `AWS of ListSchemasResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListSchemasResponse.t, ListSchemasResponse.error) Result.t
           Async.Deferred.t
 val list_sessions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSessionsRequest.t ->
-        (ListSessionsResponse.t,
-          [ `AWS of ListSessionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListSessionsResponse.t, ListSessionsResponse.error) Result.t
           Async.Deferred.t
 val list_statements :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListStatementsRequest.t ->
-        (ListStatementsResponse.t,
-          [ `AWS of ListStatementsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListStatementsResponse.t, ListStatementsResponse.error) Result.t
           Async.Deferred.t
 val list_triggers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTriggersRequest.t ->
-        (ListTriggersResponse.t,
-          [ `AWS of ListTriggersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListTriggersResponse.t, ListTriggersResponse.error) Result.t
           Async.Deferred.t
 val list_workflows :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListWorkflowsRequest.t ->
-        (ListWorkflowsResponse.t,
-          [ `AWS of ListWorkflowsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListWorkflowsResponse.t, ListWorkflowsResponse.error) Result.t
           Async.Deferred.t
 val put_data_catalog_encryption_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutDataCatalogEncryptionSettingsRequest.t ->
         (PutDataCatalogEncryptionSettingsResponse.t,
-          [ `AWS of PutDataCatalogEncryptionSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          PutDataCatalogEncryptionSettingsResponse.error) Result.t
           Async.Deferred.t
 val put_resource_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutResourcePolicyRequest.t ->
-        (PutResourcePolicyResponse.t,
-          [ `AWS of PutResourcePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (PutResourcePolicyResponse.t, PutResourcePolicyResponse.error)
+          Result.t Async.Deferred.t
 val put_schema_version_metadata :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutSchemaVersionMetadataInput.t ->
         (PutSchemaVersionMetadataResponse.t,
-          [ `AWS of PutSchemaVersionMetadataResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          PutSchemaVersionMetadataResponse.error) Result.t Async.Deferred.t
 val put_workflow_run_properties :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutWorkflowRunPropertiesRequest.t ->
         (PutWorkflowRunPropertiesResponse.t,
-          [ `AWS of PutWorkflowRunPropertiesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          PutWorkflowRunPropertiesResponse.error) Result.t Async.Deferred.t
 val query_schema_version_metadata :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       QuerySchemaVersionMetadataInput.t ->
         (QuerySchemaVersionMetadataResponse.t,
-          [ `AWS of QuerySchemaVersionMetadataResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          QuerySchemaVersionMetadataResponse.error) Result.t Async.Deferred.t
 val register_schema_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegisterSchemaVersionInput.t ->
         (RegisterSchemaVersionResponse.t,
-          [ `AWS of RegisterSchemaVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          RegisterSchemaVersionResponse.error) Result.t Async.Deferred.t
 val remove_schema_version_metadata :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RemoveSchemaVersionMetadataInput.t ->
         (RemoveSchemaVersionMetadataResponse.t,
-          [ `AWS of RemoveSchemaVersionMetadataResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          RemoveSchemaVersionMetadataResponse.error) Result.t
           Async.Deferred.t
 val reset_job_bookmark :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ResetJobBookmarkRequest.t ->
-        (ResetJobBookmarkResponse.t,
-          [ `AWS of ResetJobBookmarkResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ResetJobBookmarkResponse.t, ResetJobBookmarkResponse.error) Result.t
           Async.Deferred.t
 val resume_workflow_run :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ResumeWorkflowRunRequest.t ->
-        (ResumeWorkflowRunResponse.t,
-          [ `AWS of ResumeWorkflowRunResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ResumeWorkflowRunResponse.t, ResumeWorkflowRunResponse.error)
+          Result.t Async.Deferred.t
 val run_statement :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RunStatementRequest.t ->
-        (RunStatementResponse.t,
-          [ `AWS of RunStatementResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RunStatementResponse.t, RunStatementResponse.error) Result.t
           Async.Deferred.t
 val search_tables :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SearchTablesRequest.t ->
-        (SearchTablesResponse.t,
-          [ `AWS of SearchTablesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (SearchTablesResponse.t, SearchTablesResponse.error) Result.t
           Async.Deferred.t
 val start_blueprint_run :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartBlueprintRunRequest.t ->
-        (StartBlueprintRunResponse.t,
-          [ `AWS of StartBlueprintRunResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (StartBlueprintRunResponse.t, StartBlueprintRunResponse.error)
+          Result.t Async.Deferred.t
 val start_crawler :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartCrawlerRequest.t ->
-        (StartCrawlerResponse.t,
-          [ `AWS of StartCrawlerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StartCrawlerResponse.t, StartCrawlerResponse.error) Result.t
           Async.Deferred.t
 val start_crawler_schedule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartCrawlerScheduleRequest.t ->
-        (StartCrawlerScheduleResponse.t,
-          [ `AWS of StartCrawlerScheduleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (StartCrawlerScheduleResponse.t, StartCrawlerScheduleResponse.error)
+          Result.t Async.Deferred.t
 val start_export_labels_task_run :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartExportLabelsTaskRunRequest.t ->
         (StartExportLabelsTaskRunResponse.t,
-          [ `AWS of StartExportLabelsTaskRunResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          StartExportLabelsTaskRunResponse.error) Result.t Async.Deferred.t
 val start_import_labels_task_run :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartImportLabelsTaskRunRequest.t ->
         (StartImportLabelsTaskRunResponse.t,
-          [ `AWS of StartImportLabelsTaskRunResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          StartImportLabelsTaskRunResponse.error) Result.t Async.Deferred.t
 val start_job_run :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartJobRunRequest.t ->
-        (StartJobRunResponse.t,
-          [ `AWS of StartJobRunResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StartJobRunResponse.t, StartJobRunResponse.error) Result.t
           Async.Deferred.t
 val start_m_l_evaluation_task_run :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartMLEvaluationTaskRunRequest.t ->
         (StartMLEvaluationTaskRunResponse.t,
-          [ `AWS of StartMLEvaluationTaskRunResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          StartMLEvaluationTaskRunResponse.error) Result.t Async.Deferred.t
 val start_m_l_labeling_set_generation_task_run :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartMLLabelingSetGenerationTaskRunRequest.t ->
         (StartMLLabelingSetGenerationTaskRunResponse.t,
-          [ `AWS of StartMLLabelingSetGenerationTaskRunResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          StartMLLabelingSetGenerationTaskRunResponse.error) Result.t
           Async.Deferred.t
 val start_trigger :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartTriggerRequest.t ->
-        (StartTriggerResponse.t,
-          [ `AWS of StartTriggerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StartTriggerResponse.t, StartTriggerResponse.error) Result.t
           Async.Deferred.t
 val start_workflow_run :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartWorkflowRunRequest.t ->
-        (StartWorkflowRunResponse.t,
-          [ `AWS of StartWorkflowRunResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StartWorkflowRunResponse.t, StartWorkflowRunResponse.error) Result.t
           Async.Deferred.t
 val stop_crawler :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopCrawlerRequest.t ->
-        (StopCrawlerResponse.t,
-          [ `AWS of StopCrawlerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StopCrawlerResponse.t, StopCrawlerResponse.error) Result.t
           Async.Deferred.t
 val stop_crawler_schedule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopCrawlerScheduleRequest.t ->
-        (StopCrawlerScheduleResponse.t,
-          [ `AWS of StopCrawlerScheduleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (StopCrawlerScheduleResponse.t, StopCrawlerScheduleResponse.error)
+          Result.t Async.Deferred.t
 val stop_session :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopSessionRequest.t ->
-        (StopSessionResponse.t,
-          [ `AWS of StopSessionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StopSessionResponse.t, StopSessionResponse.error) Result.t
           Async.Deferred.t
 val stop_trigger :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopTriggerRequest.t ->
-        (StopTriggerResponse.t,
-          [ `AWS of StopTriggerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StopTriggerResponse.t, StopTriggerResponse.error) Result.t
           Async.Deferred.t
 val stop_workflow_run :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopWorkflowRunRequest.t ->
-        (StopWorkflowRunResponse.t,
-          [ `AWS of StopWorkflowRunResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StopWorkflowRunResponse.t, StopWorkflowRunResponse.error) Result.t
           Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
 val update_blueprint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateBlueprintRequest.t ->
-        (UpdateBlueprintResponse.t,
-          [ `AWS of UpdateBlueprintResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateBlueprintResponse.t, UpdateBlueprintResponse.error) Result.t
           Async.Deferred.t
 val update_classifier :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateClassifierRequest.t ->
-        (UpdateClassifierResponse.t,
-          [ `AWS of UpdateClassifierResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateClassifierResponse.t, UpdateClassifierResponse.error) Result.t
           Async.Deferred.t
 val update_column_statistics_for_partition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateColumnStatisticsForPartitionRequest.t ->
         (UpdateColumnStatisticsForPartitionResponse.t,
-          [ `AWS of UpdateColumnStatisticsForPartitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          UpdateColumnStatisticsForPartitionResponse.error) Result.t
           Async.Deferred.t
 val update_column_statistics_for_table :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateColumnStatisticsForTableRequest.t ->
         (UpdateColumnStatisticsForTableResponse.t,
-          [ `AWS of UpdateColumnStatisticsForTableResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          UpdateColumnStatisticsForTableResponse.error) Result.t
           Async.Deferred.t
 val update_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateConnectionRequest.t ->
-        (UpdateConnectionResponse.t,
-          [ `AWS of UpdateConnectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateConnectionResponse.t, UpdateConnectionResponse.error) Result.t
           Async.Deferred.t
 val update_crawler :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateCrawlerRequest.t ->
-        (UpdateCrawlerResponse.t,
-          [ `AWS of UpdateCrawlerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateCrawlerResponse.t, UpdateCrawlerResponse.error) Result.t
           Async.Deferred.t
 val update_crawler_schedule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateCrawlerScheduleRequest.t ->
         (UpdateCrawlerScheduleResponse.t,
-          [ `AWS of UpdateCrawlerScheduleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateCrawlerScheduleResponse.error) Result.t Async.Deferred.t
 val update_database :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDatabaseRequest.t ->
-        (UpdateDatabaseResponse.t,
-          [ `AWS of UpdateDatabaseResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateDatabaseResponse.t, UpdateDatabaseResponse.error) Result.t
           Async.Deferred.t
 val update_dev_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDevEndpointRequest.t ->
-        (UpdateDevEndpointResponse.t,
-          [ `AWS of UpdateDevEndpointResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateDevEndpointResponse.t, UpdateDevEndpointResponse.error)
+          Result.t Async.Deferred.t
 val update_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateJobRequest.t ->
-        (UpdateJobResponse.t,
-          [ `AWS of UpdateJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateJobResponse.t, UpdateJobResponse.error) Result.t
           Async.Deferred.t
 val update_m_l_transform :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateMLTransformRequest.t ->
-        (UpdateMLTransformResponse.t,
-          [ `AWS of UpdateMLTransformResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateMLTransformResponse.t, UpdateMLTransformResponse.error)
+          Result.t Async.Deferred.t
 val update_partition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePartitionRequest.t ->
-        (UpdatePartitionResponse.t,
-          [ `AWS of UpdatePartitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdatePartitionResponse.t, UpdatePartitionResponse.error) Result.t
           Async.Deferred.t
 val update_registry :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateRegistryInput.t ->
-        (UpdateRegistryResponse.t,
-          [ `AWS of UpdateRegistryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateRegistryResponse.t, UpdateRegistryResponse.error) Result.t
           Async.Deferred.t
 val update_schema :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSchemaInput.t ->
-        (UpdateSchemaResponse.t,
-          [ `AWS of UpdateSchemaResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateSchemaResponse.t, UpdateSchemaResponse.error) Result.t
           Async.Deferred.t
 val update_table :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateTableRequest.t ->
-        (UpdateTableResponse.t,
-          [ `AWS of UpdateTableResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateTableResponse.t, UpdateTableResponse.error) Result.t
           Async.Deferred.t
 val update_trigger :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateTriggerRequest.t ->
-        (UpdateTriggerResponse.t,
-          [ `AWS of UpdateTriggerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateTriggerResponse.t, UpdateTriggerResponse.error) Result.t
           Async.Deferred.t
 val update_user_defined_function :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateUserDefinedFunctionRequest.t ->
         (UpdateUserDefinedFunctionResponse.t,
-          [ `AWS of UpdateUserDefinedFunctionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateUserDefinedFunctionResponse.error) Result.t Async.Deferred.t
 val update_workflow :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateWorkflowRequest.t ->
-        (UpdateWorkflowResponse.t,
-          [ `AWS of UpdateWorkflowResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateWorkflowResponse.t, UpdateWorkflowResponse.error) Result.t
           Async.Deferred.t

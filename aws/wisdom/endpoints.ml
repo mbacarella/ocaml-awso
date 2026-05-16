@@ -678,259 +678,251 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | CreateAssistant ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateAssistantResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateAssistantResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateAssistantResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateAssistantResponse.error_of_json))
   | CreateAssistantAssociation ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateAssistantAssociationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateAssistantAssociationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (CreateAssistantAssociationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateAssistantAssociationResponse.error_of_json))
   | CreateContent ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateContentResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateContentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateContentResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateContentResponse.error_of_json))
   | CreateKnowledgeBase ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateKnowledgeBaseResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateKnowledgeBaseResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateKnowledgeBaseResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateKnowledgeBaseResponse.error_of_json))
   | CreateSession ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateSessionResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateSessionResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateSessionResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateSessionResponse.error_of_json))
   | DeleteAssistant ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteAssistantResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteAssistantResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteAssistantResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some DeleteAssistantResponse.error_of_json))
   | DeleteAssistantAssociation ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteAssistantAssociationResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DeleteAssistantAssociationResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeleteAssistantAssociationResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteAssistantAssociationResponse.error_of_json))
   | DeleteContent ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteContentResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteContentResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteContentResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some DeleteContentResponse.error_of_json))
   | DeleteKnowledgeBase ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteKnowledgeBaseResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteKnowledgeBaseResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteKnowledgeBaseResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteKnowledgeBaseResponse.error_of_json))
   | GetAssistant ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetAssistantResponse.error_of_json)
-       | Ok resp -> Ok (GetAssistantResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetAssistantResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetAssistantResponse.error_of_json))
   | GetAssistantAssociation ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetAssistantAssociationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetAssistantAssociationResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (GetAssistantAssociationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetAssistantAssociationResponse.error_of_json))
   | GetContent ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetContentResponse.error_of_json)
-       | Ok resp -> Ok (GetContentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetContentResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetContentResponse.error_of_json))
   | GetContentSummary ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetContentSummaryResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetContentSummaryResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetContentSummaryResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetContentSummaryResponse.error_of_json))
   | GetKnowledgeBase ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetKnowledgeBaseResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetKnowledgeBaseResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetKnowledgeBaseResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetKnowledgeBaseResponse.error_of_json))
   | GetRecommendations ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetRecommendationsResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetRecommendationsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetRecommendationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetRecommendationsResponse.error_of_json))
   | GetSession ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetSessionResponse.error_of_json)
-       | Ok resp -> Ok (GetSessionResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetSessionResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetSessionResponse.error_of_json))
   | ListAssistantAssociations ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListAssistantAssociationsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListAssistantAssociationsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListAssistantAssociationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListAssistantAssociationsResponse.error_of_json))
   | ListAssistants ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListAssistantsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListAssistantsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListAssistantsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListAssistantsResponse.error_of_json))
   | ListContents ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListContentsResponse.error_of_json)
-       | Ok resp -> Ok (ListContentsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListContentsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListContentsResponse.error_of_json))
   | ListKnowledgeBases ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListKnowledgeBasesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListKnowledgeBasesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListKnowledgeBasesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListKnowledgeBasesResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | NotifyRecommendationsReceived ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some NotifyRecommendationsReceivedResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (NotifyRecommendationsReceivedResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (NotifyRecommendationsReceivedResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some NotifyRecommendationsReceivedResponse.error_of_json))
   | QueryAssistant ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some QueryAssistantResponse.error_of_json)
-       | Ok resp ->
-           Ok (QueryAssistantResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (QueryAssistantResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some QueryAssistantResponse.error_of_json))
   | RemoveKnowledgeBaseTemplateUri ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some RemoveKnowledgeBaseTemplateUriResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (RemoveKnowledgeBaseTemplateUriResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (RemoveKnowledgeBaseTemplateUriResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some RemoveKnowledgeBaseTemplateUriResponse.error_of_json))
   | SearchContent ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some SearchContentResponse.error_of_json)
-       | Ok resp ->
-           Ok (SearchContentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (SearchContentResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some SearchContentResponse.error_of_json))
   | SearchSessions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some SearchSessionsResponse.error_of_json)
-       | Ok resp ->
-           Ok (SearchSessionsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (SearchSessionsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some SearchSessionsResponse.error_of_json))
   | StartContentUpload ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StartContentUploadResponse.error_of_json)
-       | Ok resp ->
-           Ok (StartContentUploadResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (StartContentUploadResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some StartContentUploadResponse.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UntagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateContent ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateContentResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateContentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateContentResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateContentResponse.error_of_json))
   | UpdateKnowledgeBaseTemplateUri ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateKnowledgeBaseTemplateUriResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateKnowledgeBaseTemplateUriResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (UpdateKnowledgeBaseTemplateUriResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateKnowledgeBaseTemplateUriResponse.error_of_json))

@@ -1419,365 +1419,364 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | AddLFTagsToResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some AddLFTagsToResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (AddLFTagsToResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (AddLFTagsToResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some AddLFTagsToResourceResponse.error_of_json))
   | BatchGrantPermissions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some BatchGrantPermissionsResponse.error_of_json)
-       | Ok resp ->
-           Ok (BatchGrantPermissionsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (BatchGrantPermissionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some BatchGrantPermissionsResponse.error_of_json))
   | BatchRevokePermissions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some BatchRevokePermissionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (BatchRevokePermissionsResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (BatchRevokePermissionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchRevokePermissionsResponse.error_of_json))
   | CancelTransaction ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CancelTransactionResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (CancelTransactionResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CancelTransactionResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some CancelTransactionResponse.error_of_json))
   | CommitTransaction ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CommitTransactionResponse.error_of_json)
-       | Ok resp ->
-           Ok (CommitTransactionResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CommitTransactionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CommitTransactionResponse.error_of_json))
   | CreateDataCellsFilter ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateDataCellsFilterResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (CreateDataCellsFilterResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CreateDataCellsFilterResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some CreateDataCellsFilterResponse.error_of_json))
   | CreateLFTag ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateLFTagResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (CreateLFTagResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CreateLFTagResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some CreateLFTagResponse.error_of_json))
   | DeleteDataCellsFilter ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteDataCellsFilterResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DeleteDataCellsFilterResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteDataCellsFilterResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteDataCellsFilterResponse.error_of_json))
   | DeleteLFTag ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteLFTagResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteLFTagResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteLFTagResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some DeleteLFTagResponse.error_of_json))
   | DeleteObjectsOnCancel ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteObjectsOnCancelResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DeleteObjectsOnCancelResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteObjectsOnCancelResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteObjectsOnCancelResponse.error_of_json))
   | DeregisterResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeregisterResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeregisterResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeregisterResourceResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeregisterResourceResponse.error_of_json))
   | DescribeResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeResourceResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeResourceResponse.error_of_json))
   | DescribeTransaction ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeTransactionResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeTransactionResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeTransactionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeTransactionResponse.error_of_json))
   | ExtendTransaction ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ExtendTransactionResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (ExtendTransactionResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (ExtendTransactionResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some ExtendTransactionResponse.error_of_json))
   | GetDataLakeSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetDataLakeSettingsResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetDataLakeSettingsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetDataLakeSettingsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetDataLakeSettingsResponse.error_of_json))
   | GetEffectivePermissionsForPath ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetEffectivePermissionsForPathResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetEffectivePermissionsForPathResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetEffectivePermissionsForPathResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetEffectivePermissionsForPathResponse.error_of_json))
   | GetLFTag ->
-      (match resp with
-       | Error err -> handle_error err (Some GetLFTagResponse.error_of_json)
-       | Ok resp -> Ok (GetLFTagResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetLFTagResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetLFTagResponse.error_of_json))
   | GetQueryState ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetQueryStateResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetQueryStateResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetQueryStateResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetQueryStateResponse.error_of_json))
   | GetQueryStatistics ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetQueryStatisticsResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetQueryStatisticsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetQueryStatisticsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetQueryStatisticsResponse.error_of_json))
   | GetResourceLFTags ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetResourceLFTagsResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetResourceLFTagsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetResourceLFTagsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetResourceLFTagsResponse.error_of_json))
   | GetTableObjects ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetTableObjectsResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetTableObjectsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetTableObjectsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetTableObjectsResponse.error_of_json))
   | GetTemporaryGluePartitionCredentials ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetTemporaryGluePartitionCredentialsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetTemporaryGluePartitionCredentialsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetTemporaryGluePartitionCredentialsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetTemporaryGluePartitionCredentialsResponse.error_of_json))
   | GetTemporaryGlueTableCredentials ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetTemporaryGlueTableCredentialsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetTemporaryGlueTableCredentialsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetTemporaryGlueTableCredentialsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetTemporaryGlueTableCredentialsResponse.error_of_json))
   | GetWorkUnitResults ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetWorkUnitResultsResponse.error_of_json)
-       | Ok resp ->
-           let body = ResultStream.of_string (Awso.Http.Response.body resp) in
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (GetWorkUnitResultsResponse.of_header_and_body (headers, body)))
+      if is_success
+      then
+        let body = ResultStream.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetWorkUnitResultsResponse.of_header_and_body (headers, body))
+      else
+        Error
+          (parse_aws_error (Some GetWorkUnitResultsResponse.error_of_json))
   | GetWorkUnits ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetWorkUnitsResponse.error_of_json)
-       | Ok resp -> Ok (GetWorkUnitsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetWorkUnitsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetWorkUnitsResponse.error_of_json))
   | GrantPermissions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GrantPermissionsResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (GrantPermissionsResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GrantPermissionsResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some GrantPermissionsResponse.error_of_json))
   | ListDataCellsFilter ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListDataCellsFilterResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListDataCellsFilterResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListDataCellsFilterResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListDataCellsFilterResponse.error_of_json))
   | ListLFTags ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListLFTagsResponse.error_of_json)
-       | Ok resp -> Ok (ListLFTagsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListLFTagsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListLFTagsResponse.error_of_json))
   | ListPermissions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListPermissionsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListPermissionsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListPermissionsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListPermissionsResponse.error_of_json))
   | ListResources ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListResourcesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListResourcesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListResourcesResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListResourcesResponse.error_of_json))
   | ListTableStorageOptimizers ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListTableStorageOptimizersResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListTableStorageOptimizersResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListTableStorageOptimizersResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListTableStorageOptimizersResponse.error_of_json))
   | ListTransactions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTransactionsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTransactionsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTransactionsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListTransactionsResponse.error_of_json))
   | PutDataLakeSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutDataLakeSettingsResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (PutDataLakeSettingsResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (PutDataLakeSettingsResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some PutDataLakeSettingsResponse.error_of_json))
   | RegisterResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RegisterResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (RegisterResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (RegisterResourceResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some RegisterResourceResponse.error_of_json))
   | RemoveLFTagsFromResource ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some RemoveLFTagsFromResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (RemoveLFTagsFromResourceResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (RemoveLFTagsFromResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some RemoveLFTagsFromResourceResponse.error_of_json))
   | RevokePermissions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RevokePermissionsResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (RevokePermissionsResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (RevokePermissionsResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some RevokePermissionsResponse.error_of_json))
   | SearchDatabasesByLFTags ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some SearchDatabasesByLFTagsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (SearchDatabasesByLFTagsResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (SearchDatabasesByLFTagsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some SearchDatabasesByLFTagsResponse.error_of_json))
   | SearchTablesByLFTags ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some SearchTablesByLFTagsResponse.error_of_json)
-       | Ok resp ->
-           Ok (SearchTablesByLFTagsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (SearchTablesByLFTagsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some SearchTablesByLFTagsResponse.error_of_json))
   | StartQueryPlanning ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StartQueryPlanningResponse.error_of_json)
-       | Ok resp ->
-           Ok (StartQueryPlanningResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (StartQueryPlanningResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some StartQueryPlanningResponse.error_of_json))
   | StartTransaction ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StartTransactionResponse.error_of_json)
-       | Ok resp ->
-           Ok (StartTransactionResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (StartTransactionResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some StartTransactionResponse.error_of_json))
   | UpdateLFTag ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateLFTagResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UpdateLFTagResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateLFTagResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UpdateLFTagResponse.error_of_json))
   | UpdateResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UpdateResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateResourceResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some UpdateResourceResponse.error_of_json))
   | UpdateTableObjects ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateTableObjectsResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UpdateTableObjectsResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateTableObjectsResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some UpdateTableObjectsResponse.error_of_json))
   | UpdateTableStorageOptimizer ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateTableStorageOptimizerResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateTableStorageOptimizerResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (UpdateTableStorageOptimizerResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateTableStorageOptimizerResponse.error_of_json))

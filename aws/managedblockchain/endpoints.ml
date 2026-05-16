@@ -463,176 +463,170 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | CreateMember ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateMemberOutput.error_of_json)
-       | Ok resp -> Ok (CreateMemberOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateMemberOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateMemberOutput.error_of_json))
   | CreateNetwork ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateNetworkOutput.error_of_json)
-       | Ok resp -> Ok (CreateNetworkOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateNetworkOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateNetworkOutput.error_of_json))
   | CreateNode ->
-      (match resp with
-       | Error err -> handle_error err (Some CreateNodeOutput.error_of_json)
-       | Ok resp -> Ok (CreateNodeOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateNodeOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateNodeOutput.error_of_json))
   | CreateProposal ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateProposalOutput.error_of_json)
-       | Ok resp -> Ok (CreateProposalOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateProposalOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateProposalOutput.error_of_json))
   | DeleteMember ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteMemberOutput.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteMemberOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteMemberOutput.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some DeleteMemberOutput.error_of_json))
   | DeleteNode ->
-      (match resp with
-       | Error err -> handle_error err (Some DeleteNodeOutput.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteNodeOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteNodeOutput.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some DeleteNodeOutput.error_of_json))
   | GetMember ->
-      (match resp with
-       | Error err -> handle_error err (Some GetMemberOutput.error_of_json)
-       | Ok resp -> Ok (GetMemberOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetMemberOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetMemberOutput.error_of_json))
   | GetNetwork ->
-      (match resp with
-       | Error err -> handle_error err (Some GetNetworkOutput.error_of_json)
-       | Ok resp -> Ok (GetNetworkOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetNetworkOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetNetworkOutput.error_of_json))
   | GetNode ->
-      (match resp with
-       | Error err -> handle_error err (Some GetNodeOutput.error_of_json)
-       | Ok resp -> Ok (GetNodeOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetNodeOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetNodeOutput.error_of_json))
   | GetProposal ->
-      (match resp with
-       | Error err -> handle_error err (Some GetProposalOutput.error_of_json)
-       | Ok resp -> Ok (GetProposalOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetProposalOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetProposalOutput.error_of_json))
   | ListInvitations ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListInvitationsOutput.error_of_json)
-       | Ok resp ->
-           Ok (ListInvitationsOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListInvitationsOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListInvitationsOutput.error_of_json))
   | ListMembers ->
-      (match resp with
-       | Error err -> handle_error err (Some ListMembersOutput.error_of_json)
-       | Ok resp -> Ok (ListMembersOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListMembersOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListMembersOutput.error_of_json))
   | ListNetworks ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListNetworksOutput.error_of_json)
-       | Ok resp -> Ok (ListNetworksOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListNetworksOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListNetworksOutput.error_of_json))
   | ListNodes ->
-      (match resp with
-       | Error err -> handle_error err (Some ListNodesOutput.error_of_json)
-       | Ok resp -> Ok (ListNodesOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListNodesOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListNodesOutput.error_of_json))
   | ListProposalVotes ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListProposalVotesOutput.error_of_json)
-       | Ok resp ->
-           Ok (ListProposalVotesOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListProposalVotesOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListProposalVotesOutput.error_of_json))
   | ListProposals ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListProposalsOutput.error_of_json)
-       | Ok resp -> Ok (ListProposalsOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListProposalsOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListProposalsOutput.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | RejectInvitation ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RejectInvitationOutput.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (RejectInvitationOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (RejectInvitationOutput.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some RejectInvitationOutput.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UntagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateMember ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateMemberOutput.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UpdateMemberOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateMemberOutput.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UpdateMemberOutput.error_of_json))
   | UpdateNode ->
-      (match resp with
-       | Error err -> handle_error err (Some UpdateNodeOutput.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UpdateNodeOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateNodeOutput.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UpdateNodeOutput.error_of_json))
   | VoteOnProposal ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some VoteOnProposalOutput.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (VoteOnProposalOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (VoteOnProposalOutput.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some VoteOnProposalOutput.error_of_json))

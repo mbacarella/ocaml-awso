@@ -4,116 +4,90 @@ val configure_logs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ConfigureLogsRequest.t ->
-        (ConfigureLogsResponse.t,
-          [ `AWS of ConfigureLogsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ConfigureLogsResponse.t, ConfigureLogsResponse.error) Result.t Lwt.t
 val create_asset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAssetRequest.t ->
-        (CreateAssetResponse.t,
-          [ `AWS of CreateAssetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateAssetResponse.t, CreateAssetResponse.error) Result.t Lwt.t
 val create_packaging_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePackagingConfigurationRequest.t ->
         (CreatePackagingConfigurationResponse.t,
-          [ `AWS of CreatePackagingConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreatePackagingConfigurationResponse.error) Result.t Lwt.t
 val create_packaging_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePackagingGroupRequest.t ->
-        (CreatePackagingGroupResponse.t,
-          [ `AWS of CreatePackagingGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreatePackagingGroupResponse.t, CreatePackagingGroupResponse.error)
+          Result.t Lwt.t
 val delete_asset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAssetRequest.t ->
-        (DeleteAssetResponse.t,
-          [ `AWS of DeleteAssetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteAssetResponse.t, DeleteAssetResponse.error) Result.t Lwt.t
 val delete_packaging_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePackagingConfigurationRequest.t ->
         (DeletePackagingConfigurationResponse.t,
-          [ `AWS of DeletePackagingConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeletePackagingConfigurationResponse.error) Result.t Lwt.t
 val delete_packaging_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePackagingGroupRequest.t ->
-        (DeletePackagingGroupResponse.t,
-          [ `AWS of DeletePackagingGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeletePackagingGroupResponse.t, DeletePackagingGroupResponse.error)
+          Result.t Lwt.t
 val describe_asset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAssetRequest.t ->
-        (DescribeAssetResponse.t,
-          [ `AWS of DescribeAssetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeAssetResponse.t, DescribeAssetResponse.error) Result.t Lwt.t
 val describe_packaging_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePackagingConfigurationRequest.t ->
         (DescribePackagingConfigurationResponse.t,
-          [ `AWS of DescribePackagingConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribePackagingConfigurationResponse.error) Result.t Lwt.t
 val describe_packaging_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePackagingGroupRequest.t ->
         (DescribePackagingGroupResponse.t,
-          [ `AWS of DescribePackagingGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribePackagingGroupResponse.error) Result.t Lwt.t
 val list_assets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAssetsRequest.t ->
-        (ListAssetsResponse.t,
-          [ `AWS of ListAssetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListAssetsResponse.t, ListAssetsResponse.error) Result.t Lwt.t
 val list_packaging_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPackagingConfigurationsRequest.t ->
         (ListPackagingConfigurationsResponse.t,
-          [ `AWS of ListPackagingConfigurationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListPackagingConfigurationsResponse.error) Result.t Lwt.t
 val list_packaging_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPackagingGroupsRequest.t ->
-        (ListPackagingGroupsResponse.t,
-          [ `AWS of ListPackagingGroupsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListPackagingGroupsResponse.t, ListPackagingGroupsResponse.error)
+          Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      TagResourceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> TagResourceRequest.t -> (unit, unit) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      UntagResourceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> UntagResourceRequest.t -> (unit, unit) Result.t Lwt.t
 val update_packaging_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePackagingGroupRequest.t ->
-        (UpdatePackagingGroupResponse.t,
-          [ `AWS of UpdatePackagingGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdatePackagingGroupResponse.t, UpdatePackagingGroupResponse.error)
+          Result.t Lwt.t

@@ -4,385 +4,298 @@ val accept_grant :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AcceptGrantRequest.t ->
-        (AcceptGrantResponse.t,
-          [ `AWS of AcceptGrantResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AcceptGrantResponse.t, AcceptGrantResponse.error) Result.t
           Async.Deferred.t
 val check_in_license :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CheckInLicenseRequest.t ->
-        (CheckInLicenseResponse.t,
-          [ `AWS of CheckInLicenseResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CheckInLicenseResponse.t, CheckInLicenseResponse.error) Result.t
           Async.Deferred.t
 val checkout_borrow_license :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CheckoutBorrowLicenseRequest.t ->
         (CheckoutBorrowLicenseResponse.t,
-          [ `AWS of CheckoutBorrowLicenseResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CheckoutBorrowLicenseResponse.error) Result.t Async.Deferred.t
 val checkout_license :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CheckoutLicenseRequest.t ->
-        (CheckoutLicenseResponse.t,
-          [ `AWS of CheckoutLicenseResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CheckoutLicenseResponse.t, CheckoutLicenseResponse.error) Result.t
           Async.Deferred.t
 val create_grant :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateGrantRequest.t ->
-        (CreateGrantResponse.t,
-          [ `AWS of CreateGrantResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateGrantResponse.t, CreateGrantResponse.error) Result.t
           Async.Deferred.t
 val create_grant_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateGrantVersionRequest.t ->
-        (CreateGrantVersionResponse.t,
-          [ `AWS of CreateGrantVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateGrantVersionResponse.t, CreateGrantVersionResponse.error)
+          Result.t Async.Deferred.t
 val create_license :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateLicenseRequest.t ->
-        (CreateLicenseResponse.t,
-          [ `AWS of CreateLicenseResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateLicenseResponse.t, CreateLicenseResponse.error) Result.t
           Async.Deferred.t
 val create_license_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateLicenseConfigurationRequest.t ->
         (CreateLicenseConfigurationResponse.t,
-          [ `AWS of CreateLicenseConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateLicenseConfigurationResponse.error) Result.t Async.Deferred.t
 val create_license_conversion_task_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateLicenseConversionTaskForResourceRequest.t ->
         (CreateLicenseConversionTaskForResourceResponse.t,
-          [ `AWS of CreateLicenseConversionTaskForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          CreateLicenseConversionTaskForResourceResponse.error) Result.t
           Async.Deferred.t
 val create_license_manager_report_generator :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateLicenseManagerReportGeneratorRequest.t ->
         (CreateLicenseManagerReportGeneratorResponse.t,
-          [ `AWS of CreateLicenseManagerReportGeneratorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          CreateLicenseManagerReportGeneratorResponse.error) Result.t
           Async.Deferred.t
 val create_license_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateLicenseVersionRequest.t ->
-        (CreateLicenseVersionResponse.t,
-          [ `AWS of CreateLicenseVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateLicenseVersionResponse.t, CreateLicenseVersionResponse.error)
+          Result.t Async.Deferred.t
 val create_token :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTokenRequest.t ->
-        (CreateTokenResponse.t,
-          [ `AWS of CreateTokenResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateTokenResponse.t, CreateTokenResponse.error) Result.t
           Async.Deferred.t
 val delete_grant :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteGrantRequest.t ->
-        (DeleteGrantResponse.t,
-          [ `AWS of DeleteGrantResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteGrantResponse.t, DeleteGrantResponse.error) Result.t
           Async.Deferred.t
 val delete_license :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteLicenseRequest.t ->
-        (DeleteLicenseResponse.t,
-          [ `AWS of DeleteLicenseResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteLicenseResponse.t, DeleteLicenseResponse.error) Result.t
           Async.Deferred.t
 val delete_license_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteLicenseConfigurationRequest.t ->
         (DeleteLicenseConfigurationResponse.t,
-          [ `AWS of DeleteLicenseConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeleteLicenseConfigurationResponse.error) Result.t Async.Deferred.t
 val delete_license_manager_report_generator :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteLicenseManagerReportGeneratorRequest.t ->
         (DeleteLicenseManagerReportGeneratorResponse.t,
-          [ `AWS of DeleteLicenseManagerReportGeneratorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DeleteLicenseManagerReportGeneratorResponse.error) Result.t
           Async.Deferred.t
 val delete_token :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTokenRequest.t ->
-        (DeleteTokenResponse.t,
-          [ `AWS of DeleteTokenResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteTokenResponse.t, DeleteTokenResponse.error) Result.t
           Async.Deferred.t
 val extend_license_consumption :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ExtendLicenseConsumptionRequest.t ->
         (ExtendLicenseConsumptionResponse.t,
-          [ `AWS of ExtendLicenseConsumptionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ExtendLicenseConsumptionResponse.error) Result.t Async.Deferred.t
 val get_access_token :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAccessTokenRequest.t ->
-        (GetAccessTokenResponse.t,
-          [ `AWS of GetAccessTokenResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetAccessTokenResponse.t, GetAccessTokenResponse.error) Result.t
           Async.Deferred.t
 val get_grant :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetGrantRequest.t ->
-        (GetGrantResponse.t,
-          [ `AWS of GetGrantResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetGrantResponse.t, GetGrantResponse.error) Result.t
           Async.Deferred.t
 val get_license :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLicenseRequest.t ->
-        (GetLicenseResponse.t,
-          [ `AWS of GetLicenseResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetLicenseResponse.t, GetLicenseResponse.error) Result.t
           Async.Deferred.t
 val get_license_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLicenseConfigurationRequest.t ->
         (GetLicenseConfigurationResponse.t,
-          [ `AWS of GetLicenseConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetLicenseConfigurationResponse.error) Result.t Async.Deferred.t
 val get_license_conversion_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLicenseConversionTaskRequest.t ->
         (GetLicenseConversionTaskResponse.t,
-          [ `AWS of GetLicenseConversionTaskResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetLicenseConversionTaskResponse.error) Result.t Async.Deferred.t
 val get_license_manager_report_generator :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLicenseManagerReportGeneratorRequest.t ->
         (GetLicenseManagerReportGeneratorResponse.t,
-          [ `AWS of GetLicenseManagerReportGeneratorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetLicenseManagerReportGeneratorResponse.error) Result.t
           Async.Deferred.t
 val get_license_usage :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLicenseUsageRequest.t ->
-        (GetLicenseUsageResponse.t,
-          [ `AWS of GetLicenseUsageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetLicenseUsageResponse.t, GetLicenseUsageResponse.error) Result.t
           Async.Deferred.t
 val get_service_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetServiceSettingsRequest.t ->
-        (GetServiceSettingsResponse.t,
-          [ `AWS of GetServiceSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetServiceSettingsResponse.t, GetServiceSettingsResponse.error)
+          Result.t Async.Deferred.t
 val list_associations_for_license_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAssociationsForLicenseConfigurationRequest.t ->
         (ListAssociationsForLicenseConfigurationResponse.t,
-          [ `AWS of ListAssociationsForLicenseConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListAssociationsForLicenseConfigurationResponse.error) Result.t
           Async.Deferred.t
 val list_distributed_grants :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDistributedGrantsRequest.t ->
         (ListDistributedGrantsResponse.t,
-          [ `AWS of ListDistributedGrantsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListDistributedGrantsResponse.error) Result.t Async.Deferred.t
 val list_failures_for_license_configuration_operations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFailuresForLicenseConfigurationOperationsRequest.t ->
         (ListFailuresForLicenseConfigurationOperationsResponse.t,
-          [
-            `AWS of
-              ListFailuresForLicenseConfigurationOperationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListFailuresForLicenseConfigurationOperationsResponse.error)
+          Result.t Async.Deferred.t
 val list_license_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListLicenseConfigurationsRequest.t ->
         (ListLicenseConfigurationsResponse.t,
-          [ `AWS of ListLicenseConfigurationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListLicenseConfigurationsResponse.error) Result.t Async.Deferred.t
 val list_license_conversion_tasks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListLicenseConversionTasksRequest.t ->
         (ListLicenseConversionTasksResponse.t,
-          [ `AWS of ListLicenseConversionTasksResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListLicenseConversionTasksResponse.error) Result.t Async.Deferred.t
 val list_license_manager_report_generators :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListLicenseManagerReportGeneratorsRequest.t ->
         (ListLicenseManagerReportGeneratorsResponse.t,
-          [ `AWS of ListLicenseManagerReportGeneratorsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListLicenseManagerReportGeneratorsResponse.error) Result.t
           Async.Deferred.t
 val list_license_specifications_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListLicenseSpecificationsForResourceRequest.t ->
         (ListLicenseSpecificationsForResourceResponse.t,
-          [ `AWS of ListLicenseSpecificationsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListLicenseSpecificationsForResourceResponse.error) Result.t
           Async.Deferred.t
 val list_license_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListLicenseVersionsRequest.t ->
-        (ListLicenseVersionsResponse.t,
-          [ `AWS of ListLicenseVersionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListLicenseVersionsResponse.t, ListLicenseVersionsResponse.error)
+          Result.t Async.Deferred.t
 val list_licenses :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListLicensesRequest.t ->
-        (ListLicensesResponse.t,
-          [ `AWS of ListLicensesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListLicensesResponse.t, ListLicensesResponse.error) Result.t
           Async.Deferred.t
 val list_received_grants :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListReceivedGrantsRequest.t ->
-        (ListReceivedGrantsResponse.t,
-          [ `AWS of ListReceivedGrantsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListReceivedGrantsResponse.t, ListReceivedGrantsResponse.error)
+          Result.t Async.Deferred.t
 val list_received_licenses :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListReceivedLicensesRequest.t ->
-        (ListReceivedLicensesResponse.t,
-          [ `AWS of ListReceivedLicensesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListReceivedLicensesResponse.t, ListReceivedLicensesResponse.error)
+          Result.t Async.Deferred.t
 val list_resource_inventory :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListResourceInventoryRequest.t ->
         (ListResourceInventoryResponse.t,
-          [ `AWS of ListResourceInventoryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListResourceInventoryResponse.error) Result.t Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val list_tokens :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTokensRequest.t ->
-        (ListTokensResponse.t,
-          [ `AWS of ListTokensResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListTokensResponse.t, ListTokensResponse.error) Result.t
           Async.Deferred.t
 val list_usage_for_license_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListUsageForLicenseConfigurationRequest.t ->
         (ListUsageForLicenseConfigurationResponse.t,
-          [ `AWS of ListUsageForLicenseConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListUsageForLicenseConfigurationResponse.error) Result.t
           Async.Deferred.t
 val reject_grant :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RejectGrantRequest.t ->
-        (RejectGrantResponse.t,
-          [ `AWS of RejectGrantResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RejectGrantResponse.t, RejectGrantResponse.error) Result.t
           Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
 val update_license_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateLicenseConfigurationRequest.t ->
         (UpdateLicenseConfigurationResponse.t,
-          [ `AWS of UpdateLicenseConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateLicenseConfigurationResponse.error) Result.t Async.Deferred.t
 val update_license_manager_report_generator :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateLicenseManagerReportGeneratorRequest.t ->
         (UpdateLicenseManagerReportGeneratorResponse.t,
-          [ `AWS of UpdateLicenseManagerReportGeneratorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          UpdateLicenseManagerReportGeneratorResponse.error) Result.t
           Async.Deferred.t
 val update_license_specifications_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateLicenseSpecificationsForResourceRequest.t ->
         (UpdateLicenseSpecificationsForResourceResponse.t,
-          [ `AWS of UpdateLicenseSpecificationsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          UpdateLicenseSpecificationsForResourceResponse.error) Result.t
           Async.Deferred.t
 val update_service_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateServiceSettingsRequest.t ->
         (UpdateServiceSettingsResponse.t,
-          [ `AWS of UpdateServiceSettingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateServiceSettingsResponse.error) Result.t Async.Deferred.t

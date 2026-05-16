@@ -757,303 +757,261 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpdateRuleset -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateSchedule -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | BatchDeleteRecipeVersion ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some BatchDeleteRecipeVersionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (BatchDeleteRecipeVersionResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (BatchDeleteRecipeVersionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchDeleteRecipeVersionResponse.error_of_json))
   | CreateDataset ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateDatasetResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateDatasetResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateDatasetResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateDatasetResponse.error_of_json))
   | CreateProfileJob ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateProfileJobResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateProfileJobResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateProfileJobResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateProfileJobResponse.error_of_json))
   | CreateProject ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateProjectResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateProjectResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateProjectResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateProjectResponse.error_of_json))
   | CreateRecipe ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateRecipeResponse.error_of_json)
-       | Ok resp -> Ok (CreateRecipeResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateRecipeResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateRecipeResponse.error_of_json))
   | CreateRecipeJob ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateRecipeJobResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateRecipeJobResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateRecipeJobResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateRecipeJobResponse.error_of_json))
   | CreateRuleset ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateRulesetResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateRulesetResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateRulesetResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateRulesetResponse.error_of_json))
   | CreateSchedule ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateScheduleResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateScheduleResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateScheduleResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateScheduleResponse.error_of_json))
   | DeleteDataset ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteDatasetResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteDatasetResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteDatasetResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteDatasetResponse.error_of_json))
   | DeleteJob ->
-      (match resp with
-       | Error err -> handle_error err (Some DeleteJobResponse.error_of_json)
-       | Ok resp -> Ok (DeleteJobResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteJobResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteJobResponse.error_of_json))
   | DeleteProject ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteProjectResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteProjectResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteProjectResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteProjectResponse.error_of_json))
   | DeleteRecipeVersion ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteRecipeVersionResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteRecipeVersionResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteRecipeVersionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteRecipeVersionResponse.error_of_json))
   | DeleteRuleset ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteRulesetResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteRulesetResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteRulesetResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteRulesetResponse.error_of_json))
   | DeleteSchedule ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteScheduleResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteScheduleResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteScheduleResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DeleteScheduleResponse.error_of_json))
   | DescribeDataset ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeDatasetResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeDatasetResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeDatasetResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeDatasetResponse.error_of_json))
   | DescribeJob ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeJobResponse.error_of_json)
-       | Ok resp -> Ok (DescribeJobResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeJobResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DescribeJobResponse.error_of_json))
   | DescribeJobRun ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeJobRunResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeJobRunResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeJobRunResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeJobRunResponse.error_of_json))
   | DescribeProject ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeProjectResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeProjectResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeProjectResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeProjectResponse.error_of_json))
   | DescribeRecipe ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeRecipeResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeRecipeResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeRecipeResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeRecipeResponse.error_of_json))
   | DescribeRuleset ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeRulesetResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeRulesetResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeRulesetResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeRulesetResponse.error_of_json))
   | DescribeSchedule ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeScheduleResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeScheduleResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeScheduleResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeScheduleResponse.error_of_json))
   | ListDatasets ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListDatasetsResponse.error_of_json)
-       | Ok resp -> Ok (ListDatasetsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListDatasetsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListDatasetsResponse.error_of_json))
   | ListJobRuns ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListJobRunsResponse.error_of_json)
-       | Ok resp -> Ok (ListJobRunsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListJobRunsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListJobRunsResponse.error_of_json))
   | ListJobs ->
-      (match resp with
-       | Error err -> handle_error err (Some ListJobsResponse.error_of_json)
-       | Ok resp -> Ok (ListJobsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListJobsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListJobsResponse.error_of_json))
   | ListProjects ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListProjectsResponse.error_of_json)
-       | Ok resp -> Ok (ListProjectsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListProjectsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListProjectsResponse.error_of_json))
   | ListRecipeVersions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListRecipeVersionsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListRecipeVersionsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListRecipeVersionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListRecipeVersionsResponse.error_of_json))
   | ListRecipes ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListRecipesResponse.error_of_json)
-       | Ok resp -> Ok (ListRecipesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListRecipesResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListRecipesResponse.error_of_json))
   | ListRulesets ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListRulesetsResponse.error_of_json)
-       | Ok resp -> Ok (ListRulesetsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListRulesetsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListRulesetsResponse.error_of_json))
   | ListSchedules ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListSchedulesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListSchedulesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListSchedulesResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListSchedulesResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | PublishRecipe ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PublishRecipeResponse.error_of_json)
-       | Ok resp ->
-           Ok (PublishRecipeResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (PublishRecipeResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some PublishRecipeResponse.error_of_json))
   | SendProjectSessionAction ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some SendProjectSessionActionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (SendProjectSessionActionResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (SendProjectSessionActionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some SendProjectSessionActionResponse.error_of_json))
   | StartJobRun ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StartJobRunResponse.error_of_json)
-       | Ok resp -> Ok (StartJobRunResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (StartJobRunResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some StartJobRunResponse.error_of_json))
   | StartProjectSession ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StartProjectSessionResponse.error_of_json)
-       | Ok resp ->
-           Ok (StartProjectSessionResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (StartProjectSessionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some StartProjectSessionResponse.error_of_json))
   | StopJobRun ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StopJobRunResponse.error_of_json)
-       | Ok resp -> Ok (StopJobRunResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (StopJobRunResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some StopJobRunResponse.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UntagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateDataset ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateDatasetResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateDatasetResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateDatasetResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateDatasetResponse.error_of_json))
   | UpdateProfileJob ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateProfileJobResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateProfileJobResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateProfileJobResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateProfileJobResponse.error_of_json))
   | UpdateProject ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateProjectResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateProjectResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateProjectResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateProjectResponse.error_of_json))
   | UpdateRecipe ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateRecipeResponse.error_of_json)
-       | Ok resp -> Ok (UpdateRecipeResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateRecipeResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateRecipeResponse.error_of_json))
   | UpdateRecipeJob ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateRecipeJobResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateRecipeJobResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateRecipeJobResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateRecipeJobResponse.error_of_json))
   | UpdateRuleset ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateRulesetResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateRulesetResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateRulesetResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateRulesetResponse.error_of_json))
   | UpdateSchedule ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateScheduleResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateScheduleResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateScheduleResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateScheduleResponse.error_of_json))

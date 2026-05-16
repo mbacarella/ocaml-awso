@@ -4,29 +4,21 @@ val create_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateEndpointRequest.t ->
-        (CreateEndpointResult.t,
-          [ `AWS of CreateEndpointResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateEndpointResult.t, CreateEndpointResult.error) Result.t
           Async.Deferred.t
 val delete_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteEndpointRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteEndpointRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val list_endpoints :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEndpointsRequest.t ->
-        (ListEndpointsResult.t,
-          [ `AWS of ListEndpointsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListEndpointsResult.t, ListEndpointsResult.error) Result.t
           Async.Deferred.t
 val list_shared_endpoints :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSharedEndpointsRequest.t ->
-        (ListSharedEndpointsResult.t,
-          [ `AWS of ListSharedEndpointsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListSharedEndpointsResult.t, ListSharedEndpointsResult.error)
+          Result.t Async.Deferred.t

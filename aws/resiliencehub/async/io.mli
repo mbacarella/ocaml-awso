@@ -5,313 +5,245 @@ val add_draft_app_version_resource_mappings :
     ?cfg:Awso.Cfg.t ->
       AddDraftAppVersionResourceMappingsRequest.t ->
         (AddDraftAppVersionResourceMappingsResponse.t,
-          [ `AWS of AddDraftAppVersionResourceMappingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          AddDraftAppVersionResourceMappingsResponse.error) Result.t
           Async.Deferred.t
 val create_app :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAppRequest.t ->
-        (CreateAppResponse.t,
-          [ `AWS of CreateAppResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateAppResponse.t, CreateAppResponse.error) Result.t
           Async.Deferred.t
 val create_recommendation_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRecommendationTemplateRequest.t ->
         (CreateRecommendationTemplateResponse.t,
-          [ `AWS of CreateRecommendationTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          CreateRecommendationTemplateResponse.error) Result.t
           Async.Deferred.t
 val create_resiliency_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateResiliencyPolicyRequest.t ->
         (CreateResiliencyPolicyResponse.t,
-          [ `AWS of CreateResiliencyPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateResiliencyPolicyResponse.error) Result.t Async.Deferred.t
 val delete_app :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAppRequest.t ->
-        (DeleteAppResponse.t,
-          [ `AWS of DeleteAppResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteAppResponse.t, DeleteAppResponse.error) Result.t
           Async.Deferred.t
 val delete_app_assessment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAppAssessmentRequest.t ->
-        (DeleteAppAssessmentResponse.t,
-          [ `AWS of DeleteAppAssessmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteAppAssessmentResponse.t, DeleteAppAssessmentResponse.error)
+          Result.t Async.Deferred.t
 val delete_recommendation_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRecommendationTemplateRequest.t ->
         (DeleteRecommendationTemplateResponse.t,
-          [ `AWS of DeleteRecommendationTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DeleteRecommendationTemplateResponse.error) Result.t
           Async.Deferred.t
 val delete_resiliency_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteResiliencyPolicyRequest.t ->
         (DeleteResiliencyPolicyResponse.t,
-          [ `AWS of DeleteResiliencyPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeleteResiliencyPolicyResponse.error) Result.t Async.Deferred.t
 val describe_app :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAppRequest.t ->
-        (DescribeAppResponse.t,
-          [ `AWS of DescribeAppResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeAppResponse.t, DescribeAppResponse.error) Result.t
           Async.Deferred.t
 val describe_app_assessment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAppAssessmentRequest.t ->
         (DescribeAppAssessmentResponse.t,
-          [ `AWS of DescribeAppAssessmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeAppAssessmentResponse.error) Result.t Async.Deferred.t
 val describe_app_version_resources_resolution_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAppVersionResourcesResolutionStatusRequest.t ->
         (DescribeAppVersionResourcesResolutionStatusResponse.t,
-          [
-            `AWS of DescribeAppVersionResourcesResolutionStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeAppVersionResourcesResolutionStatusResponse.error) Result.t
           Async.Deferred.t
 val describe_app_version_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAppVersionTemplateRequest.t ->
         (DescribeAppVersionTemplateResponse.t,
-          [ `AWS of DescribeAppVersionTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeAppVersionTemplateResponse.error) Result.t Async.Deferred.t
 val describe_draft_app_version_resources_import_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDraftAppVersionResourcesImportStatusRequest.t ->
         (DescribeDraftAppVersionResourcesImportStatusResponse.t,
-          [
-            `AWS of
-              DescribeDraftAppVersionResourcesImportStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeDraftAppVersionResourcesImportStatusResponse.error)
+          Result.t Async.Deferred.t
 val describe_resiliency_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeResiliencyPolicyRequest.t ->
         (DescribeResiliencyPolicyResponse.t,
-          [ `AWS of DescribeResiliencyPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeResiliencyPolicyResponse.error) Result.t Async.Deferred.t
 val import_resources_to_draft_app_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ImportResourcesToDraftAppVersionRequest.t ->
         (ImportResourcesToDraftAppVersionResponse.t,
-          [ `AWS of ImportResourcesToDraftAppVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ImportResourcesToDraftAppVersionResponse.error) Result.t
           Async.Deferred.t
 val list_alarm_recommendations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAlarmRecommendationsRequest.t ->
         (ListAlarmRecommendationsResponse.t,
-          [ `AWS of ListAlarmRecommendationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListAlarmRecommendationsResponse.error) Result.t Async.Deferred.t
 val list_app_assessments :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAppAssessmentsRequest.t ->
-        (ListAppAssessmentsResponse.t,
-          [ `AWS of ListAppAssessmentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListAppAssessmentsResponse.t, ListAppAssessmentsResponse.error)
+          Result.t Async.Deferred.t
 val list_app_component_compliances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAppComponentCompliancesRequest.t ->
         (ListAppComponentCompliancesResponse.t,
-          [ `AWS of ListAppComponentCompliancesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListAppComponentCompliancesResponse.error) Result.t
           Async.Deferred.t
 val list_app_component_recommendations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAppComponentRecommendationsRequest.t ->
         (ListAppComponentRecommendationsResponse.t,
-          [ `AWS of ListAppComponentRecommendationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListAppComponentRecommendationsResponse.error) Result.t
           Async.Deferred.t
 val list_app_version_resource_mappings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAppVersionResourceMappingsRequest.t ->
         (ListAppVersionResourceMappingsResponse.t,
-          [ `AWS of ListAppVersionResourceMappingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListAppVersionResourceMappingsResponse.error) Result.t
           Async.Deferred.t
 val list_app_version_resources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAppVersionResourcesRequest.t ->
         (ListAppVersionResourcesResponse.t,
-          [ `AWS of ListAppVersionResourcesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListAppVersionResourcesResponse.error) Result.t Async.Deferred.t
 val list_app_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAppVersionsRequest.t ->
-        (ListAppVersionsResponse.t,
-          [ `AWS of ListAppVersionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListAppVersionsResponse.t, ListAppVersionsResponse.error) Result.t
           Async.Deferred.t
 val list_apps :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAppsRequest.t ->
-        (ListAppsResponse.t,
-          [ `AWS of ListAppsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListAppsResponse.t, ListAppsResponse.error) Result.t
           Async.Deferred.t
 val list_recommendation_templates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRecommendationTemplatesRequest.t ->
         (ListRecommendationTemplatesResponse.t,
-          [ `AWS of ListRecommendationTemplatesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListRecommendationTemplatesResponse.error) Result.t
           Async.Deferred.t
 val list_resiliency_policies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListResiliencyPoliciesRequest.t ->
         (ListResiliencyPoliciesResponse.t,
-          [ `AWS of ListResiliencyPoliciesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListResiliencyPoliciesResponse.error) Result.t Async.Deferred.t
 val list_sop_recommendations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSopRecommendationsRequest.t ->
         (ListSopRecommendationsResponse.t,
-          [ `AWS of ListSopRecommendationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListSopRecommendationsResponse.error) Result.t Async.Deferred.t
 val list_suggested_resiliency_policies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSuggestedResiliencyPoliciesRequest.t ->
         (ListSuggestedResiliencyPoliciesResponse.t,
-          [ `AWS of ListSuggestedResiliencyPoliciesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListSuggestedResiliencyPoliciesResponse.error) Result.t
           Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val list_test_recommendations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTestRecommendationsRequest.t ->
         (ListTestRecommendationsResponse.t,
-          [ `AWS of ListTestRecommendationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListTestRecommendationsResponse.error) Result.t Async.Deferred.t
 val list_unsupported_app_version_resources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListUnsupportedAppVersionResourcesRequest.t ->
         (ListUnsupportedAppVersionResourcesResponse.t,
-          [ `AWS of ListUnsupportedAppVersionResourcesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListUnsupportedAppVersionResourcesResponse.error) Result.t
           Async.Deferred.t
 val publish_app_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PublishAppVersionRequest.t ->
-        (PublishAppVersionResponse.t,
-          [ `AWS of PublishAppVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (PublishAppVersionResponse.t, PublishAppVersionResponse.error)
+          Result.t Async.Deferred.t
 val put_draft_app_version_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutDraftAppVersionTemplateRequest.t ->
         (PutDraftAppVersionTemplateResponse.t,
-          [ `AWS of PutDraftAppVersionTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          PutDraftAppVersionTemplateResponse.error) Result.t Async.Deferred.t
 val remove_draft_app_version_resource_mappings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RemoveDraftAppVersionResourceMappingsRequest.t ->
         (RemoveDraftAppVersionResourceMappingsResponse.t,
-          [ `AWS of RemoveDraftAppVersionResourceMappingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          RemoveDraftAppVersionResourceMappingsResponse.error) Result.t
           Async.Deferred.t
 val resolve_app_version_resources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ResolveAppVersionResourcesRequest.t ->
         (ResolveAppVersionResourcesResponse.t,
-          [ `AWS of ResolveAppVersionResourcesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ResolveAppVersionResourcesResponse.error) Result.t Async.Deferred.t
 val start_app_assessment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartAppAssessmentRequest.t ->
-        (StartAppAssessmentResponse.t,
-          [ `AWS of StartAppAssessmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (StartAppAssessmentResponse.t, StartAppAssessmentResponse.error)
+          Result.t Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
 val update_app :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateAppRequest.t ->
-        (UpdateAppResponse.t,
-          [ `AWS of UpdateAppResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateAppResponse.t, UpdateAppResponse.error) Result.t
           Async.Deferred.t
 val update_resiliency_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateResiliencyPolicyRequest.t ->
         (UpdateResiliencyPolicyResponse.t,
-          [ `AWS of UpdateResiliencyPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateResiliencyPolicyResponse.error) Result.t Async.Deferred.t

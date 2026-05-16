@@ -4,55 +4,45 @@ val create_environment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateEnvironmentRequest.t ->
-        (CreateEnvironmentResponse.t,
-          [ `AWS of CreateEnvironmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateEnvironmentResponse.t, CreateEnvironmentResponse.error)
+          Result.t Lwt.t
 val delete_environment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteEnvironmentRequest.t ->
-        (DeleteEnvironmentResponse.t,
-          [ `AWS of DeleteEnvironmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteEnvironmentResponse.t, DeleteEnvironmentResponse.error)
+          Result.t Lwt.t
 val get_environment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEnvironmentRequest.t ->
-        (GetEnvironmentResponse.t,
-          [ `AWS of GetEnvironmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetEnvironmentResponse.t, GetEnvironmentResponse.error) Result.t
+          Lwt.t
 val list_environments :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEnvironmentsRequest.t ->
-        (ListEnvironmentsResponse.t,
-          [ `AWS of ListEnvironmentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListEnvironmentsResponse.t, ListEnvironmentsResponse.error) Result.t
+          Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_environment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateEnvironmentRequest.t ->
-        (UpdateEnvironmentResponse.t,
-          [ `AWS of UpdateEnvironmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateEnvironmentResponse.t, UpdateEnvironmentResponse.error)
+          Result.t Lwt.t

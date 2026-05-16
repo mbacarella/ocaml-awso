@@ -27,15 +27,14 @@ let ensure b fmt = Format.kasprintf (fun s -> if b then Ok () else Error s) fmt
 let print_unit_or_error = function
   | Ok () -> print_endline "(Ok ())"
   | Error s -> printf "(Error %S)\n" s
+;;
 
 let check_string_min s ~min =
   ensure (Stdlib.String.length s >= min) "Expected string of length greater than %d" min
 ;;
 
 let%expect_test "check_string_min" =
-  let test s =
-    check_string_min s ~min:3 |> print_unit_or_error
-  in
+  let test s = check_string_min s ~min:3 |> print_unit_or_error in
   test "ab";
   [%expect {| (Error "Expected string of length greater than 3") |}];
   test "abc";
@@ -49,9 +48,7 @@ let check_string_max s ~max =
 ;;
 
 let%expect_test "check_string_max" =
-  let test s =
-    check_string_max s ~max:3 |> print_unit_or_error
-  in
+  let test s = check_string_max s ~max:3 |> print_unit_or_error in
   test "ab";
   [%expect {| (Ok ()) |}];
   test "abc";
@@ -103,9 +100,7 @@ let check_pattern s ~pattern =
 ;;
 
 let%expect_test "check_pattern" =
-  let test s =
-    check_pattern s ~pattern:{|\d|} |> print_unit_or_error
-  in
+  let test s = check_pattern s ~pattern:{|\d|} |> print_unit_or_error in
   test "abc";
   [%expect {| (Error "String abc doesn't match expected regex \\d") |}];
   test "a0c";
@@ -135,7 +130,8 @@ let%expect_test "map_unicode_pattern_to_ascii_pattern" =
   test {|[\p{L}\p{N}]+|};
   [%expect {| [\p{L}\p{N}]+ -> [a-zA-Z0-9]+ |}];
   test {|[\p{L}\p{P}\p{Z}]|};
-  [%expect {xxx| [\p{L}\p{P}\p{Z}] -> [a-zA-Z!"\#$%&'()*+,\-./:;<=>?@\[\\\]^_`{|}~\p{Z}] |xxx}];
+  [%expect
+    {xxx| [\p{L}\p{P}\p{Z}] -> [a-zA-Z!"\#$%&'()*+,\-./:;<=>?@\[\\\]^_`{|}~\p{Z}] |xxx}];
   test {|[\p{S}\p{M}]|};
   [%expect {| [\p{S}\p{M}] -> [] |}];
   test {|[a-z\p{L}]|};
@@ -159,7 +155,8 @@ let%expect_test "check_pattern with unicode classes" =
   test {|^[\p{L}\p{N}_-]+$|} "hello-world_123";
   [%expect {| (Ok ()) |}];
   test {|^[\p{L}\p{N}_-]+$|} "hello world";
-  [%expect {| (Error "String hello world doesn't match expected regex ^[a-zA-Z0-9_-]+$") |}]
+  [%expect
+    {| (Error "String hello world doesn't match expected regex ^[a-zA-Z0-9_-]+$") |}]
 ;;
 
 let check_list_min l ~min =
@@ -167,9 +164,7 @@ let check_list_min l ~min =
 ;;
 
 let%expect_test "check_list_min" =
-  let test l =
-    check_list_min l ~min:3 |> print_unit_or_error
-  in
+  let test l = check_list_min l ~min:3 |> print_unit_or_error in
   test [ 1; 2 ];
   [%expect {| (Error "Expected list of length greater than 3") |}];
   test [ 1; 2; 3 ];
@@ -183,9 +178,7 @@ let check_list_max l ~max =
 ;;
 
 let%expect_test "check_list_max" =
-  let test l =
-    check_list_max l ~max:3 |> print_unit_or_error
-  in
+  let test l = check_list_max l ~max:3 |> print_unit_or_error in
   test [ 1; 2 ];
   [%expect {| (Ok ()) |}];
   test [ 1; 2; 3 ];
@@ -227,9 +220,7 @@ let check_float_min m ~min:fmin =
 ;;
 
 let%expect_test "check_float_min" =
-  let test n =
-    check_float_min n ~min:3. |> print_unit_or_error
-  in
+  let test n = check_float_min n ~min:3. |> print_unit_or_error in
   test 2.;
   [%expect {| (Error "Expected float greater than or equal to 3.000000") |}];
   test 3.;
@@ -241,9 +232,7 @@ let%expect_test "check_float_min" =
 let check_float_max m ~max:fmax = ensure Float.(m <= fmax) "Expected less than %f" fmax
 
 let%expect_test "check_float_max" =
-  let test n =
-    check_float_max n ~max:3. |> print_unit_or_error
-  in
+  let test n = check_float_max n ~max:3. |> print_unit_or_error in
   test 2.;
   [%expect {| (Ok ()) |}];
   test 3.;
@@ -253,9 +242,7 @@ let%expect_test "check_float_max" =
 ;;
 
 let%expect_test "check_int64_min" =
-  let test n =
-    check_int64_min n ~min:3L |> print_unit_or_error
-  in
+  let test n = check_int64_min n ~min:3L |> print_unit_or_error in
   test 2L;
   [%expect {| (Error "Expected long greater than 3") |}];
   test 3L;
@@ -267,9 +254,7 @@ let%expect_test "check_int64_min" =
 let check_int64_max i ~max = ensure (Int64.( <= ) i max) "Expected long less than %Ld" max
 
 let%expect_test "check_int64_max" =
-  let test n =
-    check_int64_max n ~max:3L |> print_unit_or_error
-  in
+  let test n = check_int64_max n ~max:3L |> print_unit_or_error in
   test 2L;
   [%expect {| (Ok ()) |}];
   test 3L;

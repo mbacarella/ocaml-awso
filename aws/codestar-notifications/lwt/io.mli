@@ -4,90 +4,70 @@ val create_notification_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateNotificationRuleRequest.t ->
-        (CreateNotificationRuleResult.t,
-          [ `AWS of CreateNotificationRuleResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateNotificationRuleResult.t, CreateNotificationRuleResult.error)
+          Result.t Lwt.t
 val delete_notification_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteNotificationRuleRequest.t ->
-        (DeleteNotificationRuleResult.t,
-          [ `AWS of DeleteNotificationRuleResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteNotificationRuleResult.t, DeleteNotificationRuleResult.error)
+          Result.t Lwt.t
 val delete_target :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTargetRequest.t ->
-        (DeleteTargetResult.t,
-          [ `AWS of DeleteTargetResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteTargetResult.t, DeleteTargetResult.error) Result.t Lwt.t
 val describe_notification_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeNotificationRuleRequest.t ->
         (DescribeNotificationRuleResult.t,
-          [ `AWS of DescribeNotificationRuleResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeNotificationRuleResult.error) Result.t Lwt.t
 val list_event_types :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEventTypesRequest.t ->
-        (ListEventTypesResult.t,
-          [ `AWS of ListEventTypesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListEventTypesResult.t, ListEventTypesResult.error) Result.t Lwt.t
 val list_notification_rules :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListNotificationRulesRequest.t ->
-        (ListNotificationRulesResult.t,
-          [ `AWS of ListNotificationRulesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListNotificationRulesResult.t, ListNotificationRulesResult.error)
+          Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResult.t,
-          [ `AWS of ListTagsForResourceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResult.t, ListTagsForResourceResult.error)
+          Result.t Lwt.t
 val list_targets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTargetsRequest.t ->
-        (ListTargetsResult.t,
-          [ `AWS of ListTargetsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTargetsResult.t, ListTargetsResult.error) Result.t Lwt.t
 val subscribe :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SubscribeRequest.t ->
-        (SubscribeResult.t,
-          [ `AWS of SubscribeResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SubscribeResult.t, SubscribeResult.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResult.t,
-          [ `AWS of TagResourceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResult.t, TagResourceResult.error) Result.t Lwt.t
 val unsubscribe :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UnsubscribeRequest.t ->
-        (UnsubscribeResult.t,
-          [ `AWS of UnsubscribeResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UnsubscribeResult.t, UnsubscribeResult.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResult.t,
-          [ `AWS of UntagResourceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResult.t, UntagResourceResult.error) Result.t Lwt.t
 val update_notification_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateNotificationRuleRequest.t ->
-        (UpdateNotificationRuleResult.t,
-          [ `AWS of UpdateNotificationRuleResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateNotificationRuleResult.t, UpdateNotificationRuleResult.error)
+          Result.t Lwt.t

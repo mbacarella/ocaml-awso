@@ -4,227 +4,170 @@ val batch_put_message :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchPutMessageRequest.t ->
-        (BatchPutMessageResponse.t,
-          [ `AWS of BatchPutMessageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (BatchPutMessageResponse.t, BatchPutMessageResponse.error) Result.t
+          Lwt.t
 val cancel_pipeline_reprocessing :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelPipelineReprocessingRequest.t ->
         (CancelPipelineReprocessingResponse.t,
-          [ `AWS of CancelPipelineReprocessingResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CancelPipelineReprocessingResponse.error) Result.t Lwt.t
 val create_channel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateChannelRequest.t ->
-        (CreateChannelResponse.t,
-          [ `AWS of CreateChannelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateChannelResponse.t, CreateChannelResponse.error) Result.t Lwt.t
 val create_dataset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDatasetRequest.t ->
-        (CreateDatasetResponse.t,
-          [ `AWS of CreateDatasetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateDatasetResponse.t, CreateDatasetResponse.error) Result.t Lwt.t
 val create_dataset_content :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDatasetContentRequest.t ->
-        (CreateDatasetContentResponse.t,
-          [ `AWS of CreateDatasetContentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateDatasetContentResponse.t, CreateDatasetContentResponse.error)
+          Result.t Lwt.t
 val create_datastore :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDatastoreRequest.t ->
-        (CreateDatastoreResponse.t,
-          [ `AWS of CreateDatastoreResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateDatastoreResponse.t, CreateDatastoreResponse.error) Result.t
+          Lwt.t
 val create_pipeline :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePipelineRequest.t ->
-        (CreatePipelineResponse.t,
-          [ `AWS of CreatePipelineResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreatePipelineResponse.t, CreatePipelineResponse.error) Result.t
+          Lwt.t
 val delete_channel :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteChannelRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteChannelRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_dataset :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteDatasetRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteDatasetRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_dataset_content :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteDatasetContentRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteDatasetContentRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_datastore :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteDatastoreRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteDatastoreRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_pipeline :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeletePipelineRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeletePipelineRequest.t -> (unit, unit) Result.t Lwt.t
 val describe_channel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeChannelRequest.t ->
-        (DescribeChannelResponse.t,
-          [ `AWS of DescribeChannelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeChannelResponse.t, DescribeChannelResponse.error) Result.t
+          Lwt.t
 val describe_dataset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDatasetRequest.t ->
-        (DescribeDatasetResponse.t,
-          [ `AWS of DescribeDatasetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeDatasetResponse.t, DescribeDatasetResponse.error) Result.t
+          Lwt.t
 val describe_datastore :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDatastoreRequest.t ->
-        (DescribeDatastoreResponse.t,
-          [ `AWS of DescribeDatastoreResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeDatastoreResponse.t, DescribeDatastoreResponse.error)
+          Result.t Lwt.t
 val describe_logging_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeLoggingOptionsRequest.t ->
         (DescribeLoggingOptionsResponse.t,
-          [ `AWS of DescribeLoggingOptionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeLoggingOptionsResponse.error) Result.t Lwt.t
 val describe_pipeline :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePipelineRequest.t ->
-        (DescribePipelineResponse.t,
-          [ `AWS of DescribePipelineResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribePipelineResponse.t, DescribePipelineResponse.error) Result.t
+          Lwt.t
 val get_dataset_content :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDatasetContentRequest.t ->
-        (GetDatasetContentResponse.t,
-          [ `AWS of GetDatasetContentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetDatasetContentResponse.t, GetDatasetContentResponse.error)
+          Result.t Lwt.t
 val list_channels :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListChannelsRequest.t ->
-        (ListChannelsResponse.t,
-          [ `AWS of ListChannelsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListChannelsResponse.t, ListChannelsResponse.error) Result.t Lwt.t
 val list_dataset_contents :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDatasetContentsRequest.t ->
-        (ListDatasetContentsResponse.t,
-          [ `AWS of ListDatasetContentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListDatasetContentsResponse.t, ListDatasetContentsResponse.error)
+          Result.t Lwt.t
 val list_datasets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDatasetsRequest.t ->
-        (ListDatasetsResponse.t,
-          [ `AWS of ListDatasetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListDatasetsResponse.t, ListDatasetsResponse.error) Result.t Lwt.t
 val list_datastores :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDatastoresRequest.t ->
-        (ListDatastoresResponse.t,
-          [ `AWS of ListDatastoresResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListDatastoresResponse.t, ListDatastoresResponse.error) Result.t
+          Lwt.t
 val list_pipelines :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPipelinesRequest.t ->
-        (ListPipelinesResponse.t,
-          [ `AWS of ListPipelinesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListPipelinesResponse.t, ListPipelinesResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val put_logging_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PutLoggingOptionsRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      PutLoggingOptionsRequest.t -> (unit, unit) Result.t Lwt.t
 val run_pipeline_activity :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RunPipelineActivityRequest.t ->
-        (RunPipelineActivityResponse.t,
-          [ `AWS of RunPipelineActivityResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RunPipelineActivityResponse.t, RunPipelineActivityResponse.error)
+          Result.t Lwt.t
 val sample_channel_data :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SampleChannelDataRequest.t ->
-        (SampleChannelDataResponse.t,
-          [ `AWS of SampleChannelDataResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SampleChannelDataResponse.t, SampleChannelDataResponse.error)
+          Result.t Lwt.t
 val start_pipeline_reprocessing :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartPipelineReprocessingRequest.t ->
         (StartPipelineReprocessingResponse.t,
-          [ `AWS of StartPipelineReprocessingResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartPipelineReprocessingResponse.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_channel :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      UpdateChannelRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> UpdateChannelRequest.t -> (unit, unit) Result.t Lwt.t
 val update_dataset :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      UpdateDatasetRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> UpdateDatasetRequest.t -> (unit, unit) Result.t Lwt.t
 val update_datastore :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UpdateDatastoreRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      UpdateDatastoreRequest.t -> (unit, unit) Result.t Lwt.t
 val update_pipeline :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      UpdatePipelineRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> UpdatePipelineRequest.t -> (unit, unit) Result.t Lwt.t

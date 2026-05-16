@@ -4,55 +4,40 @@ val create_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRuleRequest.t ->
-        (CreateRuleResponse.t,
-          [ `AWS of CreateRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateRuleResponse.t, CreateRuleResponse.error) Result.t Lwt.t
 val delete_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRuleRequest.t ->
-        (DeleteRuleResponse.t,
-          [ `AWS of DeleteRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteRuleResponse.t, DeleteRuleResponse.error) Result.t Lwt.t
 val get_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRuleRequest.t ->
-        (GetRuleResponse.t,
-          [ `AWS of GetRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetRuleResponse.t, GetRuleResponse.error) Result.t Lwt.t
 val list_rules :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRulesRequest.t ->
-        (ListRulesResponse.t,
-          [ `AWS of ListRulesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListRulesResponse.t, ListRulesResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateRuleRequest.t ->
-        (UpdateRuleResponse.t,
-          [ `AWS of UpdateRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateRuleResponse.t, UpdateRuleResponse.error) Result.t Lwt.t

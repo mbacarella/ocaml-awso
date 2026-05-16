@@ -4,233 +4,171 @@ val create_discoverer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDiscovererRequest.t ->
-        (CreateDiscovererResponse.t,
-          [ `AWS of CreateDiscovererResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateDiscovererResponse.t, CreateDiscovererResponse.error) Result.t
           Async.Deferred.t
 val create_registry :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRegistryRequest.t ->
-        (CreateRegistryResponse.t,
-          [ `AWS of CreateRegistryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateRegistryResponse.t, CreateRegistryResponse.error) Result.t
           Async.Deferred.t
 val create_schema :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSchemaRequest.t ->
-        (CreateSchemaResponse.t,
-          [ `AWS of CreateSchemaResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateSchemaResponse.t, CreateSchemaResponse.error) Result.t
           Async.Deferred.t
 val delete_discoverer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteDiscovererRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteDiscovererRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_registry :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteRegistryRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteRegistryRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_resource_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteResourcePolicyRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteResourcePolicyRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_schema :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteSchemaRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteSchemaRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_schema_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteSchemaVersionRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteSchemaVersionRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val describe_code_binding :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeCodeBindingRequest.t ->
-        (DescribeCodeBindingResponse.t,
-          [ `AWS of DescribeCodeBindingResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeCodeBindingResponse.t, DescribeCodeBindingResponse.error)
+          Result.t Async.Deferred.t
 val describe_discoverer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDiscovererRequest.t ->
-        (DescribeDiscovererResponse.t,
-          [ `AWS of DescribeDiscovererResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeDiscovererResponse.t, DescribeDiscovererResponse.error)
+          Result.t Async.Deferred.t
 val describe_registry :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRegistryRequest.t ->
-        (DescribeRegistryResponse.t,
-          [ `AWS of DescribeRegistryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeRegistryResponse.t, DescribeRegistryResponse.error) Result.t
           Async.Deferred.t
 val describe_schema :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSchemaRequest.t ->
-        (DescribeSchemaResponse.t,
-          [ `AWS of DescribeSchemaResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeSchemaResponse.t, DescribeSchemaResponse.error) Result.t
           Async.Deferred.t
 val export_schema :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ExportSchemaRequest.t ->
-        (ExportSchemaResponse.t,
-          [ `AWS of ExportSchemaResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ExportSchemaResponse.t, ExportSchemaResponse.error) Result.t
           Async.Deferred.t
 val get_code_binding_source :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCodeBindingSourceRequest.t ->
-        (GetCodeBindingSourceResponse.t,
-          [ `AWS of GetCodeBindingSourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetCodeBindingSourceResponse.t, GetCodeBindingSourceResponse.error)
+          Result.t Async.Deferred.t
 val get_discovered_schema :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDiscoveredSchemaRequest.t ->
-        (GetDiscoveredSchemaResponse.t,
-          [ `AWS of GetDiscoveredSchemaResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetDiscoveredSchemaResponse.t, GetDiscoveredSchemaResponse.error)
+          Result.t Async.Deferred.t
 val get_resource_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetResourcePolicyRequest.t ->
-        (GetResourcePolicyResponse.t,
-          [ `AWS of GetResourcePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetResourcePolicyResponse.t, GetResourcePolicyResponse.error)
+          Result.t Async.Deferred.t
 val list_discoverers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDiscoverersRequest.t ->
-        (ListDiscoverersResponse.t,
-          [ `AWS of ListDiscoverersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListDiscoverersResponse.t, ListDiscoverersResponse.error) Result.t
           Async.Deferred.t
 val list_registries :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRegistriesRequest.t ->
-        (ListRegistriesResponse.t,
-          [ `AWS of ListRegistriesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListRegistriesResponse.t, ListRegistriesResponse.error) Result.t
           Async.Deferred.t
 val list_schema_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSchemaVersionsRequest.t ->
-        (ListSchemaVersionsResponse.t,
-          [ `AWS of ListSchemaVersionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListSchemaVersionsResponse.t, ListSchemaVersionsResponse.error)
+          Result.t Async.Deferred.t
 val list_schemas :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSchemasRequest.t ->
-        (ListSchemasResponse.t,
-          [ `AWS of ListSchemasResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListSchemasResponse.t, ListSchemasResponse.error) Result.t
           Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val put_code_binding :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutCodeBindingRequest.t ->
-        (PutCodeBindingResponse.t,
-          [ `AWS of PutCodeBindingResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (PutCodeBindingResponse.t, PutCodeBindingResponse.error) Result.t
           Async.Deferred.t
 val put_resource_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutResourcePolicyRequest.t ->
-        (PutResourcePolicyResponse.t,
-          [ `AWS of PutResourcePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (PutResourcePolicyResponse.t, PutResourcePolicyResponse.error)
+          Result.t Async.Deferred.t
 val search_schemas :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SearchSchemasRequest.t ->
-        (SearchSchemasResponse.t,
-          [ `AWS of SearchSchemasResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (SearchSchemasResponse.t, SearchSchemasResponse.error) Result.t
           Async.Deferred.t
 val start_discoverer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartDiscovererRequest.t ->
-        (StartDiscovererResponse.t,
-          [ `AWS of StartDiscovererResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StartDiscovererResponse.t, StartDiscovererResponse.error) Result.t
           Async.Deferred.t
 val stop_discoverer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopDiscovererRequest.t ->
-        (StopDiscovererResponse.t,
-          [ `AWS of StopDiscovererResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StopDiscovererResponse.t, StopDiscovererResponse.error) Result.t
           Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      TagResourceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      TagResourceRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UntagResourceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      UntagResourceRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val update_discoverer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDiscovererRequest.t ->
-        (UpdateDiscovererResponse.t,
-          [ `AWS of UpdateDiscovererResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateDiscovererResponse.t, UpdateDiscovererResponse.error) Result.t
           Async.Deferred.t
 val update_registry :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateRegistryRequest.t ->
-        (UpdateRegistryResponse.t,
-          [ `AWS of UpdateRegistryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateRegistryResponse.t, UpdateRegistryResponse.error) Result.t
           Async.Deferred.t
 val update_schema :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSchemaRequest.t ->
-        (UpdateSchemaResponse.t,
-          [ `AWS of UpdateSchemaResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateSchemaResponse.t, UpdateSchemaResponse.error) Result.t
           Async.Deferred.t

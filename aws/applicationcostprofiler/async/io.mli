@@ -4,47 +4,35 @@ val delete_report_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteReportDefinitionRequest.t ->
-        (DeleteReportDefinitionResult.t,
-          [ `AWS of DeleteReportDefinitionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteReportDefinitionResult.t, DeleteReportDefinitionResult.error)
+          Result.t Async.Deferred.t
 val get_report_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetReportDefinitionRequest.t ->
-        (GetReportDefinitionResult.t,
-          [ `AWS of GetReportDefinitionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetReportDefinitionResult.t, GetReportDefinitionResult.error)
+          Result.t Async.Deferred.t
 val import_application_usage :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ImportApplicationUsageRequest.t ->
-        (ImportApplicationUsageResult.t,
-          [ `AWS of ImportApplicationUsageResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ImportApplicationUsageResult.t, ImportApplicationUsageResult.error)
+          Result.t Async.Deferred.t
 val list_report_definitions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListReportDefinitionsRequest.t ->
-        (ListReportDefinitionsResult.t,
-          [ `AWS of ListReportDefinitionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListReportDefinitionsResult.t, ListReportDefinitionsResult.error)
+          Result.t Async.Deferred.t
 val put_report_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutReportDefinitionRequest.t ->
-        (PutReportDefinitionResult.t,
-          [ `AWS of PutReportDefinitionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (PutReportDefinitionResult.t, PutReportDefinitionResult.error)
+          Result.t Async.Deferred.t
 val update_report_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateReportDefinitionRequest.t ->
-        (UpdateReportDefinitionResult.t,
-          [ `AWS of UpdateReportDefinitionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateReportDefinitionResult.t, UpdateReportDefinitionResult.error)
+          Result.t Async.Deferred.t

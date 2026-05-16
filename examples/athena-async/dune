@@ -3,5 +3,4 @@
  (libraries awso-async.athena core_unix.command_unix)
  (preprocess
   (pps ppx_jane ppx_yojson_conv))
- (flags
-  (:standard)))
+ (flags (:standard)))

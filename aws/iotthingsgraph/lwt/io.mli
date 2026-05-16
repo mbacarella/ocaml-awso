@@ -5,243 +5,204 @@ val associate_entity_to_thing :
     ?cfg:Awso.Cfg.t ->
       AssociateEntityToThingRequest.t ->
         (AssociateEntityToThingResponse.t,
-          [ `AWS of AssociateEntityToThingResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssociateEntityToThingResponse.error) Result.t Lwt.t
 val create_flow_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateFlowTemplateRequest.t ->
-        (CreateFlowTemplateResponse.t,
-          [ `AWS of CreateFlowTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateFlowTemplateResponse.t, CreateFlowTemplateResponse.error)
+          Result.t Lwt.t
 val create_system_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSystemInstanceRequest.t ->
-        (CreateSystemInstanceResponse.t,
-          [ `AWS of CreateSystemInstanceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateSystemInstanceResponse.t, CreateSystemInstanceResponse.error)
+          Result.t Lwt.t
 val create_system_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSystemTemplateRequest.t ->
-        (CreateSystemTemplateResponse.t,
-          [ `AWS of CreateSystemTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateSystemTemplateResponse.t, CreateSystemTemplateResponse.error)
+          Result.t Lwt.t
 val delete_flow_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteFlowTemplateRequest.t ->
-        (DeleteFlowTemplateResponse.t,
-          [ `AWS of DeleteFlowTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteFlowTemplateResponse.t, DeleteFlowTemplateResponse.error)
+          Result.t Lwt.t
 val delete_namespace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteNamespaceRequest.t ->
-        (DeleteNamespaceResponse.t,
-          [ `AWS of DeleteNamespaceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteNamespaceResponse.t, DeleteNamespaceResponse.error) Result.t
+          Lwt.t
 val delete_system_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSystemInstanceRequest.t ->
-        (DeleteSystemInstanceResponse.t,
-          [ `AWS of DeleteSystemInstanceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteSystemInstanceResponse.t, DeleteSystemInstanceResponse.error)
+          Result.t Lwt.t
 val delete_system_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSystemTemplateRequest.t ->
-        (DeleteSystemTemplateResponse.t,
-          [ `AWS of DeleteSystemTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteSystemTemplateResponse.t, DeleteSystemTemplateResponse.error)
+          Result.t Lwt.t
 val deploy_system_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeploySystemInstanceRequest.t ->
-        (DeploySystemInstanceResponse.t,
-          [ `AWS of DeploySystemInstanceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeploySystemInstanceResponse.t, DeploySystemInstanceResponse.error)
+          Result.t Lwt.t
 val deprecate_flow_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeprecateFlowTemplateRequest.t ->
         (DeprecateFlowTemplateResponse.t,
-          [ `AWS of DeprecateFlowTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeprecateFlowTemplateResponse.error) Result.t Lwt.t
 val deprecate_system_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeprecateSystemTemplateRequest.t ->
         (DeprecateSystemTemplateResponse.t,
-          [ `AWS of DeprecateSystemTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeprecateSystemTemplateResponse.error) Result.t Lwt.t
 val describe_namespace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeNamespaceRequest.t ->
-        (DescribeNamespaceResponse.t,
-          [ `AWS of DescribeNamespaceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeNamespaceResponse.t, DescribeNamespaceResponse.error)
+          Result.t Lwt.t
 val dissociate_entity_from_thing :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DissociateEntityFromThingRequest.t ->
         (DissociateEntityFromThingResponse.t,
-          [ `AWS of DissociateEntityFromThingResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DissociateEntityFromThingResponse.error) Result.t Lwt.t
 val get_entities :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEntitiesRequest.t ->
-        (GetEntitiesResponse.t,
-          [ `AWS of GetEntitiesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetEntitiesResponse.t, GetEntitiesResponse.error) Result.t Lwt.t
 val get_flow_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetFlowTemplateRequest.t ->
-        (GetFlowTemplateResponse.t,
-          [ `AWS of GetFlowTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetFlowTemplateResponse.t, GetFlowTemplateResponse.error) Result.t
+          Lwt.t
 val get_flow_template_revisions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetFlowTemplateRevisionsRequest.t ->
         (GetFlowTemplateRevisionsResponse.t,
-          [ `AWS of GetFlowTemplateRevisionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetFlowTemplateRevisionsResponse.error) Result.t Lwt.t
 val get_namespace_deletion_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetNamespaceDeletionStatusRequest.t ->
         (GetNamespaceDeletionStatusResponse.t,
-          [ `AWS of GetNamespaceDeletionStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetNamespaceDeletionStatusResponse.error) Result.t Lwt.t
 val get_system_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSystemInstanceRequest.t ->
-        (GetSystemInstanceResponse.t,
-          [ `AWS of GetSystemInstanceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetSystemInstanceResponse.t, GetSystemInstanceResponse.error)
+          Result.t Lwt.t
 val get_system_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSystemTemplateRequest.t ->
-        (GetSystemTemplateResponse.t,
-          [ `AWS of GetSystemTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetSystemTemplateResponse.t, GetSystemTemplateResponse.error)
+          Result.t Lwt.t
 val get_system_template_revisions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSystemTemplateRevisionsRequest.t ->
         (GetSystemTemplateRevisionsResponse.t,
-          [ `AWS of GetSystemTemplateRevisionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetSystemTemplateRevisionsResponse.error) Result.t Lwt.t
 val get_upload_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetUploadStatusRequest.t ->
-        (GetUploadStatusResponse.t,
-          [ `AWS of GetUploadStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetUploadStatusResponse.t, GetUploadStatusResponse.error) Result.t
+          Lwt.t
 val list_flow_execution_messages :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFlowExecutionMessagesRequest.t ->
         (ListFlowExecutionMessagesResponse.t,
-          [ `AWS of ListFlowExecutionMessagesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListFlowExecutionMessagesResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val search_entities :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SearchEntitiesRequest.t ->
-        (SearchEntitiesResponse.t,
-          [ `AWS of SearchEntitiesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SearchEntitiesResponse.t, SearchEntitiesResponse.error) Result.t
+          Lwt.t
 val search_flow_executions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SearchFlowExecutionsRequest.t ->
-        (SearchFlowExecutionsResponse.t,
-          [ `AWS of SearchFlowExecutionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SearchFlowExecutionsResponse.t, SearchFlowExecutionsResponse.error)
+          Result.t Lwt.t
 val search_flow_templates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SearchFlowTemplatesRequest.t ->
-        (SearchFlowTemplatesResponse.t,
-          [ `AWS of SearchFlowTemplatesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SearchFlowTemplatesResponse.t, SearchFlowTemplatesResponse.error)
+          Result.t Lwt.t
 val search_system_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SearchSystemInstancesRequest.t ->
         (SearchSystemInstancesResponse.t,
-          [ `AWS of SearchSystemInstancesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          SearchSystemInstancesResponse.error) Result.t Lwt.t
 val search_system_templates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SearchSystemTemplatesRequest.t ->
         (SearchSystemTemplatesResponse.t,
-          [ `AWS of SearchSystemTemplatesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          SearchSystemTemplatesResponse.error) Result.t Lwt.t
 val search_things :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SearchThingsRequest.t ->
-        (SearchThingsResponse.t,
-          [ `AWS of SearchThingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SearchThingsResponse.t, SearchThingsResponse.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val undeploy_system_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UndeploySystemInstanceRequest.t ->
         (UndeploySystemInstanceResponse.t,
-          [ `AWS of UndeploySystemInstanceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UndeploySystemInstanceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_flow_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateFlowTemplateRequest.t ->
-        (UpdateFlowTemplateResponse.t,
-          [ `AWS of UpdateFlowTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateFlowTemplateResponse.t, UpdateFlowTemplateResponse.error)
+          Result.t Lwt.t
 val update_system_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSystemTemplateRequest.t ->
-        (UpdateSystemTemplateResponse.t,
-          [ `AWS of UpdateSystemTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateSystemTemplateResponse.t, UpdateSystemTemplateResponse.error)
+          Result.t Lwt.t
 val upload_entity_definitions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UploadEntityDefinitionsRequest.t ->
         (UploadEntityDefinitionsResponse.t,
-          [ `AWS of UploadEntityDefinitionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UploadEntityDefinitionsResponse.error) Result.t Lwt.t

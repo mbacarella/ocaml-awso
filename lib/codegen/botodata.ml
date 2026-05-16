@@ -19,7 +19,7 @@
 open! Import
 
 module Int64 = struct
-  type t = int64 
+  type t = int64
 end
 
 type checksumFormat =
@@ -27,13 +27,11 @@ type checksumFormat =
   | `sha256
   ]
 
-
 type timestampFormat =
   [ `unixTimestamp
   | `rfc822
   | `iso8601
   ]
-
 
 type protocol =
   [ `query
@@ -43,7 +41,6 @@ type protocol =
   | `ec2
   ]
 
-
 type location =
   [ `header
   | `headers
@@ -51,7 +48,6 @@ type location =
   | `uri
   | `statusCode
   ]
-
 
 type metadata =
   { apiVersion : string
@@ -70,7 +66,6 @@ type metadata =
   ; xmlNamespace : Uri_json.t option
   ; uid : string option
   }
-
 
 let empty_metadata_for_tests =
   { apiVersion = ""
@@ -100,7 +95,6 @@ type http_method =
   | `PATCH
   ]
 
-
 let http_method_of_string = function
   | "DELETE" -> Ok `DELETE
   | "GET" -> Ok `GET
@@ -120,8 +114,7 @@ type requestUri_token =
   | `Equal
   ]
 
-
-type requestUri = requestUri_token list 
+type requestUri = requestUri_token list
 
 type http =
   { method_ : http_method
@@ -129,12 +122,10 @@ type http =
   ; responseCode : int option
   }
 
-
 type xmlNamespace =
   { uri : Uri_json.t
   ; prefix : string option
   }
-
 
 type httpChecksum =
   { requestValidationModeMember : string option
@@ -143,7 +134,6 @@ type httpChecksum =
   ; responseAlgorithms : string list option
   }
 
-
 type operation_input =
   { shape : string
   ; documentation : string option
@@ -151,7 +141,6 @@ type operation_input =
   ; xmlNamespace : xmlNamespace option
   ; locationName : string option
   }
-
 
 type operation_output =
   { shape : string
@@ -163,13 +152,11 @@ type operation_output =
   ; xmlOrder : string list option
   }
 
-
 type error =
   { code : string option
   ; httpStatusCode : int
   ; senderFault : bool option
   }
-
 
 type operation_error =
   { shape : string
@@ -180,9 +167,8 @@ type operation_error =
   ; xmlOrder : string list option
   }
 
-
-type operation_endpoint = { hostPrefix : string } 
-type operation_endpointdiscovery = { required : bool option } 
+type operation_endpoint = { hostPrefix : string }
+type operation_endpointdiscovery = { required : bool option }
 
 type operation =
   { name : string
@@ -201,7 +187,6 @@ type operation =
   ; endpoint : operation_endpoint option
   ; endpointdiscovery : operation_endpointdiscovery option
   }
-
 
 type shape_member =
   { shape : string
@@ -222,8 +207,7 @@ type shape_member =
   ; jsonvalue : bool option
   }
 
-
-type retryable = { throttling : bool } 
+type retryable = { throttling : bool }
 
 type structure_shape =
   { required : string list option
@@ -247,7 +231,6 @@ type structure_shape =
   ; union : bool option
   ; box : bool option
   }
-
 
 let empty_structure_shape =
   { required = None
@@ -284,7 +267,6 @@ type map_shape =
   ; sensitive : bool option
   }
 
-
 type string_shape =
   { pattern : string option
   ; min : int option
@@ -294,7 +276,6 @@ type string_shape =
   ; deprecated : bool option
   ; deprecatedMessage : string option
   }
-
 
 type list_shape =
   { member : shape_member
@@ -307,12 +288,10 @@ type list_shape =
   ; deprecatedMessage : string option
   }
 
-
 type boolean_shape =
   { box : bool option
   ; documentation : string option
   }
-
 
 type integer_shape =
   { box : bool option
@@ -323,14 +302,12 @@ type integer_shape =
   ; deprecatedMessage : string option
   }
 
-
 type long_shape =
   { box : bool option
   ; min : Int64.t option
   ; max : Int64.t option
   ; documentation : string option
   }
-
 
 type float_shape =
   { box : bool option
@@ -339,14 +316,12 @@ type float_shape =
   ; documentation : string option
   }
 
-
 type double_shape =
   { box : bool option
   ; min : float option
   ; max : float option
   ; documentation : string option
   }
-
 
 type enum_shape =
   { cases : string list
@@ -359,7 +334,6 @@ type enum_shape =
   ; sensitive : bool option
   }
 
-
 type blob_shape =
   { streaming : bool option
   ; sensitive : bool option
@@ -368,12 +342,10 @@ type blob_shape =
   ; documentation : string option
   }
 
-
 type timestamp_shape =
   { timestampFormat : timestampFormat option
   ; documentation : string option
   }
-
 
 type shape =
   | Boolean_shape of boolean_shape
@@ -390,7 +362,6 @@ type shape =
   | Timestamp_shape of timestamp_shape
   | Map_shape of map_shape
 
-
 let yojson_of_shape = function
   | Boolean_shape _ -> `String "Boolean_shape"
   | Long_shape _ -> `String "Long_shape"
@@ -404,6 +375,7 @@ let yojson_of_shape = function
   | Structure_shape _ -> `String "Structure_shape"
   | Timestamp_shape _ -> `String "Timestamp_shape"
   | Map_shape _ -> `String "Map_shape"
+;;
 
 let request_id_shape =
   String_shape
@@ -450,7 +422,6 @@ type service =
   ; shapes : (string * shape) list
   }
 
-
 type value =
   [ `Boolean of bool
   | `Long of Int64.t
@@ -465,4 +436,3 @@ type value =
   | `Timestamp of string
   | `Map of (value * value) list
   ]
-

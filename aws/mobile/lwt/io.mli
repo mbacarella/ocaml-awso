@@ -4,62 +4,44 @@ val create_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateProjectRequest.t ->
-        (CreateProjectResult.t,
-          [ `AWS of CreateProjectResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateProjectResult.t, CreateProjectResult.error) Result.t Lwt.t
 val delete_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteProjectRequest.t ->
-        (DeleteProjectResult.t,
-          [ `AWS of DeleteProjectResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteProjectResult.t, DeleteProjectResult.error) Result.t Lwt.t
 val describe_bundle :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeBundleRequest.t ->
-        (DescribeBundleResult.t,
-          [ `AWS of DescribeBundleResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeBundleResult.t, DescribeBundleResult.error) Result.t Lwt.t
 val describe_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeProjectRequest.t ->
-        (DescribeProjectResult.t,
-          [ `AWS of DescribeProjectResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeProjectResult.t, DescribeProjectResult.error) Result.t Lwt.t
 val export_bundle :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ExportBundleRequest.t ->
-        (ExportBundleResult.t,
-          [ `AWS of ExportBundleResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ExportBundleResult.t, ExportBundleResult.error) Result.t Lwt.t
 val export_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ExportProjectRequest.t ->
-        (ExportProjectResult.t,
-          [ `AWS of ExportProjectResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ExportProjectResult.t, ExportProjectResult.error) Result.t Lwt.t
 val list_bundles :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListBundlesRequest.t ->
-        (ListBundlesResult.t,
-          [ `AWS of ListBundlesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListBundlesResult.t, ListBundlesResult.error) Result.t Lwt.t
 val list_projects :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListProjectsRequest.t ->
-        (ListProjectsResult.t,
-          [ `AWS of ListProjectsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListProjectsResult.t, ListProjectsResult.error) Result.t Lwt.t
 val update_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateProjectRequest.t ->
-        (UpdateProjectResult.t,
-          [ `AWS of UpdateProjectResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateProjectResult.t, UpdateProjectResult.error) Result.t Lwt.t

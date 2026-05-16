@@ -1010,344 +1010,380 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_xml =
-    let generic_error () = Error (`Transport err) in
-    match err with
-    | `Too_many_redirects -> generic_error ()
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-        (match (error_of_xml, ((code >= 400) && (code <= 599))) with
-         | (None, _) | (_, false) -> generic_error ()
-         | (Some error_of_xml, true) ->
-             (match Awso.Xml.parse_response body with
-              | `Data _ -> generic_error ()
-              | `El (((_, "ErrorResponse"), _), _) as error_response_xml ->
-                  let error_xml =
-                    Awso.Xml.child_exn error_response_xml "Error" in
-                  (try
-                     let error_code =
-                       match Awso.Xml.child_exn error_xml "Code" with
-                       | `Data error_code -> error_code
-                       | `El (_, children) ->
-                           (List.map children
-                              ~f:(function | `Data s -> s | `El _ -> ""))
-                             |> (String.concat ~sep:"") in
-                     Error
-                       (`AWS
-                          (error_of_xml (String.strip error_code) error_xml))
-                   with | Failure _ -> generic_error ())
-              | `El _ -> generic_error ())) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let parse_aws_error error_of_xml =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = None }) in
+    match (error_of_xml, ((code >= 400) && (code <= 599))) with
+    | (None, _) | (_, false) -> bail ()
+    | (Some error_of_xml, true) ->
+        (match Awso.Xml.parse_response body with
+         | `Data _ -> bail ()
+         | `El (((_, "ErrorResponse"), _), _) as error_response_xml ->
+             let error_xml = Awso.Xml.child_exn error_response_xml "Error" in
+             (try
+                let error_code =
+                  match Awso.Xml.child_exn error_xml "Code" with
+                  | `Data error_code -> error_code
+                  | `El (_, children) ->
+                      (List.map children
+                         ~f:(function | `Data s -> s | `El _ -> ""))
+                        |> (String.concat ~sep:"") in
+                error_of_xml (String.strip error_code) error_xml
+              with | Failure _ -> bail ())
+         | `El _ -> bail ()) in
+  let _ = parse_aws_error in
+  let _ = resp in
   match endpoint with
-  | AttachInstances -> Ok ()
+  | AttachInstances ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | AttachLoadBalancerTargetGroups ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some AttachLoadBalancerTargetGroupsResultType.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (AttachLoadBalancerTargetGroupsResultType.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (AttachLoadBalancerTargetGroupsResultType.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some AttachLoadBalancerTargetGroupsResultType.error_of_xml))
   | AttachLoadBalancers ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some AttachLoadBalancersResultType.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (AttachLoadBalancersResultType.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (AttachLoadBalancersResultType.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some AttachLoadBalancersResultType.error_of_xml))
   | BatchDeleteScheduledAction ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some BatchDeleteScheduledActionAnswer.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (BatchDeleteScheduledActionAnswer.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (BatchDeleteScheduledActionAnswer.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some BatchDeleteScheduledActionAnswer.error_of_xml))
   | BatchPutScheduledUpdateGroupAction ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some BatchPutScheduledUpdateGroupActionAnswer.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (BatchPutScheduledUpdateGroupActionAnswer.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (BatchPutScheduledUpdateGroupActionAnswer.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some BatchPutScheduledUpdateGroupActionAnswer.error_of_xml))
   | CancelInstanceRefresh ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CancelInstanceRefreshAnswer.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CancelInstanceRefreshAnswer.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CancelInstanceRefreshAnswer.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some CancelInstanceRefreshAnswer.error_of_xml))
   | CompleteLifecycleAction ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CompleteLifecycleActionAnswer.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CompleteLifecycleActionAnswer.of_xml xml))
-  | CreateAutoScalingGroup -> Ok ()
-  | CreateLaunchConfiguration -> Ok ()
-  | CreateOrUpdateTags -> Ok ()
-  | DeleteAutoScalingGroup -> Ok ()
-  | DeleteLaunchConfiguration -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CompleteLifecycleActionAnswer.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some CompleteLifecycleActionAnswer.error_of_xml))
+  | CreateAutoScalingGroup ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | CreateLaunchConfiguration ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | CreateOrUpdateTags ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteAutoScalingGroup ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteLaunchConfiguration ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteLifecycleHook ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteLifecycleHookAnswer.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeleteLifecycleHookAnswer.of_xml xml))
-  | DeleteNotificationConfiguration -> Ok ()
-  | DeletePolicy -> Ok ()
-  | DeleteScheduledAction -> Ok ()
-  | DeleteTags -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteLifecycleHookAnswer.of_xml xml)
+      else
+        Error (parse_aws_error (Some DeleteLifecycleHookAnswer.error_of_xml))
+  | DeleteNotificationConfiguration ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeletePolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteScheduledAction ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteTags -> if is_success then Ok () else Error (parse_aws_error None)
   | DeleteWarmPool ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteWarmPoolAnswer.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeleteWarmPoolAnswer.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteWarmPoolAnswer.of_xml xml)
+      else Error (parse_aws_error (Some DeleteWarmPoolAnswer.error_of_xml))
   | DescribeAccountLimits ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeAccountLimitsAnswer.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeAccountLimitsAnswer.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeAccountLimitsAnswer.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DescribeAccountLimitsAnswer.error_of_xml))
   | DescribeAdjustmentTypes ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeAdjustmentTypesAnswer.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeAdjustmentTypesAnswer.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeAdjustmentTypesAnswer.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DescribeAdjustmentTypesAnswer.error_of_xml))
   | DescribeAutoScalingGroups ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some AutoScalingGroupsType.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (AutoScalingGroupsType.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (AutoScalingGroupsType.of_xml xml)
+      else Error (parse_aws_error (Some AutoScalingGroupsType.error_of_xml))
   | DescribeAutoScalingInstances ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some AutoScalingInstancesType.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (AutoScalingInstancesType.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (AutoScalingInstancesType.of_xml xml)
+      else
+        Error (parse_aws_error (Some AutoScalingInstancesType.error_of_xml))
   | DescribeAutoScalingNotificationTypes ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeAutoScalingNotificationTypesAnswer.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeAutoScalingNotificationTypesAnswer.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeAutoScalingNotificationTypesAnswer.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAutoScalingNotificationTypesAnswer.error_of_xml))
   | DescribeInstanceRefreshes ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeInstanceRefreshesAnswer.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeInstanceRefreshesAnswer.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeInstanceRefreshesAnswer.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeInstanceRefreshesAnswer.error_of_xml))
   | DescribeLaunchConfigurations ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some LaunchConfigurationsType.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (LaunchConfigurationsType.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (LaunchConfigurationsType.of_xml xml)
+      else
+        Error (parse_aws_error (Some LaunchConfigurationsType.error_of_xml))
   | DescribeLifecycleHookTypes ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeLifecycleHookTypesAnswer.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeLifecycleHookTypesAnswer.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeLifecycleHookTypesAnswer.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeLifecycleHookTypesAnswer.error_of_xml))
   | DescribeLifecycleHooks ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeLifecycleHooksAnswer.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeLifecycleHooksAnswer.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeLifecycleHooksAnswer.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DescribeLifecycleHooksAnswer.error_of_xml))
   | DescribeLoadBalancerTargetGroups ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeLoadBalancerTargetGroupsResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeLoadBalancerTargetGroupsResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeLoadBalancerTargetGroupsResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeLoadBalancerTargetGroupsResponse.error_of_xml))
   | DescribeLoadBalancers ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeLoadBalancersResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeLoadBalancersResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeLoadBalancersResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DescribeLoadBalancersResponse.error_of_xml))
   | DescribeMetricCollectionTypes ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeMetricCollectionTypesAnswer.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeMetricCollectionTypesAnswer.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeMetricCollectionTypesAnswer.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeMetricCollectionTypesAnswer.error_of_xml))
   | DescribeNotificationConfigurations ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeNotificationConfigurationsAnswer.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeNotificationConfigurationsAnswer.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeNotificationConfigurationsAnswer.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeNotificationConfigurationsAnswer.error_of_xml))
   | DescribePolicies ->
-      (match resp with
-       | Error err -> handle_error err (Some PoliciesType.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (PoliciesType.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (PoliciesType.of_xml xml)
+      else Error (parse_aws_error (Some PoliciesType.error_of_xml))
   | DescribeScalingActivities ->
-      (match resp with
-       | Error err -> handle_error err (Some ActivitiesType.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ActivitiesType.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ActivitiesType.of_xml xml)
+      else Error (parse_aws_error (Some ActivitiesType.error_of_xml))
   | DescribeScalingProcessTypes ->
-      (match resp with
-       | Error err -> handle_error err (Some ProcessesType.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ProcessesType.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ProcessesType.of_xml xml)
+      else Error (parse_aws_error (Some ProcessesType.error_of_xml))
   | DescribeScheduledActions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ScheduledActionsType.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ScheduledActionsType.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ScheduledActionsType.of_xml xml)
+      else Error (parse_aws_error (Some ScheduledActionsType.error_of_xml))
   | DescribeTags ->
-      (match resp with
-       | Error err -> handle_error err (Some TagsType.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (TagsType.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (TagsType.of_xml xml)
+      else Error (parse_aws_error (Some TagsType.error_of_xml))
   | DescribeTerminationPolicyTypes ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeTerminationPolicyTypesAnswer.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeTerminationPolicyTypesAnswer.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeTerminationPolicyTypesAnswer.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeTerminationPolicyTypesAnswer.error_of_xml))
   | DescribeWarmPool ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeWarmPoolAnswer.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeWarmPoolAnswer.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeWarmPoolAnswer.of_xml xml)
+      else Error (parse_aws_error (Some DescribeWarmPoolAnswer.error_of_xml))
   | DetachInstances ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DetachInstancesAnswer.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DetachInstancesAnswer.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DetachInstancesAnswer.of_xml xml)
+      else Error (parse_aws_error (Some DetachInstancesAnswer.error_of_xml))
   | DetachLoadBalancerTargetGroups ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DetachLoadBalancerTargetGroupsResultType.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DetachLoadBalancerTargetGroupsResultType.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DetachLoadBalancerTargetGroupsResultType.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DetachLoadBalancerTargetGroupsResultType.error_of_xml))
   | DetachLoadBalancers ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DetachLoadBalancersResultType.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DetachLoadBalancersResultType.of_xml xml))
-  | DisableMetricsCollection -> Ok ()
-  | EnableMetricsCollection -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DetachLoadBalancersResultType.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DetachLoadBalancersResultType.error_of_xml))
+  | DisableMetricsCollection ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | EnableMetricsCollection ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | EnterStandby ->
-      (match resp with
-       | Error err -> handle_error err (Some EnterStandbyAnswer.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (EnterStandbyAnswer.of_xml xml))
-  | ExecutePolicy -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (EnterStandbyAnswer.of_xml xml)
+      else Error (parse_aws_error (Some EnterStandbyAnswer.error_of_xml))
+  | ExecutePolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | ExitStandby ->
-      (match resp with
-       | Error err -> handle_error err (Some ExitStandbyAnswer.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ExitStandbyAnswer.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ExitStandbyAnswer.of_xml xml)
+      else Error (parse_aws_error (Some ExitStandbyAnswer.error_of_xml))
   | GetPredictiveScalingForecast ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetPredictiveScalingForecastAnswer.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetPredictiveScalingForecastAnswer.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetPredictiveScalingForecastAnswer.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some GetPredictiveScalingForecastAnswer.error_of_xml))
   | PutLifecycleHook ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutLifecycleHookAnswer.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (PutLifecycleHookAnswer.of_xml xml))
-  | PutNotificationConfiguration -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (PutLifecycleHookAnswer.of_xml xml)
+      else Error (parse_aws_error (Some PutLifecycleHookAnswer.error_of_xml))
+  | PutNotificationConfiguration ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | PutScalingPolicy ->
-      (match resp with
-       | Error err -> handle_error err (Some PolicyARNType.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (PolicyARNType.of_xml xml))
-  | PutScheduledUpdateGroupAction -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (PolicyARNType.of_xml xml)
+      else Error (parse_aws_error (Some PolicyARNType.error_of_xml))
+  | PutScheduledUpdateGroupAction ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | PutWarmPool ->
-      (match resp with
-       | Error err -> handle_error err (Some PutWarmPoolAnswer.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (PutWarmPoolAnswer.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (PutWarmPoolAnswer.of_xml xml)
+      else Error (parse_aws_error (Some PutWarmPoolAnswer.error_of_xml))
   | RecordLifecycleActionHeartbeat ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some RecordLifecycleActionHeartbeatAnswer.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (RecordLifecycleActionHeartbeatAnswer.of_xml xml))
-  | ResumeProcesses -> Ok ()
-  | SetDesiredCapacity -> Ok ()
-  | SetInstanceHealth -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (RecordLifecycleActionHeartbeatAnswer.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some RecordLifecycleActionHeartbeatAnswer.error_of_xml))
+  | ResumeProcesses ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | SetDesiredCapacity ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | SetInstanceHealth ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | SetInstanceProtection ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some SetInstanceProtectionAnswer.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (SetInstanceProtectionAnswer.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (SetInstanceProtectionAnswer.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some SetInstanceProtectionAnswer.error_of_xml))
   | StartInstanceRefresh ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StartInstanceRefreshAnswer.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (StartInstanceRefreshAnswer.of_xml xml))
-  | SuspendProcesses -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (StartInstanceRefreshAnswer.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some StartInstanceRefreshAnswer.error_of_xml))
+  | SuspendProcesses ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | TerminateInstanceInAutoScalingGroup ->
-      (match resp with
-       | Error err -> handle_error err (Some ActivityType.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ActivityType.of_xml xml))
-  | UpdateAutoScalingGroup -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ActivityType.of_xml xml)
+      else Error (parse_aws_error (Some ActivityType.error_of_xml))
+  | UpdateAutoScalingGroup ->
+      if is_success then Ok () else Error (parse_aws_error None)

@@ -4,41 +4,34 @@ val cancel_change_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelChangeSetRequest.t ->
-        (CancelChangeSetResponse.t,
-          [ `AWS of CancelChangeSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CancelChangeSetResponse.t, CancelChangeSetResponse.error) Result.t
+          Lwt.t
 val describe_change_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeChangeSetRequest.t ->
-        (DescribeChangeSetResponse.t,
-          [ `AWS of DescribeChangeSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeChangeSetResponse.t, DescribeChangeSetResponse.error)
+          Result.t Lwt.t
 val describe_entity :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEntityRequest.t ->
-        (DescribeEntityResponse.t,
-          [ `AWS of DescribeEntityResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeEntityResponse.t, DescribeEntityResponse.error) Result.t
+          Lwt.t
 val list_change_sets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListChangeSetsRequest.t ->
-        (ListChangeSetsResponse.t,
-          [ `AWS of ListChangeSetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListChangeSetsResponse.t, ListChangeSetsResponse.error) Result.t
+          Lwt.t
 val list_entities :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEntitiesRequest.t ->
-        (ListEntitiesResponse.t,
-          [ `AWS of ListEntitiesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListEntitiesResponse.t, ListEntitiesResponse.error) Result.t Lwt.t
 val start_change_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartChangeSetRequest.t ->
-        (StartChangeSetResponse.t,
-          [ `AWS of StartChangeSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartChangeSetResponse.t, StartChangeSetResponse.error) Result.t
+          Lwt.t

@@ -327,195 +327,194 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             "AWSIESnowballJobManagementService.UpdateLongTermPricing")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    let generic_error () = Error (`Transport err) in
-    match err with
-    | `Too_many_redirects -> generic_error ()
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-        (match (error_of_json, ((code >= 400) && (code <= 599))) with
-         | (Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             (match json |> (Yojson.Safe.Util.member "__type") with
-              | `String error_type ->
-                  Error (`AWS (error_of_json error_type json))
-              | `Null -> generic_error ()
-              | _ ->
-                  failwith
-                    (sprintf "Error '__type' did not have string type: %s"
-                       body))
-         | (None, _) | (_, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = None }) in
+    match (error_of_json, ((code >= 400) && (code <= 599))) with
+    | (Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        (match json |> (Yojson.Safe.Util.member "__type") with
+         | `String error_type -> error_of_json error_type json
+         | `Null -> bail ()
+         | _ ->
+             failwith
+               (sprintf "Error '__type' did not have string type: %s" body))
+    | (None, _) | (_, false) -> bail () in
+  let _ = parse_aws_error in
+  let _ = resp in
   match endpoint with
   | CancelCluster ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CancelClusterResult.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CancelClusterResult.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CancelClusterResult.of_json json)
+      else Error (parse_aws_error (Some CancelClusterResult.error_of_json))
   | CancelJob ->
-      (match resp with
-       | Error err -> handle_error err (Some CancelJobResult.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CancelJobResult.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CancelJobResult.of_json json)
+      else Error (parse_aws_error (Some CancelJobResult.error_of_json))
   | CreateAddress ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateAddressResult.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateAddressResult.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateAddressResult.of_json json)
+      else Error (parse_aws_error (Some CreateAddressResult.error_of_json))
   | CreateCluster ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateClusterResult.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateClusterResult.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateClusterResult.of_json json)
+      else Error (parse_aws_error (Some CreateClusterResult.error_of_json))
   | CreateJob ->
-      (match resp with
-       | Error err -> handle_error err (Some CreateJobResult.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateJobResult.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateJobResult.of_json json)
+      else Error (parse_aws_error (Some CreateJobResult.error_of_json))
   | CreateLongTermPricing ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateLongTermPricingResult.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateLongTermPricingResult.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateLongTermPricingResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateLongTermPricingResult.error_of_json))
   | CreateReturnShippingLabel ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateReturnShippingLabelResult.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateReturnShippingLabelResult.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateReturnShippingLabelResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateReturnShippingLabelResult.error_of_json))
   | DescribeAddress ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeAddressResult.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeAddressResult.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeAddressResult.of_json json)
+      else Error (parse_aws_error (Some DescribeAddressResult.error_of_json))
   | DescribeAddresses ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeAddressesResult.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeAddressesResult.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeAddressesResult.of_json json)
+      else
+        Error (parse_aws_error (Some DescribeAddressesResult.error_of_json))
   | DescribeCluster ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeClusterResult.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeClusterResult.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeClusterResult.of_json json)
+      else Error (parse_aws_error (Some DescribeClusterResult.error_of_json))
   | DescribeJob ->
-      (match resp with
-       | Error err -> handle_error err (Some DescribeJobResult.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeJobResult.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeJobResult.of_json json)
+      else Error (parse_aws_error (Some DescribeJobResult.error_of_json))
   | DescribeReturnShippingLabel ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeReturnShippingLabelResult.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeReturnShippingLabelResult.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeReturnShippingLabelResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeReturnShippingLabelResult.error_of_json))
   | GetJobManifest ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetJobManifestResult.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetJobManifestResult.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetJobManifestResult.of_json json)
+      else Error (parse_aws_error (Some GetJobManifestResult.error_of_json))
   | GetJobUnlockCode ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetJobUnlockCodeResult.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetJobUnlockCodeResult.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetJobUnlockCodeResult.of_json json)
+      else
+        Error (parse_aws_error (Some GetJobUnlockCodeResult.error_of_json))
   | GetSnowballUsage ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetSnowballUsageResult.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetSnowballUsageResult.of_json json)
+      else Error (parse_aws_error None)
   | GetSoftwareUpdates ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetSoftwareUpdatesResult.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetSoftwareUpdatesResult.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetSoftwareUpdatesResult.of_json json)
+      else
+        Error (parse_aws_error (Some GetSoftwareUpdatesResult.error_of_json))
   | ListClusterJobs ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListClusterJobsResult.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListClusterJobsResult.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListClusterJobsResult.of_json json)
+      else Error (parse_aws_error (Some ListClusterJobsResult.error_of_json))
   | ListClusters ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListClustersResult.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListClustersResult.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListClustersResult.of_json json)
+      else Error (parse_aws_error (Some ListClustersResult.error_of_json))
   | ListCompatibleImages ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListCompatibleImagesResult.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListCompatibleImagesResult.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListCompatibleImagesResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListCompatibleImagesResult.error_of_json))
   | ListJobs ->
-      (match resp with
-       | Error err -> handle_error err (Some ListJobsResult.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListJobsResult.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListJobsResult.of_json json)
+      else Error (parse_aws_error (Some ListJobsResult.error_of_json))
   | ListLongTermPricing ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListLongTermPricingResult.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListLongTermPricingResult.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListLongTermPricingResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListLongTermPricingResult.error_of_json))
   | UpdateCluster ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateClusterResult.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateClusterResult.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateClusterResult.of_json json)
+      else Error (parse_aws_error (Some UpdateClusterResult.error_of_json))
   | UpdateJob ->
-      (match resp with
-       | Error err -> handle_error err (Some UpdateJobResult.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateJobResult.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateJobResult.of_json json)
+      else Error (parse_aws_error (Some UpdateJobResult.error_of_json))
   | UpdateJobShipmentState ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateJobShipmentStateResult.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateJobShipmentStateResult.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateJobShipmentStateResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateJobShipmentStateResult.error_of_json))
   | UpdateLongTermPricing ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateLongTermPricingResult.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateLongTermPricingResult.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateLongTermPricingResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateLongTermPricingResult.error_of_json))

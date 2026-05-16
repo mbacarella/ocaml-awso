@@ -93,9 +93,7 @@ end
 module Headers = struct
   type t = (string * string) list
 
-  let yojson_of_t l =
-    `List (List.map l ~f:(fun (k, v) -> `List [ `String k; `String v ]))
-
+  let yojson_of_t l = `List (List.map l ~f:(fun (k, v) -> `List [ `String k; `String v ]))
   let empty = []
   let of_list x = x
   let to_list x = x
@@ -114,8 +112,8 @@ module Monad = struct
   end
 
   module Make (T : sig
-    type 'a t
-  end) : S with type 'a s = 'a T.t = struct
+      type 'a t
+    end) : S with type 'a s = 'a T.t = struct
     type 'a s = 'a T.t
     type t
 
@@ -162,8 +160,8 @@ module Range = struct
     let test x y =
       of_range x y
       |> (function
-            | Ok v -> `List [ `String "Ok"; yojson_of_byte_range_spec_list v ]
-            | Error s -> `List [ `String "Error"; `String s ])
+       | Ok v -> `List [ `String "Ok"; yojson_of_byte_range_spec_list v ]
+       | Error s -> `List [ `String "Error"; `String s ])
       |> Yojson.Safe.to_string
       |> print_endline
     in
@@ -326,6 +324,11 @@ module Status = struct
     | `Code of int
     ]
   [@@deriving yojson_of]
+
+  let to_code = function
+    | `Code n -> n
+    | #Cohttp.Code.status_code as s -> Cohttp.Code.code_of_status s
+  ;;
 end
 
 module Request = struct
@@ -378,11 +381,8 @@ module Io = struct
       }
     [@@deriving yojson]
 
-    type call =
-      [ `Bad_response of bad_response
-      | `Too_many_redirects
-      ]
-    [@@deriving yojson]
+    exception Bad_response of bad_response
+    exception Too_many_redirects
   end
 
   module type S = sig
@@ -395,7 +395,7 @@ module Io = struct
       -> Meth.t
       -> Request.t
       -> Uri.t
-      -> (Response.t, Error.call) result t
+      -> Response.t t
 
     val resolve_cfg : Cfg.t option -> Cfg.t t
   end

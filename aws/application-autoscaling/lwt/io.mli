@@ -4,69 +4,59 @@ val delete_scaling_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteScalingPolicyRequest.t ->
-        (DeleteScalingPolicyResponse.t,
-          [ `AWS of DeleteScalingPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteScalingPolicyResponse.t, DeleteScalingPolicyResponse.error)
+          Result.t Lwt.t
 val delete_scheduled_action :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteScheduledActionRequest.t ->
         (DeleteScheduledActionResponse.t,
-          [ `AWS of DeleteScheduledActionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteScheduledActionResponse.error) Result.t Lwt.t
 val deregister_scalable_target :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeregisterScalableTargetRequest.t ->
         (DeregisterScalableTargetResponse.t,
-          [ `AWS of DeregisterScalableTargetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeregisterScalableTargetResponse.error) Result.t Lwt.t
 val describe_scalable_targets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeScalableTargetsRequest.t ->
         (DescribeScalableTargetsResponse.t,
-          [ `AWS of DescribeScalableTargetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeScalableTargetsResponse.error) Result.t Lwt.t
 val describe_scaling_activities :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeScalingActivitiesRequest.t ->
         (DescribeScalingActivitiesResponse.t,
-          [ `AWS of DescribeScalingActivitiesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeScalingActivitiesResponse.error) Result.t Lwt.t
 val describe_scaling_policies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeScalingPoliciesRequest.t ->
         (DescribeScalingPoliciesResponse.t,
-          [ `AWS of DescribeScalingPoliciesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeScalingPoliciesResponse.error) Result.t Lwt.t
 val describe_scheduled_actions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeScheduledActionsRequest.t ->
         (DescribeScheduledActionsResponse.t,
-          [ `AWS of DescribeScheduledActionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeScheduledActionsResponse.error) Result.t Lwt.t
 val put_scaling_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutScalingPolicyRequest.t ->
-        (PutScalingPolicyResponse.t,
-          [ `AWS of PutScalingPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutScalingPolicyResponse.t, PutScalingPolicyResponse.error) Result.t
+          Lwt.t
 val put_scheduled_action :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutScheduledActionRequest.t ->
-        (PutScheduledActionResponse.t,
-          [ `AWS of PutScheduledActionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutScheduledActionResponse.t, PutScheduledActionResponse.error)
+          Result.t Lwt.t
 val register_scalable_target :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegisterScalableTargetRequest.t ->
         (RegisterScalableTargetResponse.t,
-          [ `AWS of RegisterScalableTargetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          RegisterScalableTargetResponse.error) Result.t Lwt.t

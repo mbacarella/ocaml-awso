@@ -4,41 +4,34 @@ val complete_snapshot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CompleteSnapshotRequest.t ->
-        (CompleteSnapshotResponse.t,
-          [ `AWS of CompleteSnapshotResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CompleteSnapshotResponse.t, CompleteSnapshotResponse.error) Result.t
+          Lwt.t
 val get_snapshot_block :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSnapshotBlockRequest.t ->
-        (GetSnapshotBlockResponse.t,
-          [ `AWS of GetSnapshotBlockResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetSnapshotBlockResponse.t, GetSnapshotBlockResponse.error) Result.t
+          Lwt.t
 val list_changed_blocks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListChangedBlocksRequest.t ->
-        (ListChangedBlocksResponse.t,
-          [ `AWS of ListChangedBlocksResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListChangedBlocksResponse.t, ListChangedBlocksResponse.error)
+          Result.t Lwt.t
 val list_snapshot_blocks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSnapshotBlocksRequest.t ->
-        (ListSnapshotBlocksResponse.t,
-          [ `AWS of ListSnapshotBlocksResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListSnapshotBlocksResponse.t, ListSnapshotBlocksResponse.error)
+          Result.t Lwt.t
 val put_snapshot_block :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutSnapshotBlockRequest.t ->
-        (PutSnapshotBlockResponse.t,
-          [ `AWS of PutSnapshotBlockResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutSnapshotBlockResponse.t, PutSnapshotBlockResponse.error) Result.t
+          Lwt.t
 val start_snapshot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartSnapshotRequest.t ->
-        (StartSnapshotResponse.t,
-          [ `AWS of StartSnapshotResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartSnapshotResponse.t, StartSnapshotResponse.error) Result.t Lwt.t

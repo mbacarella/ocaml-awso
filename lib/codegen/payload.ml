@@ -6,15 +6,17 @@ type t =
   ; field_name : string
   ; is_required : bool
   }
+
 let create ~is_blob ~payload_module ~field_name ~is_required =
   { is_blob; payload_module; field_name; is_required }
+;;
 
 let convert_rest_json
-  { is_blob; payload_module; field_name; is_required }
-  ~(service : Botodata.service)
-  ~(op : Botodata.operation option)
-  ~endpoint_name:_
-  expr
+      { is_blob; payload_module; field_name; is_required }
+      ~(service : Botodata.service)
+      ~(op : Botodata.operation option)
+      ~endpoint_name:_
+      expr
   =
   let loc = !Ast_helper.default_loc in
   match op with
@@ -103,9 +105,9 @@ let convert_rest_json
 ;;
 
 let convert_rest_xml
-  { is_blob; payload_module; field_name; is_required }
-  ~endpoint_name
-  expr
+      { is_blob; payload_module; field_name; is_required }
+      ~endpoint_name
+      expr
   =
   let loc = !Ast_helper.default_loc in
   let in_module id = Printf.ksprintf Ast_convenience.evar "%s.%s" payload_module id in
@@ -150,9 +152,11 @@ let of_botodata (op : Botodata.operation) ~shapes =
           | Blob_shape _ -> true
           | String_shape _ -> true
           | shape ->
-            failwithf "Unexpected payload shape %s for op %s"
+            failwithf
+              "Unexpected payload shape %s for op %s"
               (Yojson.Safe.to_string (Botodata.yojson_of_shape shape))
-              op.name ()
+              op.name
+              ()
         in
         let field_name = String.uncapitalize name in
         let is_required =

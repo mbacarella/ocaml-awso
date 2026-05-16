@@ -5,274 +5,206 @@ val batch_associate_scram_secret :
     ?cfg:Awso.Cfg.t ->
       BatchAssociateScramSecretRequest.t ->
         (BatchAssociateScramSecretResponse.t,
-          [ `AWS of BatchAssociateScramSecretResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          BatchAssociateScramSecretResponse.error) Result.t Async.Deferred.t
 val create_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateClusterRequest.t ->
-        (CreateClusterResponse.t,
-          [ `AWS of CreateClusterResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateClusterResponse.t, CreateClusterResponse.error) Result.t
           Async.Deferred.t
 val create_cluster_v2 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateClusterV2Request.t ->
-        (CreateClusterV2Response.t,
-          [ `AWS of CreateClusterV2Response.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateClusterV2Response.t, CreateClusterV2Response.error) Result.t
           Async.Deferred.t
 val create_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateConfigurationRequest.t ->
-        (CreateConfigurationResponse.t,
-          [ `AWS of CreateConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateConfigurationResponse.t, CreateConfigurationResponse.error)
+          Result.t Async.Deferred.t
 val delete_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteClusterRequest.t ->
-        (DeleteClusterResponse.t,
-          [ `AWS of DeleteClusterResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteClusterResponse.t, DeleteClusterResponse.error) Result.t
           Async.Deferred.t
 val delete_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteConfigurationRequest.t ->
-        (DeleteConfigurationResponse.t,
-          [ `AWS of DeleteConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteConfigurationResponse.t, DeleteConfigurationResponse.error)
+          Result.t Async.Deferred.t
 val describe_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeClusterRequest.t ->
-        (DescribeClusterResponse.t,
-          [ `AWS of DescribeClusterResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeClusterResponse.t, DescribeClusterResponse.error) Result.t
           Async.Deferred.t
 val describe_cluster_v2 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeClusterV2Request.t ->
-        (DescribeClusterV2Response.t,
-          [ `AWS of DescribeClusterV2Response.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeClusterV2Response.t, DescribeClusterV2Response.error)
+          Result.t Async.Deferred.t
 val describe_cluster_operation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeClusterOperationRequest.t ->
         (DescribeClusterOperationResponse.t,
-          [ `AWS of DescribeClusterOperationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeClusterOperationResponse.error) Result.t Async.Deferred.t
 val describe_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeConfigurationRequest.t ->
         (DescribeConfigurationResponse.t,
-          [ `AWS of DescribeConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeConfigurationResponse.error) Result.t Async.Deferred.t
 val describe_configuration_revision :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeConfigurationRevisionRequest.t ->
         (DescribeConfigurationRevisionResponse.t,
-          [ `AWS of DescribeConfigurationRevisionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeConfigurationRevisionResponse.error) Result.t
           Async.Deferred.t
 val batch_disassociate_scram_secret :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchDisassociateScramSecretRequest.t ->
         (BatchDisassociateScramSecretResponse.t,
-          [ `AWS of BatchDisassociateScramSecretResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          BatchDisassociateScramSecretResponse.error) Result.t
           Async.Deferred.t
 val get_bootstrap_brokers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBootstrapBrokersRequest.t ->
-        (GetBootstrapBrokersResponse.t,
-          [ `AWS of GetBootstrapBrokersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetBootstrapBrokersResponse.t, GetBootstrapBrokersResponse.error)
+          Result.t Async.Deferred.t
 val get_compatible_kafka_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCompatibleKafkaVersionsRequest.t ->
         (GetCompatibleKafkaVersionsResponse.t,
-          [ `AWS of GetCompatibleKafkaVersionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetCompatibleKafkaVersionsResponse.error) Result.t Async.Deferred.t
 val list_cluster_operations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListClusterOperationsRequest.t ->
         (ListClusterOperationsResponse.t,
-          [ `AWS of ListClusterOperationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListClusterOperationsResponse.error) Result.t Async.Deferred.t
 val list_clusters :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListClustersRequest.t ->
-        (ListClustersResponse.t,
-          [ `AWS of ListClustersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListClustersResponse.t, ListClustersResponse.error) Result.t
           Async.Deferred.t
 val list_clusters_v2 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListClustersV2Request.t ->
-        (ListClustersV2Response.t,
-          [ `AWS of ListClustersV2Response.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListClustersV2Response.t, ListClustersV2Response.error) Result.t
           Async.Deferred.t
 val list_configuration_revisions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListConfigurationRevisionsRequest.t ->
         (ListConfigurationRevisionsResponse.t,
-          [ `AWS of ListConfigurationRevisionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListConfigurationRevisionsResponse.error) Result.t Async.Deferred.t
 val list_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListConfigurationsRequest.t ->
-        (ListConfigurationsResponse.t,
-          [ `AWS of ListConfigurationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListConfigurationsResponse.t, ListConfigurationsResponse.error)
+          Result.t Async.Deferred.t
 val list_kafka_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListKafkaVersionsRequest.t ->
-        (ListKafkaVersionsResponse.t,
-          [ `AWS of ListKafkaVersionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListKafkaVersionsResponse.t, ListKafkaVersionsResponse.error)
+          Result.t Async.Deferred.t
 val list_nodes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListNodesRequest.t ->
-        (ListNodesResponse.t,
-          [ `AWS of ListNodesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListNodesResponse.t, ListNodesResponse.error) Result.t
           Async.Deferred.t
 val list_scram_secrets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListScramSecretsRequest.t ->
-        (ListScramSecretsResponse.t,
-          [ `AWS of ListScramSecretsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListScramSecretsResponse.t, ListScramSecretsResponse.error) Result.t
           Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val reboot_broker :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RebootBrokerRequest.t ->
-        (RebootBrokerResponse.t,
-          [ `AWS of RebootBrokerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RebootBrokerResponse.t, RebootBrokerResponse.error) Result.t
           Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      TagResourceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      TagResourceRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UntagResourceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      UntagResourceRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val update_broker_count :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateBrokerCountRequest.t ->
-        (UpdateBrokerCountResponse.t,
-          [ `AWS of UpdateBrokerCountResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateBrokerCountResponse.t, UpdateBrokerCountResponse.error)
+          Result.t Async.Deferred.t
 val update_broker_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateBrokerTypeRequest.t ->
-        (UpdateBrokerTypeResponse.t,
-          [ `AWS of UpdateBrokerTypeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateBrokerTypeResponse.t, UpdateBrokerTypeResponse.error) Result.t
           Async.Deferred.t
 val update_broker_storage :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateBrokerStorageRequest.t ->
-        (UpdateBrokerStorageResponse.t,
-          [ `AWS of UpdateBrokerStorageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateBrokerStorageResponse.t, UpdateBrokerStorageResponse.error)
+          Result.t Async.Deferred.t
 val update_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateConfigurationRequest.t ->
-        (UpdateConfigurationResponse.t,
-          [ `AWS of UpdateConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateConfigurationResponse.t, UpdateConfigurationResponse.error)
+          Result.t Async.Deferred.t
 val update_connectivity :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateConnectivityRequest.t ->
-        (UpdateConnectivityResponse.t,
-          [ `AWS of UpdateConnectivityResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateConnectivityResponse.t, UpdateConnectivityResponse.error)
+          Result.t Async.Deferred.t
 val update_cluster_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateClusterConfigurationRequest.t ->
         (UpdateClusterConfigurationResponse.t,
-          [ `AWS of UpdateClusterConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateClusterConfigurationResponse.error) Result.t Async.Deferred.t
 val update_cluster_kafka_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateClusterKafkaVersionRequest.t ->
         (UpdateClusterKafkaVersionResponse.t,
-          [ `AWS of UpdateClusterKafkaVersionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateClusterKafkaVersionResponse.error) Result.t Async.Deferred.t
 val update_monitoring :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateMonitoringRequest.t ->
-        (UpdateMonitoringResponse.t,
-          [ `AWS of UpdateMonitoringResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateMonitoringResponse.t, UpdateMonitoringResponse.error) Result.t
           Async.Deferred.t
 val update_security :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSecurityRequest.t ->
-        (UpdateSecurityResponse.t,
-          [ `AWS of UpdateSecurityResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateSecurityResponse.t, UpdateSecurityResponse.error) Result.t
           Async.Deferred.t

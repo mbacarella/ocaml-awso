@@ -3,98 +3,76 @@ open Awso_acm.Values
 val add_tags_to_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      AddTagsToCertificateRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      AddTagsToCertificateRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteCertificateRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteCertificateRequest.t -> (unit, unit) Result.t Lwt.t
 val describe_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeCertificateRequest.t ->
-        (DescribeCertificateResponse.t,
-          [ `AWS of DescribeCertificateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeCertificateResponse.t, DescribeCertificateResponse.error)
+          Result.t Lwt.t
 val export_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ExportCertificateRequest.t ->
-        (ExportCertificateResponse.t,
-          [ `AWS of ExportCertificateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ExportCertificateResponse.t, ExportCertificateResponse.error)
+          Result.t Lwt.t
 val get_account_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       unit ->
         (GetAccountConfigurationResponse.t,
-          [ `AWS of GetAccountConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetAccountConfigurationResponse.error) Result.t Lwt.t
 val get_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCertificateRequest.t ->
-        (GetCertificateResponse.t,
-          [ `AWS of GetCertificateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetCertificateResponse.t, GetCertificateResponse.error) Result.t
+          Lwt.t
 val import_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ImportCertificateRequest.t ->
-        (ImportCertificateResponse.t,
-          [ `AWS of ImportCertificateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ImportCertificateResponse.t, ImportCertificateResponse.error)
+          Result.t Lwt.t
 val list_certificates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCertificatesRequest.t ->
-        (ListCertificatesResponse.t,
-          [ `AWS of ListCertificatesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListCertificatesResponse.t, ListCertificatesResponse.error) Result.t
+          Lwt.t
 val list_tags_for_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForCertificateRequest.t ->
         (ListTagsForCertificateResponse.t,
-          [ `AWS of ListTagsForCertificateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListTagsForCertificateResponse.error) Result.t Lwt.t
 val put_account_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PutAccountConfigurationRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      PutAccountConfigurationRequest.t -> (unit, unit) Result.t Lwt.t
 val remove_tags_from_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      RemoveTagsFromCertificateRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      RemoveTagsFromCertificateRequest.t -> (unit, unit) Result.t Lwt.t
 val renew_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      RenewCertificateRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      RenewCertificateRequest.t -> (unit, unit) Result.t Lwt.t
 val request_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RequestCertificateRequest.t ->
-        (RequestCertificateResponse.t,
-          [ `AWS of RequestCertificateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RequestCertificateResponse.t, RequestCertificateResponse.error)
+          Result.t Lwt.t
 val resend_validation_email :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      ResendValidationEmailRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      ResendValidationEmailRequest.t -> (unit, unit) Result.t Lwt.t
 val update_certificate_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UpdateCertificateOptionsRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      UpdateCertificateOptionsRequest.t -> (unit, unit) Result.t Lwt.t

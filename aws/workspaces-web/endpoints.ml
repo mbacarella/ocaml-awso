@@ -656,368 +656,355 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpdateTrustStore -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateUserSettings -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | AssociateBrowserSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some AssociateBrowserSettingsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (AssociateBrowserSettingsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (AssociateBrowserSettingsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some AssociateBrowserSettingsResponse.error_of_json))
   | AssociateNetworkSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some AssociateNetworkSettingsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (AssociateNetworkSettingsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (AssociateNetworkSettingsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some AssociateNetworkSettingsResponse.error_of_json))
   | AssociateTrustStore ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some AssociateTrustStoreResponse.error_of_json)
-       | Ok resp ->
-           Ok (AssociateTrustStoreResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (AssociateTrustStoreResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some AssociateTrustStoreResponse.error_of_json))
   | AssociateUserSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some AssociateUserSettingsResponse.error_of_json)
-       | Ok resp ->
-           Ok (AssociateUserSettingsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (AssociateUserSettingsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some AssociateUserSettingsResponse.error_of_json))
   | CreateBrowserSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateBrowserSettingsResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateBrowserSettingsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateBrowserSettingsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateBrowserSettingsResponse.error_of_json))
   | CreateIdentityProvider ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateIdentityProviderResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateIdentityProviderResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (CreateIdentityProviderResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateIdentityProviderResponse.error_of_json))
   | CreateNetworkSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateNetworkSettingsResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateNetworkSettingsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateNetworkSettingsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateNetworkSettingsResponse.error_of_json))
   | CreatePortal ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreatePortalResponse.error_of_json)
-       | Ok resp -> Ok (CreatePortalResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreatePortalResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreatePortalResponse.error_of_json))
   | CreateTrustStore ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateTrustStoreResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateTrustStoreResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateTrustStoreResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateTrustStoreResponse.error_of_json))
   | CreateUserSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateUserSettingsResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateUserSettingsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateUserSettingsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateUserSettingsResponse.error_of_json))
   | DeleteBrowserSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteBrowserSettingsResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DeleteBrowserSettingsResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteBrowserSettingsResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteBrowserSettingsResponse.error_of_json))
   | DeleteIdentityProvider ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteIdentityProviderResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DeleteIdentityProviderResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteIdentityProviderResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteIdentityProviderResponse.error_of_json))
   | DeleteNetworkSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteNetworkSettingsResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DeleteNetworkSettingsResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteNetworkSettingsResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteNetworkSettingsResponse.error_of_json))
   | DeletePortal ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeletePortalResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeletePortalResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeletePortalResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some DeletePortalResponse.error_of_json))
   | DeleteTrustStore ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteTrustStoreResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteTrustStoreResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteTrustStoreResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some DeleteTrustStoreResponse.error_of_json))
   | DeleteUserSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteUserSettingsResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteUserSettingsResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteUserSettingsResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteUserSettingsResponse.error_of_json))
   | DisassociateBrowserSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DisassociateBrowserSettingsResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DisassociateBrowserSettingsResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DisassociateBrowserSettingsResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DisassociateBrowserSettingsResponse.error_of_json))
   | DisassociateNetworkSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DisassociateNetworkSettingsResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DisassociateNetworkSettingsResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DisassociateNetworkSettingsResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DisassociateNetworkSettingsResponse.error_of_json))
   | DisassociateTrustStore ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DisassociateTrustStoreResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DisassociateTrustStoreResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DisassociateTrustStoreResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DisassociateTrustStoreResponse.error_of_json))
   | DisassociateUserSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DisassociateUserSettingsResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DisassociateUserSettingsResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DisassociateUserSettingsResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DisassociateUserSettingsResponse.error_of_json))
   | GetBrowserSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetBrowserSettingsResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetBrowserSettingsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetBrowserSettingsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetBrowserSettingsResponse.error_of_json))
   | GetIdentityProvider ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetIdentityProviderResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetIdentityProviderResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetIdentityProviderResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetIdentityProviderResponse.error_of_json))
   | GetNetworkSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetNetworkSettingsResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetNetworkSettingsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetNetworkSettingsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetNetworkSettingsResponse.error_of_json))
   | GetPortal ->
-      (match resp with
-       | Error err -> handle_error err (Some GetPortalResponse.error_of_json)
-       | Ok resp -> Ok (GetPortalResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetPortalResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetPortalResponse.error_of_json))
   | GetPortalServiceProviderMetadata ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetPortalServiceProviderMetadataResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetPortalServiceProviderMetadataResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetPortalServiceProviderMetadataResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetPortalServiceProviderMetadataResponse.error_of_json))
   | GetTrustStore ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetTrustStoreResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetTrustStoreResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetTrustStoreResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetTrustStoreResponse.error_of_json))
   | GetTrustStoreCertificate ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetTrustStoreCertificateResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetTrustStoreCertificateResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (GetTrustStoreCertificateResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetTrustStoreCertificateResponse.error_of_json))
   | GetUserSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetUserSettingsResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetUserSettingsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetUserSettingsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetUserSettingsResponse.error_of_json))
   | ListBrowserSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListBrowserSettingsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListBrowserSettingsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListBrowserSettingsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListBrowserSettingsResponse.error_of_json))
   | ListIdentityProviders ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListIdentityProvidersResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListIdentityProvidersResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListIdentityProvidersResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListIdentityProvidersResponse.error_of_json))
   | ListNetworkSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListNetworkSettingsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListNetworkSettingsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListNetworkSettingsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListNetworkSettingsResponse.error_of_json))
   | ListPortals ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListPortalsResponse.error_of_json)
-       | Ok resp -> Ok (ListPortalsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListPortalsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListPortalsResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | ListTrustStoreCertificates ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListTrustStoreCertificatesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListTrustStoreCertificatesResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListTrustStoreCertificatesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListTrustStoreCertificatesResponse.error_of_json))
   | ListTrustStores ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTrustStoresResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTrustStoresResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTrustStoresResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListTrustStoresResponse.error_of_json))
   | ListUserSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListUserSettingsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListUserSettingsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListUserSettingsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListUserSettingsResponse.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UntagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateBrowserSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateBrowserSettingsResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateBrowserSettingsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateBrowserSettingsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateBrowserSettingsResponse.error_of_json))
   | UpdateIdentityProvider ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateIdentityProviderResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateIdentityProviderResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (UpdateIdentityProviderResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateIdentityProviderResponse.error_of_json))
   | UpdateNetworkSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateNetworkSettingsResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateNetworkSettingsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateNetworkSettingsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateNetworkSettingsResponse.error_of_json))
   | UpdatePortal ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdatePortalResponse.error_of_json)
-       | Ok resp -> Ok (UpdatePortalResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdatePortalResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdatePortalResponse.error_of_json))
   | UpdateTrustStore ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateTrustStoreResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateTrustStoreResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateTrustStoreResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateTrustStoreResponse.error_of_json))
   | UpdateUserSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateUserSettingsResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateUserSettingsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateUserSettingsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateUserSettingsResponse.error_of_json))

@@ -3,240 +3,174 @@ open Awso_glacier.Values
 val abort_multipart_upload :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      AbortMultipartUploadInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      AbortMultipartUploadInput.t -> (unit, unit) Result.t Async.Deferred.t
 val abort_vault_lock :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      AbortVaultLockInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      AbortVaultLockInput.t -> (unit, unit) Result.t Async.Deferred.t
 val add_tags_to_vault :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      AddTagsToVaultInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      AddTagsToVaultInput.t -> (unit, unit) Result.t Async.Deferred.t
 val complete_multipart_upload :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CompleteMultipartUploadInput.t ->
-        (ArchiveCreationOutput.t,
-          [ `AWS of ArchiveCreationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ArchiveCreationOutput.t, ArchiveCreationOutput.error) Result.t
           Async.Deferred.t
 val complete_vault_lock :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      CompleteVaultLockInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      CompleteVaultLockInput.t -> (unit, unit) Result.t Async.Deferred.t
 val create_vault :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateVaultInput.t ->
-        (CreateVaultOutput.t,
-          [ `AWS of CreateVaultOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateVaultOutput.t, CreateVaultOutput.error) Result.t
           Async.Deferred.t
 val delete_archive :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteArchiveInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteArchiveInput.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_vault :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteVaultInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteVaultInput.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_vault_access_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteVaultAccessPolicyInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val delete_vault_notifications :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteVaultNotificationsInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val describe_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeJobInput.t ->
-        (GlacierJobDescription.t,
-          [ `AWS of GlacierJobDescription.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GlacierJobDescription.t, GlacierJobDescription.error) Result.t
           Async.Deferred.t
 val describe_vault :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeVaultInput.t ->
-        (DescribeVaultOutput.t,
-          [ `AWS of DescribeVaultOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeVaultOutput.t, DescribeVaultOutput.error) Result.t
           Async.Deferred.t
 val get_data_retrieval_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDataRetrievalPolicyInput.t ->
-        (GetDataRetrievalPolicyOutput.t,
-          [ `AWS of GetDataRetrievalPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetDataRetrievalPolicyOutput.t, GetDataRetrievalPolicyOutput.error)
+          Result.t Async.Deferred.t
 val get_job_output :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetJobOutputInput.t ->
-        (GetJobOutputOutput.t,
-          [ `AWS of GetJobOutputOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetJobOutputOutput.t, GetJobOutputOutput.error) Result.t
           Async.Deferred.t
 val get_vault_access_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetVaultAccessPolicyInput.t ->
-        (GetVaultAccessPolicyOutput.t,
-          [ `AWS of GetVaultAccessPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetVaultAccessPolicyOutput.t, GetVaultAccessPolicyOutput.error)
+          Result.t Async.Deferred.t
 val get_vault_lock :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetVaultLockInput.t ->
-        (GetVaultLockOutput.t,
-          [ `AWS of GetVaultLockOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetVaultLockOutput.t, GetVaultLockOutput.error) Result.t
           Async.Deferred.t
 val get_vault_notifications :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetVaultNotificationsInput.t ->
-        (GetVaultNotificationsOutput.t,
-          [ `AWS of GetVaultNotificationsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetVaultNotificationsOutput.t, GetVaultNotificationsOutput.error)
+          Result.t Async.Deferred.t
 val initiate_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       InitiateJobInput.t ->
-        (InitiateJobOutput.t,
-          [ `AWS of InitiateJobOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (InitiateJobOutput.t, InitiateJobOutput.error) Result.t
           Async.Deferred.t
 val initiate_multipart_upload :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       InitiateMultipartUploadInput.t ->
         (InitiateMultipartUploadOutput.t,
-          [ `AWS of InitiateMultipartUploadOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          InitiateMultipartUploadOutput.error) Result.t Async.Deferred.t
 val initiate_vault_lock :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       InitiateVaultLockInput.t ->
-        (InitiateVaultLockOutput.t,
-          [ `AWS of InitiateVaultLockOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (InitiateVaultLockOutput.t, InitiateVaultLockOutput.error) Result.t
           Async.Deferred.t
 val list_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListJobsInput.t ->
-        (ListJobsOutput.t,
-          [ `AWS of ListJobsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListJobsOutput.t, ListJobsOutput.error) Result.t Async.Deferred.t
 val list_multipart_uploads :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListMultipartUploadsInput.t ->
-        (ListMultipartUploadsOutput.t,
-          [ `AWS of ListMultipartUploadsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListMultipartUploadsOutput.t, ListMultipartUploadsOutput.error)
+          Result.t Async.Deferred.t
 val list_parts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPartsInput.t ->
-        (ListPartsOutput.t,
-          [ `AWS of ListPartsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListPartsOutput.t, ListPartsOutput.error) Result.t Async.Deferred.t
 val list_provisioned_capacity :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListProvisionedCapacityInput.t ->
         (ListProvisionedCapacityOutput.t,
-          [ `AWS of ListProvisionedCapacityOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListProvisionedCapacityOutput.error) Result.t Async.Deferred.t
 val list_tags_for_vault :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForVaultInput.t ->
-        (ListTagsForVaultOutput.t,
-          [ `AWS of ListTagsForVaultOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListTagsForVaultOutput.t, ListTagsForVaultOutput.error) Result.t
           Async.Deferred.t
 val list_vaults :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListVaultsInput.t ->
-        (ListVaultsOutput.t,
-          [ `AWS of ListVaultsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListVaultsOutput.t, ListVaultsOutput.error) Result.t
           Async.Deferred.t
 val purchase_provisioned_capacity :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PurchaseProvisionedCapacityInput.t ->
         (PurchaseProvisionedCapacityOutput.t,
-          [ `AWS of PurchaseProvisionedCapacityOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          PurchaseProvisionedCapacityOutput.error) Result.t Async.Deferred.t
 val remove_tags_from_vault :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      RemoveTagsFromVaultInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      RemoveTagsFromVaultInput.t -> (unit, unit) Result.t Async.Deferred.t
 val set_data_retrieval_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      SetDataRetrievalPolicyInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      SetDataRetrievalPolicyInput.t -> (unit, unit) Result.t Async.Deferred.t
 val set_vault_access_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      SetVaultAccessPolicyInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      SetVaultAccessPolicyInput.t -> (unit, unit) Result.t Async.Deferred.t
 val set_vault_notifications :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      SetVaultNotificationsInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      SetVaultNotificationsInput.t -> (unit, unit) Result.t Async.Deferred.t
 val upload_archive :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UploadArchiveInput.t ->
-        (ArchiveCreationOutput.t,
-          [ `AWS of ArchiveCreationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ArchiveCreationOutput.t, ArchiveCreationOutput.error) Result.t
           Async.Deferred.t
 val upload_multipart_part :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UploadMultipartPartInput.t ->
-        (UploadMultipartPartOutput.t,
-          [ `AWS of UploadMultipartPartOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UploadMultipartPartOutput.t, UploadMultipartPartOutput.error)
+          Result.t Async.Deferred.t

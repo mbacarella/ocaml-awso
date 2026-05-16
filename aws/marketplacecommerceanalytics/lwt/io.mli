@@ -4,13 +4,10 @@ val generate_data_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GenerateDataSetRequest.t ->
-        (GenerateDataSetResult.t,
-          [ `AWS of GenerateDataSetResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GenerateDataSetResult.t, GenerateDataSetResult.error) Result.t Lwt.t
 val start_support_data_export :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartSupportDataExportRequest.t ->
-        (StartSupportDataExportResult.t,
-          [ `AWS of StartSupportDataExportResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartSupportDataExportResult.t, StartSupportDataExportResult.error)
+          Result.t Lwt.t

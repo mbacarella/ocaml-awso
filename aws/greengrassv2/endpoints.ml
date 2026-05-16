@@ -513,241 +513,241 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpdateConnectivityInfo ->
       Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | AssociateServiceRoleToAccount ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some AssociateServiceRoleToAccountResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (AssociateServiceRoleToAccountResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (AssociateServiceRoleToAccountResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some AssociateServiceRoleToAccountResponse.error_of_json))
   | BatchAssociateClientDeviceWithCoreDevice ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (BatchAssociateClientDeviceWithCoreDeviceResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                BatchAssociateClientDeviceWithCoreDeviceResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (BatchAssociateClientDeviceWithCoreDeviceResponse.of_json
-                (response_to_json resp)))
+                BatchAssociateClientDeviceWithCoreDeviceResponse.error_of_json))
   | BatchDisassociateClientDeviceFromCoreDevice ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (BatchDisassociateClientDeviceFromCoreDeviceResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                BatchDisassociateClientDeviceFromCoreDeviceResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (BatchDisassociateClientDeviceFromCoreDeviceResponse.of_json
-                (response_to_json resp)))
+                BatchDisassociateClientDeviceFromCoreDeviceResponse.error_of_json))
   | CancelDeployment ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CancelDeploymentResponse.error_of_json)
-       | Ok resp ->
-           Ok (CancelDeploymentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CancelDeploymentResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CancelDeploymentResponse.error_of_json))
   | CreateComponentVersion ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateComponentVersionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateComponentVersionResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (CreateComponentVersionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateComponentVersionResponse.error_of_json))
   | CreateDeployment ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateDeploymentResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateDeploymentResponse.of_json (response_to_json resp)))
-  | DeleteComponent -> Ok ()
-  | DeleteCoreDevice -> Ok ()
+      if is_success
+      then Ok (CreateDeploymentResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateDeploymentResponse.error_of_json))
+  | DeleteComponent ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteCoreDevice ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DescribeComponent ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeComponentResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeComponentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeComponentResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeComponentResponse.error_of_json))
   | DisassociateServiceRoleFromAccount ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DisassociateServiceRoleFromAccountResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DisassociateServiceRoleFromAccountResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DisassociateServiceRoleFromAccountResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DisassociateServiceRoleFromAccountResponse.error_of_json))
   | GetComponent ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetComponentResponse.error_of_json)
-       | Ok resp -> Ok (GetComponentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetComponentResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetComponentResponse.error_of_json))
   | GetComponentVersionArtifact ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetComponentVersionArtifactResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetComponentVersionArtifactResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetComponentVersionArtifactResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetComponentVersionArtifactResponse.error_of_json))
   | GetConnectivityInfo ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetConnectivityInfoResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetConnectivityInfoResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetConnectivityInfoResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetConnectivityInfoResponse.error_of_json))
   | GetCoreDevice ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetCoreDeviceResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetCoreDeviceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetCoreDeviceResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetCoreDeviceResponse.error_of_json))
   | GetDeployment ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetDeploymentResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetDeploymentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetDeploymentResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetDeploymentResponse.error_of_json))
   | GetServiceRoleForAccount ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetServiceRoleForAccountResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetServiceRoleForAccountResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (GetServiceRoleForAccountResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetServiceRoleForAccountResponse.error_of_json))
   | ListClientDevicesAssociatedWithCoreDevice ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (ListClientDevicesAssociatedWithCoreDeviceResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                ListClientDevicesAssociatedWithCoreDeviceResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListClientDevicesAssociatedWithCoreDeviceResponse.of_json
-                (response_to_json resp)))
+                ListClientDevicesAssociatedWithCoreDeviceResponse.error_of_json))
   | ListComponentVersions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListComponentVersionsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListComponentVersionsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListComponentVersionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListComponentVersionsResponse.error_of_json))
   | ListComponents ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListComponentsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListComponentsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListComponentsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListComponentsResponse.error_of_json))
   | ListCoreDevices ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListCoreDevicesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListCoreDevicesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListCoreDevicesResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListCoreDevicesResponse.error_of_json))
   | ListDeployments ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListDeploymentsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListDeploymentsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListDeploymentsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListDeploymentsResponse.error_of_json))
   | ListEffectiveDeployments ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListEffectiveDeploymentsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListEffectiveDeploymentsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListEffectiveDeploymentsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListEffectiveDeploymentsResponse.error_of_json))
   | ListInstalledComponents ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListInstalledComponentsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListInstalledComponentsResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListInstalledComponentsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListInstalledComponentsResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | ResolveComponentCandidates ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ResolveComponentCandidatesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ResolveComponentCandidatesResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ResolveComponentCandidatesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ResolveComponentCandidatesResponse.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UntagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateConnectivityInfo ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateConnectivityInfoResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateConnectivityInfoResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (UpdateConnectivityInfoResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateConnectivityInfoResponse.error_of_json))

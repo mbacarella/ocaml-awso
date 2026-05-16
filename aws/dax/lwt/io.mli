@@ -4,146 +4,118 @@ val create_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateClusterRequest.t ->
-        (CreateClusterResponse.t,
-          [ `AWS of CreateClusterResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateClusterResponse.t, CreateClusterResponse.error) Result.t Lwt.t
 val create_parameter_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateParameterGroupRequest.t ->
-        (CreateParameterGroupResponse.t,
-          [ `AWS of CreateParameterGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateParameterGroupResponse.t, CreateParameterGroupResponse.error)
+          Result.t Lwt.t
 val create_subnet_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSubnetGroupRequest.t ->
-        (CreateSubnetGroupResponse.t,
-          [ `AWS of CreateSubnetGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateSubnetGroupResponse.t, CreateSubnetGroupResponse.error)
+          Result.t Lwt.t
 val decrease_replication_factor :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DecreaseReplicationFactorRequest.t ->
         (DecreaseReplicationFactorResponse.t,
-          [ `AWS of DecreaseReplicationFactorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DecreaseReplicationFactorResponse.error) Result.t Lwt.t
 val delete_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteClusterRequest.t ->
-        (DeleteClusterResponse.t,
-          [ `AWS of DeleteClusterResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteClusterResponse.t, DeleteClusterResponse.error) Result.t Lwt.t
 val delete_parameter_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteParameterGroupRequest.t ->
-        (DeleteParameterGroupResponse.t,
-          [ `AWS of DeleteParameterGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteParameterGroupResponse.t, DeleteParameterGroupResponse.error)
+          Result.t Lwt.t
 val delete_subnet_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSubnetGroupRequest.t ->
-        (DeleteSubnetGroupResponse.t,
-          [ `AWS of DeleteSubnetGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteSubnetGroupResponse.t, DeleteSubnetGroupResponse.error)
+          Result.t Lwt.t
 val describe_clusters :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeClustersRequest.t ->
-        (DescribeClustersResponse.t,
-          [ `AWS of DescribeClustersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeClustersResponse.t, DescribeClustersResponse.error) Result.t
+          Lwt.t
 val describe_default_parameters :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDefaultParametersRequest.t ->
         (DescribeDefaultParametersResponse.t,
-          [ `AWS of DescribeDefaultParametersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeDefaultParametersResponse.error) Result.t Lwt.t
 val describe_events :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEventsRequest.t ->
-        (DescribeEventsResponse.t,
-          [ `AWS of DescribeEventsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeEventsResponse.t, DescribeEventsResponse.error) Result.t
+          Lwt.t
 val describe_parameter_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeParameterGroupsRequest.t ->
         (DescribeParameterGroupsResponse.t,
-          [ `AWS of DescribeParameterGroupsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeParameterGroupsResponse.error) Result.t Lwt.t
 val describe_parameters :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeParametersRequest.t ->
-        (DescribeParametersResponse.t,
-          [ `AWS of DescribeParametersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeParametersResponse.t, DescribeParametersResponse.error)
+          Result.t Lwt.t
 val describe_subnet_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSubnetGroupsRequest.t ->
-        (DescribeSubnetGroupsResponse.t,
-          [ `AWS of DescribeSubnetGroupsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeSubnetGroupsResponse.t, DescribeSubnetGroupsResponse.error)
+          Result.t Lwt.t
 val increase_replication_factor :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       IncreaseReplicationFactorRequest.t ->
         (IncreaseReplicationFactorResponse.t,
-          [ `AWS of IncreaseReplicationFactorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          IncreaseReplicationFactorResponse.error) Result.t Lwt.t
 val list_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsRequest.t ->
-        (ListTagsResponse.t,
-          [ `AWS of ListTagsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsResponse.t, ListTagsResponse.error) Result.t Lwt.t
 val reboot_node :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RebootNodeRequest.t ->
-        (RebootNodeResponse.t,
-          [ `AWS of RebootNodeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RebootNodeResponse.t, RebootNodeResponse.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateClusterRequest.t ->
-        (UpdateClusterResponse.t,
-          [ `AWS of UpdateClusterResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateClusterResponse.t, UpdateClusterResponse.error) Result.t Lwt.t
 val update_parameter_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateParameterGroupRequest.t ->
-        (UpdateParameterGroupResponse.t,
-          [ `AWS of UpdateParameterGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateParameterGroupResponse.t, UpdateParameterGroupResponse.error)
+          Result.t Lwt.t
 val update_subnet_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSubnetGroupRequest.t ->
-        (UpdateSubnetGroupResponse.t,
-          [ `AWS of UpdateSubnetGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateSubnetGroupResponse.t, UpdateSubnetGroupResponse.error)
+          Result.t Lwt.t

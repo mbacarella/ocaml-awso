@@ -4,10 +4,7 @@ module Ec2 = Awso_ec2_async
 
 let or_die = function
   | Ok result -> result
-  | Error (`Transport err) ->
-    let s = err |> Awso.Http.Io.Error.yojson_of_call |> Yojson.Safe.pretty_to_string in
-    failwithf "transport error: %s" s ()
-  | Error (`AWS aws) ->
+  | Error aws ->
     let s = aws |> Ec2.Ec2_error.to_json |> Yojson.Safe.to_string in
     failwithf "aws error: %s" s ()
 ;;

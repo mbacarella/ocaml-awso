@@ -3,19 +3,14 @@ open Awso_account.Values
 val delete_alternate_contact :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteAlternateContactRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteAlternateContactRequest.t -> (unit, unit) Result.t Lwt.t
 val get_alternate_contact :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAlternateContactRequest.t ->
-        (GetAlternateContactResponse.t,
-          [ `AWS of GetAlternateContactResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetAlternateContactResponse.t, GetAlternateContactResponse.error)
+          Result.t Lwt.t
 val put_alternate_contact :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PutAlternateContactRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      PutAlternateContactRequest.t -> (unit, unit) Result.t Lwt.t

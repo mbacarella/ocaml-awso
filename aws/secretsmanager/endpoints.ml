@@ -277,171 +277,178 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target", "secretsmanager.ValidateResourcePolicy")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    let generic_error () = Error (`Transport err) in
-    match err with
-    | `Too_many_redirects -> generic_error ()
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-        (match (error_of_json, ((code >= 400) && (code <= 599))) with
-         | (Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             (match json |> (Yojson.Safe.Util.member "__type") with
-              | `String error_type ->
-                  Error (`AWS (error_of_json error_type json))
-              | `Null -> generic_error ()
-              | _ ->
-                  failwith
-                    (sprintf "Error '__type' did not have string type: %s"
-                       body))
-         | (None, _) | (_, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = None }) in
+    match (error_of_json, ((code >= 400) && (code <= 599))) with
+    | (Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        (match json |> (Yojson.Safe.Util.member "__type") with
+         | `String error_type -> error_of_json error_type json
+         | `Null -> bail ()
+         | _ ->
+             failwith
+               (sprintf "Error '__type' did not have string type: %s" body))
+    | (None, _) | (_, false) -> bail () in
+  let _ = parse_aws_error in
+  let _ = resp in
   match endpoint with
   | CancelRotateSecret ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CancelRotateSecretResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CancelRotateSecretResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CancelRotateSecretResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CancelRotateSecretResponse.error_of_json))
   | CreateSecret ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateSecretResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateSecretResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateSecretResponse.of_json json)
+      else Error (parse_aws_error (Some CreateSecretResponse.error_of_json))
   | DeleteResourcePolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteResourcePolicyResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteResourcePolicyResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteResourcePolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteResourcePolicyResponse.error_of_json))
   | DeleteSecret ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteSecretResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteSecretResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteSecretResponse.of_json json)
+      else Error (parse_aws_error (Some DeleteSecretResponse.error_of_json))
   | DescribeSecret ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeSecretResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeSecretResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeSecretResponse.of_json json)
+      else
+        Error (parse_aws_error (Some DescribeSecretResponse.error_of_json))
   | GetRandomPassword ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetRandomPasswordResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetRandomPasswordResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetRandomPasswordResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetRandomPasswordResponse.error_of_json))
   | GetResourcePolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetResourcePolicyResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetResourcePolicyResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetResourcePolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetResourcePolicyResponse.error_of_json))
   | GetSecretValue ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetSecretValueResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetSecretValueResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetSecretValueResponse.of_json json)
+      else
+        Error (parse_aws_error (Some GetSecretValueResponse.error_of_json))
   | ListSecretVersionIds ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListSecretVersionIdsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListSecretVersionIdsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListSecretVersionIdsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListSecretVersionIdsResponse.error_of_json))
   | ListSecrets ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListSecretsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListSecretsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListSecretsResponse.of_json json)
+      else Error (parse_aws_error (Some ListSecretsResponse.error_of_json))
   | PutResourcePolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutResourcePolicyResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (PutResourcePolicyResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutResourcePolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some PutResourcePolicyResponse.error_of_json))
   | PutSecretValue ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutSecretValueResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (PutSecretValueResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutSecretValueResponse.of_json json)
+      else
+        Error (parse_aws_error (Some PutSecretValueResponse.error_of_json))
   | RemoveRegionsFromReplication ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some RemoveRegionsFromReplicationResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (RemoveRegionsFromReplicationResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (RemoveRegionsFromReplicationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some RemoveRegionsFromReplicationResponse.error_of_json))
   | ReplicateSecretToRegions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ReplicateSecretToRegionsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ReplicateSecretToRegionsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ReplicateSecretToRegionsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ReplicateSecretToRegionsResponse.error_of_json))
   | RestoreSecret ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RestoreSecretResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (RestoreSecretResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (RestoreSecretResponse.of_json json)
+      else Error (parse_aws_error (Some RestoreSecretResponse.error_of_json))
   | RotateSecret ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RotateSecretResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (RotateSecretResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (RotateSecretResponse.of_json json)
+      else Error (parse_aws_error (Some RotateSecretResponse.error_of_json))
   | StopReplicationToReplica ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some StopReplicationToReplicaResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (StopReplicationToReplicaResponse.of_json json))
-  | TagResource -> Ok ()
-  | UntagResource -> Ok ()
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StopReplicationToReplicaResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StopReplicationToReplicaResponse.error_of_json))
+  | TagResource -> if is_success then Ok () else Error (parse_aws_error None)
+  | UntagResource ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | UpdateSecret ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateSecretResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateSecretResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateSecretResponse.of_json json)
+      else Error (parse_aws_error (Some UpdateSecretResponse.error_of_json))
   | UpdateSecretVersionStage ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateSecretVersionStageResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateSecretVersionStageResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateSecretVersionStageResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateSecretVersionStageResponse.error_of_json))
   | ValidateResourcePolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ValidateResourcePolicyResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ValidateResourcePolicyResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ValidateResourcePolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ValidateResourcePolicyResponse.error_of_json))

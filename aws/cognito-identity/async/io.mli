@@ -4,175 +4,129 @@ val create_identity_pool :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateIdentityPoolInput.t ->
-        (IdentityPool.t,
-          [ `AWS of IdentityPool.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (IdentityPool.t, IdentityPool.error) Result.t Async.Deferred.t
 val delete_identities :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteIdentitiesInput.t ->
-        (DeleteIdentitiesResponse.t,
-          [ `AWS of DeleteIdentitiesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteIdentitiesResponse.t, DeleteIdentitiesResponse.error) Result.t
           Async.Deferred.t
 val delete_identity_pool :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteIdentityPoolInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteIdentityPoolInput.t -> (unit, unit) Result.t Async.Deferred.t
 val describe_identity :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeIdentityInput.t ->
-        (IdentityDescription.t,
-          [ `AWS of IdentityDescription.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (IdentityDescription.t, IdentityDescription.error) Result.t
           Async.Deferred.t
 val describe_identity_pool :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeIdentityPoolInput.t ->
-        (IdentityPool.t,
-          [ `AWS of IdentityPool.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (IdentityPool.t, IdentityPool.error) Result.t Async.Deferred.t
 val get_credentials_for_identity :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCredentialsForIdentityInput.t ->
         (GetCredentialsForIdentityResponse.t,
-          [ `AWS of GetCredentialsForIdentityResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetCredentialsForIdentityResponse.error) Result.t Async.Deferred.t
 val get_id :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetIdInput.t ->
-        (GetIdResponse.t,
-          [ `AWS of GetIdResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetIdResponse.t, GetIdResponse.error) Result.t Async.Deferred.t
 val get_identity_pool_roles :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetIdentityPoolRolesInput.t ->
-        (GetIdentityPoolRolesResponse.t,
-          [ `AWS of GetIdentityPoolRolesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetIdentityPoolRolesResponse.t, GetIdentityPoolRolesResponse.error)
+          Result.t Async.Deferred.t
 val get_open_id_token :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetOpenIdTokenInput.t ->
-        (GetOpenIdTokenResponse.t,
-          [ `AWS of GetOpenIdTokenResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetOpenIdTokenResponse.t, GetOpenIdTokenResponse.error) Result.t
           Async.Deferred.t
 val get_open_id_token_for_developer_identity :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetOpenIdTokenForDeveloperIdentityInput.t ->
         (GetOpenIdTokenForDeveloperIdentityResponse.t,
-          [ `AWS of GetOpenIdTokenForDeveloperIdentityResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetOpenIdTokenForDeveloperIdentityResponse.error) Result.t
           Async.Deferred.t
 val get_principal_tag_attribute_map :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPrincipalTagAttributeMapInput.t ->
         (GetPrincipalTagAttributeMapResponse.t,
-          [ `AWS of GetPrincipalTagAttributeMapResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetPrincipalTagAttributeMapResponse.error) Result.t
           Async.Deferred.t
 val list_identities :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListIdentitiesInput.t ->
-        (ListIdentitiesResponse.t,
-          [ `AWS of ListIdentitiesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListIdentitiesResponse.t, ListIdentitiesResponse.error) Result.t
           Async.Deferred.t
 val list_identity_pools :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListIdentityPoolsInput.t ->
-        (ListIdentityPoolsResponse.t,
-          [ `AWS of ListIdentityPoolsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListIdentityPoolsResponse.t, ListIdentityPoolsResponse.error)
+          Result.t Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceInput.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val lookup_developer_identity :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       LookupDeveloperIdentityInput.t ->
         (LookupDeveloperIdentityResponse.t,
-          [ `AWS of LookupDeveloperIdentityResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          LookupDeveloperIdentityResponse.error) Result.t Async.Deferred.t
 val merge_developer_identities :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       MergeDeveloperIdentitiesInput.t ->
         (MergeDeveloperIdentitiesResponse.t,
-          [ `AWS of MergeDeveloperIdentitiesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          MergeDeveloperIdentitiesResponse.error) Result.t Async.Deferred.t
 val set_identity_pool_roles :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      SetIdentityPoolRolesInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      SetIdentityPoolRolesInput.t -> (unit, unit) Result.t Async.Deferred.t
 val set_principal_tag_attribute_map :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SetPrincipalTagAttributeMapInput.t ->
         (SetPrincipalTagAttributeMapResponse.t,
-          [ `AWS of SetPrincipalTagAttributeMapResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          SetPrincipalTagAttributeMapResponse.error) Result.t
           Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceInput.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val unlink_developer_identity :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UnlinkDeveloperIdentityInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val unlink_identity :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UnlinkIdentityInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      UnlinkIdentityInput.t -> (unit, unit) Result.t Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceInput.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
 val update_identity_pool :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       IdentityPool.t ->
-        (IdentityPool.t,
-          [ `AWS of IdentityPool.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (IdentityPool.t, IdentityPool.error) Result.t Async.Deferred.t

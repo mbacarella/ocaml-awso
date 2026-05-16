@@ -13,25 +13,14 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
          (fun result ->
             match result with
             | Error err ->
-                (match err with
-                 | `Transport err ->
-                     let msg =
-                       match err with
-                       | `Bad_response (r : Awso.Http.Io.Error.bad_response)
-                           ->
-                           sprintf "Bad response: code=%d body=%s" r.code
-                             r.body
-                       | `Too_many_redirects -> "Too many redirects" in
-                     failwithf "Transport error: %s" msg ()
-                 | `AWS err ->
-                     (match error_to_json with
-                      | None ->
-                          failwithf
-                            "endpoint error, but no error values defined in boto"
-                            ()
-                      | Some to_json ->
-                          let s = (err |> to_json) |> Yojson.Safe.to_string in
-                          failwithf "AWS error: %s" s ()))
+                (match error_to_json with
+                 | None ->
+                     failwithf
+                       "endpoint error, but no error values defined in boto"
+                       ()
+                 | Some to_json ->
+                     let s = (err |> to_json) |> Yojson.Safe.to_string in
+                     failwithf "AWS error: %s" s ())
             | Ok result ->
                 ((match result_to_json with
                   | None -> print_endline "ok response from endpoint"

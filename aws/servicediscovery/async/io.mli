@@ -4,205 +4,154 @@ val create_http_namespace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateHttpNamespaceRequest.t ->
-        (CreateHttpNamespaceResponse.t,
-          [ `AWS of CreateHttpNamespaceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateHttpNamespaceResponse.t, CreateHttpNamespaceResponse.error)
+          Result.t Async.Deferred.t
 val create_private_dns_namespace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePrivateDnsNamespaceRequest.t ->
         (CreatePrivateDnsNamespaceResponse.t,
-          [ `AWS of CreatePrivateDnsNamespaceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreatePrivateDnsNamespaceResponse.error) Result.t Async.Deferred.t
 val create_public_dns_namespace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePublicDnsNamespaceRequest.t ->
         (CreatePublicDnsNamespaceResponse.t,
-          [ `AWS of CreatePublicDnsNamespaceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreatePublicDnsNamespaceResponse.error) Result.t Async.Deferred.t
 val create_service :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateServiceRequest.t ->
-        (CreateServiceResponse.t,
-          [ `AWS of CreateServiceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateServiceResponse.t, CreateServiceResponse.error) Result.t
           Async.Deferred.t
 val delete_namespace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteNamespaceRequest.t ->
-        (DeleteNamespaceResponse.t,
-          [ `AWS of DeleteNamespaceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteNamespaceResponse.t, DeleteNamespaceResponse.error) Result.t
           Async.Deferred.t
 val delete_service :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteServiceRequest.t ->
-        (DeleteServiceResponse.t,
-          [ `AWS of DeleteServiceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteServiceResponse.t, DeleteServiceResponse.error) Result.t
           Async.Deferred.t
 val deregister_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeregisterInstanceRequest.t ->
-        (DeregisterInstanceResponse.t,
-          [ `AWS of DeregisterInstanceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeregisterInstanceResponse.t, DeregisterInstanceResponse.error)
+          Result.t Async.Deferred.t
 val discover_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DiscoverInstancesRequest.t ->
-        (DiscoverInstancesResponse.t,
-          [ `AWS of DiscoverInstancesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DiscoverInstancesResponse.t, DiscoverInstancesResponse.error)
+          Result.t Async.Deferred.t
 val get_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetInstanceRequest.t ->
-        (GetInstanceResponse.t,
-          [ `AWS of GetInstanceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetInstanceResponse.t, GetInstanceResponse.error) Result.t
           Async.Deferred.t
 val get_instances_health_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetInstancesHealthStatusRequest.t ->
         (GetInstancesHealthStatusResponse.t,
-          [ `AWS of GetInstancesHealthStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetInstancesHealthStatusResponse.error) Result.t Async.Deferred.t
 val get_namespace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetNamespaceRequest.t ->
-        (GetNamespaceResponse.t,
-          [ `AWS of GetNamespaceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetNamespaceResponse.t, GetNamespaceResponse.error) Result.t
           Async.Deferred.t
 val get_operation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetOperationRequest.t ->
-        (GetOperationResponse.t,
-          [ `AWS of GetOperationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetOperationResponse.t, GetOperationResponse.error) Result.t
           Async.Deferred.t
 val get_service :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetServiceRequest.t ->
-        (GetServiceResponse.t,
-          [ `AWS of GetServiceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetServiceResponse.t, GetServiceResponse.error) Result.t
           Async.Deferred.t
 val list_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListInstancesRequest.t ->
-        (ListInstancesResponse.t,
-          [ `AWS of ListInstancesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListInstancesResponse.t, ListInstancesResponse.error) Result.t
           Async.Deferred.t
 val list_namespaces :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListNamespacesRequest.t ->
-        (ListNamespacesResponse.t,
-          [ `AWS of ListNamespacesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListNamespacesResponse.t, ListNamespacesResponse.error) Result.t
           Async.Deferred.t
 val list_operations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListOperationsRequest.t ->
-        (ListOperationsResponse.t,
-          [ `AWS of ListOperationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListOperationsResponse.t, ListOperationsResponse.error) Result.t
           Async.Deferred.t
 val list_services :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListServicesRequest.t ->
-        (ListServicesResponse.t,
-          [ `AWS of ListServicesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListServicesResponse.t, ListServicesResponse.error) Result.t
           Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val register_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegisterInstanceRequest.t ->
-        (RegisterInstanceResponse.t,
-          [ `AWS of RegisterInstanceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RegisterInstanceResponse.t, RegisterInstanceResponse.error) Result.t
           Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
 val update_http_namespace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateHttpNamespaceRequest.t ->
-        (UpdateHttpNamespaceResponse.t,
-          [ `AWS of UpdateHttpNamespaceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateHttpNamespaceResponse.t, UpdateHttpNamespaceResponse.error)
+          Result.t Async.Deferred.t
 val update_instance_custom_health_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateInstanceCustomHealthStatusRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val update_private_dns_namespace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePrivateDnsNamespaceRequest.t ->
         (UpdatePrivateDnsNamespaceResponse.t,
-          [ `AWS of UpdatePrivateDnsNamespaceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdatePrivateDnsNamespaceResponse.error) Result.t Async.Deferred.t
 val update_public_dns_namespace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePublicDnsNamespaceRequest.t ->
         (UpdatePublicDnsNamespaceResponse.t,
-          [ `AWS of UpdatePublicDnsNamespaceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdatePublicDnsNamespaceResponse.error) Result.t Async.Deferred.t
 val update_service :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateServiceRequest.t ->
-        (UpdateServiceResponse.t,
-          [ `AWS of UpdateServiceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateServiceResponse.t, UpdateServiceResponse.error) Result.t
           Async.Deferred.t

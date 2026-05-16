@@ -5,195 +5,153 @@ val create_replication_configuration_template :
     ?cfg:Awso.Cfg.t ->
       CreateReplicationConfigurationTemplateRequest.t ->
         (ReplicationConfigurationTemplate.t,
-          [ `AWS of ReplicationConfigurationTemplate.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ReplicationConfigurationTemplate.error) Result.t Lwt.t
 val delete_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteJobRequest.t ->
-        (DeleteJobResponse.t,
-          [ `AWS of DeleteJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteJobResponse.t, DeleteJobResponse.error) Result.t Lwt.t
 val delete_recovery_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteRecoveryInstanceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteRecoveryInstanceRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_replication_configuration_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteReplicationConfigurationTemplateRequest.t ->
         (DeleteReplicationConfigurationTemplateResponse.t,
-          [ `AWS of DeleteReplicationConfigurationTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteReplicationConfigurationTemplateResponse.error) Result.t
+          Lwt.t
 val delete_source_server :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSourceServerRequest.t ->
-        (DeleteSourceServerResponse.t,
-          [ `AWS of DeleteSourceServerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteSourceServerResponse.t, DeleteSourceServerResponse.error)
+          Result.t Lwt.t
 val describe_job_log_items :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeJobLogItemsRequest.t ->
-        (DescribeJobLogItemsResponse.t,
-          [ `AWS of DescribeJobLogItemsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeJobLogItemsResponse.t, DescribeJobLogItemsResponse.error)
+          Result.t Lwt.t
 val describe_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeJobsRequest.t ->
-        (DescribeJobsResponse.t,
-          [ `AWS of DescribeJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeJobsResponse.t, DescribeJobsResponse.error) Result.t Lwt.t
 val describe_recovery_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRecoveryInstancesRequest.t ->
         (DescribeRecoveryInstancesResponse.t,
-          [ `AWS of DescribeRecoveryInstancesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeRecoveryInstancesResponse.error) Result.t Lwt.t
 val describe_recovery_snapshots :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRecoverySnapshotsRequest.t ->
         (DescribeRecoverySnapshotsResponse.t,
-          [ `AWS of DescribeRecoverySnapshotsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeRecoverySnapshotsResponse.error) Result.t Lwt.t
 val describe_replication_configuration_templates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeReplicationConfigurationTemplatesRequest.t ->
         (DescribeReplicationConfigurationTemplatesResponse.t,
-          [ `AWS of DescribeReplicationConfigurationTemplatesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeReplicationConfigurationTemplatesResponse.error) Result.t
+          Lwt.t
 val describe_source_servers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSourceServersRequest.t ->
         (DescribeSourceServersResponse.t,
-          [ `AWS of DescribeSourceServersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeSourceServersResponse.error) Result.t Lwt.t
 val disconnect_recovery_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DisconnectRecoveryInstanceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DisconnectRecoveryInstanceRequest.t -> (unit, unit) Result.t Lwt.t
 val disconnect_source_server :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisconnectSourceServerRequest.t ->
-        (SourceServer.t,
-          [ `AWS of SourceServer.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SourceServer.t, SourceServer.error) Result.t Lwt.t
 val get_failback_replication_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetFailbackReplicationConfigurationRequest.t ->
         (GetFailbackReplicationConfigurationResponse.t,
-          [ `AWS of GetFailbackReplicationConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetFailbackReplicationConfigurationResponse.error) Result.t Lwt.t
 val get_launch_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLaunchConfigurationRequest.t ->
-        (LaunchConfiguration.t,
-          [ `AWS of LaunchConfiguration.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (LaunchConfiguration.t, LaunchConfiguration.error) Result.t Lwt.t
 val get_replication_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetReplicationConfigurationRequest.t ->
-        (ReplicationConfiguration.t,
-          [ `AWS of ReplicationConfiguration.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ReplicationConfiguration.t, ReplicationConfiguration.error) Result.t
+          Lwt.t
 val initialize_service :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       InitializeServiceRequest.t ->
-        (InitializeServiceResponse.t,
-          [ `AWS of InitializeServiceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (InitializeServiceResponse.t, InitializeServiceResponse.error)
+          Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val retry_data_replication :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RetryDataReplicationRequest.t ->
-        (SourceServer.t,
-          [ `AWS of SourceServer.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SourceServer.t, SourceServer.error) Result.t Lwt.t
 val start_failback_launch :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartFailbackLaunchRequest.t ->
-        (StartFailbackLaunchResponse.t,
-          [ `AWS of StartFailbackLaunchResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartFailbackLaunchResponse.t, StartFailbackLaunchResponse.error)
+          Result.t Lwt.t
 val start_recovery :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartRecoveryRequest.t ->
-        (StartRecoveryResponse.t,
-          [ `AWS of StartRecoveryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartRecoveryResponse.t, StartRecoveryResponse.error) Result.t Lwt.t
 val stop_failback :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      StopFailbackRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> StopFailbackRequest.t -> (unit, unit) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      TagResourceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> TagResourceRequest.t -> (unit, unit) Result.t Lwt.t
 val terminate_recovery_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TerminateRecoveryInstancesRequest.t ->
         (TerminateRecoveryInstancesResponse.t,
-          [ `AWS of TerminateRecoveryInstancesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          TerminateRecoveryInstancesResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      UntagResourceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> UntagResourceRequest.t -> (unit, unit) Result.t Lwt.t
 val update_failback_replication_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateFailbackReplicationConfigurationRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+        (unit, unit) Result.t Lwt.t
 val update_launch_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateLaunchConfigurationRequest.t ->
-        (LaunchConfiguration.t,
-          [ `AWS of LaunchConfiguration.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (LaunchConfiguration.t, LaunchConfiguration.error) Result.t Lwt.t
 val update_replication_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateReplicationConfigurationRequest.t ->
-        (ReplicationConfiguration.t,
-          [ `AWS of ReplicationConfiguration.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ReplicationConfiguration.t, ReplicationConfiguration.error) Result.t
+          Lwt.t
 val update_replication_configuration_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateReplicationConfigurationTemplateRequest.t ->
         (ReplicationConfigurationTemplate.t,
-          [ `AWS of ReplicationConfigurationTemplate.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ReplicationConfigurationTemplate.error) Result.t Lwt.t

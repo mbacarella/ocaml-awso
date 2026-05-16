@@ -3,196 +3,156 @@ open Awso_machinelearning.Values
 val add_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      AddTagsInput.t ->
-        (AddTagsOutput.t,
-          [ `AWS of AddTagsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+      AddTagsInput.t -> (AddTagsOutput.t, AddTagsOutput.error) Result.t Lwt.t
 val create_batch_prediction :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateBatchPredictionInput.t ->
-        (CreateBatchPredictionOutput.t,
-          [ `AWS of CreateBatchPredictionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateBatchPredictionOutput.t, CreateBatchPredictionOutput.error)
+          Result.t Lwt.t
 val create_data_source_from_r_d_s :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDataSourceFromRDSInput.t ->
         (CreateDataSourceFromRDSOutput.t,
-          [ `AWS of CreateDataSourceFromRDSOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateDataSourceFromRDSOutput.error) Result.t Lwt.t
 val create_data_source_from_redshift :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDataSourceFromRedshiftInput.t ->
         (CreateDataSourceFromRedshiftOutput.t,
-          [ `AWS of CreateDataSourceFromRedshiftOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateDataSourceFromRedshiftOutput.error) Result.t Lwt.t
 val create_data_source_from_s3 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDataSourceFromS3Input.t ->
-        (CreateDataSourceFromS3Output.t,
-          [ `AWS of CreateDataSourceFromS3Output.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateDataSourceFromS3Output.t, CreateDataSourceFromS3Output.error)
+          Result.t Lwt.t
 val create_evaluation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateEvaluationInput.t ->
-        (CreateEvaluationOutput.t,
-          [ `AWS of CreateEvaluationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateEvaluationOutput.t, CreateEvaluationOutput.error) Result.t
+          Lwt.t
 val create_m_l_model :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateMLModelInput.t ->
-        (CreateMLModelOutput.t,
-          [ `AWS of CreateMLModelOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateMLModelOutput.t, CreateMLModelOutput.error) Result.t Lwt.t
 val create_realtime_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRealtimeEndpointInput.t ->
-        (CreateRealtimeEndpointOutput.t,
-          [ `AWS of CreateRealtimeEndpointOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateRealtimeEndpointOutput.t, CreateRealtimeEndpointOutput.error)
+          Result.t Lwt.t
 val delete_batch_prediction :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteBatchPredictionInput.t ->
-        (DeleteBatchPredictionOutput.t,
-          [ `AWS of DeleteBatchPredictionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteBatchPredictionOutput.t, DeleteBatchPredictionOutput.error)
+          Result.t Lwt.t
 val delete_data_source :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDataSourceInput.t ->
-        (DeleteDataSourceOutput.t,
-          [ `AWS of DeleteDataSourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteDataSourceOutput.t, DeleteDataSourceOutput.error) Result.t
+          Lwt.t
 val delete_evaluation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteEvaluationInput.t ->
-        (DeleteEvaluationOutput.t,
-          [ `AWS of DeleteEvaluationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteEvaluationOutput.t, DeleteEvaluationOutput.error) Result.t
+          Lwt.t
 val delete_m_l_model :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteMLModelInput.t ->
-        (DeleteMLModelOutput.t,
-          [ `AWS of DeleteMLModelOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteMLModelOutput.t, DeleteMLModelOutput.error) Result.t Lwt.t
 val delete_realtime_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRealtimeEndpointInput.t ->
-        (DeleteRealtimeEndpointOutput.t,
-          [ `AWS of DeleteRealtimeEndpointOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteRealtimeEndpointOutput.t, DeleteRealtimeEndpointOutput.error)
+          Result.t Lwt.t
 val delete_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTagsInput.t ->
-        (DeleteTagsOutput.t,
-          [ `AWS of DeleteTagsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteTagsOutput.t, DeleteTagsOutput.error) Result.t Lwt.t
 val describe_batch_predictions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeBatchPredictionsInput.t ->
         (DescribeBatchPredictionsOutput.t,
-          [ `AWS of DescribeBatchPredictionsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeBatchPredictionsOutput.error) Result.t Lwt.t
 val describe_data_sources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDataSourcesInput.t ->
-        (DescribeDataSourcesOutput.t,
-          [ `AWS of DescribeDataSourcesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeDataSourcesOutput.t, DescribeDataSourcesOutput.error)
+          Result.t Lwt.t
 val describe_evaluations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEvaluationsInput.t ->
-        (DescribeEvaluationsOutput.t,
-          [ `AWS of DescribeEvaluationsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeEvaluationsOutput.t, DescribeEvaluationsOutput.error)
+          Result.t Lwt.t
 val describe_m_l_models :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeMLModelsInput.t ->
-        (DescribeMLModelsOutput.t,
-          [ `AWS of DescribeMLModelsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeMLModelsOutput.t, DescribeMLModelsOutput.error) Result.t
+          Lwt.t
 val describe_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTagsInput.t ->
-        (DescribeTagsOutput.t,
-          [ `AWS of DescribeTagsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeTagsOutput.t, DescribeTagsOutput.error) Result.t Lwt.t
 val get_batch_prediction :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBatchPredictionInput.t ->
-        (GetBatchPredictionOutput.t,
-          [ `AWS of GetBatchPredictionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetBatchPredictionOutput.t, GetBatchPredictionOutput.error) Result.t
+          Lwt.t
 val get_data_source :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDataSourceInput.t ->
-        (GetDataSourceOutput.t,
-          [ `AWS of GetDataSourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetDataSourceOutput.t, GetDataSourceOutput.error) Result.t Lwt.t
 val get_evaluation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEvaluationInput.t ->
-        (GetEvaluationOutput.t,
-          [ `AWS of GetEvaluationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetEvaluationOutput.t, GetEvaluationOutput.error) Result.t Lwt.t
 val get_m_l_model :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMLModelInput.t ->
-        (GetMLModelOutput.t,
-          [ `AWS of GetMLModelOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetMLModelOutput.t, GetMLModelOutput.error) Result.t Lwt.t
 val predict :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PredictInput.t ->
-        (PredictOutput.t,
-          [ `AWS of PredictOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+      PredictInput.t -> (PredictOutput.t, PredictOutput.error) Result.t Lwt.t
 val update_batch_prediction :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateBatchPredictionInput.t ->
-        (UpdateBatchPredictionOutput.t,
-          [ `AWS of UpdateBatchPredictionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateBatchPredictionOutput.t, UpdateBatchPredictionOutput.error)
+          Result.t Lwt.t
 val update_data_source :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDataSourceInput.t ->
-        (UpdateDataSourceOutput.t,
-          [ `AWS of UpdateDataSourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateDataSourceOutput.t, UpdateDataSourceOutput.error) Result.t
+          Lwt.t
 val update_evaluation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateEvaluationInput.t ->
-        (UpdateEvaluationOutput.t,
-          [ `AWS of UpdateEvaluationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateEvaluationOutput.t, UpdateEvaluationOutput.error) Result.t
+          Lwt.t
 val update_m_l_model :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateMLModelInput.t ->
-        (UpdateMLModelOutput.t,
-          [ `AWS of UpdateMLModelOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateMLModelOutput.t, UpdateMLModelOutput.error) Result.t Lwt.t

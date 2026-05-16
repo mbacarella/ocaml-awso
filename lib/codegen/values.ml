@@ -72,6 +72,7 @@ let ec2_error_module () =
            (match message with
             | None -> []
             | Some m -> [ "message", `String m ]))
+      ;;
 
       let of_xml = function
         | `Data _ as xml ->
@@ -95,9 +96,9 @@ let ec2_error_module () =
               Awso.Xml.child_exn xml "Errors"
               |> Awso.Xml.all_children
               |> List.map ~f:(fun error ->
-                   let code = Awso.Xml.child_exn error "Code" |> data in
-                   let message = Awso.Xml.child_exn error "Message" |> data in
-                   string_to_code code, Some message)
+                let code = Awso.Xml.child_exn error "Code" |> data in
+                let message = Awso.Xml.child_exn error "Message" |> data in
+                string_to_code code, Some message)
             in
             match errors with
             | [] -> failwithf "Ec2_error.of_xml: no errors in Ec2 error response" ()

@@ -827,245 +827,234 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | ActivateAnomalyDetector ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ActivateAnomalyDetectorResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (ActivateAnomalyDetectorResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (ActivateAnomalyDetectorResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some ActivateAnomalyDetectorResponse.error_of_json))
   | BackTestAnomalyDetector ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some BackTestAnomalyDetectorResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (BackTestAnomalyDetectorResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (BackTestAnomalyDetectorResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some BackTestAnomalyDetectorResponse.error_of_json))
   | CreateAlert ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateAlertResponse.error_of_json)
-       | Ok resp -> Ok (CreateAlertResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateAlertResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateAlertResponse.error_of_json))
   | CreateAnomalyDetector ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateAnomalyDetectorResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateAnomalyDetectorResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateAnomalyDetectorResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateAnomalyDetectorResponse.error_of_json))
   | CreateMetricSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateMetricSetResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateMetricSetResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateMetricSetResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateMetricSetResponse.error_of_json))
   | DeactivateAnomalyDetector ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeactivateAnomalyDetectorResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DeactivateAnomalyDetectorResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeactivateAnomalyDetectorResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeactivateAnomalyDetectorResponse.error_of_json))
   | DeleteAlert ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteAlertResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteAlertResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteAlertResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some DeleteAlertResponse.error_of_json))
   | DeleteAnomalyDetector ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteAnomalyDetectorResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DeleteAnomalyDetectorResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteAnomalyDetectorResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteAnomalyDetectorResponse.error_of_json))
   | DescribeAlert ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeAlertResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeAlertResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeAlertResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DescribeAlertResponse.error_of_json))
   | DescribeAnomalyDetectionExecutions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeAnomalyDetectionExecutionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeAnomalyDetectionExecutionsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeAnomalyDetectionExecutionsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAnomalyDetectionExecutionsResponse.error_of_json))
   | DescribeAnomalyDetector ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeAnomalyDetectorResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeAnomalyDetectorResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (DescribeAnomalyDetectorResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAnomalyDetectorResponse.error_of_json))
   | DescribeMetricSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeMetricSetResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeMetricSetResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeMetricSetResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeMetricSetResponse.error_of_json))
   | GetAnomalyGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetAnomalyGroupResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetAnomalyGroupResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetAnomalyGroupResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetAnomalyGroupResponse.error_of_json))
   | GetFeedback ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetFeedbackResponse.error_of_json)
-       | Ok resp -> Ok (GetFeedbackResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetFeedbackResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetFeedbackResponse.error_of_json))
   | GetSampleData ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetSampleDataResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetSampleDataResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetSampleDataResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetSampleDataResponse.error_of_json))
   | ListAlerts ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListAlertsResponse.error_of_json)
-       | Ok resp -> Ok (ListAlertsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListAlertsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListAlertsResponse.error_of_json))
   | ListAnomalyDetectors ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListAnomalyDetectorsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListAnomalyDetectorsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListAnomalyDetectorsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListAnomalyDetectorsResponse.error_of_json))
   | ListAnomalyGroupRelatedMetrics ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListAnomalyGroupRelatedMetricsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListAnomalyGroupRelatedMetricsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListAnomalyGroupRelatedMetricsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListAnomalyGroupRelatedMetricsResponse.error_of_json))
   | ListAnomalyGroupSummaries ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListAnomalyGroupSummariesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListAnomalyGroupSummariesResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListAnomalyGroupSummariesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListAnomalyGroupSummariesResponse.error_of_json))
   | ListAnomalyGroupTimeSeries ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListAnomalyGroupTimeSeriesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListAnomalyGroupTimeSeriesResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListAnomalyGroupTimeSeriesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListAnomalyGroupTimeSeriesResponse.error_of_json))
   | ListMetricSets ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListMetricSetsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListMetricSetsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListMetricSetsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListMetricSetsResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | PutFeedback ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutFeedbackResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (PutFeedbackResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (PutFeedbackResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some PutFeedbackResponse.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UntagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateAnomalyDetector ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateAnomalyDetectorResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateAnomalyDetectorResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateAnomalyDetectorResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateAnomalyDetectorResponse.error_of_json))
   | UpdateMetricSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateMetricSetResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateMetricSetResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateMetricSetResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateMetricSetResponse.error_of_json))

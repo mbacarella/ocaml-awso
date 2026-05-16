@@ -5,236 +5,195 @@ val associate_external_connection :
     ?cfg:Awso.Cfg.t ->
       AssociateExternalConnectionRequest.t ->
         (AssociateExternalConnectionResult.t,
-          [ `AWS of AssociateExternalConnectionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssociateExternalConnectionResult.error) Result.t Lwt.t
 val copy_package_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CopyPackageVersionsRequest.t ->
-        (CopyPackageVersionsResult.t,
-          [ `AWS of CopyPackageVersionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CopyPackageVersionsResult.t, CopyPackageVersionsResult.error)
+          Result.t Lwt.t
 val create_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDomainRequest.t ->
-        (CreateDomainResult.t,
-          [ `AWS of CreateDomainResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateDomainResult.t, CreateDomainResult.error) Result.t Lwt.t
 val create_repository :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRepositoryRequest.t ->
-        (CreateRepositoryResult.t,
-          [ `AWS of CreateRepositoryResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateRepositoryResult.t, CreateRepositoryResult.error) Result.t
+          Lwt.t
 val delete_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDomainRequest.t ->
-        (DeleteDomainResult.t,
-          [ `AWS of DeleteDomainResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteDomainResult.t, DeleteDomainResult.error) Result.t Lwt.t
 val delete_domain_permissions_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDomainPermissionsPolicyRequest.t ->
         (DeleteDomainPermissionsPolicyResult.t,
-          [ `AWS of DeleteDomainPermissionsPolicyResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteDomainPermissionsPolicyResult.error) Result.t Lwt.t
 val delete_package_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePackageVersionsRequest.t ->
-        (DeletePackageVersionsResult.t,
-          [ `AWS of DeletePackageVersionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeletePackageVersionsResult.t, DeletePackageVersionsResult.error)
+          Result.t Lwt.t
 val delete_repository :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRepositoryRequest.t ->
-        (DeleteRepositoryResult.t,
-          [ `AWS of DeleteRepositoryResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteRepositoryResult.t, DeleteRepositoryResult.error) Result.t
+          Lwt.t
 val delete_repository_permissions_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRepositoryPermissionsPolicyRequest.t ->
         (DeleteRepositoryPermissionsPolicyResult.t,
-          [ `AWS of DeleteRepositoryPermissionsPolicyResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteRepositoryPermissionsPolicyResult.error) Result.t Lwt.t
 val describe_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDomainRequest.t ->
-        (DescribeDomainResult.t,
-          [ `AWS of DescribeDomainResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeDomainResult.t, DescribeDomainResult.error) Result.t Lwt.t
 val describe_package_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePackageVersionRequest.t ->
-        (DescribePackageVersionResult.t,
-          [ `AWS of DescribePackageVersionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribePackageVersionResult.t, DescribePackageVersionResult.error)
+          Result.t Lwt.t
 val describe_repository :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRepositoryRequest.t ->
-        (DescribeRepositoryResult.t,
-          [ `AWS of DescribeRepositoryResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeRepositoryResult.t, DescribeRepositoryResult.error) Result.t
+          Lwt.t
 val disassociate_external_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateExternalConnectionRequest.t ->
         (DisassociateExternalConnectionResult.t,
-          [ `AWS of DisassociateExternalConnectionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateExternalConnectionResult.error) Result.t Lwt.t
 val dispose_package_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisposePackageVersionsRequest.t ->
-        (DisposePackageVersionsResult.t,
-          [ `AWS of DisposePackageVersionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DisposePackageVersionsResult.t, DisposePackageVersionsResult.error)
+          Result.t Lwt.t
 val get_authorization_token :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAuthorizationTokenRequest.t ->
-        (GetAuthorizationTokenResult.t,
-          [ `AWS of GetAuthorizationTokenResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetAuthorizationTokenResult.t, GetAuthorizationTokenResult.error)
+          Result.t Lwt.t
 val get_domain_permissions_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDomainPermissionsPolicyRequest.t ->
         (GetDomainPermissionsPolicyResult.t,
-          [ `AWS of GetDomainPermissionsPolicyResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetDomainPermissionsPolicyResult.error) Result.t Lwt.t
 val get_package_version_asset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPackageVersionAssetRequest.t ->
-        (GetPackageVersionAssetResult.t,
-          [ `AWS of GetPackageVersionAssetResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetPackageVersionAssetResult.t, GetPackageVersionAssetResult.error)
+          Result.t Lwt.t
 val get_package_version_readme :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPackageVersionReadmeRequest.t ->
         (GetPackageVersionReadmeResult.t,
-          [ `AWS of GetPackageVersionReadmeResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetPackageVersionReadmeResult.error) Result.t Lwt.t
 val get_repository_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRepositoryEndpointRequest.t ->
-        (GetRepositoryEndpointResult.t,
-          [ `AWS of GetRepositoryEndpointResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetRepositoryEndpointResult.t, GetRepositoryEndpointResult.error)
+          Result.t Lwt.t
 val get_repository_permissions_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRepositoryPermissionsPolicyRequest.t ->
         (GetRepositoryPermissionsPolicyResult.t,
-          [ `AWS of GetRepositoryPermissionsPolicyResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetRepositoryPermissionsPolicyResult.error) Result.t Lwt.t
 val list_domains :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDomainsRequest.t ->
-        (ListDomainsResult.t,
-          [ `AWS of ListDomainsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListDomainsResult.t, ListDomainsResult.error) Result.t Lwt.t
 val list_package_version_assets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPackageVersionAssetsRequest.t ->
         (ListPackageVersionAssetsResult.t,
-          [ `AWS of ListPackageVersionAssetsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListPackageVersionAssetsResult.error) Result.t Lwt.t
 val list_package_version_dependencies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPackageVersionDependenciesRequest.t ->
         (ListPackageVersionDependenciesResult.t,
-          [ `AWS of ListPackageVersionDependenciesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListPackageVersionDependenciesResult.error) Result.t Lwt.t
 val list_package_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPackageVersionsRequest.t ->
-        (ListPackageVersionsResult.t,
-          [ `AWS of ListPackageVersionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListPackageVersionsResult.t, ListPackageVersionsResult.error)
+          Result.t Lwt.t
 val list_packages :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPackagesRequest.t ->
-        (ListPackagesResult.t,
-          [ `AWS of ListPackagesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListPackagesResult.t, ListPackagesResult.error) Result.t Lwt.t
 val list_repositories :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRepositoriesRequest.t ->
-        (ListRepositoriesResult.t,
-          [ `AWS of ListRepositoriesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListRepositoriesResult.t, ListRepositoriesResult.error) Result.t
+          Lwt.t
 val list_repositories_in_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRepositoriesInDomainRequest.t ->
         (ListRepositoriesInDomainResult.t,
-          [ `AWS of ListRepositoriesInDomainResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListRepositoriesInDomainResult.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResult.t,
-          [ `AWS of ListTagsForResourceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResult.t, ListTagsForResourceResult.error)
+          Result.t Lwt.t
 val put_domain_permissions_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutDomainPermissionsPolicyRequest.t ->
         (PutDomainPermissionsPolicyResult.t,
-          [ `AWS of PutDomainPermissionsPolicyResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutDomainPermissionsPolicyResult.error) Result.t Lwt.t
 val put_repository_permissions_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutRepositoryPermissionsPolicyRequest.t ->
         (PutRepositoryPermissionsPolicyResult.t,
-          [ `AWS of PutRepositoryPermissionsPolicyResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutRepositoryPermissionsPolicyResult.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResult.t,
-          [ `AWS of TagResourceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResult.t, TagResourceResult.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResult.t,
-          [ `AWS of UntagResourceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResult.t, UntagResourceResult.error) Result.t Lwt.t
 val update_package_versions_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePackageVersionsStatusRequest.t ->
         (UpdatePackageVersionsStatusResult.t,
-          [ `AWS of UpdatePackageVersionsStatusResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdatePackageVersionsStatusResult.error) Result.t Lwt.t
 val update_repository :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateRepositoryRequest.t ->
-        (UpdateRepositoryResult.t,
-          [ `AWS of UpdateRepositoryResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateRepositoryResult.t, UpdateRepositoryResult.error) Result.t
+          Lwt.t

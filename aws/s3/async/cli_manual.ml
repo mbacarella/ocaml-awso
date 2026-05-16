@@ -13,9 +13,7 @@ let failwithf fmt = Format.kasprintf failwith fmt
 let dispatch_exn ~name ~error_to_json ~f =
   match%bind f () with
   | Ok v -> return v
-  | Error (`Transport err) ->
-    failwithf "%s: %s" name (Awso.Http.Io.Error.yojson_of_call err |> Yojson.Safe.pretty_to_string) ()
-  | Error (`AWS aws) ->
+  | Error aws ->
     failwithf "%s: %s" name (aws |> error_to_json |> Yojson.Safe.to_string) ()
 ;;
 

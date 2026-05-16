@@ -5,26 +5,22 @@ val get_routing_control_state :
     ?cfg:Awso.Cfg.t ->
       GetRoutingControlStateRequest.t ->
         (GetRoutingControlStateResponse.t,
-          [ `AWS of GetRoutingControlStateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetRoutingControlStateResponse.error) Result.t Lwt.t
 val list_routing_controls :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRoutingControlsRequest.t ->
-        (ListRoutingControlsResponse.t,
-          [ `AWS of ListRoutingControlsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListRoutingControlsResponse.t, ListRoutingControlsResponse.error)
+          Result.t Lwt.t
 val update_routing_control_state :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateRoutingControlStateRequest.t ->
         (UpdateRoutingControlStateResponse.t,
-          [ `AWS of UpdateRoutingControlStateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateRoutingControlStateResponse.error) Result.t Lwt.t
 val update_routing_control_states :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateRoutingControlStatesRequest.t ->
         (UpdateRoutingControlStatesResponse.t,
-          [ `AWS of UpdateRoutingControlStatesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateRoutingControlStatesResponse.error) Result.t Lwt.t

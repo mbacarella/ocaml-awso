@@ -5,54 +5,44 @@ val create_configuration_set :
     ?cfg:Awso.Cfg.t ->
       CreateConfigurationSetRequest.t ->
         (CreateConfigurationSetResponse.t,
-          [ `AWS of CreateConfigurationSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateConfigurationSetResponse.error) Result.t Async.Deferred.t
 val create_configuration_set_event_destination :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateConfigurationSetEventDestinationRequest.t ->
         (CreateConfigurationSetEventDestinationResponse.t,
-          [ `AWS of CreateConfigurationSetEventDestinationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          CreateConfigurationSetEventDestinationResponse.error) Result.t
           Async.Deferred.t
 val delete_configuration_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteConfigurationSetRequest.t ->
         (DeleteConfigurationSetResponse.t,
-          [ `AWS of DeleteConfigurationSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeleteConfigurationSetResponse.error) Result.t Async.Deferred.t
 val delete_configuration_set_event_destination :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteConfigurationSetEventDestinationRequest.t ->
         (DeleteConfigurationSetEventDestinationResponse.t,
-          [ `AWS of DeleteConfigurationSetEventDestinationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DeleteConfigurationSetEventDestinationResponse.error) Result.t
           Async.Deferred.t
 val get_configuration_set_event_destinations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetConfigurationSetEventDestinationsRequest.t ->
         (GetConfigurationSetEventDestinationsResponse.t,
-          [ `AWS of GetConfigurationSetEventDestinationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetConfigurationSetEventDestinationsResponse.error) Result.t
           Async.Deferred.t
 val send_voice_message :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SendVoiceMessageRequest.t ->
-        (SendVoiceMessageResponse.t,
-          [ `AWS of SendVoiceMessageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (SendVoiceMessageResponse.t, SendVoiceMessageResponse.error) Result.t
           Async.Deferred.t
 val update_configuration_set_event_destination :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateConfigurationSetEventDestinationRequest.t ->
         (UpdateConfigurationSetEventDestinationResponse.t,
-          [ `AWS of UpdateConfigurationSetEventDestinationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          UpdateConfigurationSetEventDestinationResponse.error) Result.t
           Async.Deferred.t

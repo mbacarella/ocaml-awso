@@ -454,165 +454,181 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target", "SimpleWorkflowService.UntagResource")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    let generic_error () = Error (`Transport err) in
-    match err with
-    | `Too_many_redirects -> generic_error ()
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-        (match (error_of_json, ((code >= 400) && (code <= 599))) with
-         | (Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             (match json |> (Yojson.Safe.Util.member "__type") with
-              | `String error_type ->
-                  Error (`AWS (error_of_json error_type json))
-              | `Null -> generic_error ()
-              | _ ->
-                  failwith
-                    (sprintf "Error '__type' did not have string type: %s"
-                       body))
-         | (None, _) | (_, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = None }) in
+    match (error_of_json, ((code >= 400) && (code <= 599))) with
+    | (Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        (match json |> (Yojson.Safe.Util.member "__type") with
+         | `String error_type -> error_of_json error_type json
+         | `Null -> bail ()
+         | _ ->
+             failwith
+               (sprintf "Error '__type' did not have string type: %s" body))
+    | (None, _) | (_, false) -> bail () in
+  let _ = parse_aws_error in
+  let _ = resp in
   match endpoint with
   | CountClosedWorkflowExecutions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some WorkflowExecutionCount.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (WorkflowExecutionCount.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (WorkflowExecutionCount.of_json json)
+      else
+        Error (parse_aws_error (Some WorkflowExecutionCount.error_of_json))
   | CountOpenWorkflowExecutions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some WorkflowExecutionCount.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (WorkflowExecutionCount.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (WorkflowExecutionCount.of_json json)
+      else
+        Error (parse_aws_error (Some WorkflowExecutionCount.error_of_json))
   | CountPendingActivityTasks ->
-      (match resp with
-       | Error err -> handle_error err (Some PendingTaskCount.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (PendingTaskCount.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PendingTaskCount.of_json json)
+      else Error (parse_aws_error (Some PendingTaskCount.error_of_json))
   | CountPendingDecisionTasks ->
-      (match resp with
-       | Error err -> handle_error err (Some PendingTaskCount.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (PendingTaskCount.of_json json))
-  | DeprecateActivityType -> Ok ()
-  | DeprecateDomain -> Ok ()
-  | DeprecateWorkflowType -> Ok ()
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PendingTaskCount.of_json json)
+      else Error (parse_aws_error (Some PendingTaskCount.error_of_json))
+  | DeprecateActivityType ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeprecateDomain ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeprecateWorkflowType ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DescribeActivityType ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ActivityTypeDetail.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ActivityTypeDetail.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ActivityTypeDetail.of_json json)
+      else Error (parse_aws_error (Some ActivityTypeDetail.error_of_json))
   | DescribeDomain ->
-      (match resp with
-       | Error err -> handle_error err (Some DomainDetail.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DomainDetail.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DomainDetail.of_json json)
+      else Error (parse_aws_error (Some DomainDetail.error_of_json))
   | DescribeWorkflowExecution ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some WorkflowExecutionDetail.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (WorkflowExecutionDetail.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (WorkflowExecutionDetail.of_json json)
+      else
+        Error (parse_aws_error (Some WorkflowExecutionDetail.error_of_json))
   | DescribeWorkflowType ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some WorkflowTypeDetail.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (WorkflowTypeDetail.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (WorkflowTypeDetail.of_json json)
+      else Error (parse_aws_error (Some WorkflowTypeDetail.error_of_json))
   | GetWorkflowExecutionHistory ->
-      (match resp with
-       | Error err -> handle_error err (Some History.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (History.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (History.of_json json)
+      else Error (parse_aws_error (Some History.error_of_json))
   | ListActivityTypes ->
-      (match resp with
-       | Error err -> handle_error err (Some ActivityTypeInfos.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ActivityTypeInfos.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ActivityTypeInfos.of_json json)
+      else Error (parse_aws_error (Some ActivityTypeInfos.error_of_json))
   | ListClosedWorkflowExecutions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some WorkflowExecutionInfos.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (WorkflowExecutionInfos.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (WorkflowExecutionInfos.of_json json)
+      else
+        Error (parse_aws_error (Some WorkflowExecutionInfos.error_of_json))
   | ListDomains ->
-      (match resp with
-       | Error err -> handle_error err (Some DomainInfos.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DomainInfos.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DomainInfos.of_json json)
+      else Error (parse_aws_error (Some DomainInfos.error_of_json))
   | ListOpenWorkflowExecutions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some WorkflowExecutionInfos.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (WorkflowExecutionInfos.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (WorkflowExecutionInfos.of_json json)
+      else
+        Error (parse_aws_error (Some WorkflowExecutionInfos.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceOutput.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListTagsForResourceOutput.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListTagsForResourceOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceOutput.error_of_json))
   | ListWorkflowTypes ->
-      (match resp with
-       | Error err -> handle_error err (Some WorkflowTypeInfos.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (WorkflowTypeInfos.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (WorkflowTypeInfos.of_json json)
+      else Error (parse_aws_error (Some WorkflowTypeInfos.error_of_json))
   | PollForActivityTask ->
-      (match resp with
-       | Error err -> handle_error err (Some ActivityTask.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ActivityTask.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ActivityTask.of_json json)
+      else Error (parse_aws_error (Some ActivityTask.error_of_json))
   | PollForDecisionTask ->
-      (match resp with
-       | Error err -> handle_error err (Some DecisionTask.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DecisionTask.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DecisionTask.of_json json)
+      else Error (parse_aws_error (Some DecisionTask.error_of_json))
   | RecordActivityTaskHeartbeat ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ActivityTaskStatus.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ActivityTaskStatus.of_json json))
-  | RegisterActivityType -> Ok ()
-  | RegisterDomain -> Ok ()
-  | RegisterWorkflowType -> Ok ()
-  | RequestCancelWorkflowExecution -> Ok ()
-  | RespondActivityTaskCanceled -> Ok ()
-  | RespondActivityTaskCompleted -> Ok ()
-  | RespondActivityTaskFailed -> Ok ()
-  | RespondDecisionTaskCompleted -> Ok ()
-  | SignalWorkflowExecution -> Ok ()
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ActivityTaskStatus.of_json json)
+      else Error (parse_aws_error (Some ActivityTaskStatus.error_of_json))
+  | RegisterActivityType ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | RegisterDomain ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | RegisterWorkflowType ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | RequestCancelWorkflowExecution ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | RespondActivityTaskCanceled ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | RespondActivityTaskCompleted ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | RespondActivityTaskFailed ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | RespondDecisionTaskCompleted ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | SignalWorkflowExecution ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | StartWorkflowExecution ->
-      (match resp with
-       | Error err -> handle_error err (Some Run.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (Run.of_json json))
-  | TagResource -> Ok ()
-  | TerminateWorkflowExecution -> Ok ()
-  | UndeprecateActivityType -> Ok ()
-  | UndeprecateDomain -> Ok ()
-  | UndeprecateWorkflowType -> Ok ()
-  | UntagResource -> Ok ()
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (Run.of_json json)
+      else Error (parse_aws_error (Some Run.error_of_json))
+  | TagResource -> if is_success then Ok () else Error (parse_aws_error None)
+  | TerminateWorkflowExecution ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UndeprecateActivityType ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UndeprecateDomain ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UndeprecateWorkflowType ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UntagResource ->
+      if is_success then Ok () else Error (parse_aws_error None)

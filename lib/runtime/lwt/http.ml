@@ -14,7 +14,7 @@ module Io : Awso.Http.Io.S with type 'a t := 'a Lwt.t = struct
       -> Awso.Http.Meth.t
       -> Awso.Http.Request.t
       -> Uri.t
-      -> (Awso.Http.Response.t, Awso.Http.Io.Error.call) result Lwt.t
+      -> Awso.Http.Response.t Lwt.t
   end = struct
     let find_xml_redirect_endpoint xml =
       let get x = Awso.Xml.child_exn xml x |> Awso.Xml.string_data_exn in
@@ -33,13 +33,12 @@ module Io : Awso.Http.Io.S with type 'a t := 'a Lwt.t = struct
     ;;
 
     let rec interpret_response ~limit req_body request (resp, body)
-      : (Cohttp.Response.t * Cohttp.Body.t, Awso.Http.Io.Error.call) result Lwt.t
+      : (Cohttp.Response.t * Cohttp.Body.t) Lwt.t
       =
       if limit >= 50
-      then Lwt.return (Error `Too_many_redirects)
+      then Lwt.fail Awso.Http.Io.Error.Too_many_redirects
       else (
         match Cohttp.Response.status resp with
-        | #Cohttp.Code.success_status -> Lwt.return (Ok (resp, body))
         | #Cohttp.Code.redirection_status ->
           Cohttp.Body.to_string body
           >>= fun body ->
@@ -53,25 +52,10 @@ module Io : Awso.Http.Io.S with type 'a t := 'a Lwt.t = struct
             (Cohttp.Request.meth new_request)
             (Cohttp.Request.uri new_request)
           >>= interpret_response ~limit:(succ limit) req_body new_request
-        | code ->
-          Cohttp.Body.to_string body
-          >>= fun body ->
-          let x_amzn_error_type =
-            let headers = Cohttp.Response.headers resp in
-            match Cohttp.Header.get headers "x-amzn-ErrorType" with
-            | None -> None
-            | Some value -> (
-              match String.lsplit2 value ~on:':' with
-              | None -> Some value
-              | Some (v, _) -> Some v)
-          in
-          let bad_response =
-            { Awso.Http.Io.Error.code = Cohttp.Code.code_of_status code
-            ; body
-            ; x_amzn_error_type
-            }
-          in
-          Lwt.return (Error (`Bad_response bad_response)))
+        | _ ->
+          (* Any other HTTP response (2xx success, 4xx/5xx AWS error) flows
+             back to the codegen layer for status-aware parsing. *)
+          Lwt.return (resp, body))
     ;;
 
     let interpret_response = interpret_response ~limit:0
@@ -134,15 +118,13 @@ module Io : Awso.Http.Io.S with type 'a t := 'a Lwt.t = struct
              ~payload_hash
       in
       request_and_follow request req_body
-      >>= function
-      | Error _ as err -> Lwt.return err
-      | Ok (resp, body) ->
-        let version = Cohttp.of_version resp in
-        let headers = Cohttp.of_headers resp in
-        let status = Cohttp.of_status resp in
-        Cohttp.Body.to_string body
-        >|= fun body_str ->
-        Ok (Awso.Http.Response.make ~version ~headers ~body:body_str status)
+      >>= fun (resp, body) ->
+      let version = Cohttp.of_version resp in
+      let headers = Cohttp.of_headers resp in
+      let status = Cohttp.of_status resp in
+      Cohttp.Body.to_string body
+      >|= fun body_str ->
+      Awso.Http.Response.make ~version ~headers ~body:body_str status
     ;;
   end
 

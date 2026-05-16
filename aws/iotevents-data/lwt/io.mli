@@ -5,75 +5,61 @@ val batch_acknowledge_alarm :
     ?cfg:Awso.Cfg.t ->
       BatchAcknowledgeAlarmRequest.t ->
         (BatchAcknowledgeAlarmResponse.t,
-          [ `AWS of BatchAcknowledgeAlarmResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          BatchAcknowledgeAlarmResponse.error) Result.t Lwt.t
 val batch_disable_alarm :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchDisableAlarmRequest.t ->
-        (BatchDisableAlarmResponse.t,
-          [ `AWS of BatchDisableAlarmResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (BatchDisableAlarmResponse.t, BatchDisableAlarmResponse.error)
+          Result.t Lwt.t
 val batch_enable_alarm :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchEnableAlarmRequest.t ->
-        (BatchEnableAlarmResponse.t,
-          [ `AWS of BatchEnableAlarmResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (BatchEnableAlarmResponse.t, BatchEnableAlarmResponse.error) Result.t
+          Lwt.t
 val batch_put_message :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchPutMessageRequest.t ->
-        (BatchPutMessageResponse.t,
-          [ `AWS of BatchPutMessageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (BatchPutMessageResponse.t, BatchPutMessageResponse.error) Result.t
+          Lwt.t
 val batch_reset_alarm :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchResetAlarmRequest.t ->
-        (BatchResetAlarmResponse.t,
-          [ `AWS of BatchResetAlarmResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (BatchResetAlarmResponse.t, BatchResetAlarmResponse.error) Result.t
+          Lwt.t
 val batch_snooze_alarm :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchSnoozeAlarmRequest.t ->
-        (BatchSnoozeAlarmResponse.t,
-          [ `AWS of BatchSnoozeAlarmResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (BatchSnoozeAlarmResponse.t, BatchSnoozeAlarmResponse.error) Result.t
+          Lwt.t
 val batch_update_detector :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchUpdateDetectorRequest.t ->
-        (BatchUpdateDetectorResponse.t,
-          [ `AWS of BatchUpdateDetectorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (BatchUpdateDetectorResponse.t, BatchUpdateDetectorResponse.error)
+          Result.t Lwt.t
 val describe_alarm :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAlarmRequest.t ->
-        (DescribeAlarmResponse.t,
-          [ `AWS of DescribeAlarmResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeAlarmResponse.t, DescribeAlarmResponse.error) Result.t Lwt.t
 val describe_detector :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDetectorRequest.t ->
-        (DescribeDetectorResponse.t,
-          [ `AWS of DescribeDetectorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeDetectorResponse.t, DescribeDetectorResponse.error) Result.t
+          Lwt.t
 val list_alarms :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAlarmsRequest.t ->
-        (ListAlarmsResponse.t,
-          [ `AWS of ListAlarmsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListAlarmsResponse.t, ListAlarmsResponse.error) Result.t Lwt.t
 val list_detectors :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDetectorsRequest.t ->
-        (ListDetectorsResponse.t,
-          [ `AWS of ListDetectorsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListDetectorsResponse.t, ListDetectorsResponse.error) Result.t Lwt.t

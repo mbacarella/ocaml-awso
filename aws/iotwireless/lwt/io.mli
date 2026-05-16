@@ -5,615 +5,526 @@ val associate_aws_account_with_partner_account :
     ?cfg:Awso.Cfg.t ->
       AssociateAwsAccountWithPartnerAccountRequest.t ->
         (AssociateAwsAccountWithPartnerAccountResponse.t,
-          [ `AWS of AssociateAwsAccountWithPartnerAccountResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssociateAwsAccountWithPartnerAccountResponse.error) Result.t Lwt.t
 val associate_multicast_group_with_fuota_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateMulticastGroupWithFuotaTaskRequest.t ->
         (AssociateMulticastGroupWithFuotaTaskResponse.t,
-          [ `AWS of AssociateMulticastGroupWithFuotaTaskResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssociateMulticastGroupWithFuotaTaskResponse.error) Result.t Lwt.t
 val associate_wireless_device_with_fuota_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateWirelessDeviceWithFuotaTaskRequest.t ->
         (AssociateWirelessDeviceWithFuotaTaskResponse.t,
-          [ `AWS of AssociateWirelessDeviceWithFuotaTaskResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssociateWirelessDeviceWithFuotaTaskResponse.error) Result.t Lwt.t
 val associate_wireless_device_with_multicast_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateWirelessDeviceWithMulticastGroupRequest.t ->
         (AssociateWirelessDeviceWithMulticastGroupResponse.t,
-          [ `AWS of AssociateWirelessDeviceWithMulticastGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssociateWirelessDeviceWithMulticastGroupResponse.error) Result.t
+          Lwt.t
 val associate_wireless_device_with_thing :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateWirelessDeviceWithThingRequest.t ->
         (AssociateWirelessDeviceWithThingResponse.t,
-          [ `AWS of AssociateWirelessDeviceWithThingResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssociateWirelessDeviceWithThingResponse.error) Result.t Lwt.t
 val associate_wireless_gateway_with_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateWirelessGatewayWithCertificateRequest.t ->
         (AssociateWirelessGatewayWithCertificateResponse.t,
-          [ `AWS of AssociateWirelessGatewayWithCertificateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssociateWirelessGatewayWithCertificateResponse.error) Result.t
+          Lwt.t
 val associate_wireless_gateway_with_thing :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateWirelessGatewayWithThingRequest.t ->
         (AssociateWirelessGatewayWithThingResponse.t,
-          [ `AWS of AssociateWirelessGatewayWithThingResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssociateWirelessGatewayWithThingResponse.error) Result.t Lwt.t
 val cancel_multicast_group_session :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelMulticastGroupSessionRequest.t ->
         (CancelMulticastGroupSessionResponse.t,
-          [ `AWS of CancelMulticastGroupSessionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CancelMulticastGroupSessionResponse.error) Result.t Lwt.t
 val create_destination :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDestinationRequest.t ->
-        (CreateDestinationResponse.t,
-          [ `AWS of CreateDestinationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateDestinationResponse.t, CreateDestinationResponse.error)
+          Result.t Lwt.t
 val create_device_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDeviceProfileRequest.t ->
-        (CreateDeviceProfileResponse.t,
-          [ `AWS of CreateDeviceProfileResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateDeviceProfileResponse.t, CreateDeviceProfileResponse.error)
+          Result.t Lwt.t
 val create_fuota_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateFuotaTaskRequest.t ->
-        (CreateFuotaTaskResponse.t,
-          [ `AWS of CreateFuotaTaskResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateFuotaTaskResponse.t, CreateFuotaTaskResponse.error) Result.t
+          Lwt.t
 val create_multicast_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateMulticastGroupRequest.t ->
-        (CreateMulticastGroupResponse.t,
-          [ `AWS of CreateMulticastGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateMulticastGroupResponse.t, CreateMulticastGroupResponse.error)
+          Result.t Lwt.t
 val create_service_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateServiceProfileRequest.t ->
-        (CreateServiceProfileResponse.t,
-          [ `AWS of CreateServiceProfileResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateServiceProfileResponse.t, CreateServiceProfileResponse.error)
+          Result.t Lwt.t
 val create_wireless_device :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateWirelessDeviceRequest.t ->
-        (CreateWirelessDeviceResponse.t,
-          [ `AWS of CreateWirelessDeviceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateWirelessDeviceResponse.t, CreateWirelessDeviceResponse.error)
+          Result.t Lwt.t
 val create_wireless_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateWirelessGatewayRequest.t ->
         (CreateWirelessGatewayResponse.t,
-          [ `AWS of CreateWirelessGatewayResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateWirelessGatewayResponse.error) Result.t Lwt.t
 val create_wireless_gateway_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateWirelessGatewayTaskRequest.t ->
         (CreateWirelessGatewayTaskResponse.t,
-          [ `AWS of CreateWirelessGatewayTaskResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateWirelessGatewayTaskResponse.error) Result.t Lwt.t
 val create_wireless_gateway_task_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateWirelessGatewayTaskDefinitionRequest.t ->
         (CreateWirelessGatewayTaskDefinitionResponse.t,
-          [ `AWS of CreateWirelessGatewayTaskDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateWirelessGatewayTaskDefinitionResponse.error) Result.t Lwt.t
 val delete_destination :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDestinationRequest.t ->
-        (DeleteDestinationResponse.t,
-          [ `AWS of DeleteDestinationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteDestinationResponse.t, DeleteDestinationResponse.error)
+          Result.t Lwt.t
 val delete_device_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDeviceProfileRequest.t ->
-        (DeleteDeviceProfileResponse.t,
-          [ `AWS of DeleteDeviceProfileResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteDeviceProfileResponse.t, DeleteDeviceProfileResponse.error)
+          Result.t Lwt.t
 val delete_fuota_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteFuotaTaskRequest.t ->
-        (DeleteFuotaTaskResponse.t,
-          [ `AWS of DeleteFuotaTaskResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteFuotaTaskResponse.t, DeleteFuotaTaskResponse.error) Result.t
+          Lwt.t
 val delete_multicast_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteMulticastGroupRequest.t ->
-        (DeleteMulticastGroupResponse.t,
-          [ `AWS of DeleteMulticastGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteMulticastGroupResponse.t, DeleteMulticastGroupResponse.error)
+          Result.t Lwt.t
 val delete_queued_messages :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteQueuedMessagesRequest.t ->
-        (DeleteQueuedMessagesResponse.t,
-          [ `AWS of DeleteQueuedMessagesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteQueuedMessagesResponse.t, DeleteQueuedMessagesResponse.error)
+          Result.t Lwt.t
 val delete_service_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteServiceProfileRequest.t ->
-        (DeleteServiceProfileResponse.t,
-          [ `AWS of DeleteServiceProfileResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteServiceProfileResponse.t, DeleteServiceProfileResponse.error)
+          Result.t Lwt.t
 val delete_wireless_device :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteWirelessDeviceRequest.t ->
-        (DeleteWirelessDeviceResponse.t,
-          [ `AWS of DeleteWirelessDeviceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteWirelessDeviceResponse.t, DeleteWirelessDeviceResponse.error)
+          Result.t Lwt.t
 val delete_wireless_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteWirelessGatewayRequest.t ->
         (DeleteWirelessGatewayResponse.t,
-          [ `AWS of DeleteWirelessGatewayResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteWirelessGatewayResponse.error) Result.t Lwt.t
 val delete_wireless_gateway_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteWirelessGatewayTaskRequest.t ->
         (DeleteWirelessGatewayTaskResponse.t,
-          [ `AWS of DeleteWirelessGatewayTaskResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteWirelessGatewayTaskResponse.error) Result.t Lwt.t
 val delete_wireless_gateway_task_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteWirelessGatewayTaskDefinitionRequest.t ->
         (DeleteWirelessGatewayTaskDefinitionResponse.t,
-          [ `AWS of DeleteWirelessGatewayTaskDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteWirelessGatewayTaskDefinitionResponse.error) Result.t Lwt.t
 val disassociate_aws_account_from_partner_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateAwsAccountFromPartnerAccountRequest.t ->
         (DisassociateAwsAccountFromPartnerAccountResponse.t,
-          [ `AWS of DisassociateAwsAccountFromPartnerAccountResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateAwsAccountFromPartnerAccountResponse.error) Result.t
+          Lwt.t
 val disassociate_multicast_group_from_fuota_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateMulticastGroupFromFuotaTaskRequest.t ->
         (DisassociateMulticastGroupFromFuotaTaskResponse.t,
-          [ `AWS of DisassociateMulticastGroupFromFuotaTaskResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateMulticastGroupFromFuotaTaskResponse.error) Result.t
+          Lwt.t
 val disassociate_wireless_device_from_fuota_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateWirelessDeviceFromFuotaTaskRequest.t ->
         (DisassociateWirelessDeviceFromFuotaTaskResponse.t,
-          [ `AWS of DisassociateWirelessDeviceFromFuotaTaskResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateWirelessDeviceFromFuotaTaskResponse.error) Result.t
+          Lwt.t
 val disassociate_wireless_device_from_multicast_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateWirelessDeviceFromMulticastGroupRequest.t ->
         (DisassociateWirelessDeviceFromMulticastGroupResponse.t,
-          [
-            `AWS of
-              DisassociateWirelessDeviceFromMulticastGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateWirelessDeviceFromMulticastGroupResponse.error)
+          Result.t Lwt.t
 val disassociate_wireless_device_from_thing :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateWirelessDeviceFromThingRequest.t ->
         (DisassociateWirelessDeviceFromThingResponse.t,
-          [ `AWS of DisassociateWirelessDeviceFromThingResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateWirelessDeviceFromThingResponse.error) Result.t Lwt.t
 val disassociate_wireless_gateway_from_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateWirelessGatewayFromCertificateRequest.t ->
         (DisassociateWirelessGatewayFromCertificateResponse.t,
-          [ `AWS of DisassociateWirelessGatewayFromCertificateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateWirelessGatewayFromCertificateResponse.error) Result.t
+          Lwt.t
 val disassociate_wireless_gateway_from_thing :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateWirelessGatewayFromThingRequest.t ->
         (DisassociateWirelessGatewayFromThingResponse.t,
-          [ `AWS of DisassociateWirelessGatewayFromThingResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateWirelessGatewayFromThingResponse.error) Result.t Lwt.t
 val get_destination :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDestinationRequest.t ->
-        (GetDestinationResponse.t,
-          [ `AWS of GetDestinationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetDestinationResponse.t, GetDestinationResponse.error) Result.t
+          Lwt.t
 val get_device_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDeviceProfileRequest.t ->
-        (GetDeviceProfileResponse.t,
-          [ `AWS of GetDeviceProfileResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetDeviceProfileResponse.t, GetDeviceProfileResponse.error) Result.t
+          Lwt.t
 val get_fuota_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetFuotaTaskRequest.t ->
-        (GetFuotaTaskResponse.t,
-          [ `AWS of GetFuotaTaskResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetFuotaTaskResponse.t, GetFuotaTaskResponse.error) Result.t Lwt.t
 val get_log_levels_by_resource_types :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLogLevelsByResourceTypesRequest.t ->
         (GetLogLevelsByResourceTypesResponse.t,
-          [ `AWS of GetLogLevelsByResourceTypesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetLogLevelsByResourceTypesResponse.error) Result.t Lwt.t
 val get_multicast_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMulticastGroupRequest.t ->
-        (GetMulticastGroupResponse.t,
-          [ `AWS of GetMulticastGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetMulticastGroupResponse.t, GetMulticastGroupResponse.error)
+          Result.t Lwt.t
 val get_multicast_group_session :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMulticastGroupSessionRequest.t ->
         (GetMulticastGroupSessionResponse.t,
-          [ `AWS of GetMulticastGroupSessionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetMulticastGroupSessionResponse.error) Result.t Lwt.t
 val get_network_analyzer_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetNetworkAnalyzerConfigurationRequest.t ->
         (GetNetworkAnalyzerConfigurationResponse.t,
-          [ `AWS of GetNetworkAnalyzerConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetNetworkAnalyzerConfigurationResponse.error) Result.t Lwt.t
 val get_partner_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPartnerAccountRequest.t ->
-        (GetPartnerAccountResponse.t,
-          [ `AWS of GetPartnerAccountResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetPartnerAccountResponse.t, GetPartnerAccountResponse.error)
+          Result.t Lwt.t
 val get_resource_event_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetResourceEventConfigurationRequest.t ->
         (GetResourceEventConfigurationResponse.t,
-          [ `AWS of GetResourceEventConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetResourceEventConfigurationResponse.error) Result.t Lwt.t
 val get_resource_log_level :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetResourceLogLevelRequest.t ->
-        (GetResourceLogLevelResponse.t,
-          [ `AWS of GetResourceLogLevelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetResourceLogLevelResponse.t, GetResourceLogLevelResponse.error)
+          Result.t Lwt.t
 val get_service_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetServiceEndpointRequest.t ->
-        (GetServiceEndpointResponse.t,
-          [ `AWS of GetServiceEndpointResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetServiceEndpointResponse.t, GetServiceEndpointResponse.error)
+          Result.t Lwt.t
 val get_service_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetServiceProfileRequest.t ->
-        (GetServiceProfileResponse.t,
-          [ `AWS of GetServiceProfileResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetServiceProfileResponse.t, GetServiceProfileResponse.error)
+          Result.t Lwt.t
 val get_wireless_device :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetWirelessDeviceRequest.t ->
-        (GetWirelessDeviceResponse.t,
-          [ `AWS of GetWirelessDeviceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetWirelessDeviceResponse.t, GetWirelessDeviceResponse.error)
+          Result.t Lwt.t
 val get_wireless_device_statistics :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetWirelessDeviceStatisticsRequest.t ->
         (GetWirelessDeviceStatisticsResponse.t,
-          [ `AWS of GetWirelessDeviceStatisticsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetWirelessDeviceStatisticsResponse.error) Result.t Lwt.t
 val get_wireless_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetWirelessGatewayRequest.t ->
-        (GetWirelessGatewayResponse.t,
-          [ `AWS of GetWirelessGatewayResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetWirelessGatewayResponse.t, GetWirelessGatewayResponse.error)
+          Result.t Lwt.t
 val get_wireless_gateway_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetWirelessGatewayCertificateRequest.t ->
         (GetWirelessGatewayCertificateResponse.t,
-          [ `AWS of GetWirelessGatewayCertificateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetWirelessGatewayCertificateResponse.error) Result.t Lwt.t
 val get_wireless_gateway_firmware_information :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetWirelessGatewayFirmwareInformationRequest.t ->
         (GetWirelessGatewayFirmwareInformationResponse.t,
-          [ `AWS of GetWirelessGatewayFirmwareInformationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetWirelessGatewayFirmwareInformationResponse.error) Result.t Lwt.t
 val get_wireless_gateway_statistics :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetWirelessGatewayStatisticsRequest.t ->
         (GetWirelessGatewayStatisticsResponse.t,
-          [ `AWS of GetWirelessGatewayStatisticsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetWirelessGatewayStatisticsResponse.error) Result.t Lwt.t
 val get_wireless_gateway_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetWirelessGatewayTaskRequest.t ->
         (GetWirelessGatewayTaskResponse.t,
-          [ `AWS of GetWirelessGatewayTaskResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetWirelessGatewayTaskResponse.error) Result.t Lwt.t
 val get_wireless_gateway_task_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetWirelessGatewayTaskDefinitionRequest.t ->
         (GetWirelessGatewayTaskDefinitionResponse.t,
-          [ `AWS of GetWirelessGatewayTaskDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetWirelessGatewayTaskDefinitionResponse.error) Result.t Lwt.t
 val list_destinations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDestinationsRequest.t ->
-        (ListDestinationsResponse.t,
-          [ `AWS of ListDestinationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListDestinationsResponse.t, ListDestinationsResponse.error) Result.t
+          Lwt.t
 val list_device_profiles :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDeviceProfilesRequest.t ->
-        (ListDeviceProfilesResponse.t,
-          [ `AWS of ListDeviceProfilesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListDeviceProfilesResponse.t, ListDeviceProfilesResponse.error)
+          Result.t Lwt.t
 val list_fuota_tasks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFuotaTasksRequest.t ->
-        (ListFuotaTasksResponse.t,
-          [ `AWS of ListFuotaTasksResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListFuotaTasksResponse.t, ListFuotaTasksResponse.error) Result.t
+          Lwt.t
 val list_multicast_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListMulticastGroupsRequest.t ->
-        (ListMulticastGroupsResponse.t,
-          [ `AWS of ListMulticastGroupsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListMulticastGroupsResponse.t, ListMulticastGroupsResponse.error)
+          Result.t Lwt.t
 val list_multicast_groups_by_fuota_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListMulticastGroupsByFuotaTaskRequest.t ->
         (ListMulticastGroupsByFuotaTaskResponse.t,
-          [ `AWS of ListMulticastGroupsByFuotaTaskResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListMulticastGroupsByFuotaTaskResponse.error) Result.t Lwt.t
 val list_partner_accounts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPartnerAccountsRequest.t ->
-        (ListPartnerAccountsResponse.t,
-          [ `AWS of ListPartnerAccountsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListPartnerAccountsResponse.t, ListPartnerAccountsResponse.error)
+          Result.t Lwt.t
 val list_queued_messages :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListQueuedMessagesRequest.t ->
-        (ListQueuedMessagesResponse.t,
-          [ `AWS of ListQueuedMessagesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListQueuedMessagesResponse.t, ListQueuedMessagesResponse.error)
+          Result.t Lwt.t
 val list_service_profiles :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListServiceProfilesRequest.t ->
-        (ListServiceProfilesResponse.t,
-          [ `AWS of ListServiceProfilesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListServiceProfilesResponse.t, ListServiceProfilesResponse.error)
+          Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val list_wireless_devices :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListWirelessDevicesRequest.t ->
-        (ListWirelessDevicesResponse.t,
-          [ `AWS of ListWirelessDevicesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListWirelessDevicesResponse.t, ListWirelessDevicesResponse.error)
+          Result.t Lwt.t
 val list_wireless_gateway_task_definitions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListWirelessGatewayTaskDefinitionsRequest.t ->
         (ListWirelessGatewayTaskDefinitionsResponse.t,
-          [ `AWS of ListWirelessGatewayTaskDefinitionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListWirelessGatewayTaskDefinitionsResponse.error) Result.t Lwt.t
 val list_wireless_gateways :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListWirelessGatewaysRequest.t ->
-        (ListWirelessGatewaysResponse.t,
-          [ `AWS of ListWirelessGatewaysResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListWirelessGatewaysResponse.t, ListWirelessGatewaysResponse.error)
+          Result.t Lwt.t
 val put_resource_log_level :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutResourceLogLevelRequest.t ->
-        (PutResourceLogLevelResponse.t,
-          [ `AWS of PutResourceLogLevelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutResourceLogLevelResponse.t, PutResourceLogLevelResponse.error)
+          Result.t Lwt.t
 val reset_all_resource_log_levels :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ResetAllResourceLogLevelsRequest.t ->
         (ResetAllResourceLogLevelsResponse.t,
-          [ `AWS of ResetAllResourceLogLevelsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ResetAllResourceLogLevelsResponse.error) Result.t Lwt.t
 val reset_resource_log_level :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ResetResourceLogLevelRequest.t ->
         (ResetResourceLogLevelResponse.t,
-          [ `AWS of ResetResourceLogLevelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ResetResourceLogLevelResponse.error) Result.t Lwt.t
 val send_data_to_multicast_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SendDataToMulticastGroupRequest.t ->
         (SendDataToMulticastGroupResponse.t,
-          [ `AWS of SendDataToMulticastGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          SendDataToMulticastGroupResponse.error) Result.t Lwt.t
 val send_data_to_wireless_device :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SendDataToWirelessDeviceRequest.t ->
         (SendDataToWirelessDeviceResponse.t,
-          [ `AWS of SendDataToWirelessDeviceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          SendDataToWirelessDeviceResponse.error) Result.t Lwt.t
 val start_bulk_associate_wireless_device_with_multicast_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartBulkAssociateWirelessDeviceWithMulticastGroupRequest.t ->
         (StartBulkAssociateWirelessDeviceWithMulticastGroupResponse.t,
-          [
-            `AWS of
-              StartBulkAssociateWirelessDeviceWithMulticastGroupResponse.error
-               | `Transport of Awso.Http.Io.Error.call ])
+          StartBulkAssociateWirelessDeviceWithMulticastGroupResponse.error)
           Result.t Lwt.t
 val start_bulk_disassociate_wireless_device_from_multicast_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartBulkDisassociateWirelessDeviceFromMulticastGroupRequest.t ->
         (StartBulkDisassociateWirelessDeviceFromMulticastGroupResponse.t,
-          [
-            `AWS of
-              StartBulkDisassociateWirelessDeviceFromMulticastGroupResponse.error
-               | `Transport of Awso.Http.Io.Error.call ])
+          StartBulkDisassociateWirelessDeviceFromMulticastGroupResponse.error)
           Result.t Lwt.t
 val start_fuota_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartFuotaTaskRequest.t ->
-        (StartFuotaTaskResponse.t,
-          [ `AWS of StartFuotaTaskResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartFuotaTaskResponse.t, StartFuotaTaskResponse.error) Result.t
+          Lwt.t
 val start_multicast_group_session :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartMulticastGroupSessionRequest.t ->
         (StartMulticastGroupSessionResponse.t,
-          [ `AWS of StartMulticastGroupSessionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartMulticastGroupSessionResponse.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val test_wireless_device :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TestWirelessDeviceRequest.t ->
-        (TestWirelessDeviceResponse.t,
-          [ `AWS of TestWirelessDeviceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TestWirelessDeviceResponse.t, TestWirelessDeviceResponse.error)
+          Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_destination :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDestinationRequest.t ->
-        (UpdateDestinationResponse.t,
-          [ `AWS of UpdateDestinationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateDestinationResponse.t, UpdateDestinationResponse.error)
+          Result.t Lwt.t
 val update_fuota_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateFuotaTaskRequest.t ->
-        (UpdateFuotaTaskResponse.t,
-          [ `AWS of UpdateFuotaTaskResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateFuotaTaskResponse.t, UpdateFuotaTaskResponse.error) Result.t
+          Lwt.t
 val update_log_levels_by_resource_types :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateLogLevelsByResourceTypesRequest.t ->
         (UpdateLogLevelsByResourceTypesResponse.t,
-          [ `AWS of UpdateLogLevelsByResourceTypesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateLogLevelsByResourceTypesResponse.error) Result.t Lwt.t
 val update_multicast_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateMulticastGroupRequest.t ->
-        (UpdateMulticastGroupResponse.t,
-          [ `AWS of UpdateMulticastGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateMulticastGroupResponse.t, UpdateMulticastGroupResponse.error)
+          Result.t Lwt.t
 val update_network_analyzer_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateNetworkAnalyzerConfigurationRequest.t ->
         (UpdateNetworkAnalyzerConfigurationResponse.t,
-          [ `AWS of UpdateNetworkAnalyzerConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateNetworkAnalyzerConfigurationResponse.error) Result.t Lwt.t
 val update_partner_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePartnerAccountRequest.t ->
-        (UpdatePartnerAccountResponse.t,
-          [ `AWS of UpdatePartnerAccountResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdatePartnerAccountResponse.t, UpdatePartnerAccountResponse.error)
+          Result.t Lwt.t
 val update_resource_event_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateResourceEventConfigurationRequest.t ->
         (UpdateResourceEventConfigurationResponse.t,
-          [ `AWS of UpdateResourceEventConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateResourceEventConfigurationResponse.error) Result.t Lwt.t
 val update_wireless_device :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateWirelessDeviceRequest.t ->
-        (UpdateWirelessDeviceResponse.t,
-          [ `AWS of UpdateWirelessDeviceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateWirelessDeviceResponse.t, UpdateWirelessDeviceResponse.error)
+          Result.t Lwt.t
 val update_wireless_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateWirelessGatewayRequest.t ->
         (UpdateWirelessGatewayResponse.t,
-          [ `AWS of UpdateWirelessGatewayResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateWirelessGatewayResponse.error) Result.t Lwt.t

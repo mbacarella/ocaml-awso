@@ -453,224 +453,235 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_xml =
-    let generic_error () = Error (`Transport err) in
-    match err with
-    | `Too_many_redirects -> generic_error ()
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-        (match (error_of_xml, ((code >= 400) && (code <= 599))) with
-         | (None, _) | (_, false) -> generic_error ()
-         | (Some error_of_xml, true) ->
-             (match Awso.Xml.parse_response body with
-              | `Data _ -> generic_error ()
-              | `El (((_, "ErrorResponse"), _), _) as error_response_xml ->
-                  let error_xml =
-                    Awso.Xml.child_exn error_response_xml "Error" in
-                  (try
-                     let error_code =
-                       match Awso.Xml.child_exn error_xml "Code" with
-                       | `Data error_code -> error_code
-                       | `El (_, children) ->
-                           (List.map children
-                              ~f:(function | `Data s -> s | `El _ -> ""))
-                             |> (String.concat ~sep:"") in
-                     Error
-                       (`AWS
-                          (error_of_xml (String.strip error_code) error_xml))
-                   with | Failure _ -> generic_error ())
-              | `El _ -> generic_error ())) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let parse_aws_error error_of_xml =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = None }) in
+    match (error_of_xml, ((code >= 400) && (code <= 599))) with
+    | (None, _) | (_, false) -> bail ()
+    | (Some error_of_xml, true) ->
+        (match Awso.Xml.parse_response body with
+         | `Data _ -> bail ()
+         | `El (((_, "ErrorResponse"), _), _) as error_response_xml ->
+             let error_xml = Awso.Xml.child_exn error_response_xml "Error" in
+             (try
+                let error_code =
+                  match Awso.Xml.child_exn error_xml "Code" with
+                  | `Data error_code -> error_code
+                  | `El (_, children) ->
+                      (List.map children
+                         ~f:(function | `Data s -> s | `El _ -> ""))
+                        |> (String.concat ~sep:"") in
+                error_of_xml (String.strip error_code) error_xml
+              with | Failure _ -> bail ())
+         | `El _ -> bail ()) in
+  let _ = parse_aws_error in
+  let _ = resp in
   match endpoint with
   | BuildSuggesters ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some BuildSuggestersResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (BuildSuggestersResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (BuildSuggestersResponse.of_xml xml)
+      else
+        Error (parse_aws_error (Some BuildSuggestersResponse.error_of_xml))
   | CreateDomain ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateDomainResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateDomainResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateDomainResponse.of_xml xml)
+      else Error (parse_aws_error (Some CreateDomainResponse.error_of_xml))
   | DefineAnalysisScheme ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DefineAnalysisSchemeResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DefineAnalysisSchemeResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DefineAnalysisSchemeResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DefineAnalysisSchemeResponse.error_of_xml))
   | DefineExpression ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DefineExpressionResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DefineExpressionResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DefineExpressionResponse.of_xml xml)
+      else
+        Error (parse_aws_error (Some DefineExpressionResponse.error_of_xml))
   | DefineIndexField ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DefineIndexFieldResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DefineIndexFieldResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DefineIndexFieldResponse.of_xml xml)
+      else
+        Error (parse_aws_error (Some DefineIndexFieldResponse.error_of_xml))
   | DefineSuggester ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DefineSuggesterResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DefineSuggesterResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DefineSuggesterResponse.of_xml xml)
+      else
+        Error (parse_aws_error (Some DefineSuggesterResponse.error_of_xml))
   | DeleteAnalysisScheme ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteAnalysisSchemeResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeleteAnalysisSchemeResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteAnalysisSchemeResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DeleteAnalysisSchemeResponse.error_of_xml))
   | DeleteDomain ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteDomainResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeleteDomainResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteDomainResponse.of_xml xml)
+      else Error (parse_aws_error (Some DeleteDomainResponse.error_of_xml))
   | DeleteExpression ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteExpressionResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeleteExpressionResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteExpressionResponse.of_xml xml)
+      else
+        Error (parse_aws_error (Some DeleteExpressionResponse.error_of_xml))
   | DeleteIndexField ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteIndexFieldResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeleteIndexFieldResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteIndexFieldResponse.of_xml xml)
+      else
+        Error (parse_aws_error (Some DeleteIndexFieldResponse.error_of_xml))
   | DeleteSuggester ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteSuggesterResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeleteSuggesterResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteSuggesterResponse.of_xml xml)
+      else
+        Error (parse_aws_error (Some DeleteSuggesterResponse.error_of_xml))
   | DescribeAnalysisSchemes ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeAnalysisSchemesResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeAnalysisSchemesResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeAnalysisSchemesResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAnalysisSchemesResponse.error_of_xml))
   | DescribeAvailabilityOptions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeAvailabilityOptionsResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeAvailabilityOptionsResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeAvailabilityOptionsResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAvailabilityOptionsResponse.error_of_xml))
   | DescribeDomainEndpointOptions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeDomainEndpointOptionsResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeDomainEndpointOptionsResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeDomainEndpointOptionsResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeDomainEndpointOptionsResponse.error_of_xml))
   | DescribeDomains ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeDomainsResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeDomainsResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeDomainsResponse.of_xml xml)
+      else
+        Error (parse_aws_error (Some DescribeDomainsResponse.error_of_xml))
   | DescribeExpressions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeExpressionsResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeExpressionsResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeExpressionsResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DescribeExpressionsResponse.error_of_xml))
   | DescribeIndexFields ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeIndexFieldsResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeIndexFieldsResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeIndexFieldsResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DescribeIndexFieldsResponse.error_of_xml))
   | DescribeScalingParameters ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeScalingParametersResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeScalingParametersResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeScalingParametersResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeScalingParametersResponse.error_of_xml))
   | DescribeServiceAccessPolicies ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeServiceAccessPoliciesResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeServiceAccessPoliciesResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeServiceAccessPoliciesResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeServiceAccessPoliciesResponse.error_of_xml))
   | DescribeSuggesters ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeSuggestersResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeSuggestersResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeSuggestersResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DescribeSuggestersResponse.error_of_xml))
   | IndexDocuments ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some IndexDocumentsResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (IndexDocumentsResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (IndexDocumentsResponse.of_xml xml)
+      else Error (parse_aws_error (Some IndexDocumentsResponse.error_of_xml))
   | ListDomainNames ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListDomainNamesResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListDomainNamesResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListDomainNamesResponse.of_xml xml)
+      else
+        Error (parse_aws_error (Some ListDomainNamesResponse.error_of_xml))
   | UpdateAvailabilityOptions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateAvailabilityOptionsResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (UpdateAvailabilityOptionsResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (UpdateAvailabilityOptionsResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateAvailabilityOptionsResponse.error_of_xml))
   | UpdateDomainEndpointOptions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateDomainEndpointOptionsResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (UpdateDomainEndpointOptionsResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (UpdateDomainEndpointOptionsResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateDomainEndpointOptionsResponse.error_of_xml))
   | UpdateScalingParameters ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateScalingParametersResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (UpdateScalingParametersResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (UpdateScalingParametersResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateScalingParametersResponse.error_of_xml))
   | UpdateServiceAccessPolicies ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateServiceAccessPoliciesResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (UpdateServiceAccessPoliciesResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (UpdateServiceAccessPoliciesResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateServiceAccessPoliciesResponse.error_of_xml))

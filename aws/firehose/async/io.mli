@@ -4,95 +4,71 @@ val create_delivery_stream :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDeliveryStreamInput.t ->
-        (CreateDeliveryStreamOutput.t,
-          [ `AWS of CreateDeliveryStreamOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateDeliveryStreamOutput.t, CreateDeliveryStreamOutput.error)
+          Result.t Async.Deferred.t
 val delete_delivery_stream :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDeliveryStreamInput.t ->
-        (DeleteDeliveryStreamOutput.t,
-          [ `AWS of DeleteDeliveryStreamOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteDeliveryStreamOutput.t, DeleteDeliveryStreamOutput.error)
+          Result.t Async.Deferred.t
 val describe_delivery_stream :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDeliveryStreamInput.t ->
-        (DescribeDeliveryStreamOutput.t,
-          [ `AWS of DescribeDeliveryStreamOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeDeliveryStreamOutput.t, DescribeDeliveryStreamOutput.error)
+          Result.t Async.Deferred.t
 val list_delivery_streams :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDeliveryStreamsInput.t ->
-        (ListDeliveryStreamsOutput.t,
-          [ `AWS of ListDeliveryStreamsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListDeliveryStreamsOutput.t, ListDeliveryStreamsOutput.error)
+          Result.t Async.Deferred.t
 val list_tags_for_delivery_stream :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForDeliveryStreamInput.t ->
         (ListTagsForDeliveryStreamOutput.t,
-          [ `AWS of ListTagsForDeliveryStreamOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListTagsForDeliveryStreamOutput.error) Result.t Async.Deferred.t
 val put_record :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutRecordInput.t ->
-        (PutRecordOutput.t,
-          [ `AWS of PutRecordOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (PutRecordOutput.t, PutRecordOutput.error) Result.t Async.Deferred.t
 val put_record_batch :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutRecordBatchInput.t ->
-        (PutRecordBatchOutput.t,
-          [ `AWS of PutRecordBatchOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (PutRecordBatchOutput.t, PutRecordBatchOutput.error) Result.t
           Async.Deferred.t
 val start_delivery_stream_encryption :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartDeliveryStreamEncryptionInput.t ->
         (StartDeliveryStreamEncryptionOutput.t,
-          [ `AWS of StartDeliveryStreamEncryptionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          StartDeliveryStreamEncryptionOutput.error) Result.t
           Async.Deferred.t
 val stop_delivery_stream_encryption :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopDeliveryStreamEncryptionInput.t ->
         (StopDeliveryStreamEncryptionOutput.t,
-          [ `AWS of StopDeliveryStreamEncryptionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          StopDeliveryStreamEncryptionOutput.error) Result.t Async.Deferred.t
 val tag_delivery_stream :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagDeliveryStreamInput.t ->
-        (TagDeliveryStreamOutput.t,
-          [ `AWS of TagDeliveryStreamOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagDeliveryStreamOutput.t, TagDeliveryStreamOutput.error) Result.t
           Async.Deferred.t
 val untag_delivery_stream :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagDeliveryStreamInput.t ->
-        (UntagDeliveryStreamOutput.t,
-          [ `AWS of UntagDeliveryStreamOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UntagDeliveryStreamOutput.t, UntagDeliveryStreamOutput.error)
+          Result.t Async.Deferred.t
 val update_destination :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDestinationInput.t ->
-        (UpdateDestinationOutput.t,
-          [ `AWS of UpdateDestinationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateDestinationOutput.t, UpdateDestinationOutput.error) Result.t
           Async.Deferred.t

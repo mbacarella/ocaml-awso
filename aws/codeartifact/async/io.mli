@@ -5,270 +5,208 @@ val associate_external_connection :
     ?cfg:Awso.Cfg.t ->
       AssociateExternalConnectionRequest.t ->
         (AssociateExternalConnectionResult.t,
-          [ `AWS of AssociateExternalConnectionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          AssociateExternalConnectionResult.error) Result.t Async.Deferred.t
 val copy_package_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CopyPackageVersionsRequest.t ->
-        (CopyPackageVersionsResult.t,
-          [ `AWS of CopyPackageVersionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CopyPackageVersionsResult.t, CopyPackageVersionsResult.error)
+          Result.t Async.Deferred.t
 val create_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDomainRequest.t ->
-        (CreateDomainResult.t,
-          [ `AWS of CreateDomainResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateDomainResult.t, CreateDomainResult.error) Result.t
           Async.Deferred.t
 val create_repository :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRepositoryRequest.t ->
-        (CreateRepositoryResult.t,
-          [ `AWS of CreateRepositoryResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateRepositoryResult.t, CreateRepositoryResult.error) Result.t
           Async.Deferred.t
 val delete_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDomainRequest.t ->
-        (DeleteDomainResult.t,
-          [ `AWS of DeleteDomainResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteDomainResult.t, DeleteDomainResult.error) Result.t
           Async.Deferred.t
 val delete_domain_permissions_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDomainPermissionsPolicyRequest.t ->
         (DeleteDomainPermissionsPolicyResult.t,
-          [ `AWS of DeleteDomainPermissionsPolicyResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DeleteDomainPermissionsPolicyResult.error) Result.t
           Async.Deferred.t
 val delete_package_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePackageVersionsRequest.t ->
-        (DeletePackageVersionsResult.t,
-          [ `AWS of DeletePackageVersionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeletePackageVersionsResult.t, DeletePackageVersionsResult.error)
+          Result.t Async.Deferred.t
 val delete_repository :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRepositoryRequest.t ->
-        (DeleteRepositoryResult.t,
-          [ `AWS of DeleteRepositoryResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteRepositoryResult.t, DeleteRepositoryResult.error) Result.t
           Async.Deferred.t
 val delete_repository_permissions_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRepositoryPermissionsPolicyRequest.t ->
         (DeleteRepositoryPermissionsPolicyResult.t,
-          [ `AWS of DeleteRepositoryPermissionsPolicyResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DeleteRepositoryPermissionsPolicyResult.error) Result.t
           Async.Deferred.t
 val describe_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDomainRequest.t ->
-        (DescribeDomainResult.t,
-          [ `AWS of DescribeDomainResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeDomainResult.t, DescribeDomainResult.error) Result.t
           Async.Deferred.t
 val describe_package_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePackageVersionRequest.t ->
-        (DescribePackageVersionResult.t,
-          [ `AWS of DescribePackageVersionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribePackageVersionResult.t, DescribePackageVersionResult.error)
+          Result.t Async.Deferred.t
 val describe_repository :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRepositoryRequest.t ->
-        (DescribeRepositoryResult.t,
-          [ `AWS of DescribeRepositoryResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeRepositoryResult.t, DescribeRepositoryResult.error) Result.t
           Async.Deferred.t
 val disassociate_external_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateExternalConnectionRequest.t ->
         (DisassociateExternalConnectionResult.t,
-          [ `AWS of DisassociateExternalConnectionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DisassociateExternalConnectionResult.error) Result.t
           Async.Deferred.t
 val dispose_package_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisposePackageVersionsRequest.t ->
-        (DisposePackageVersionsResult.t,
-          [ `AWS of DisposePackageVersionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DisposePackageVersionsResult.t, DisposePackageVersionsResult.error)
+          Result.t Async.Deferred.t
 val get_authorization_token :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAuthorizationTokenRequest.t ->
-        (GetAuthorizationTokenResult.t,
-          [ `AWS of GetAuthorizationTokenResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetAuthorizationTokenResult.t, GetAuthorizationTokenResult.error)
+          Result.t Async.Deferred.t
 val get_domain_permissions_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDomainPermissionsPolicyRequest.t ->
         (GetDomainPermissionsPolicyResult.t,
-          [ `AWS of GetDomainPermissionsPolicyResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetDomainPermissionsPolicyResult.error) Result.t Async.Deferred.t
 val get_package_version_asset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPackageVersionAssetRequest.t ->
-        (GetPackageVersionAssetResult.t,
-          [ `AWS of GetPackageVersionAssetResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetPackageVersionAssetResult.t, GetPackageVersionAssetResult.error)
+          Result.t Async.Deferred.t
 val get_package_version_readme :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPackageVersionReadmeRequest.t ->
         (GetPackageVersionReadmeResult.t,
-          [ `AWS of GetPackageVersionReadmeResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetPackageVersionReadmeResult.error) Result.t Async.Deferred.t
 val get_repository_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRepositoryEndpointRequest.t ->
-        (GetRepositoryEndpointResult.t,
-          [ `AWS of GetRepositoryEndpointResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetRepositoryEndpointResult.t, GetRepositoryEndpointResult.error)
+          Result.t Async.Deferred.t
 val get_repository_permissions_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRepositoryPermissionsPolicyRequest.t ->
         (GetRepositoryPermissionsPolicyResult.t,
-          [ `AWS of GetRepositoryPermissionsPolicyResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetRepositoryPermissionsPolicyResult.error) Result.t
           Async.Deferred.t
 val list_domains :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDomainsRequest.t ->
-        (ListDomainsResult.t,
-          [ `AWS of ListDomainsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListDomainsResult.t, ListDomainsResult.error) Result.t
           Async.Deferred.t
 val list_package_version_assets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPackageVersionAssetsRequest.t ->
         (ListPackageVersionAssetsResult.t,
-          [ `AWS of ListPackageVersionAssetsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListPackageVersionAssetsResult.error) Result.t Async.Deferred.t
 val list_package_version_dependencies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPackageVersionDependenciesRequest.t ->
         (ListPackageVersionDependenciesResult.t,
-          [ `AWS of ListPackageVersionDependenciesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListPackageVersionDependenciesResult.error) Result.t
           Async.Deferred.t
 val list_package_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPackageVersionsRequest.t ->
-        (ListPackageVersionsResult.t,
-          [ `AWS of ListPackageVersionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListPackageVersionsResult.t, ListPackageVersionsResult.error)
+          Result.t Async.Deferred.t
 val list_packages :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPackagesRequest.t ->
-        (ListPackagesResult.t,
-          [ `AWS of ListPackagesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListPackagesResult.t, ListPackagesResult.error) Result.t
           Async.Deferred.t
 val list_repositories :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRepositoriesRequest.t ->
-        (ListRepositoriesResult.t,
-          [ `AWS of ListRepositoriesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListRepositoriesResult.t, ListRepositoriesResult.error) Result.t
           Async.Deferred.t
 val list_repositories_in_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRepositoriesInDomainRequest.t ->
         (ListRepositoriesInDomainResult.t,
-          [ `AWS of ListRepositoriesInDomainResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListRepositoriesInDomainResult.error) Result.t Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResult.t,
-          [ `AWS of ListTagsForResourceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResult.t, ListTagsForResourceResult.error)
+          Result.t Async.Deferred.t
 val put_domain_permissions_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutDomainPermissionsPolicyRequest.t ->
         (PutDomainPermissionsPolicyResult.t,
-          [ `AWS of PutDomainPermissionsPolicyResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          PutDomainPermissionsPolicyResult.error) Result.t Async.Deferred.t
 val put_repository_permissions_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutRepositoryPermissionsPolicyRequest.t ->
         (PutRepositoryPermissionsPolicyResult.t,
-          [ `AWS of PutRepositoryPermissionsPolicyResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          PutRepositoryPermissionsPolicyResult.error) Result.t
           Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResult.t,
-          [ `AWS of TagResourceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResult.t, TagResourceResult.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResult.t,
-          [ `AWS of UntagResourceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResult.t, UntagResourceResult.error) Result.t
           Async.Deferred.t
 val update_package_versions_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePackageVersionsStatusRequest.t ->
         (UpdatePackageVersionsStatusResult.t,
-          [ `AWS of UpdatePackageVersionsStatusResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdatePackageVersionsStatusResult.error) Result.t Async.Deferred.t
 val update_repository :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateRepositoryRequest.t ->
-        (UpdateRepositoryResult.t,
-          [ `AWS of UpdateRepositoryResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateRepositoryResult.t, UpdateRepositoryResult.error) Result.t
           Async.Deferred.t

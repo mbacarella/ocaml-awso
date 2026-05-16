@@ -4,7 +4,5 @@ val query_forecast :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       QueryForecastRequest.t ->
-        (QueryForecastResponse.t,
-          [ `AWS of QueryForecastResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (QueryForecastResponse.t, QueryForecastResponse.error) Result.t
           Async.Deferred.t

@@ -4,293 +4,238 @@ val cancel_task_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelTaskExecutionRequest.t ->
-        (CancelTaskExecutionResponse.t,
-          [ `AWS of CancelTaskExecutionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CancelTaskExecutionResponse.t, CancelTaskExecutionResponse.error)
+          Result.t Lwt.t
 val create_agent :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAgentRequest.t ->
-        (CreateAgentResponse.t,
-          [ `AWS of CreateAgentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateAgentResponse.t, CreateAgentResponse.error) Result.t Lwt.t
 val create_location_efs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateLocationEfsRequest.t ->
-        (CreateLocationEfsResponse.t,
-          [ `AWS of CreateLocationEfsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateLocationEfsResponse.t, CreateLocationEfsResponse.error)
+          Result.t Lwt.t
 val create_location_fsx_lustre :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateLocationFsxLustreRequest.t ->
         (CreateLocationFsxLustreResponse.t,
-          [ `AWS of CreateLocationFsxLustreResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateLocationFsxLustreResponse.error) Result.t Lwt.t
 val create_location_fsx_open_zfs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateLocationFsxOpenZfsRequest.t ->
         (CreateLocationFsxOpenZfsResponse.t,
-          [ `AWS of CreateLocationFsxOpenZfsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateLocationFsxOpenZfsResponse.error) Result.t Lwt.t
 val create_location_fsx_windows :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateLocationFsxWindowsRequest.t ->
         (CreateLocationFsxWindowsResponse.t,
-          [ `AWS of CreateLocationFsxWindowsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateLocationFsxWindowsResponse.error) Result.t Lwt.t
 val create_location_hdfs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateLocationHdfsRequest.t ->
-        (CreateLocationHdfsResponse.t,
-          [ `AWS of CreateLocationHdfsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateLocationHdfsResponse.t, CreateLocationHdfsResponse.error)
+          Result.t Lwt.t
 val create_location_nfs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateLocationNfsRequest.t ->
-        (CreateLocationNfsResponse.t,
-          [ `AWS of CreateLocationNfsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateLocationNfsResponse.t, CreateLocationNfsResponse.error)
+          Result.t Lwt.t
 val create_location_object_storage :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateLocationObjectStorageRequest.t ->
         (CreateLocationObjectStorageResponse.t,
-          [ `AWS of CreateLocationObjectStorageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateLocationObjectStorageResponse.error) Result.t Lwt.t
 val create_location_s3 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateLocationS3Request.t ->
-        (CreateLocationS3Response.t,
-          [ `AWS of CreateLocationS3Response.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateLocationS3Response.t, CreateLocationS3Response.error) Result.t
+          Lwt.t
 val create_location_smb :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateLocationSmbRequest.t ->
-        (CreateLocationSmbResponse.t,
-          [ `AWS of CreateLocationSmbResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateLocationSmbResponse.t, CreateLocationSmbResponse.error)
+          Result.t Lwt.t
 val create_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTaskRequest.t ->
-        (CreateTaskResponse.t,
-          [ `AWS of CreateTaskResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateTaskResponse.t, CreateTaskResponse.error) Result.t Lwt.t
 val delete_agent :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAgentRequest.t ->
-        (DeleteAgentResponse.t,
-          [ `AWS of DeleteAgentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteAgentResponse.t, DeleteAgentResponse.error) Result.t Lwt.t
 val delete_location :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteLocationRequest.t ->
-        (DeleteLocationResponse.t,
-          [ `AWS of DeleteLocationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteLocationResponse.t, DeleteLocationResponse.error) Result.t
+          Lwt.t
 val delete_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTaskRequest.t ->
-        (DeleteTaskResponse.t,
-          [ `AWS of DeleteTaskResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteTaskResponse.t, DeleteTaskResponse.error) Result.t Lwt.t
 val describe_agent :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAgentRequest.t ->
-        (DescribeAgentResponse.t,
-          [ `AWS of DescribeAgentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeAgentResponse.t, DescribeAgentResponse.error) Result.t Lwt.t
 val describe_location_efs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeLocationEfsRequest.t ->
-        (DescribeLocationEfsResponse.t,
-          [ `AWS of DescribeLocationEfsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeLocationEfsResponse.t, DescribeLocationEfsResponse.error)
+          Result.t Lwt.t
 val describe_location_fsx_lustre :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeLocationFsxLustreRequest.t ->
         (DescribeLocationFsxLustreResponse.t,
-          [ `AWS of DescribeLocationFsxLustreResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeLocationFsxLustreResponse.error) Result.t Lwt.t
 val describe_location_fsx_open_zfs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeLocationFsxOpenZfsRequest.t ->
         (DescribeLocationFsxOpenZfsResponse.t,
-          [ `AWS of DescribeLocationFsxOpenZfsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeLocationFsxOpenZfsResponse.error) Result.t Lwt.t
 val describe_location_fsx_windows :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeLocationFsxWindowsRequest.t ->
         (DescribeLocationFsxWindowsResponse.t,
-          [ `AWS of DescribeLocationFsxWindowsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeLocationFsxWindowsResponse.error) Result.t Lwt.t
 val describe_location_hdfs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeLocationHdfsRequest.t ->
-        (DescribeLocationHdfsResponse.t,
-          [ `AWS of DescribeLocationHdfsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeLocationHdfsResponse.t, DescribeLocationHdfsResponse.error)
+          Result.t Lwt.t
 val describe_location_nfs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeLocationNfsRequest.t ->
-        (DescribeLocationNfsResponse.t,
-          [ `AWS of DescribeLocationNfsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeLocationNfsResponse.t, DescribeLocationNfsResponse.error)
+          Result.t Lwt.t
 val describe_location_object_storage :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeLocationObjectStorageRequest.t ->
         (DescribeLocationObjectStorageResponse.t,
-          [ `AWS of DescribeLocationObjectStorageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeLocationObjectStorageResponse.error) Result.t Lwt.t
 val describe_location_s3 :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeLocationS3Request.t ->
-        (DescribeLocationS3Response.t,
-          [ `AWS of DescribeLocationS3Response.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeLocationS3Response.t, DescribeLocationS3Response.error)
+          Result.t Lwt.t
 val describe_location_smb :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeLocationSmbRequest.t ->
-        (DescribeLocationSmbResponse.t,
-          [ `AWS of DescribeLocationSmbResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeLocationSmbResponse.t, DescribeLocationSmbResponse.error)
+          Result.t Lwt.t
 val describe_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTaskRequest.t ->
-        (DescribeTaskResponse.t,
-          [ `AWS of DescribeTaskResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeTaskResponse.t, DescribeTaskResponse.error) Result.t Lwt.t
 val describe_task_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTaskExecutionRequest.t ->
         (DescribeTaskExecutionResponse.t,
-          [ `AWS of DescribeTaskExecutionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeTaskExecutionResponse.error) Result.t Lwt.t
 val list_agents :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAgentsRequest.t ->
-        (ListAgentsResponse.t,
-          [ `AWS of ListAgentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListAgentsResponse.t, ListAgentsResponse.error) Result.t Lwt.t
 val list_locations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListLocationsRequest.t ->
-        (ListLocationsResponse.t,
-          [ `AWS of ListLocationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListLocationsResponse.t, ListLocationsResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val list_task_executions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTaskExecutionsRequest.t ->
-        (ListTaskExecutionsResponse.t,
-          [ `AWS of ListTaskExecutionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTaskExecutionsResponse.t, ListTaskExecutionsResponse.error)
+          Result.t Lwt.t
 val list_tasks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTasksRequest.t ->
-        (ListTasksResponse.t,
-          [ `AWS of ListTasksResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTasksResponse.t, ListTasksResponse.error) Result.t Lwt.t
 val start_task_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartTaskExecutionRequest.t ->
-        (StartTaskExecutionResponse.t,
-          [ `AWS of StartTaskExecutionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartTaskExecutionResponse.t, StartTaskExecutionResponse.error)
+          Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_agent :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateAgentRequest.t ->
-        (UpdateAgentResponse.t,
-          [ `AWS of UpdateAgentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateAgentResponse.t, UpdateAgentResponse.error) Result.t Lwt.t
 val update_location_hdfs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateLocationHdfsRequest.t ->
-        (UpdateLocationHdfsResponse.t,
-          [ `AWS of UpdateLocationHdfsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateLocationHdfsResponse.t, UpdateLocationHdfsResponse.error)
+          Result.t Lwt.t
 val update_location_nfs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateLocationNfsRequest.t ->
-        (UpdateLocationNfsResponse.t,
-          [ `AWS of UpdateLocationNfsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateLocationNfsResponse.t, UpdateLocationNfsResponse.error)
+          Result.t Lwt.t
 val update_location_object_storage :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateLocationObjectStorageRequest.t ->
         (UpdateLocationObjectStorageResponse.t,
-          [ `AWS of UpdateLocationObjectStorageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateLocationObjectStorageResponse.error) Result.t Lwt.t
 val update_location_smb :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateLocationSmbRequest.t ->
-        (UpdateLocationSmbResponse.t,
-          [ `AWS of UpdateLocationSmbResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateLocationSmbResponse.t, UpdateLocationSmbResponse.error)
+          Result.t Lwt.t
 val update_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateTaskRequest.t ->
-        (UpdateTaskResponse.t,
-          [ `AWS of UpdateTaskResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateTaskResponse.t, UpdateTaskResponse.error) Result.t Lwt.t
 val update_task_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateTaskExecutionRequest.t ->
-        (UpdateTaskExecutionResponse.t,
-          [ `AWS of UpdateTaskExecutionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateTaskExecutionResponse.t, UpdateTaskExecutionResponse.error)
+          Result.t Lwt.t

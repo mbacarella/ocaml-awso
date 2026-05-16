@@ -4,62 +4,51 @@ val create_savings_plan :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSavingsPlanRequest.t ->
-        (CreateSavingsPlanResponse.t,
-          [ `AWS of CreateSavingsPlanResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateSavingsPlanResponse.t, CreateSavingsPlanResponse.error)
+          Result.t Lwt.t
 val delete_queued_savings_plan :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteQueuedSavingsPlanRequest.t ->
         (DeleteQueuedSavingsPlanResponse.t,
-          [ `AWS of DeleteQueuedSavingsPlanResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteQueuedSavingsPlanResponse.error) Result.t Lwt.t
 val describe_savings_plan_rates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSavingsPlanRatesRequest.t ->
         (DescribeSavingsPlanRatesResponse.t,
-          [ `AWS of DescribeSavingsPlanRatesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeSavingsPlanRatesResponse.error) Result.t Lwt.t
 val describe_savings_plans :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSavingsPlansRequest.t ->
-        (DescribeSavingsPlansResponse.t,
-          [ `AWS of DescribeSavingsPlansResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeSavingsPlansResponse.t, DescribeSavingsPlansResponse.error)
+          Result.t Lwt.t
 val describe_savings_plans_offering_rates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSavingsPlansOfferingRatesRequest.t ->
         (DescribeSavingsPlansOfferingRatesResponse.t,
-          [ `AWS of DescribeSavingsPlansOfferingRatesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeSavingsPlansOfferingRatesResponse.error) Result.t Lwt.t
 val describe_savings_plans_offerings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSavingsPlansOfferingsRequest.t ->
         (DescribeSavingsPlansOfferingsResponse.t,
-          [ `AWS of DescribeSavingsPlansOfferingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeSavingsPlansOfferingsResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t

@@ -133,96 +133,103 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target", "Textract.StartExpenseAnalysis")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    let generic_error () = Error (`Transport err) in
-    match err with
-    | `Too_many_redirects -> generic_error ()
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-        (match (error_of_json, ((code >= 400) && (code <= 599))) with
-         | (Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             (match json |> (Yojson.Safe.Util.member "__type") with
-              | `String error_type ->
-                  Error (`AWS (error_of_json error_type json))
-              | `Null -> generic_error ()
-              | _ ->
-                  failwith
-                    (sprintf "Error '__type' did not have string type: %s"
-                       body))
-         | (None, _) | (_, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = None }) in
+    match (error_of_json, ((code >= 400) && (code <= 599))) with
+    | (Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        (match json |> (Yojson.Safe.Util.member "__type") with
+         | `String error_type -> error_of_json error_type json
+         | `Null -> bail ()
+         | _ ->
+             failwith
+               (sprintf "Error '__type' did not have string type: %s" body))
+    | (None, _) | (_, false) -> bail () in
+  let _ = parse_aws_error in
+  let _ = resp in
   match endpoint with
   | AnalyzeDocument ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some AnalyzeDocumentResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (AnalyzeDocumentResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (AnalyzeDocumentResponse.of_json json)
+      else
+        Error (parse_aws_error (Some AnalyzeDocumentResponse.error_of_json))
   | AnalyzeExpense ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some AnalyzeExpenseResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (AnalyzeExpenseResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (AnalyzeExpenseResponse.of_json json)
+      else
+        Error (parse_aws_error (Some AnalyzeExpenseResponse.error_of_json))
   | AnalyzeID ->
-      (match resp with
-       | Error err -> handle_error err (Some AnalyzeIDResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (AnalyzeIDResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (AnalyzeIDResponse.of_json json)
+      else Error (parse_aws_error (Some AnalyzeIDResponse.error_of_json))
   | DetectDocumentText ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DetectDocumentTextResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DetectDocumentTextResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DetectDocumentTextResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DetectDocumentTextResponse.error_of_json))
   | GetDocumentAnalysis ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetDocumentAnalysisResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetDocumentAnalysisResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetDocumentAnalysisResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetDocumentAnalysisResponse.error_of_json))
   | GetDocumentTextDetection ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetDocumentTextDetectionResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetDocumentTextDetectionResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetDocumentTextDetectionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetDocumentTextDetectionResponse.error_of_json))
   | GetExpenseAnalysis ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetExpenseAnalysisResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetExpenseAnalysisResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetExpenseAnalysisResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetExpenseAnalysisResponse.error_of_json))
   | StartDocumentAnalysis ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some StartDocumentAnalysisResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (StartDocumentAnalysisResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartDocumentAnalysisResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some StartDocumentAnalysisResponse.error_of_json))
   | StartDocumentTextDetection ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some StartDocumentTextDetectionResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (StartDocumentTextDetectionResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartDocumentTextDetectionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StartDocumentTextDetectionResponse.error_of_json))
   | StartExpenseAnalysis ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StartExpenseAnalysisResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (StartExpenseAnalysisResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartExpenseAnalysisResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some StartExpenseAnalysisResponse.error_of_json))

@@ -3,276 +3,207 @@ open Awso_logs.Values
 val associate_kms_key :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      AssociateKmsKeyRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      AssociateKmsKeyRequest.t -> (unit, unit) Result.t Lwt.t
 val cancel_export_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      CancelExportTaskRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      CancelExportTaskRequest.t -> (unit, unit) Result.t Lwt.t
 val create_export_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateExportTaskRequest.t ->
-        (CreateExportTaskResponse.t,
-          [ `AWS of CreateExportTaskResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateExportTaskResponse.t, CreateExportTaskResponse.error) Result.t
+          Lwt.t
 val create_log_group :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      CreateLogGroupRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> CreateLogGroupRequest.t -> (unit, unit) Result.t Lwt.t
 val create_log_stream :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      CreateLogStreamRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      CreateLogStreamRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_destination :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteDestinationRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteDestinationRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_log_group :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteLogGroupRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteLogGroupRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_log_stream :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteLogStreamRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteLogStreamRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_metric_filter :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteMetricFilterRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteMetricFilterRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_query_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteQueryDefinitionRequest.t ->
         (DeleteQueryDefinitionResponse.t,
-          [ `AWS of DeleteQueryDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteQueryDefinitionResponse.error) Result.t Lwt.t
 val delete_resource_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteResourcePolicyRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteResourcePolicyRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_retention_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteRetentionPolicyRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteRetentionPolicyRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_subscription_filter :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteSubscriptionFilterRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteSubscriptionFilterRequest.t -> (unit, unit) Result.t Lwt.t
 val describe_destinations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDestinationsRequest.t ->
-        (DescribeDestinationsResponse.t,
-          [ `AWS of DescribeDestinationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeDestinationsResponse.t, DescribeDestinationsResponse.error)
+          Result.t Lwt.t
 val describe_export_tasks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeExportTasksRequest.t ->
-        (DescribeExportTasksResponse.t,
-          [ `AWS of DescribeExportTasksResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeExportTasksResponse.t, DescribeExportTasksResponse.error)
+          Result.t Lwt.t
 val describe_log_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeLogGroupsRequest.t ->
-        (DescribeLogGroupsResponse.t,
-          [ `AWS of DescribeLogGroupsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeLogGroupsResponse.t, DescribeLogGroupsResponse.error)
+          Result.t Lwt.t
 val describe_log_streams :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeLogStreamsRequest.t ->
-        (DescribeLogStreamsResponse.t,
-          [ `AWS of DescribeLogStreamsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeLogStreamsResponse.t, DescribeLogStreamsResponse.error)
+          Result.t Lwt.t
 val describe_metric_filters :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeMetricFiltersRequest.t ->
         (DescribeMetricFiltersResponse.t,
-          [ `AWS of DescribeMetricFiltersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeMetricFiltersResponse.error) Result.t Lwt.t
 val describe_queries :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeQueriesRequest.t ->
-        (DescribeQueriesResponse.t,
-          [ `AWS of DescribeQueriesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeQueriesResponse.t, DescribeQueriesResponse.error) Result.t
+          Lwt.t
 val describe_query_definitions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeQueryDefinitionsRequest.t ->
         (DescribeQueryDefinitionsResponse.t,
-          [ `AWS of DescribeQueryDefinitionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeQueryDefinitionsResponse.error) Result.t Lwt.t
 val describe_resource_policies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeResourcePoliciesRequest.t ->
         (DescribeResourcePoliciesResponse.t,
-          [ `AWS of DescribeResourcePoliciesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeResourcePoliciesResponse.error) Result.t Lwt.t
 val describe_subscription_filters :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSubscriptionFiltersRequest.t ->
         (DescribeSubscriptionFiltersResponse.t,
-          [ `AWS of DescribeSubscriptionFiltersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeSubscriptionFiltersResponse.error) Result.t Lwt.t
 val disassociate_kms_key :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DisassociateKmsKeyRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DisassociateKmsKeyRequest.t -> (unit, unit) Result.t Lwt.t
 val filter_log_events :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       FilterLogEventsRequest.t ->
-        (FilterLogEventsResponse.t,
-          [ `AWS of FilterLogEventsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (FilterLogEventsResponse.t, FilterLogEventsResponse.error) Result.t
+          Lwt.t
 val get_log_events :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLogEventsRequest.t ->
-        (GetLogEventsResponse.t,
-          [ `AWS of GetLogEventsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetLogEventsResponse.t, GetLogEventsResponse.error) Result.t Lwt.t
 val get_log_group_fields :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLogGroupFieldsRequest.t ->
-        (GetLogGroupFieldsResponse.t,
-          [ `AWS of GetLogGroupFieldsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetLogGroupFieldsResponse.t, GetLogGroupFieldsResponse.error)
+          Result.t Lwt.t
 val get_log_record :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLogRecordRequest.t ->
-        (GetLogRecordResponse.t,
-          [ `AWS of GetLogRecordResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetLogRecordResponse.t, GetLogRecordResponse.error) Result.t Lwt.t
 val get_query_results :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetQueryResultsRequest.t ->
-        (GetQueryResultsResponse.t,
-          [ `AWS of GetQueryResultsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetQueryResultsResponse.t, GetQueryResultsResponse.error) Result.t
+          Lwt.t
 val list_tags_log_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsLogGroupRequest.t ->
-        (ListTagsLogGroupResponse.t,
-          [ `AWS of ListTagsLogGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsLogGroupResponse.t, ListTagsLogGroupResponse.error) Result.t
+          Lwt.t
 val put_destination :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutDestinationRequest.t ->
-        (PutDestinationResponse.t,
-          [ `AWS of PutDestinationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutDestinationResponse.t, PutDestinationResponse.error) Result.t
+          Lwt.t
 val put_destination_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PutDestinationPolicyRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      PutDestinationPolicyRequest.t -> (unit, unit) Result.t Lwt.t
 val put_log_events :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutLogEventsRequest.t ->
-        (PutLogEventsResponse.t,
-          [ `AWS of PutLogEventsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutLogEventsResponse.t, PutLogEventsResponse.error) Result.t Lwt.t
 val put_metric_filter :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PutMetricFilterRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      PutMetricFilterRequest.t -> (unit, unit) Result.t Lwt.t
 val put_query_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutQueryDefinitionRequest.t ->
-        (PutQueryDefinitionResponse.t,
-          [ `AWS of PutQueryDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutQueryDefinitionResponse.t, PutQueryDefinitionResponse.error)
+          Result.t Lwt.t
 val put_resource_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutResourcePolicyRequest.t ->
-        (PutResourcePolicyResponse.t,
-          [ `AWS of PutResourcePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutResourcePolicyResponse.t, PutResourcePolicyResponse.error)
+          Result.t Lwt.t
 val put_retention_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PutRetentionPolicyRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      PutRetentionPolicyRequest.t -> (unit, unit) Result.t Lwt.t
 val put_subscription_filter :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PutSubscriptionFilterRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      PutSubscriptionFilterRequest.t -> (unit, unit) Result.t Lwt.t
 val start_query :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartQueryRequest.t ->
-        (StartQueryResponse.t,
-          [ `AWS of StartQueryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartQueryResponse.t, StartQueryResponse.error) Result.t Lwt.t
 val stop_query :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopQueryRequest.t ->
-        (StopQueryResponse.t,
-          [ `AWS of StopQueryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StopQueryResponse.t, StopQueryResponse.error) Result.t Lwt.t
 val tag_log_group :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      TagLogGroupRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> TagLogGroupRequest.t -> (unit, unit) Result.t Lwt.t
 val test_metric_filter :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TestMetricFilterRequest.t ->
-        (TestMetricFilterResponse.t,
-          [ `AWS of TestMetricFilterResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TestMetricFilterResponse.t, TestMetricFilterResponse.error) Result.t
+          Lwt.t
 val untag_log_group :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      UntagLogGroupRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> UntagLogGroupRequest.t -> (unit, unit) Result.t Lwt.t

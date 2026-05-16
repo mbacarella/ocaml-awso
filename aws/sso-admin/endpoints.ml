@@ -461,281 +461,306 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target", "SWBExternalService.UpdatePermissionSet")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    let generic_error () = Error (`Transport err) in
-    match err with
-    | `Too_many_redirects -> generic_error ()
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-        (match (error_of_json, ((code >= 400) && (code <= 599))) with
-         | (Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             (match json |> (Yojson.Safe.Util.member "__type") with
-              | `String error_type ->
-                  Error (`AWS (error_of_json error_type json))
-              | `Null -> generic_error ()
-              | _ ->
-                  failwith
-                    (sprintf "Error '__type' did not have string type: %s"
-                       body))
-         | (None, _) | (_, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = None }) in
+    match (error_of_json, ((code >= 400) && (code <= 599))) with
+    | (Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        (match json |> (Yojson.Safe.Util.member "__type") with
+         | `String error_type -> error_of_json error_type json
+         | `Null -> bail ()
+         | _ ->
+             failwith
+               (sprintf "Error '__type' did not have string type: %s" body))
+    | (None, _) | (_, false) -> bail () in
+  let _ = parse_aws_error in
+  let _ = resp in
   match endpoint with
   | AttachManagedPolicyToPermissionSet ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some AttachManagedPolicyToPermissionSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (AttachManagedPolicyToPermissionSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (AttachManagedPolicyToPermissionSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some AttachManagedPolicyToPermissionSetResponse.error_of_json))
   | CreateAccountAssignment ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateAccountAssignmentResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateAccountAssignmentResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateAccountAssignmentResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateAccountAssignmentResponse.error_of_json))
   | CreateInstanceAccessControlAttributeConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok
+          (CreateInstanceAccessControlAttributeConfigurationResponse.of_json
+             json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                CreateInstanceAccessControlAttributeConfigurationResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok
-             (CreateInstanceAccessControlAttributeConfigurationResponse.of_json
-                json))
+                CreateInstanceAccessControlAttributeConfigurationResponse.error_of_json))
   | CreatePermissionSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreatePermissionSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreatePermissionSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreatePermissionSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreatePermissionSetResponse.error_of_json))
   | DeleteAccountAssignment ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteAccountAssignmentResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteAccountAssignmentResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteAccountAssignmentResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteAccountAssignmentResponse.error_of_json))
   | DeleteInlinePolicyFromPermissionSet ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteInlinePolicyFromPermissionSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteInlinePolicyFromPermissionSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteInlinePolicyFromPermissionSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteInlinePolicyFromPermissionSetResponse.error_of_json))
   | DeleteInstanceAccessControlAttributeConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok
+          (DeleteInstanceAccessControlAttributeConfigurationResponse.of_json
+             json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                DeleteInstanceAccessControlAttributeConfigurationResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok
-             (DeleteInstanceAccessControlAttributeConfigurationResponse.of_json
-                json))
+                DeleteInstanceAccessControlAttributeConfigurationResponse.error_of_json))
   | DeletePermissionSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeletePermissionSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeletePermissionSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeletePermissionSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeletePermissionSetResponse.error_of_json))
   | DescribeAccountAssignmentCreationStatus ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeAccountAssignmentCreationStatusResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                DescribeAccountAssignmentCreationStatusResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeAccountAssignmentCreationStatusResponse.of_json json))
+                DescribeAccountAssignmentCreationStatusResponse.error_of_json))
   | DescribeAccountAssignmentDeletionStatus ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeAccountAssignmentDeletionStatusResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                DescribeAccountAssignmentDeletionStatusResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeAccountAssignmentDeletionStatusResponse.of_json json))
+                DescribeAccountAssignmentDeletionStatusResponse.error_of_json))
   | DescribeInstanceAccessControlAttributeConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok
+          (DescribeInstanceAccessControlAttributeConfigurationResponse.of_json
+             json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                DescribeInstanceAccessControlAttributeConfigurationResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok
-             (DescribeInstanceAccessControlAttributeConfigurationResponse.of_json
-                json))
+                DescribeInstanceAccessControlAttributeConfigurationResponse.error_of_json))
   | DescribePermissionSet ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribePermissionSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribePermissionSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribePermissionSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribePermissionSetResponse.error_of_json))
   | DescribePermissionSetProvisioningStatus ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribePermissionSetProvisioningStatusResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                DescribePermissionSetProvisioningStatusResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribePermissionSetProvisioningStatusResponse.of_json json))
+                DescribePermissionSetProvisioningStatusResponse.error_of_json))
   | DetachManagedPolicyFromPermissionSet ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DetachManagedPolicyFromPermissionSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DetachManagedPolicyFromPermissionSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DetachManagedPolicyFromPermissionSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DetachManagedPolicyFromPermissionSetResponse.error_of_json))
   | GetInlinePolicyForPermissionSet ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetInlinePolicyForPermissionSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetInlinePolicyForPermissionSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetInlinePolicyForPermissionSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetInlinePolicyForPermissionSetResponse.error_of_json))
   | ListAccountAssignmentCreationStatus ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListAccountAssignmentCreationStatusResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListAccountAssignmentCreationStatusResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListAccountAssignmentCreationStatusResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListAccountAssignmentCreationStatusResponse.error_of_json))
   | ListAccountAssignmentDeletionStatus ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListAccountAssignmentDeletionStatusResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListAccountAssignmentDeletionStatusResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListAccountAssignmentDeletionStatusResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListAccountAssignmentDeletionStatusResponse.error_of_json))
   | ListAccountAssignments ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListAccountAssignmentsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListAccountAssignmentsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListAccountAssignmentsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListAccountAssignmentsResponse.error_of_json))
   | ListAccountsForProvisionedPermissionSet ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListAccountsForProvisionedPermissionSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                ListAccountsForProvisionedPermissionSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListAccountsForProvisionedPermissionSetResponse.of_json json))
+                ListAccountsForProvisionedPermissionSetResponse.error_of_json))
   | ListInstances ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListInstancesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListInstancesResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListInstancesResponse.of_json json)
+      else Error (parse_aws_error (Some ListInstancesResponse.error_of_json))
   | ListManagedPoliciesInPermissionSet ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListManagedPoliciesInPermissionSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListManagedPoliciesInPermissionSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListManagedPoliciesInPermissionSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListManagedPoliciesInPermissionSetResponse.error_of_json))
   | ListPermissionSetProvisioningStatus ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListPermissionSetProvisioningStatusResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListPermissionSetProvisioningStatusResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListPermissionSetProvisioningStatusResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListPermissionSetProvisioningStatusResponse.error_of_json))
   | ListPermissionSets ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListPermissionSetsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListPermissionSetsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListPermissionSetsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListPermissionSetsResponse.error_of_json))
   | ListPermissionSetsProvisionedToAccount ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListPermissionSetsProvisionedToAccountResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                ListPermissionSetsProvisionedToAccountResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListPermissionSetsProvisionedToAccountResponse.of_json json))
+                ListPermissionSetsProvisionedToAccountResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListTagsForResourceResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListTagsForResourceResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | ProvisionPermissionSet ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ProvisionPermissionSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ProvisionPermissionSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ProvisionPermissionSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ProvisionPermissionSetResponse.error_of_json))
   | PutInlinePolicyToPermissionSet ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PutInlinePolicyToPermissionSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (PutInlinePolicyToPermissionSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutInlinePolicyToPermissionSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some PutInlinePolicyToPermissionSetResponse.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (TagResourceResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (TagResourceResponse.of_json json)
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UntagResourceResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UntagResourceResponse.of_json json)
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateInstanceAccessControlAttributeConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok
+          (UpdateInstanceAccessControlAttributeConfigurationResponse.of_json
+             json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                UpdateInstanceAccessControlAttributeConfigurationResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok
-             (UpdateInstanceAccessControlAttributeConfigurationResponse.of_json
-                json))
+                UpdateInstanceAccessControlAttributeConfigurationResponse.error_of_json))
   | UpdatePermissionSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdatePermissionSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdatePermissionSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdatePermissionSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdatePermissionSetResponse.error_of_json))

@@ -5,285 +5,240 @@ val batch_check_layer_availability :
     ?cfg:Awso.Cfg.t ->
       BatchCheckLayerAvailabilityRequest.t ->
         (BatchCheckLayerAvailabilityResponse.t,
-          [ `AWS of BatchCheckLayerAvailabilityResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          BatchCheckLayerAvailabilityResponse.error) Result.t Lwt.t
 val batch_delete_image :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchDeleteImageRequest.t ->
-        (BatchDeleteImageResponse.t,
-          [ `AWS of BatchDeleteImageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (BatchDeleteImageResponse.t, BatchDeleteImageResponse.error) Result.t
+          Lwt.t
 val batch_get_image :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchGetImageRequest.t ->
-        (BatchGetImageResponse.t,
-          [ `AWS of BatchGetImageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (BatchGetImageResponse.t, BatchGetImageResponse.error) Result.t Lwt.t
 val batch_get_repository_scanning_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchGetRepositoryScanningConfigurationRequest.t ->
         (BatchGetRepositoryScanningConfigurationResponse.t,
-          [ `AWS of BatchGetRepositoryScanningConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          BatchGetRepositoryScanningConfigurationResponse.error) Result.t
+          Lwt.t
 val complete_layer_upload :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CompleteLayerUploadRequest.t ->
-        (CompleteLayerUploadResponse.t,
-          [ `AWS of CompleteLayerUploadResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CompleteLayerUploadResponse.t, CompleteLayerUploadResponse.error)
+          Result.t Lwt.t
 val create_pull_through_cache_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePullThroughCacheRuleRequest.t ->
         (CreatePullThroughCacheRuleResponse.t,
-          [ `AWS of CreatePullThroughCacheRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreatePullThroughCacheRuleResponse.error) Result.t Lwt.t
 val create_repository :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRepositoryRequest.t ->
-        (CreateRepositoryResponse.t,
-          [ `AWS of CreateRepositoryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateRepositoryResponse.t, CreateRepositoryResponse.error) Result.t
+          Lwt.t
 val delete_lifecycle_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteLifecyclePolicyRequest.t ->
         (DeleteLifecyclePolicyResponse.t,
-          [ `AWS of DeleteLifecyclePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteLifecyclePolicyResponse.error) Result.t Lwt.t
 val delete_pull_through_cache_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePullThroughCacheRuleRequest.t ->
         (DeletePullThroughCacheRuleResponse.t,
-          [ `AWS of DeletePullThroughCacheRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeletePullThroughCacheRuleResponse.error) Result.t Lwt.t
 val delete_registry_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRegistryPolicyRequest.t ->
-        (DeleteRegistryPolicyResponse.t,
-          [ `AWS of DeleteRegistryPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteRegistryPolicyResponse.t, DeleteRegistryPolicyResponse.error)
+          Result.t Lwt.t
 val delete_repository :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRepositoryRequest.t ->
-        (DeleteRepositoryResponse.t,
-          [ `AWS of DeleteRepositoryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteRepositoryResponse.t, DeleteRepositoryResponse.error) Result.t
+          Lwt.t
 val delete_repository_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRepositoryPolicyRequest.t ->
         (DeleteRepositoryPolicyResponse.t,
-          [ `AWS of DeleteRepositoryPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteRepositoryPolicyResponse.error) Result.t Lwt.t
 val describe_image_replication_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeImageReplicationStatusRequest.t ->
         (DescribeImageReplicationStatusResponse.t,
-          [ `AWS of DescribeImageReplicationStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeImageReplicationStatusResponse.error) Result.t Lwt.t
 val describe_image_scan_findings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeImageScanFindingsRequest.t ->
         (DescribeImageScanFindingsResponse.t,
-          [ `AWS of DescribeImageScanFindingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeImageScanFindingsResponse.error) Result.t Lwt.t
 val describe_images :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeImagesRequest.t ->
-        (DescribeImagesResponse.t,
-          [ `AWS of DescribeImagesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeImagesResponse.t, DescribeImagesResponse.error) Result.t
+          Lwt.t
 val describe_pull_through_cache_rules :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePullThroughCacheRulesRequest.t ->
         (DescribePullThroughCacheRulesResponse.t,
-          [ `AWS of DescribePullThroughCacheRulesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribePullThroughCacheRulesResponse.error) Result.t Lwt.t
 val describe_registry :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRegistryRequest.t ->
-        (DescribeRegistryResponse.t,
-          [ `AWS of DescribeRegistryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeRegistryResponse.t, DescribeRegistryResponse.error) Result.t
+          Lwt.t
 val describe_repositories :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRepositoriesRequest.t ->
-        (DescribeRepositoriesResponse.t,
-          [ `AWS of DescribeRepositoriesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeRepositoriesResponse.t, DescribeRepositoriesResponse.error)
+          Result.t Lwt.t
 val get_authorization_token :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAuthorizationTokenRequest.t ->
         (GetAuthorizationTokenResponse.t,
-          [ `AWS of GetAuthorizationTokenResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetAuthorizationTokenResponse.error) Result.t Lwt.t
 val get_download_url_for_layer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDownloadUrlForLayerRequest.t ->
         (GetDownloadUrlForLayerResponse.t,
-          [ `AWS of GetDownloadUrlForLayerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetDownloadUrlForLayerResponse.error) Result.t Lwt.t
 val get_lifecycle_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLifecyclePolicyRequest.t ->
-        (GetLifecyclePolicyResponse.t,
-          [ `AWS of GetLifecyclePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetLifecyclePolicyResponse.t, GetLifecyclePolicyResponse.error)
+          Result.t Lwt.t
 val get_lifecycle_policy_preview :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLifecyclePolicyPreviewRequest.t ->
         (GetLifecyclePolicyPreviewResponse.t,
-          [ `AWS of GetLifecyclePolicyPreviewResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetLifecyclePolicyPreviewResponse.error) Result.t Lwt.t
 val get_registry_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRegistryPolicyRequest.t ->
-        (GetRegistryPolicyResponse.t,
-          [ `AWS of GetRegistryPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetRegistryPolicyResponse.t, GetRegistryPolicyResponse.error)
+          Result.t Lwt.t
 val get_registry_scanning_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRegistryScanningConfigurationRequest.t ->
         (GetRegistryScanningConfigurationResponse.t,
-          [ `AWS of GetRegistryScanningConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetRegistryScanningConfigurationResponse.error) Result.t Lwt.t
 val get_repository_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRepositoryPolicyRequest.t ->
-        (GetRepositoryPolicyResponse.t,
-          [ `AWS of GetRepositoryPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetRepositoryPolicyResponse.t, GetRepositoryPolicyResponse.error)
+          Result.t Lwt.t
 val initiate_layer_upload :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       InitiateLayerUploadRequest.t ->
-        (InitiateLayerUploadResponse.t,
-          [ `AWS of InitiateLayerUploadResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (InitiateLayerUploadResponse.t, InitiateLayerUploadResponse.error)
+          Result.t Lwt.t
 val list_images :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListImagesRequest.t ->
-        (ListImagesResponse.t,
-          [ `AWS of ListImagesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListImagesResponse.t, ListImagesResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val put_image :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutImageRequest.t ->
-        (PutImageResponse.t,
-          [ `AWS of PutImageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutImageResponse.t, PutImageResponse.error) Result.t Lwt.t
 val put_image_scanning_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutImageScanningConfigurationRequest.t ->
         (PutImageScanningConfigurationResponse.t,
-          [ `AWS of PutImageScanningConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutImageScanningConfigurationResponse.error) Result.t Lwt.t
 val put_image_tag_mutability :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutImageTagMutabilityRequest.t ->
         (PutImageTagMutabilityResponse.t,
-          [ `AWS of PutImageTagMutabilityResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutImageTagMutabilityResponse.error) Result.t Lwt.t
 val put_lifecycle_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutLifecyclePolicyRequest.t ->
-        (PutLifecyclePolicyResponse.t,
-          [ `AWS of PutLifecyclePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutLifecyclePolicyResponse.t, PutLifecyclePolicyResponse.error)
+          Result.t Lwt.t
 val put_registry_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutRegistryPolicyRequest.t ->
-        (PutRegistryPolicyResponse.t,
-          [ `AWS of PutRegistryPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutRegistryPolicyResponse.t, PutRegistryPolicyResponse.error)
+          Result.t Lwt.t
 val put_registry_scanning_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutRegistryScanningConfigurationRequest.t ->
         (PutRegistryScanningConfigurationResponse.t,
-          [ `AWS of PutRegistryScanningConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutRegistryScanningConfigurationResponse.error) Result.t Lwt.t
 val put_replication_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutReplicationConfigurationRequest.t ->
         (PutReplicationConfigurationResponse.t,
-          [ `AWS of PutReplicationConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutReplicationConfigurationResponse.error) Result.t Lwt.t
 val set_repository_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SetRepositoryPolicyRequest.t ->
-        (SetRepositoryPolicyResponse.t,
-          [ `AWS of SetRepositoryPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SetRepositoryPolicyResponse.t, SetRepositoryPolicyResponse.error)
+          Result.t Lwt.t
 val start_image_scan :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartImageScanRequest.t ->
-        (StartImageScanResponse.t,
-          [ `AWS of StartImageScanResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartImageScanResponse.t, StartImageScanResponse.error) Result.t
+          Lwt.t
 val start_lifecycle_policy_preview :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartLifecyclePolicyPreviewRequest.t ->
         (StartLifecyclePolicyPreviewResponse.t,
-          [ `AWS of StartLifecyclePolicyPreviewResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartLifecyclePolicyPreviewResponse.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val upload_layer_part :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UploadLayerPartRequest.t ->
-        (UploadLayerPartResponse.t,
-          [ `AWS of UploadLayerPartResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UploadLayerPartResponse.t, UploadLayerPartResponse.error) Result.t
+          Lwt.t

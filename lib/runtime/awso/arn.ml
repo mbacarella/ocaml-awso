@@ -39,14 +39,14 @@ type t =
 [@@deriving yojson]
 
 let make
-  ?(partition = Default.partition)
-  ?region
-  ?account_id
-  ?(resource_type = `None)
-  ?(qualifier = `None)
-  ~service
-  ~resource
-  ()
+      ?(partition = Default.partition)
+      ?region
+      ?account_id
+      ?(resource_type = `None)
+      ?(qualifier = `None)
+      ~service
+      ~resource
+      ()
   =
   let make_qualifier x =
     match x with
@@ -68,14 +68,14 @@ let make
 ;;
 
 let make_exn
-  ?partition
-  ?region
-  ?account_id
-  ?resource_type
-  ?qualifier
-  ~service
-  ~resource
-  ()
+      ?partition
+      ?region
+      ?account_id
+      ?resource_type
+      ?qualifier
+      ~service
+      ~resource
+      ()
   =
   match
     make ?partition ?region ?account_id ?resource_type ?qualifier ~service ~resource ()
@@ -83,8 +83,7 @@ let make_exn
   | `Ok x -> x
   | #Error.make as e ->
     failwith
-      ("Invalid ARN "
-       ^ Yojson.Safe.to_string (Error.yojson_of_make (e :> Error.make)))
+      ("Invalid ARN " ^ Yojson.Safe.to_string (Error.yojson_of_make (e :> Error.make)))
 ;;
 
 let of_string s =
@@ -237,7 +236,9 @@ let%expect_test "of_string" =
   let test_good input =
     match of_string input with
     | x ->
-      Test.pass "Input parsed as ARN." [ "input", input; "arn", Yojson.Safe.to_string (yojson_of_t x) ]
+      Test.pass
+        "Input parsed as ARN."
+        [ "input", input; "arn", Yojson.Safe.to_string (yojson_of_t x) ]
     | exception e ->
       Test.fail
         "Input failed to parse as ARN."
@@ -306,7 +307,7 @@ let%expect_test "of_string" =
 ;;
 
 let to_string
-  { partition; service; region; account_id; resource; resource_type; qualifier }
+      { partition; service; region; account_id; resource; resource_type; qualifier }
   =
   let account_id = Option.value ~default:"" account_id in
   let region = Option.value_map ~default:"" ~f:Region.to_string region in

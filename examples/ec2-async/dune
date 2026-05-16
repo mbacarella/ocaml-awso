@@ -1,5 +1,4 @@
 (executable
  (name awso_ec2)
  (libraries awso-async.ec2 core_unix.command_unix)
- (flags
-  (:standard)))
+ (flags (:standard)))

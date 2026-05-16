@@ -4,125 +4,98 @@ val associate_team_member :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateTeamMemberRequest.t ->
-        (AssociateTeamMemberResult.t,
-          [ `AWS of AssociateTeamMemberResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AssociateTeamMemberResult.t, AssociateTeamMemberResult.error)
+          Result.t Lwt.t
 val create_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateProjectRequest.t ->
-        (CreateProjectResult.t,
-          [ `AWS of CreateProjectResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateProjectResult.t, CreateProjectResult.error) Result.t Lwt.t
 val create_user_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateUserProfileRequest.t ->
-        (CreateUserProfileResult.t,
-          [ `AWS of CreateUserProfileResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateUserProfileResult.t, CreateUserProfileResult.error) Result.t
+          Lwt.t
 val delete_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteProjectRequest.t ->
-        (DeleteProjectResult.t,
-          [ `AWS of DeleteProjectResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteProjectResult.t, DeleteProjectResult.error) Result.t Lwt.t
 val delete_user_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteUserProfileRequest.t ->
-        (DeleteUserProfileResult.t,
-          [ `AWS of DeleteUserProfileResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteUserProfileResult.t, DeleteUserProfileResult.error) Result.t
+          Lwt.t
 val describe_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeProjectRequest.t ->
-        (DescribeProjectResult.t,
-          [ `AWS of DescribeProjectResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeProjectResult.t, DescribeProjectResult.error) Result.t Lwt.t
 val describe_user_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeUserProfileRequest.t ->
-        (DescribeUserProfileResult.t,
-          [ `AWS of DescribeUserProfileResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeUserProfileResult.t, DescribeUserProfileResult.error)
+          Result.t Lwt.t
 val disassociate_team_member :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateTeamMemberRequest.t ->
-        (DisassociateTeamMemberResult.t,
-          [ `AWS of DisassociateTeamMemberResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DisassociateTeamMemberResult.t, DisassociateTeamMemberResult.error)
+          Result.t Lwt.t
 val list_projects :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListProjectsRequest.t ->
-        (ListProjectsResult.t,
-          [ `AWS of ListProjectsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListProjectsResult.t, ListProjectsResult.error) Result.t Lwt.t
 val list_resources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListResourcesRequest.t ->
-        (ListResourcesResult.t,
-          [ `AWS of ListResourcesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListResourcesResult.t, ListResourcesResult.error) Result.t Lwt.t
 val list_tags_for_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForProjectRequest.t ->
-        (ListTagsForProjectResult.t,
-          [ `AWS of ListTagsForProjectResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForProjectResult.t, ListTagsForProjectResult.error) Result.t
+          Lwt.t
 val list_team_members :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTeamMembersRequest.t ->
-        (ListTeamMembersResult.t,
-          [ `AWS of ListTeamMembersResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTeamMembersResult.t, ListTeamMembersResult.error) Result.t Lwt.t
 val list_user_profiles :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListUserProfilesRequest.t ->
-        (ListUserProfilesResult.t,
-          [ `AWS of ListUserProfilesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListUserProfilesResult.t, ListUserProfilesResult.error) Result.t
+          Lwt.t
 val tag_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagProjectRequest.t ->
-        (TagProjectResult.t,
-          [ `AWS of TagProjectResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagProjectResult.t, TagProjectResult.error) Result.t Lwt.t
 val untag_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagProjectRequest.t ->
-        (UntagProjectResult.t,
-          [ `AWS of UntagProjectResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagProjectResult.t, UntagProjectResult.error) Result.t Lwt.t
 val update_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateProjectRequest.t ->
-        (UpdateProjectResult.t,
-          [ `AWS of UpdateProjectResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateProjectResult.t, UpdateProjectResult.error) Result.t Lwt.t
 val update_team_member :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateTeamMemberRequest.t ->
-        (UpdateTeamMemberResult.t,
-          [ `AWS of UpdateTeamMemberResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateTeamMemberResult.t, UpdateTeamMemberResult.error) Result.t
+          Lwt.t
 val update_user_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateUserProfileRequest.t ->
-        (UpdateUserProfileResult.t,
-          [ `AWS of UpdateUserProfileResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateUserProfileResult.t, UpdateUserProfileResult.error) Result.t
+          Lwt.t

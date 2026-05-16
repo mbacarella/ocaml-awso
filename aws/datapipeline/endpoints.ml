@@ -238,144 +238,145 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target", "DataPipeline.ValidatePipelineDefinition")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    let generic_error () = Error (`Transport err) in
-    match err with
-    | `Too_many_redirects -> generic_error ()
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-        (match (error_of_json, ((code >= 400) && (code <= 599))) with
-         | (Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             (match json |> (Yojson.Safe.Util.member "__type") with
-              | `String error_type ->
-                  Error (`AWS (error_of_json error_type json))
-              | `Null -> generic_error ()
-              | _ ->
-                  failwith
-                    (sprintf "Error '__type' did not have string type: %s"
-                       body))
-         | (None, _) | (_, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = None }) in
+    match (error_of_json, ((code >= 400) && (code <= 599))) with
+    | (Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        (match json |> (Yojson.Safe.Util.member "__type") with
+         | `String error_type -> error_of_json error_type json
+         | `Null -> bail ()
+         | _ ->
+             failwith
+               (sprintf "Error '__type' did not have string type: %s" body))
+    | (None, _) | (_, false) -> bail () in
+  let _ = parse_aws_error in
+  let _ = resp in
   match endpoint with
   | ActivatePipeline ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ActivatePipelineOutput.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ActivatePipelineOutput.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ActivatePipelineOutput.of_json json)
+      else
+        Error (parse_aws_error (Some ActivatePipelineOutput.error_of_json))
   | AddTags ->
-      (match resp with
-       | Error err -> handle_error err (Some AddTagsOutput.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (AddTagsOutput.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (AddTagsOutput.of_json json)
+      else Error (parse_aws_error (Some AddTagsOutput.error_of_json))
   | CreatePipeline ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreatePipelineOutput.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreatePipelineOutput.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreatePipelineOutput.of_json json)
+      else Error (parse_aws_error (Some CreatePipelineOutput.error_of_json))
   | DeactivatePipeline ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeactivatePipelineOutput.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeactivatePipelineOutput.of_json json))
-  | DeletePipeline -> Ok ()
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeactivatePipelineOutput.of_json json)
+      else
+        Error (parse_aws_error (Some DeactivatePipelineOutput.error_of_json))
+  | DeletePipeline ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DescribeObjects ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeObjectsOutput.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeObjectsOutput.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeObjectsOutput.of_json json)
+      else Error (parse_aws_error (Some DescribeObjectsOutput.error_of_json))
   | DescribePipelines ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribePipelinesOutput.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribePipelinesOutput.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribePipelinesOutput.of_json json)
+      else
+        Error (parse_aws_error (Some DescribePipelinesOutput.error_of_json))
   | EvaluateExpression ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some EvaluateExpressionOutput.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (EvaluateExpressionOutput.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (EvaluateExpressionOutput.of_json json)
+      else
+        Error (parse_aws_error (Some EvaluateExpressionOutput.error_of_json))
   | GetPipelineDefinition ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetPipelineDefinitionOutput.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetPipelineDefinitionOutput.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetPipelineDefinitionOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetPipelineDefinitionOutput.error_of_json))
   | ListPipelines ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListPipelinesOutput.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListPipelinesOutput.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListPipelinesOutput.of_json json)
+      else Error (parse_aws_error (Some ListPipelinesOutput.error_of_json))
   | PollForTask ->
-      (match resp with
-       | Error err -> handle_error err (Some PollForTaskOutput.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (PollForTaskOutput.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PollForTaskOutput.of_json json)
+      else Error (parse_aws_error (Some PollForTaskOutput.error_of_json))
   | PutPipelineDefinition ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutPipelineDefinitionOutput.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (PutPipelineDefinitionOutput.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutPipelineDefinitionOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some PutPipelineDefinitionOutput.error_of_json))
   | QueryObjects ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some QueryObjectsOutput.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (QueryObjectsOutput.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (QueryObjectsOutput.of_json json)
+      else Error (parse_aws_error (Some QueryObjectsOutput.error_of_json))
   | RemoveTags ->
-      (match resp with
-       | Error err -> handle_error err (Some RemoveTagsOutput.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (RemoveTagsOutput.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (RemoveTagsOutput.of_json json)
+      else Error (parse_aws_error (Some RemoveTagsOutput.error_of_json))
   | ReportTaskProgress ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ReportTaskProgressOutput.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ReportTaskProgressOutput.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ReportTaskProgressOutput.of_json json)
+      else
+        Error (parse_aws_error (Some ReportTaskProgressOutput.error_of_json))
   | ReportTaskRunnerHeartbeat ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ReportTaskRunnerHeartbeatOutput.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ReportTaskRunnerHeartbeatOutput.of_json json))
-  | SetStatus -> Ok ()
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ReportTaskRunnerHeartbeatOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ReportTaskRunnerHeartbeatOutput.error_of_json))
+  | SetStatus -> if is_success then Ok () else Error (parse_aws_error None)
   | SetTaskStatus ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some SetTaskStatusOutput.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (SetTaskStatusOutput.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (SetTaskStatusOutput.of_json json)
+      else Error (parse_aws_error (Some SetTaskStatusOutput.error_of_json))
   | ValidatePipelineDefinition ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ValidatePipelineDefinitionOutput.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ValidatePipelineDefinitionOutput.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ValidatePipelineDefinitionOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ValidatePipelineDefinitionOutput.error_of_json))

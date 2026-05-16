@@ -5,486 +5,372 @@ val associate_connection_alias :
     ?cfg:Awso.Cfg.t ->
       AssociateConnectionAliasRequest.t ->
         (AssociateConnectionAliasResult.t,
-          [ `AWS of AssociateConnectionAliasResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          AssociateConnectionAliasResult.error) Result.t Async.Deferred.t
 val associate_ip_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateIpGroupsRequest.t ->
-        (AssociateIpGroupsResult.t,
-          [ `AWS of AssociateIpGroupsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AssociateIpGroupsResult.t, AssociateIpGroupsResult.error) Result.t
           Async.Deferred.t
 val authorize_ip_rules :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AuthorizeIpRulesRequest.t ->
-        (AuthorizeIpRulesResult.t,
-          [ `AWS of AuthorizeIpRulesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AuthorizeIpRulesResult.t, AuthorizeIpRulesResult.error) Result.t
           Async.Deferred.t
 val copy_workspace_image :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CopyWorkspaceImageRequest.t ->
-        (CopyWorkspaceImageResult.t,
-          [ `AWS of CopyWorkspaceImageResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CopyWorkspaceImageResult.t, CopyWorkspaceImageResult.error) Result.t
           Async.Deferred.t
 val create_connect_client_add_in :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateConnectClientAddInRequest.t ->
         (CreateConnectClientAddInResult.t,
-          [ `AWS of CreateConnectClientAddInResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateConnectClientAddInResult.error) Result.t Async.Deferred.t
 val create_connection_alias :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateConnectionAliasRequest.t ->
-        (CreateConnectionAliasResult.t,
-          [ `AWS of CreateConnectionAliasResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateConnectionAliasResult.t, CreateConnectionAliasResult.error)
+          Result.t Async.Deferred.t
 val create_ip_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateIpGroupRequest.t ->
-        (CreateIpGroupResult.t,
-          [ `AWS of CreateIpGroupResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateIpGroupResult.t, CreateIpGroupResult.error) Result.t
           Async.Deferred.t
 val create_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTagsRequest.t ->
-        (CreateTagsResult.t,
-          [ `AWS of CreateTagsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateTagsResult.t, CreateTagsResult.error) Result.t
           Async.Deferred.t
 val create_updated_workspace_image :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateUpdatedWorkspaceImageRequest.t ->
         (CreateUpdatedWorkspaceImageResult.t,
-          [ `AWS of CreateUpdatedWorkspaceImageResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateUpdatedWorkspaceImageResult.error) Result.t Async.Deferred.t
 val create_workspace_bundle :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateWorkspaceBundleRequest.t ->
-        (CreateWorkspaceBundleResult.t,
-          [ `AWS of CreateWorkspaceBundleResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateWorkspaceBundleResult.t, CreateWorkspaceBundleResult.error)
+          Result.t Async.Deferred.t
 val create_workspaces :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateWorkspacesRequest.t ->
-        (CreateWorkspacesResult.t,
-          [ `AWS of CreateWorkspacesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateWorkspacesResult.t, CreateWorkspacesResult.error) Result.t
           Async.Deferred.t
 val delete_client_branding :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteClientBrandingRequest.t ->
-        (DeleteClientBrandingResult.t,
-          [ `AWS of DeleteClientBrandingResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteClientBrandingResult.t, DeleteClientBrandingResult.error)
+          Result.t Async.Deferred.t
 val delete_connect_client_add_in :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteConnectClientAddInRequest.t ->
         (DeleteConnectClientAddInResult.t,
-          [ `AWS of DeleteConnectClientAddInResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeleteConnectClientAddInResult.error) Result.t Async.Deferred.t
 val delete_connection_alias :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteConnectionAliasRequest.t ->
-        (DeleteConnectionAliasResult.t,
-          [ `AWS of DeleteConnectionAliasResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteConnectionAliasResult.t, DeleteConnectionAliasResult.error)
+          Result.t Async.Deferred.t
 val delete_ip_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteIpGroupRequest.t ->
-        (DeleteIpGroupResult.t,
-          [ `AWS of DeleteIpGroupResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteIpGroupResult.t, DeleteIpGroupResult.error) Result.t
           Async.Deferred.t
 val delete_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTagsRequest.t ->
-        (DeleteTagsResult.t,
-          [ `AWS of DeleteTagsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteTagsResult.t, DeleteTagsResult.error) Result.t
           Async.Deferred.t
 val delete_workspace_bundle :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteWorkspaceBundleRequest.t ->
-        (DeleteWorkspaceBundleResult.t,
-          [ `AWS of DeleteWorkspaceBundleResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteWorkspaceBundleResult.t, DeleteWorkspaceBundleResult.error)
+          Result.t Async.Deferred.t
 val delete_workspace_image :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteWorkspaceImageRequest.t ->
-        (DeleteWorkspaceImageResult.t,
-          [ `AWS of DeleteWorkspaceImageResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteWorkspaceImageResult.t, DeleteWorkspaceImageResult.error)
+          Result.t Async.Deferred.t
 val deregister_workspace_directory :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeregisterWorkspaceDirectoryRequest.t ->
         (DeregisterWorkspaceDirectoryResult.t,
-          [ `AWS of DeregisterWorkspaceDirectoryResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeregisterWorkspaceDirectoryResult.error) Result.t Async.Deferred.t
 val describe_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAccountRequest.t ->
-        (DescribeAccountResult.t,
-          [ `AWS of DescribeAccountResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeAccountResult.t, DescribeAccountResult.error) Result.t
           Async.Deferred.t
 val describe_account_modifications :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAccountModificationsRequest.t ->
         (DescribeAccountModificationsResult.t,
-          [ `AWS of DescribeAccountModificationsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeAccountModificationsResult.error) Result.t Async.Deferred.t
 val describe_client_branding :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeClientBrandingRequest.t ->
-        (DescribeClientBrandingResult.t,
-          [ `AWS of DescribeClientBrandingResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeClientBrandingResult.t, DescribeClientBrandingResult.error)
+          Result.t Async.Deferred.t
 val describe_client_properties :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeClientPropertiesRequest.t ->
         (DescribeClientPropertiesResult.t,
-          [ `AWS of DescribeClientPropertiesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeClientPropertiesResult.error) Result.t Async.Deferred.t
 val describe_connect_client_add_ins :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeConnectClientAddInsRequest.t ->
         (DescribeConnectClientAddInsResult.t,
-          [ `AWS of DescribeConnectClientAddInsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeConnectClientAddInsResult.error) Result.t Async.Deferred.t
 val describe_connection_alias_permissions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeConnectionAliasPermissionsRequest.t ->
         (DescribeConnectionAliasPermissionsResult.t,
-          [ `AWS of DescribeConnectionAliasPermissionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeConnectionAliasPermissionsResult.error) Result.t
           Async.Deferred.t
 val describe_connection_aliases :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeConnectionAliasesRequest.t ->
         (DescribeConnectionAliasesResult.t,
-          [ `AWS of DescribeConnectionAliasesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeConnectionAliasesResult.error) Result.t Async.Deferred.t
 val describe_ip_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeIpGroupsRequest.t ->
-        (DescribeIpGroupsResult.t,
-          [ `AWS of DescribeIpGroupsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeIpGroupsResult.t, DescribeIpGroupsResult.error) Result.t
           Async.Deferred.t
 val describe_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTagsRequest.t ->
-        (DescribeTagsResult.t,
-          [ `AWS of DescribeTagsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeTagsResult.t, DescribeTagsResult.error) Result.t
           Async.Deferred.t
 val describe_workspace_bundles :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeWorkspaceBundlesRequest.t ->
         (DescribeWorkspaceBundlesResult.t,
-          [ `AWS of DescribeWorkspaceBundlesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeWorkspaceBundlesResult.error) Result.t Async.Deferred.t
 val describe_workspace_directories :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeWorkspaceDirectoriesRequest.t ->
         (DescribeWorkspaceDirectoriesResult.t,
-          [ `AWS of DescribeWorkspaceDirectoriesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeWorkspaceDirectoriesResult.error) Result.t Async.Deferred.t
 val describe_workspace_image_permissions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeWorkspaceImagePermissionsRequest.t ->
         (DescribeWorkspaceImagePermissionsResult.t,
-          [ `AWS of DescribeWorkspaceImagePermissionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeWorkspaceImagePermissionsResult.error) Result.t
           Async.Deferred.t
 val describe_workspace_images :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeWorkspaceImagesRequest.t ->
         (DescribeWorkspaceImagesResult.t,
-          [ `AWS of DescribeWorkspaceImagesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeWorkspaceImagesResult.error) Result.t Async.Deferred.t
 val describe_workspace_snapshots :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeWorkspaceSnapshotsRequest.t ->
         (DescribeWorkspaceSnapshotsResult.t,
-          [ `AWS of DescribeWorkspaceSnapshotsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeWorkspaceSnapshotsResult.error) Result.t Async.Deferred.t
 val describe_workspaces :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeWorkspacesRequest.t ->
-        (DescribeWorkspacesResult.t,
-          [ `AWS of DescribeWorkspacesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeWorkspacesResult.t, DescribeWorkspacesResult.error) Result.t
           Async.Deferred.t
 val describe_workspaces_connection_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeWorkspacesConnectionStatusRequest.t ->
         (DescribeWorkspacesConnectionStatusResult.t,
-          [ `AWS of DescribeWorkspacesConnectionStatusResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeWorkspacesConnectionStatusResult.error) Result.t
           Async.Deferred.t
 val disassociate_connection_alias :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateConnectionAliasRequest.t ->
         (DisassociateConnectionAliasResult.t,
-          [ `AWS of DisassociateConnectionAliasResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DisassociateConnectionAliasResult.error) Result.t Async.Deferred.t
 val disassociate_ip_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateIpGroupsRequest.t ->
-        (DisassociateIpGroupsResult.t,
-          [ `AWS of DisassociateIpGroupsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DisassociateIpGroupsResult.t, DisassociateIpGroupsResult.error)
+          Result.t Async.Deferred.t
 val import_client_branding :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ImportClientBrandingRequest.t ->
-        (ImportClientBrandingResult.t,
-          [ `AWS of ImportClientBrandingResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ImportClientBrandingResult.t, ImportClientBrandingResult.error)
+          Result.t Async.Deferred.t
 val import_workspace_image :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ImportWorkspaceImageRequest.t ->
-        (ImportWorkspaceImageResult.t,
-          [ `AWS of ImportWorkspaceImageResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ImportWorkspaceImageResult.t, ImportWorkspaceImageResult.error)
+          Result.t Async.Deferred.t
 val list_available_management_cidr_ranges :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAvailableManagementCidrRangesRequest.t ->
         (ListAvailableManagementCidrRangesResult.t,
-          [ `AWS of ListAvailableManagementCidrRangesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListAvailableManagementCidrRangesResult.error) Result.t
           Async.Deferred.t
 val migrate_workspace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       MigrateWorkspaceRequest.t ->
-        (MigrateWorkspaceResult.t,
-          [ `AWS of MigrateWorkspaceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (MigrateWorkspaceResult.t, MigrateWorkspaceResult.error) Result.t
           Async.Deferred.t
 val modify_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyAccountRequest.t ->
-        (ModifyAccountResult.t,
-          [ `AWS of ModifyAccountResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ModifyAccountResult.t, ModifyAccountResult.error) Result.t
           Async.Deferred.t
 val modify_client_properties :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyClientPropertiesRequest.t ->
-        (ModifyClientPropertiesResult.t,
-          [ `AWS of ModifyClientPropertiesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ModifyClientPropertiesResult.t, ModifyClientPropertiesResult.error)
+          Result.t Async.Deferred.t
 val modify_selfservice_permissions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifySelfservicePermissionsRequest.t ->
         (ModifySelfservicePermissionsResult.t,
-          [ `AWS of ModifySelfservicePermissionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ModifySelfservicePermissionsResult.error) Result.t Async.Deferred.t
 val modify_workspace_access_properties :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyWorkspaceAccessPropertiesRequest.t ->
         (ModifyWorkspaceAccessPropertiesResult.t,
-          [ `AWS of ModifyWorkspaceAccessPropertiesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ModifyWorkspaceAccessPropertiesResult.error) Result.t
           Async.Deferred.t
 val modify_workspace_creation_properties :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyWorkspaceCreationPropertiesRequest.t ->
         (ModifyWorkspaceCreationPropertiesResult.t,
-          [ `AWS of ModifyWorkspaceCreationPropertiesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ModifyWorkspaceCreationPropertiesResult.error) Result.t
           Async.Deferred.t
 val modify_workspace_properties :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyWorkspacePropertiesRequest.t ->
         (ModifyWorkspacePropertiesResult.t,
-          [ `AWS of ModifyWorkspacePropertiesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ModifyWorkspacePropertiesResult.error) Result.t Async.Deferred.t
 val modify_workspace_state :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyWorkspaceStateRequest.t ->
-        (ModifyWorkspaceStateResult.t,
-          [ `AWS of ModifyWorkspaceStateResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ModifyWorkspaceStateResult.t, ModifyWorkspaceStateResult.error)
+          Result.t Async.Deferred.t
 val reboot_workspaces :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RebootWorkspacesRequest.t ->
-        (RebootWorkspacesResult.t,
-          [ `AWS of RebootWorkspacesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RebootWorkspacesResult.t, RebootWorkspacesResult.error) Result.t
           Async.Deferred.t
 val rebuild_workspaces :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RebuildWorkspacesRequest.t ->
-        (RebuildWorkspacesResult.t,
-          [ `AWS of RebuildWorkspacesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RebuildWorkspacesResult.t, RebuildWorkspacesResult.error) Result.t
           Async.Deferred.t
 val register_workspace_directory :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegisterWorkspaceDirectoryRequest.t ->
         (RegisterWorkspaceDirectoryResult.t,
-          [ `AWS of RegisterWorkspaceDirectoryResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          RegisterWorkspaceDirectoryResult.error) Result.t Async.Deferred.t
 val restore_workspace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RestoreWorkspaceRequest.t ->
-        (RestoreWorkspaceResult.t,
-          [ `AWS of RestoreWorkspaceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RestoreWorkspaceResult.t, RestoreWorkspaceResult.error) Result.t
           Async.Deferred.t
 val revoke_ip_rules :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RevokeIpRulesRequest.t ->
-        (RevokeIpRulesResult.t,
-          [ `AWS of RevokeIpRulesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RevokeIpRulesResult.t, RevokeIpRulesResult.error) Result.t
           Async.Deferred.t
 val start_workspaces :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartWorkspacesRequest.t ->
-        (StartWorkspacesResult.t,
-          [ `AWS of StartWorkspacesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StartWorkspacesResult.t, StartWorkspacesResult.error) Result.t
           Async.Deferred.t
 val stop_workspaces :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopWorkspacesRequest.t ->
-        (StopWorkspacesResult.t,
-          [ `AWS of StopWorkspacesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StopWorkspacesResult.t, StopWorkspacesResult.error) Result.t
           Async.Deferred.t
 val terminate_workspaces :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TerminateWorkspacesRequest.t ->
-        (TerminateWorkspacesResult.t,
-          [ `AWS of TerminateWorkspacesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (TerminateWorkspacesResult.t, TerminateWorkspacesResult.error)
+          Result.t Async.Deferred.t
 val update_connect_client_add_in :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateConnectClientAddInRequest.t ->
         (UpdateConnectClientAddInResult.t,
-          [ `AWS of UpdateConnectClientAddInResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateConnectClientAddInResult.error) Result.t Async.Deferred.t
 val update_connection_alias_permission :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateConnectionAliasPermissionRequest.t ->
         (UpdateConnectionAliasPermissionResult.t,
-          [ `AWS of UpdateConnectionAliasPermissionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          UpdateConnectionAliasPermissionResult.error) Result.t
           Async.Deferred.t
 val update_rules_of_ip_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateRulesOfIpGroupRequest.t ->
-        (UpdateRulesOfIpGroupResult.t,
-          [ `AWS of UpdateRulesOfIpGroupResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateRulesOfIpGroupResult.t, UpdateRulesOfIpGroupResult.error)
+          Result.t Async.Deferred.t
 val update_workspace_bundle :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateWorkspaceBundleRequest.t ->
-        (UpdateWorkspaceBundleResult.t,
-          [ `AWS of UpdateWorkspaceBundleResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateWorkspaceBundleResult.t, UpdateWorkspaceBundleResult.error)
+          Result.t Async.Deferred.t
 val update_workspace_image_permission :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateWorkspaceImagePermissionRequest.t ->
         (UpdateWorkspaceImagePermissionResult.t,
-          [ `AWS of UpdateWorkspaceImagePermissionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          UpdateWorkspaceImagePermissionResult.error) Result.t
           Async.Deferred.t

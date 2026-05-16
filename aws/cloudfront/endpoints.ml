@@ -1164,591 +1164,598 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
              |> (String.concat ~sep:"")) req.streamingDistributionConfig in
       Awso.Http.Request.make ~body (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_xml =
-    let generic_error () = Error (`Transport err) in
-    match err with
-    | `Too_many_redirects -> generic_error ()
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-        (match (error_of_xml, ((code >= 400) && (code <= 599))) with
-         | (None, _) | (_, false) -> generic_error ()
-         | (Some error_of_xml, true) ->
-             (match Awso.Xml.parse_response body with
-              | `Data _ -> generic_error ()
-              | `El (((_, "Error"), _), _) as xml ->
-                  (try
-                     let error_code =
-                       match Awso.Xml.child_exn xml "Code" with
-                       | `Data error_code -> error_code
-                       | `El (_, children) ->
-                           (List.map children
-                              ~f:(function | `Data s -> s | `El _ -> ""))
-                             |> (String.concat ~sep:"") in
-                     Error
-                       (`AWS (error_of_xml (String.strip error_code) xml))
-                   with | Failure _ -> generic_error ())
-              | `El _ -> generic_error ())) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let parse_aws_error error_of_xml =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = None }) in
+    match (error_of_xml, ((code >= 400) && (code <= 599))) with
+    | (None, _) | (_, false) -> bail ()
+    | (Some error_of_xml, true) ->
+        (match Awso.Xml.parse_response body with
+         | `Data _ -> bail ()
+         | `El (((_, "Error"), _), _) as xml ->
+             (try
+                let error_code =
+                  match Awso.Xml.child_exn xml "Code" with
+                  | `Data error_code -> error_code
+                  | `El (_, children) ->
+                      (List.map children
+                         ~f:(function | `Data s -> s | `El _ -> ""))
+                        |> (String.concat ~sep:"") in
+                error_of_xml (String.strip error_code) xml
+              with | Failure _ -> bail ())
+         | `El _ -> bail ()) in
   let response_to_xml resp =
     Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+  let _ = parse_aws_error in
+  let _ = response_to_xml in
+  let _ = resp in
   match endpoint with
-  | AssociateAlias2020_05_31 -> Ok ()
+  | AssociateAlias2020_05_31 ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | CreateCachePolicy2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateCachePolicyResult.error_of_xml)
-       | Ok resp ->
-           Ok (CreateCachePolicyResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (CreateCachePolicyResult.of_xml (response_to_xml resp))
+      else
+        Error (parse_aws_error (Some CreateCachePolicyResult.error_of_xml))
   | CreateCloudFrontOriginAccessIdentity2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateCloudFrontOriginAccessIdentityResult.error_of_xml)
-       | Ok resp ->
-           Ok
-             (CreateCloudFrontOriginAccessIdentityResult.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok
+          (CreateCloudFrontOriginAccessIdentityResult.of_xml
+             (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateCloudFrontOriginAccessIdentityResult.error_of_xml))
   | CreateDistribution2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateDistributionResult.error_of_xml)
-       | Ok resp ->
-           Ok (CreateDistributionResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (CreateDistributionResult.of_xml (response_to_xml resp))
+      else
+        Error (parse_aws_error (Some CreateDistributionResult.error_of_xml))
   | CreateDistributionWithTags2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateDistributionWithTagsResult.error_of_xml)
-       | Ok resp ->
-           Ok
-             (CreateDistributionWithTagsResult.of_xml (response_to_xml resp)))
+      if is_success
+      then
+        Ok (CreateDistributionWithTagsResult.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateDistributionWithTagsResult.error_of_xml))
   | CreateFieldLevelEncryptionConfig2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateFieldLevelEncryptionConfigResult.error_of_xml)
-       | Ok resp ->
-           Ok
-             (CreateFieldLevelEncryptionConfigResult.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok
+          (CreateFieldLevelEncryptionConfigResult.of_xml
+             (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateFieldLevelEncryptionConfigResult.error_of_xml))
   | CreateFieldLevelEncryptionProfile2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateFieldLevelEncryptionProfileResult.error_of_xml)
-       | Ok resp ->
-           Ok
-             (CreateFieldLevelEncryptionProfileResult.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok
+          (CreateFieldLevelEncryptionProfileResult.of_xml
+             (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateFieldLevelEncryptionProfileResult.error_of_xml))
   | CreateFunction2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateFunctionResult.error_of_xml)
-       | Ok resp -> Ok (CreateFunctionResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (CreateFunctionResult.of_xml (response_to_xml resp))
+      else Error (parse_aws_error (Some CreateFunctionResult.error_of_xml))
   | CreateInvalidation2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateInvalidationResult.error_of_xml)
-       | Ok resp ->
-           Ok (CreateInvalidationResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (CreateInvalidationResult.of_xml (response_to_xml resp))
+      else
+        Error (parse_aws_error (Some CreateInvalidationResult.error_of_xml))
   | CreateKeyGroup2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateKeyGroupResult.error_of_xml)
-       | Ok resp -> Ok (CreateKeyGroupResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (CreateKeyGroupResult.of_xml (response_to_xml resp))
+      else Error (parse_aws_error (Some CreateKeyGroupResult.error_of_xml))
   | CreateMonitoringSubscription2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateMonitoringSubscriptionResult.error_of_xml)
-       | Ok resp ->
-           Ok
-             (CreateMonitoringSubscriptionResult.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok (CreateMonitoringSubscriptionResult.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateMonitoringSubscriptionResult.error_of_xml))
   | CreateOriginRequestPolicy2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateOriginRequestPolicyResult.error_of_xml)
-       | Ok resp ->
-           Ok (CreateOriginRequestPolicyResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (CreateOriginRequestPolicyResult.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateOriginRequestPolicyResult.error_of_xml))
   | CreatePublicKey2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreatePublicKeyResult.error_of_xml)
-       | Ok resp -> Ok (CreatePublicKeyResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (CreatePublicKeyResult.of_xml (response_to_xml resp))
+      else Error (parse_aws_error (Some CreatePublicKeyResult.error_of_xml))
   | CreateRealtimeLogConfig2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateRealtimeLogConfigResult.error_of_xml)
-       | Ok resp ->
-           Ok (CreateRealtimeLogConfigResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (CreateRealtimeLogConfigResult.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error (Some CreateRealtimeLogConfigResult.error_of_xml))
   | CreateResponseHeadersPolicy2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateResponseHeadersPolicyResult.error_of_xml)
-       | Ok resp ->
-           Ok
-             (CreateResponseHeadersPolicyResult.of_xml (response_to_xml resp)))
+      if is_success
+      then
+        Ok (CreateResponseHeadersPolicyResult.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateResponseHeadersPolicyResult.error_of_xml))
   | CreateStreamingDistribution2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateStreamingDistributionResult.error_of_xml)
-       | Ok resp ->
-           Ok
-             (CreateStreamingDistributionResult.of_xml (response_to_xml resp)))
+      if is_success
+      then
+        Ok (CreateStreamingDistributionResult.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateStreamingDistributionResult.error_of_xml))
   | CreateStreamingDistributionWithTags2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateStreamingDistributionWithTagsResult.error_of_xml)
-       | Ok resp ->
-           Ok
-             (CreateStreamingDistributionWithTagsResult.of_xml
-                (response_to_xml resp)))
-  | DeleteCachePolicy2020_05_31 -> Ok ()
-  | DeleteCloudFrontOriginAccessIdentity2020_05_31 -> Ok ()
-  | DeleteDistribution2020_05_31 -> Ok ()
-  | DeleteFieldLevelEncryptionConfig2020_05_31 -> Ok ()
-  | DeleteFieldLevelEncryptionProfile2020_05_31 -> Ok ()
-  | DeleteFunction2020_05_31 -> Ok ()
-  | DeleteKeyGroup2020_05_31 -> Ok ()
+      if is_success
+      then
+        Ok
+          (CreateStreamingDistributionWithTagsResult.of_xml
+             (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateStreamingDistributionWithTagsResult.error_of_xml))
+  | DeleteCachePolicy2020_05_31 ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteCloudFrontOriginAccessIdentity2020_05_31 ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteDistribution2020_05_31 ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteFieldLevelEncryptionConfig2020_05_31 ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteFieldLevelEncryptionProfile2020_05_31 ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteFunction2020_05_31 ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteKeyGroup2020_05_31 ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteMonitoringSubscription2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteMonitoringSubscriptionResult.error_of_xml)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DeleteMonitoringSubscriptionResult.of_header_and_body
-                (headers, ())))
-  | DeleteOriginRequestPolicy2020_05_31 -> Ok ()
-  | DeletePublicKey2020_05_31 -> Ok ()
-  | DeleteRealtimeLogConfig2020_05_31 -> Ok ()
-  | DeleteResponseHeadersPolicy2020_05_31 -> Ok ()
-  | DeleteStreamingDistribution2020_05_31 -> Ok ()
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeleteMonitoringSubscriptionResult.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteMonitoringSubscriptionResult.error_of_xml))
+  | DeleteOriginRequestPolicy2020_05_31 ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeletePublicKey2020_05_31 ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteRealtimeLogConfig2020_05_31 ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteResponseHeadersPolicy2020_05_31 ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteStreamingDistribution2020_05_31 ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DescribeFunction2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeFunctionResult.error_of_xml)
-       | Ok resp -> Ok (DescribeFunctionResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (DescribeFunctionResult.of_xml (response_to_xml resp))
+      else Error (parse_aws_error (Some DescribeFunctionResult.error_of_xml))
   | GetCachePolicy2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetCachePolicyResult.error_of_xml)
-       | Ok resp -> Ok (GetCachePolicyResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetCachePolicyResult.of_xml (response_to_xml resp))
+      else Error (parse_aws_error (Some GetCachePolicyResult.error_of_xml))
   | GetCachePolicyConfig2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetCachePolicyConfigResult.error_of_xml)
-       | Ok resp ->
-           Ok (GetCachePolicyConfigResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetCachePolicyConfigResult.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error (Some GetCachePolicyConfigResult.error_of_xml))
   | GetCloudFrontOriginAccessIdentity2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetCloudFrontOriginAccessIdentityResult.error_of_xml)
-       | Ok resp ->
-           Ok
-             (GetCloudFrontOriginAccessIdentityResult.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok
+          (GetCloudFrontOriginAccessIdentityResult.of_xml
+             (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetCloudFrontOriginAccessIdentityResult.error_of_xml))
   | GetCloudFrontOriginAccessIdentityConfig2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetCloudFrontOriginAccessIdentityConfigResult.error_of_xml)
-       | Ok resp ->
-           Ok
-             (GetCloudFrontOriginAccessIdentityConfigResult.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok
+          (GetCloudFrontOriginAccessIdentityConfigResult.of_xml
+             (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetCloudFrontOriginAccessIdentityConfigResult.error_of_xml))
   | GetDistribution2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetDistributionResult.error_of_xml)
-       | Ok resp -> Ok (GetDistributionResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetDistributionResult.of_xml (response_to_xml resp))
+      else Error (parse_aws_error (Some GetDistributionResult.error_of_xml))
   | GetDistributionConfig2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetDistributionConfigResult.error_of_xml)
-       | Ok resp ->
-           Ok (GetDistributionConfigResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetDistributionConfigResult.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error (Some GetDistributionConfigResult.error_of_xml))
   | GetFieldLevelEncryption2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetFieldLevelEncryptionResult.error_of_xml)
-       | Ok resp ->
-           Ok (GetFieldLevelEncryptionResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetFieldLevelEncryptionResult.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error (Some GetFieldLevelEncryptionResult.error_of_xml))
   | GetFieldLevelEncryptionConfig2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetFieldLevelEncryptionConfigResult.error_of_xml)
-       | Ok resp ->
-           Ok
-             (GetFieldLevelEncryptionConfigResult.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok
+          (GetFieldLevelEncryptionConfigResult.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetFieldLevelEncryptionConfigResult.error_of_xml))
   | GetFieldLevelEncryptionProfile2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetFieldLevelEncryptionProfileResult.error_of_xml)
-       | Ok resp ->
-           Ok
-             (GetFieldLevelEncryptionProfileResult.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok
+          (GetFieldLevelEncryptionProfileResult.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetFieldLevelEncryptionProfileResult.error_of_xml))
   | GetFieldLevelEncryptionProfileConfig2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetFieldLevelEncryptionProfileConfigResult.error_of_xml)
-       | Ok resp ->
-           Ok
-             (GetFieldLevelEncryptionProfileConfigResult.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok
+          (GetFieldLevelEncryptionProfileConfigResult.of_xml
+             (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetFieldLevelEncryptionProfileConfigResult.error_of_xml))
   | GetFunction2020_05_31 ->
-      (match resp with
-       | Error err -> handle_error err (Some GetFunctionResult.error_of_xml)
-       | Ok resp ->
-           let body = FunctionBlob.of_string (Awso.Http.Response.body resp) in
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (GetFunctionResult.of_header_and_body (headers, body)))
+      if is_success
+      then
+        let body = FunctionBlob.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetFunctionResult.of_header_and_body (headers, body))
+      else Error (parse_aws_error (Some GetFunctionResult.error_of_xml))
   | GetInvalidation2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetInvalidationResult.error_of_xml)
-       | Ok resp -> Ok (GetInvalidationResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetInvalidationResult.of_xml (response_to_xml resp))
+      else Error (parse_aws_error (Some GetInvalidationResult.error_of_xml))
   | GetKeyGroup2020_05_31 ->
-      (match resp with
-       | Error err -> handle_error err (Some GetKeyGroupResult.error_of_xml)
-       | Ok resp -> Ok (GetKeyGroupResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetKeyGroupResult.of_xml (response_to_xml resp))
+      else Error (parse_aws_error (Some GetKeyGroupResult.error_of_xml))
   | GetKeyGroupConfig2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetKeyGroupConfigResult.error_of_xml)
-       | Ok resp ->
-           Ok (GetKeyGroupConfigResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetKeyGroupConfigResult.of_xml (response_to_xml resp))
+      else
+        Error (parse_aws_error (Some GetKeyGroupConfigResult.error_of_xml))
   | GetMonitoringSubscription2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetMonitoringSubscriptionResult.error_of_xml)
-       | Ok resp ->
-           Ok (GetMonitoringSubscriptionResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetMonitoringSubscriptionResult.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetMonitoringSubscriptionResult.error_of_xml))
   | GetOriginRequestPolicy2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetOriginRequestPolicyResult.error_of_xml)
-       | Ok resp ->
-           Ok (GetOriginRequestPolicyResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetOriginRequestPolicyResult.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error (Some GetOriginRequestPolicyResult.error_of_xml))
   | GetOriginRequestPolicyConfig2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetOriginRequestPolicyConfigResult.error_of_xml)
-       | Ok resp ->
-           Ok
-             (GetOriginRequestPolicyConfigResult.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok (GetOriginRequestPolicyConfigResult.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetOriginRequestPolicyConfigResult.error_of_xml))
   | GetPublicKey2020_05_31 ->
-      (match resp with
-       | Error err -> handle_error err (Some GetPublicKeyResult.error_of_xml)
-       | Ok resp -> Ok (GetPublicKeyResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetPublicKeyResult.of_xml (response_to_xml resp))
+      else Error (parse_aws_error (Some GetPublicKeyResult.error_of_xml))
   | GetPublicKeyConfig2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetPublicKeyConfigResult.error_of_xml)
-       | Ok resp ->
-           Ok (GetPublicKeyConfigResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetPublicKeyConfigResult.of_xml (response_to_xml resp))
+      else
+        Error (parse_aws_error (Some GetPublicKeyConfigResult.error_of_xml))
   | GetRealtimeLogConfig2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetRealtimeLogConfigResult.error_of_xml)
-       | Ok resp ->
-           Ok (GetRealtimeLogConfigResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetRealtimeLogConfigResult.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error (Some GetRealtimeLogConfigResult.error_of_xml))
   | GetResponseHeadersPolicy2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetResponseHeadersPolicyResult.error_of_xml)
-       | Ok resp ->
-           Ok (GetResponseHeadersPolicyResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetResponseHeadersPolicyResult.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error (Some GetResponseHeadersPolicyResult.error_of_xml))
   | GetResponseHeadersPolicyConfig2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetResponseHeadersPolicyConfigResult.error_of_xml)
-       | Ok resp ->
-           Ok
-             (GetResponseHeadersPolicyConfigResult.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok
+          (GetResponseHeadersPolicyConfigResult.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetResponseHeadersPolicyConfigResult.error_of_xml))
   | GetStreamingDistribution2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetStreamingDistributionResult.error_of_xml)
-       | Ok resp ->
-           Ok (GetStreamingDistributionResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetStreamingDistributionResult.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error (Some GetStreamingDistributionResult.error_of_xml))
   | GetStreamingDistributionConfig2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetStreamingDistributionConfigResult.error_of_xml)
-       | Ok resp ->
-           Ok
-             (GetStreamingDistributionConfigResult.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok
+          (GetStreamingDistributionConfigResult.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetStreamingDistributionConfigResult.error_of_xml))
   | ListCachePolicies2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListCachePoliciesResult.error_of_xml)
-       | Ok resp ->
-           Ok (ListCachePoliciesResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (ListCachePoliciesResult.of_xml (response_to_xml resp))
+      else
+        Error (parse_aws_error (Some ListCachePoliciesResult.error_of_xml))
   | ListCloudFrontOriginAccessIdentities2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListCloudFrontOriginAccessIdentitiesResult.error_of_xml)
-       | Ok resp ->
-           Ok
-             (ListCloudFrontOriginAccessIdentitiesResult.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok
+          (ListCloudFrontOriginAccessIdentitiesResult.of_xml
+             (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListCloudFrontOriginAccessIdentitiesResult.error_of_xml))
   | ListConflictingAliases2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListConflictingAliasesResult.error_of_xml)
-       | Ok resp ->
-           Ok (ListConflictingAliasesResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (ListConflictingAliasesResult.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error (Some ListConflictingAliasesResult.error_of_xml))
   | ListDistributions2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListDistributionsResult.error_of_xml)
-       | Ok resp ->
-           Ok (ListDistributionsResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (ListDistributionsResult.of_xml (response_to_xml resp))
+      else
+        Error (parse_aws_error (Some ListDistributionsResult.error_of_xml))
   | ListDistributionsByCachePolicyId2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListDistributionsByCachePolicyIdResult.error_of_xml)
-       | Ok resp ->
-           Ok
-             (ListDistributionsByCachePolicyIdResult.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok
+          (ListDistributionsByCachePolicyIdResult.of_xml
+             (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListDistributionsByCachePolicyIdResult.error_of_xml))
   | ListDistributionsByKeyGroup2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListDistributionsByKeyGroupResult.error_of_xml)
-       | Ok resp ->
-           Ok
-             (ListDistributionsByKeyGroupResult.of_xml (response_to_xml resp)))
+      if is_success
+      then
+        Ok (ListDistributionsByKeyGroupResult.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListDistributionsByKeyGroupResult.error_of_xml))
   | ListDistributionsByOriginRequestPolicyId2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (ListDistributionsByOriginRequestPolicyIdResult.of_xml
+             (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                ListDistributionsByOriginRequestPolicyIdResult.error_of_xml)
-       | Ok resp ->
-           Ok
-             (ListDistributionsByOriginRequestPolicyIdResult.of_xml
-                (response_to_xml resp)))
+                ListDistributionsByOriginRequestPolicyIdResult.error_of_xml))
   | ListDistributionsByRealtimeLogConfig2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListDistributionsByRealtimeLogConfigResult.error_of_xml)
-       | Ok resp ->
-           Ok
-             (ListDistributionsByRealtimeLogConfigResult.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok
+          (ListDistributionsByRealtimeLogConfigResult.of_xml
+             (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListDistributionsByRealtimeLogConfigResult.error_of_xml))
   | ListDistributionsByResponseHeadersPolicyId2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (ListDistributionsByResponseHeadersPolicyIdResult.of_xml
+             (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                ListDistributionsByResponseHeadersPolicyIdResult.error_of_xml)
-       | Ok resp ->
-           Ok
-             (ListDistributionsByResponseHeadersPolicyIdResult.of_xml
-                (response_to_xml resp)))
+                ListDistributionsByResponseHeadersPolicyIdResult.error_of_xml))
   | ListDistributionsByWebACLId2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListDistributionsByWebACLIdResult.error_of_xml)
-       | Ok resp ->
-           Ok
-             (ListDistributionsByWebACLIdResult.of_xml (response_to_xml resp)))
+      if is_success
+      then
+        Ok (ListDistributionsByWebACLIdResult.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListDistributionsByWebACLIdResult.error_of_xml))
   | ListFieldLevelEncryptionConfigs2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListFieldLevelEncryptionConfigsResult.error_of_xml)
-       | Ok resp ->
-           Ok
-             (ListFieldLevelEncryptionConfigsResult.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok
+          (ListFieldLevelEncryptionConfigsResult.of_xml
+             (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListFieldLevelEncryptionConfigsResult.error_of_xml))
   | ListFieldLevelEncryptionProfiles2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListFieldLevelEncryptionProfilesResult.error_of_xml)
-       | Ok resp ->
-           Ok
-             (ListFieldLevelEncryptionProfilesResult.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok
+          (ListFieldLevelEncryptionProfilesResult.of_xml
+             (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListFieldLevelEncryptionProfilesResult.error_of_xml))
   | ListFunctions2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListFunctionsResult.error_of_xml)
-       | Ok resp -> Ok (ListFunctionsResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (ListFunctionsResult.of_xml (response_to_xml resp))
+      else Error (parse_aws_error (Some ListFunctionsResult.error_of_xml))
   | ListInvalidations2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListInvalidationsResult.error_of_xml)
-       | Ok resp ->
-           Ok (ListInvalidationsResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (ListInvalidationsResult.of_xml (response_to_xml resp))
+      else
+        Error (parse_aws_error (Some ListInvalidationsResult.error_of_xml))
   | ListKeyGroups2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListKeyGroupsResult.error_of_xml)
-       | Ok resp -> Ok (ListKeyGroupsResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (ListKeyGroupsResult.of_xml (response_to_xml resp))
+      else Error (parse_aws_error (Some ListKeyGroupsResult.error_of_xml))
   | ListOriginRequestPolicies2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListOriginRequestPoliciesResult.error_of_xml)
-       | Ok resp ->
-           Ok (ListOriginRequestPoliciesResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (ListOriginRequestPoliciesResult.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListOriginRequestPoliciesResult.error_of_xml))
   | ListPublicKeys2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListPublicKeysResult.error_of_xml)
-       | Ok resp -> Ok (ListPublicKeysResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (ListPublicKeysResult.of_xml (response_to_xml resp))
+      else Error (parse_aws_error (Some ListPublicKeysResult.error_of_xml))
   | ListRealtimeLogConfigs2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListRealtimeLogConfigsResult.error_of_xml)
-       | Ok resp ->
-           Ok (ListRealtimeLogConfigsResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (ListRealtimeLogConfigsResult.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error (Some ListRealtimeLogConfigsResult.error_of_xml))
   | ListResponseHeadersPolicies2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListResponseHeadersPoliciesResult.error_of_xml)
-       | Ok resp ->
-           Ok
-             (ListResponseHeadersPoliciesResult.of_xml (response_to_xml resp)))
+      if is_success
+      then
+        Ok (ListResponseHeadersPoliciesResult.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListResponseHeadersPoliciesResult.error_of_xml))
   | ListStreamingDistributions2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListStreamingDistributionsResult.error_of_xml)
-       | Ok resp ->
-           Ok
-             (ListStreamingDistributionsResult.of_xml (response_to_xml resp)))
+      if is_success
+      then
+        Ok (ListStreamingDistributionsResult.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListStreamingDistributionsResult.error_of_xml))
   | ListTagsForResource2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResult.error_of_xml)
-       | Ok resp ->
-           Ok (ListTagsForResourceResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (ListTagsForResourceResult.of_xml (response_to_xml resp))
+      else
+        Error (parse_aws_error (Some ListTagsForResourceResult.error_of_xml))
   | PublishFunction2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PublishFunctionResult.error_of_xml)
-       | Ok resp -> Ok (PublishFunctionResult.of_xml (response_to_xml resp)))
-  | TagResource2020_05_31 -> Ok ()
+      if is_success
+      then Ok (PublishFunctionResult.of_xml (response_to_xml resp))
+      else Error (parse_aws_error (Some PublishFunctionResult.error_of_xml))
+  | TagResource2020_05_31 ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | TestFunction2020_05_31 ->
-      (match resp with
-       | Error err -> handle_error err (Some TestFunctionResult.error_of_xml)
-       | Ok resp -> Ok (TestFunctionResult.of_xml (response_to_xml resp)))
-  | UntagResource2020_05_31 -> Ok ()
+      if is_success
+      then Ok (TestFunctionResult.of_xml (response_to_xml resp))
+      else Error (parse_aws_error (Some TestFunctionResult.error_of_xml))
+  | UntagResource2020_05_31 ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | UpdateCachePolicy2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateCachePolicyResult.error_of_xml)
-       | Ok resp ->
-           Ok (UpdateCachePolicyResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (UpdateCachePolicyResult.of_xml (response_to_xml resp))
+      else
+        Error (parse_aws_error (Some UpdateCachePolicyResult.error_of_xml))
   | UpdateCloudFrontOriginAccessIdentity2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateCloudFrontOriginAccessIdentityResult.error_of_xml)
-       | Ok resp ->
-           Ok
-             (UpdateCloudFrontOriginAccessIdentityResult.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok
+          (UpdateCloudFrontOriginAccessIdentityResult.of_xml
+             (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateCloudFrontOriginAccessIdentityResult.error_of_xml))
   | UpdateDistribution2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateDistributionResult.error_of_xml)
-       | Ok resp ->
-           Ok (UpdateDistributionResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (UpdateDistributionResult.of_xml (response_to_xml resp))
+      else
+        Error (parse_aws_error (Some UpdateDistributionResult.error_of_xml))
   | UpdateFieldLevelEncryptionConfig2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateFieldLevelEncryptionConfigResult.error_of_xml)
-       | Ok resp ->
-           Ok
-             (UpdateFieldLevelEncryptionConfigResult.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok
+          (UpdateFieldLevelEncryptionConfigResult.of_xml
+             (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateFieldLevelEncryptionConfigResult.error_of_xml))
   | UpdateFieldLevelEncryptionProfile2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateFieldLevelEncryptionProfileResult.error_of_xml)
-       | Ok resp ->
-           Ok
-             (UpdateFieldLevelEncryptionProfileResult.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok
+          (UpdateFieldLevelEncryptionProfileResult.of_xml
+             (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateFieldLevelEncryptionProfileResult.error_of_xml))
   | UpdateFunction2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateFunctionResult.error_of_xml)
-       | Ok resp -> Ok (UpdateFunctionResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (UpdateFunctionResult.of_xml (response_to_xml resp))
+      else Error (parse_aws_error (Some UpdateFunctionResult.error_of_xml))
   | UpdateKeyGroup2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateKeyGroupResult.error_of_xml)
-       | Ok resp -> Ok (UpdateKeyGroupResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (UpdateKeyGroupResult.of_xml (response_to_xml resp))
+      else Error (parse_aws_error (Some UpdateKeyGroupResult.error_of_xml))
   | UpdateOriginRequestPolicy2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateOriginRequestPolicyResult.error_of_xml)
-       | Ok resp ->
-           Ok (UpdateOriginRequestPolicyResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (UpdateOriginRequestPolicyResult.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateOriginRequestPolicyResult.error_of_xml))
   | UpdatePublicKey2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdatePublicKeyResult.error_of_xml)
-       | Ok resp -> Ok (UpdatePublicKeyResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (UpdatePublicKeyResult.of_xml (response_to_xml resp))
+      else Error (parse_aws_error (Some UpdatePublicKeyResult.error_of_xml))
   | UpdateRealtimeLogConfig2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateRealtimeLogConfigResult.error_of_xml)
-       | Ok resp ->
-           Ok (UpdateRealtimeLogConfigResult.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (UpdateRealtimeLogConfigResult.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateRealtimeLogConfigResult.error_of_xml))
   | UpdateResponseHeadersPolicy2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateResponseHeadersPolicyResult.error_of_xml)
-       | Ok resp ->
-           Ok
-             (UpdateResponseHeadersPolicyResult.of_xml (response_to_xml resp)))
+      if is_success
+      then
+        Ok (UpdateResponseHeadersPolicyResult.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateResponseHeadersPolicyResult.error_of_xml))
   | UpdateStreamingDistribution2020_05_31 ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateStreamingDistributionResult.error_of_xml)
-       | Ok resp ->
-           Ok
-             (UpdateStreamingDistributionResult.of_xml (response_to_xml resp)))
+      if is_success
+      then
+        Ok (UpdateStreamingDistributionResult.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateStreamingDistributionResult.error_of_xml))

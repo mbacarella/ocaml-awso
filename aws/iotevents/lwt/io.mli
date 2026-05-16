@@ -4,180 +4,146 @@ val create_alarm_model :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAlarmModelRequest.t ->
-        (CreateAlarmModelResponse.t,
-          [ `AWS of CreateAlarmModelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateAlarmModelResponse.t, CreateAlarmModelResponse.error) Result.t
+          Lwt.t
 val create_detector_model :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDetectorModelRequest.t ->
-        (CreateDetectorModelResponse.t,
-          [ `AWS of CreateDetectorModelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateDetectorModelResponse.t, CreateDetectorModelResponse.error)
+          Result.t Lwt.t
 val create_input :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateInputRequest.t ->
-        (CreateInputResponse.t,
-          [ `AWS of CreateInputResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateInputResponse.t, CreateInputResponse.error) Result.t Lwt.t
 val delete_alarm_model :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAlarmModelRequest.t ->
-        (DeleteAlarmModelResponse.t,
-          [ `AWS of DeleteAlarmModelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteAlarmModelResponse.t, DeleteAlarmModelResponse.error) Result.t
+          Lwt.t
 val delete_detector_model :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDetectorModelRequest.t ->
-        (DeleteDetectorModelResponse.t,
-          [ `AWS of DeleteDetectorModelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteDetectorModelResponse.t, DeleteDetectorModelResponse.error)
+          Result.t Lwt.t
 val delete_input :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteInputRequest.t ->
-        (DeleteInputResponse.t,
-          [ `AWS of DeleteInputResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteInputResponse.t, DeleteInputResponse.error) Result.t Lwt.t
 val describe_alarm_model :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAlarmModelRequest.t ->
-        (DescribeAlarmModelResponse.t,
-          [ `AWS of DescribeAlarmModelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeAlarmModelResponse.t, DescribeAlarmModelResponse.error)
+          Result.t Lwt.t
 val describe_detector_model :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDetectorModelRequest.t ->
         (DescribeDetectorModelResponse.t,
-          [ `AWS of DescribeDetectorModelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeDetectorModelResponse.error) Result.t Lwt.t
 val describe_detector_model_analysis :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDetectorModelAnalysisRequest.t ->
         (DescribeDetectorModelAnalysisResponse.t,
-          [ `AWS of DescribeDetectorModelAnalysisResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeDetectorModelAnalysisResponse.error) Result.t Lwt.t
 val describe_input :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeInputRequest.t ->
-        (DescribeInputResponse.t,
-          [ `AWS of DescribeInputResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeInputResponse.t, DescribeInputResponse.error) Result.t Lwt.t
 val describe_logging_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeLoggingOptionsRequest.t ->
         (DescribeLoggingOptionsResponse.t,
-          [ `AWS of DescribeLoggingOptionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeLoggingOptionsResponse.error) Result.t Lwt.t
 val get_detector_model_analysis_results :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDetectorModelAnalysisResultsRequest.t ->
         (GetDetectorModelAnalysisResultsResponse.t,
-          [ `AWS of GetDetectorModelAnalysisResultsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetDetectorModelAnalysisResultsResponse.error) Result.t Lwt.t
 val list_alarm_model_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAlarmModelVersionsRequest.t ->
         (ListAlarmModelVersionsResponse.t,
-          [ `AWS of ListAlarmModelVersionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListAlarmModelVersionsResponse.error) Result.t Lwt.t
 val list_alarm_models :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAlarmModelsRequest.t ->
-        (ListAlarmModelsResponse.t,
-          [ `AWS of ListAlarmModelsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListAlarmModelsResponse.t, ListAlarmModelsResponse.error) Result.t
+          Lwt.t
 val list_detector_model_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDetectorModelVersionsRequest.t ->
         (ListDetectorModelVersionsResponse.t,
-          [ `AWS of ListDetectorModelVersionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListDetectorModelVersionsResponse.error) Result.t Lwt.t
 val list_detector_models :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDetectorModelsRequest.t ->
-        (ListDetectorModelsResponse.t,
-          [ `AWS of ListDetectorModelsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListDetectorModelsResponse.t, ListDetectorModelsResponse.error)
+          Result.t Lwt.t
 val list_input_routings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListInputRoutingsRequest.t ->
-        (ListInputRoutingsResponse.t,
-          [ `AWS of ListInputRoutingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListInputRoutingsResponse.t, ListInputRoutingsResponse.error)
+          Result.t Lwt.t
 val list_inputs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListInputsRequest.t ->
-        (ListInputsResponse.t,
-          [ `AWS of ListInputsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListInputsResponse.t, ListInputsResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val put_logging_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      PutLoggingOptionsRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      PutLoggingOptionsRequest.t -> (unit, unit) Result.t Lwt.t
 val start_detector_model_analysis :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartDetectorModelAnalysisRequest.t ->
         (StartDetectorModelAnalysisResponse.t,
-          [ `AWS of StartDetectorModelAnalysisResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartDetectorModelAnalysisResponse.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_alarm_model :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateAlarmModelRequest.t ->
-        (UpdateAlarmModelResponse.t,
-          [ `AWS of UpdateAlarmModelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateAlarmModelResponse.t, UpdateAlarmModelResponse.error) Result.t
+          Lwt.t
 val update_detector_model :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDetectorModelRequest.t ->
-        (UpdateDetectorModelResponse.t,
-          [ `AWS of UpdateDetectorModelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateDetectorModelResponse.t, UpdateDetectorModelResponse.error)
+          Result.t Lwt.t
 val update_input :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateInputRequest.t ->
-        (UpdateInputResponse.t,
-          [ `AWS of UpdateInputResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateInputResponse.t, UpdateInputResponse.error) Result.t Lwt.t

@@ -5,248 +5,200 @@ val add_attributes_to_findings :
     ?cfg:Awso.Cfg.t ->
       AddAttributesToFindingsRequest.t ->
         (AddAttributesToFindingsResponse.t,
-          [ `AWS of AddAttributesToFindingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AddAttributesToFindingsResponse.error) Result.t Lwt.t
 val create_assessment_target :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAssessmentTargetRequest.t ->
         (CreateAssessmentTargetResponse.t,
-          [ `AWS of CreateAssessmentTargetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateAssessmentTargetResponse.error) Result.t Lwt.t
 val create_assessment_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAssessmentTemplateRequest.t ->
         (CreateAssessmentTemplateResponse.t,
-          [ `AWS of CreateAssessmentTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateAssessmentTemplateResponse.error) Result.t Lwt.t
 val create_exclusions_preview :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateExclusionsPreviewRequest.t ->
         (CreateExclusionsPreviewResponse.t,
-          [ `AWS of CreateExclusionsPreviewResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateExclusionsPreviewResponse.error) Result.t Lwt.t
 val create_resource_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateResourceGroupRequest.t ->
-        (CreateResourceGroupResponse.t,
-          [ `AWS of CreateResourceGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateResourceGroupResponse.t, CreateResourceGroupResponse.error)
+          Result.t Lwt.t
 val delete_assessment_run :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteAssessmentRunRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteAssessmentRunRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_assessment_target :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteAssessmentTargetRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteAssessmentTargetRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_assessment_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteAssessmentTemplateRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteAssessmentTemplateRequest.t -> (unit, unit) Result.t Lwt.t
 val describe_assessment_runs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAssessmentRunsRequest.t ->
         (DescribeAssessmentRunsResponse.t,
-          [ `AWS of DescribeAssessmentRunsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeAssessmentRunsResponse.error) Result.t Lwt.t
 val describe_assessment_targets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAssessmentTargetsRequest.t ->
         (DescribeAssessmentTargetsResponse.t,
-          [ `AWS of DescribeAssessmentTargetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeAssessmentTargetsResponse.error) Result.t Lwt.t
 val describe_assessment_templates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAssessmentTemplatesRequest.t ->
         (DescribeAssessmentTemplatesResponse.t,
-          [ `AWS of DescribeAssessmentTemplatesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeAssessmentTemplatesResponse.error) Result.t Lwt.t
 val describe_cross_account_access_role :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       unit ->
         (DescribeCrossAccountAccessRoleResponse.t,
-          [ `AWS of DescribeCrossAccountAccessRoleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeCrossAccountAccessRoleResponse.error) Result.t Lwt.t
 val describe_exclusions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeExclusionsRequest.t ->
-        (DescribeExclusionsResponse.t,
-          [ `AWS of DescribeExclusionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeExclusionsResponse.t, DescribeExclusionsResponse.error)
+          Result.t Lwt.t
 val describe_findings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeFindingsRequest.t ->
-        (DescribeFindingsResponse.t,
-          [ `AWS of DescribeFindingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeFindingsResponse.t, DescribeFindingsResponse.error) Result.t
+          Lwt.t
 val describe_resource_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeResourceGroupsRequest.t ->
         (DescribeResourceGroupsResponse.t,
-          [ `AWS of DescribeResourceGroupsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeResourceGroupsResponse.error) Result.t Lwt.t
 val describe_rules_packages :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRulesPackagesRequest.t ->
         (DescribeRulesPackagesResponse.t,
-          [ `AWS of DescribeRulesPackagesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeRulesPackagesResponse.error) Result.t Lwt.t
 val get_assessment_report :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAssessmentReportRequest.t ->
-        (GetAssessmentReportResponse.t,
-          [ `AWS of GetAssessmentReportResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetAssessmentReportResponse.t, GetAssessmentReportResponse.error)
+          Result.t Lwt.t
 val get_exclusions_preview :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetExclusionsPreviewRequest.t ->
-        (GetExclusionsPreviewResponse.t,
-          [ `AWS of GetExclusionsPreviewResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetExclusionsPreviewResponse.t, GetExclusionsPreviewResponse.error)
+          Result.t Lwt.t
 val get_telemetry_metadata :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTelemetryMetadataRequest.t ->
-        (GetTelemetryMetadataResponse.t,
-          [ `AWS of GetTelemetryMetadataResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetTelemetryMetadataResponse.t, GetTelemetryMetadataResponse.error)
+          Result.t Lwt.t
 val list_assessment_run_agents :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAssessmentRunAgentsRequest.t ->
         (ListAssessmentRunAgentsResponse.t,
-          [ `AWS of ListAssessmentRunAgentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListAssessmentRunAgentsResponse.error) Result.t Lwt.t
 val list_assessment_runs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAssessmentRunsRequest.t ->
-        (ListAssessmentRunsResponse.t,
-          [ `AWS of ListAssessmentRunsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListAssessmentRunsResponse.t, ListAssessmentRunsResponse.error)
+          Result.t Lwt.t
 val list_assessment_targets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAssessmentTargetsRequest.t ->
         (ListAssessmentTargetsResponse.t,
-          [ `AWS of ListAssessmentTargetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListAssessmentTargetsResponse.error) Result.t Lwt.t
 val list_assessment_templates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAssessmentTemplatesRequest.t ->
         (ListAssessmentTemplatesResponse.t,
-          [ `AWS of ListAssessmentTemplatesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListAssessmentTemplatesResponse.error) Result.t Lwt.t
 val list_event_subscriptions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEventSubscriptionsRequest.t ->
         (ListEventSubscriptionsResponse.t,
-          [ `AWS of ListEventSubscriptionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListEventSubscriptionsResponse.error) Result.t Lwt.t
 val list_exclusions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListExclusionsRequest.t ->
-        (ListExclusionsResponse.t,
-          [ `AWS of ListExclusionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListExclusionsResponse.t, ListExclusionsResponse.error) Result.t
+          Lwt.t
 val list_findings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFindingsRequest.t ->
-        (ListFindingsResponse.t,
-          [ `AWS of ListFindingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListFindingsResponse.t, ListFindingsResponse.error) Result.t Lwt.t
 val list_rules_packages :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRulesPackagesRequest.t ->
-        (ListRulesPackagesResponse.t,
-          [ `AWS of ListRulesPackagesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListRulesPackagesResponse.t, ListRulesPackagesResponse.error)
+          Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val preview_agents :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PreviewAgentsRequest.t ->
-        (PreviewAgentsResponse.t,
-          [ `AWS of PreviewAgentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PreviewAgentsResponse.t, PreviewAgentsResponse.error) Result.t Lwt.t
 val register_cross_account_access_role :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      RegisterCrossAccountAccessRoleRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      RegisterCrossAccountAccessRoleRequest.t -> (unit, unit) Result.t Lwt.t
 val remove_attributes_from_findings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RemoveAttributesFromFindingsRequest.t ->
         (RemoveAttributesFromFindingsResponse.t,
-          [ `AWS of RemoveAttributesFromFindingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          RemoveAttributesFromFindingsResponse.error) Result.t Lwt.t
 val set_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      SetTagsForResourceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      SetTagsForResourceRequest.t -> (unit, unit) Result.t Lwt.t
 val start_assessment_run :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartAssessmentRunRequest.t ->
-        (StartAssessmentRunResponse.t,
-          [ `AWS of StartAssessmentRunResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartAssessmentRunResponse.t, StartAssessmentRunResponse.error)
+          Result.t Lwt.t
 val stop_assessment_run :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      StopAssessmentRunRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      StopAssessmentRunRequest.t -> (unit, unit) Result.t Lwt.t
 val subscribe_to_event :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      SubscribeToEventRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      SubscribeToEventRequest.t -> (unit, unit) Result.t Lwt.t
 val unsubscribe_from_event :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UnsubscribeFromEventRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      UnsubscribeFromEventRequest.t -> (unit, unit) Result.t Lwt.t
 val update_assessment_target :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UpdateAssessmentTargetRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      UpdateAssessmentTargetRequest.t -> (unit, unit) Result.t Lwt.t

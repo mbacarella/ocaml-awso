@@ -34,9 +34,14 @@ module Date_header = struct
 
   let amzdate (timestamp : float) : string =
     let tm = Unix.gmtime timestamp in
-    sprintf "%04d%02d%02dT%02d%02d%02dZ"
-      (tm.tm_year + 1900) (tm.tm_mon + 1) tm.tm_mday
-      tm.tm_hour tm.tm_min tm.tm_sec
+    sprintf
+      "%04d%02d%02dT%02d%02d%02dZ"
+      (tm.tm_year + 1900)
+      (tm.tm_mon + 1)
+      tm.tm_mday
+      tm.tm_hour
+      tm.tm_min
+      tm.tm_sec
   ;;
 
   let x_amz_date_key = "x-amz-date"
@@ -116,17 +121,17 @@ let canonical_uri_encode_char = function
 let canonical_uri_encode x = String.concat_map x ~f:canonical_uri_encode_char
 
 let canonical_uri_query : Uri.t -> string =
- fun uri ->
+  fun uri ->
   Uri.query uri
   |> List.sort ~compare:(fun (a, avs) (b, bvs) ->
-       match String.compare a b with
-       | 0 -> Stdlib.compare avs bvs
-       | c -> c)
+    match String.compare a b with
+    | 0 -> Stdlib.compare avs bvs
+    | c -> c)
   |> List.map ~f:(fun (x, ys) ->
-       sprintf
-         "%s=%s"
-         (canonical_uri_encode x)
-         (List.map ys ~f:canonical_uri_encode |> String.concat ~sep:","))
+    sprintf
+      "%s=%s"
+      (canonical_uri_encode x)
+      (List.map ys ~f:canonical_uri_encode |> String.concat ~sep:","))
   |> String.concat ~sep:"&"
 ;;
 
@@ -231,23 +236,22 @@ let authorization_header ?aws_access_key_id ~signature ~credential_scope ~header
 (* Main API                                                                   *)
 (******************************************************************************)
 let sign_url
-  ~http_method
-  ~region
-  ~service
-  ~timestamp
-  ~headers
-  ?aws_secret_access_key
-  ?aws_access_key_id
-  ~(payload_hash : [ `Signed of payload_hash | `Unsigned ])
-  ?timeout
-  uri
+      ~http_method
+      ~region
+      ~service
+      ~timestamp
+      ~headers
+      ?aws_secret_access_key
+      ?aws_access_key_id
+      ~(payload_hash : [ `Signed of payload_hash | `Unsigned ])
+      ?timeout
+      uri
   =
   (match timeout with
    | None -> timeout
    | Some x ->
      if x < 1 || x > 604800
-     then
-       failwithf "timeout must be between 1 and 604800 seconds: %d" x ()
+     then failwithf "timeout must be between 1 and 604800 seconds: %d" x ()
      else timeout)
   |> fun timeout ->
   let credential_scope = credential_scope ~timestamp ~region ~service in
@@ -279,13 +283,13 @@ let sign_url
 ;;
 
 let sign_request
-  ?session_token
-  ?aws_access_key_id
-  ?aws_secret_access_key
-  ~region
-  ~service
-  ~payload_hash
-  req
+      ?session_token
+      ?aws_access_key_id
+      ?aws_secret_access_key
+      ~region
+      ~service
+      ~payload_hash
+      req
   =
   let timestamp = Unix.gettimeofday () in
   let headers =
@@ -302,9 +306,9 @@ let sign_request
     headers
     |> Cohttp.Header.to_list
     |> List.filter ~f:(fun (k, _) ->
-         match String.lowercase k with
-         | "host" | "x-amz-date" | "content-type" | "x-amz-security-token" -> true
-         | _ -> false)
+      match String.lowercase k with
+      | "host" | "x-amz-date" | "content-type" | "x-amz-security-token" -> true
+      | _ -> false)
     |> Cohttp.Header.of_list
   in
   let canonical_request =

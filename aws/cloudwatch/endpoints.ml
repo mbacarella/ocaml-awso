@@ -581,238 +581,241 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_xml =
-    let generic_error () = Error (`Transport err) in
-    match err with
-    | `Too_many_redirects -> generic_error ()
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-        (match (error_of_xml, ((code >= 400) && (code <= 599))) with
-         | (None, _) | (_, false) -> generic_error ()
-         | (Some error_of_xml, true) ->
-             (match Awso.Xml.parse_response body with
-              | `Data _ -> generic_error ()
-              | `El (((_, "ErrorResponse"), _), _) as error_response_xml ->
-                  let error_xml =
-                    Awso.Xml.child_exn error_response_xml "Error" in
-                  (try
-                     let error_code =
-                       match Awso.Xml.child_exn error_xml "Code" with
-                       | `Data error_code -> error_code
-                       | `El (_, children) ->
-                           (List.map children
-                              ~f:(function | `Data s -> s | `El _ -> ""))
-                             |> (String.concat ~sep:"") in
-                     Error
-                       (`AWS
-                          (error_of_xml (String.strip error_code) error_xml))
-                   with | Failure _ -> generic_error ())
-              | `El _ -> generic_error ())) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let parse_aws_error error_of_xml =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = None }) in
+    match (error_of_xml, ((code >= 400) && (code <= 599))) with
+    | (None, _) | (_, false) -> bail ()
+    | (Some error_of_xml, true) ->
+        (match Awso.Xml.parse_response body with
+         | `Data _ -> bail ()
+         | `El (((_, "ErrorResponse"), _), _) as error_response_xml ->
+             let error_xml = Awso.Xml.child_exn error_response_xml "Error" in
+             (try
+                let error_code =
+                  match Awso.Xml.child_exn error_xml "Code" with
+                  | `Data error_code -> error_code
+                  | `El (_, children) ->
+                      (List.map children
+                         ~f:(function | `Data s -> s | `El _ -> ""))
+                        |> (String.concat ~sep:"") in
+                error_of_xml (String.strip error_code) error_xml
+              with | Failure _ -> bail ())
+         | `El _ -> bail ()) in
+  let _ = parse_aws_error in
+  let _ = resp in
   match endpoint with
-  | DeleteAlarms -> Ok ()
+  | DeleteAlarms ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteAnomalyDetector ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteAnomalyDetectorOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeleteAnomalyDetectorOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteAnomalyDetectorOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DeleteAnomalyDetectorOutput.error_of_xml))
   | DeleteDashboards ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteDashboardsOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeleteDashboardsOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteDashboardsOutput.of_xml xml)
+      else Error (parse_aws_error (Some DeleteDashboardsOutput.error_of_xml))
   | DeleteInsightRules ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteInsightRulesOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeleteInsightRulesOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteInsightRulesOutput.of_xml xml)
+      else
+        Error (parse_aws_error (Some DeleteInsightRulesOutput.error_of_xml))
   | DeleteMetricStream ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteMetricStreamOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeleteMetricStreamOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteMetricStreamOutput.of_xml xml)
+      else
+        Error (parse_aws_error (Some DeleteMetricStreamOutput.error_of_xml))
   | DescribeAlarmHistory ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeAlarmHistoryOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeAlarmHistoryOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeAlarmHistoryOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DescribeAlarmHistoryOutput.error_of_xml))
   | DescribeAlarms ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeAlarmsOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeAlarmsOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeAlarmsOutput.of_xml xml)
+      else Error (parse_aws_error (Some DescribeAlarmsOutput.error_of_xml))
   | DescribeAlarmsForMetric ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeAlarmsForMetricOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeAlarmsForMetricOutput.of_xml xml)
+      else Error (parse_aws_error None)
   | DescribeAnomalyDetectors ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeAnomalyDetectorsOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeAnomalyDetectorsOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeAnomalyDetectorsOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DescribeAnomalyDetectorsOutput.error_of_xml))
   | DescribeInsightRules ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeInsightRulesOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeInsightRulesOutput.of_xml xml))
-  | DisableAlarmActions -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeInsightRulesOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DescribeInsightRulesOutput.error_of_xml))
+  | DisableAlarmActions ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DisableInsightRules ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DisableInsightRulesOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DisableInsightRulesOutput.of_xml xml))
-  | EnableAlarmActions -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DisableInsightRulesOutput.of_xml xml)
+      else
+        Error (parse_aws_error (Some DisableInsightRulesOutput.error_of_xml))
+  | EnableAlarmActions ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | EnableInsightRules ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some EnableInsightRulesOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (EnableInsightRulesOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (EnableInsightRulesOutput.of_xml xml)
+      else
+        Error (parse_aws_error (Some EnableInsightRulesOutput.error_of_xml))
   | GetDashboard ->
-      (match resp with
-       | Error err -> handle_error err (Some GetDashboardOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetDashboardOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetDashboardOutput.of_xml xml)
+      else Error (parse_aws_error (Some GetDashboardOutput.error_of_xml))
   | GetInsightRuleReport ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetInsightRuleReportOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetInsightRuleReportOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetInsightRuleReportOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some GetInsightRuleReportOutput.error_of_xml))
   | GetMetricData ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetMetricDataOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetMetricDataOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetMetricDataOutput.of_xml xml)
+      else Error (parse_aws_error (Some GetMetricDataOutput.error_of_xml))
   | GetMetricStatistics ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetMetricStatisticsOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetMetricStatisticsOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetMetricStatisticsOutput.of_xml xml)
+      else
+        Error (parse_aws_error (Some GetMetricStatisticsOutput.error_of_xml))
   | GetMetricStream ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetMetricStreamOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetMetricStreamOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetMetricStreamOutput.of_xml xml)
+      else Error (parse_aws_error (Some GetMetricStreamOutput.error_of_xml))
   | GetMetricWidgetImage ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetMetricWidgetImageOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetMetricWidgetImageOutput.of_xml xml)
+      else Error (parse_aws_error None)
   | ListDashboards ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListDashboardsOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListDashboardsOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListDashboardsOutput.of_xml xml)
+      else Error (parse_aws_error (Some ListDashboardsOutput.error_of_xml))
   | ListMetricStreams ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListMetricStreamsOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListMetricStreamsOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListMetricStreamsOutput.of_xml xml)
+      else
+        Error (parse_aws_error (Some ListMetricStreamsOutput.error_of_xml))
   | ListMetrics ->
-      (match resp with
-       | Error err -> handle_error err (Some ListMetricsOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListMetricsOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListMetricsOutput.of_xml xml)
+      else Error (parse_aws_error (Some ListMetricsOutput.error_of_xml))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListTagsForResourceOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListTagsForResourceOutput.of_xml xml)
+      else
+        Error (parse_aws_error (Some ListTagsForResourceOutput.error_of_xml))
   | PutAnomalyDetector ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutAnomalyDetectorOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (PutAnomalyDetectorOutput.of_xml xml))
-  | PutCompositeAlarm -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (PutAnomalyDetectorOutput.of_xml xml)
+      else
+        Error (parse_aws_error (Some PutAnomalyDetectorOutput.error_of_xml))
+  | PutCompositeAlarm ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | PutDashboard ->
-      (match resp with
-       | Error err -> handle_error err (Some PutDashboardOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (PutDashboardOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (PutDashboardOutput.of_xml xml)
+      else Error (parse_aws_error (Some PutDashboardOutput.error_of_xml))
   | PutInsightRule ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutInsightRuleOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (PutInsightRuleOutput.of_xml xml))
-  | PutMetricAlarm -> Ok ()
-  | PutMetricData -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (PutInsightRuleOutput.of_xml xml)
+      else Error (parse_aws_error (Some PutInsightRuleOutput.error_of_xml))
+  | PutMetricAlarm ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | PutMetricData ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | PutMetricStream ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutMetricStreamOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (PutMetricStreamOutput.of_xml xml))
-  | SetAlarmState -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (PutMetricStreamOutput.of_xml xml)
+      else Error (parse_aws_error (Some PutMetricStreamOutput.error_of_xml))
+  | SetAlarmState ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | StartMetricStreams ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StartMetricStreamsOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (StartMetricStreamsOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (StartMetricStreamsOutput.of_xml xml)
+      else
+        Error (parse_aws_error (Some StartMetricStreamsOutput.error_of_xml))
   | StopMetricStreams ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StopMetricStreamsOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (StopMetricStreamsOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (StopMetricStreamsOutput.of_xml xml)
+      else
+        Error (parse_aws_error (Some StopMetricStreamsOutput.error_of_xml))
   | TagResource ->
-      (match resp with
-       | Error err -> handle_error err (Some TagResourceOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (TagResourceOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (TagResourceOutput.of_xml xml)
+      else Error (parse_aws_error (Some TagResourceOutput.error_of_xml))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceOutput.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (UntagResourceOutput.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (UntagResourceOutput.of_xml xml)
+      else Error (parse_aws_error (Some UntagResourceOutput.error_of_xml))

@@ -4,265 +4,215 @@ val create_gateway_route :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateGatewayRouteInput.t ->
-        (CreateGatewayRouteOutput.t,
-          [ `AWS of CreateGatewayRouteOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateGatewayRouteOutput.t, CreateGatewayRouteOutput.error) Result.t
+          Lwt.t
 val create_mesh :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateMeshInput.t ->
-        (CreateMeshOutput.t,
-          [ `AWS of CreateMeshOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateMeshOutput.t, CreateMeshOutput.error) Result.t Lwt.t
 val create_route :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRouteInput.t ->
-        (CreateRouteOutput.t,
-          [ `AWS of CreateRouteOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateRouteOutput.t, CreateRouteOutput.error) Result.t Lwt.t
 val create_virtual_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateVirtualGatewayInput.t ->
-        (CreateVirtualGatewayOutput.t,
-          [ `AWS of CreateVirtualGatewayOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateVirtualGatewayOutput.t, CreateVirtualGatewayOutput.error)
+          Result.t Lwt.t
 val create_virtual_node :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateVirtualNodeInput.t ->
-        (CreateVirtualNodeOutput.t,
-          [ `AWS of CreateVirtualNodeOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateVirtualNodeOutput.t, CreateVirtualNodeOutput.error) Result.t
+          Lwt.t
 val create_virtual_router :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateVirtualRouterInput.t ->
-        (CreateVirtualRouterOutput.t,
-          [ `AWS of CreateVirtualRouterOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateVirtualRouterOutput.t, CreateVirtualRouterOutput.error)
+          Result.t Lwt.t
 val create_virtual_service :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateVirtualServiceInput.t ->
-        (CreateVirtualServiceOutput.t,
-          [ `AWS of CreateVirtualServiceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateVirtualServiceOutput.t, CreateVirtualServiceOutput.error)
+          Result.t Lwt.t
 val delete_gateway_route :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteGatewayRouteInput.t ->
-        (DeleteGatewayRouteOutput.t,
-          [ `AWS of DeleteGatewayRouteOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteGatewayRouteOutput.t, DeleteGatewayRouteOutput.error) Result.t
+          Lwt.t
 val delete_mesh :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteMeshInput.t ->
-        (DeleteMeshOutput.t,
-          [ `AWS of DeleteMeshOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteMeshOutput.t, DeleteMeshOutput.error) Result.t Lwt.t
 val delete_route :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRouteInput.t ->
-        (DeleteRouteOutput.t,
-          [ `AWS of DeleteRouteOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteRouteOutput.t, DeleteRouteOutput.error) Result.t Lwt.t
 val delete_virtual_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteVirtualGatewayInput.t ->
-        (DeleteVirtualGatewayOutput.t,
-          [ `AWS of DeleteVirtualGatewayOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteVirtualGatewayOutput.t, DeleteVirtualGatewayOutput.error)
+          Result.t Lwt.t
 val delete_virtual_node :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteVirtualNodeInput.t ->
-        (DeleteVirtualNodeOutput.t,
-          [ `AWS of DeleteVirtualNodeOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteVirtualNodeOutput.t, DeleteVirtualNodeOutput.error) Result.t
+          Lwt.t
 val delete_virtual_router :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteVirtualRouterInput.t ->
-        (DeleteVirtualRouterOutput.t,
-          [ `AWS of DeleteVirtualRouterOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteVirtualRouterOutput.t, DeleteVirtualRouterOutput.error)
+          Result.t Lwt.t
 val delete_virtual_service :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteVirtualServiceInput.t ->
-        (DeleteVirtualServiceOutput.t,
-          [ `AWS of DeleteVirtualServiceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteVirtualServiceOutput.t, DeleteVirtualServiceOutput.error)
+          Result.t Lwt.t
 val describe_gateway_route :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeGatewayRouteInput.t ->
-        (DescribeGatewayRouteOutput.t,
-          [ `AWS of DescribeGatewayRouteOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeGatewayRouteOutput.t, DescribeGatewayRouteOutput.error)
+          Result.t Lwt.t
 val describe_mesh :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeMeshInput.t ->
-        (DescribeMeshOutput.t,
-          [ `AWS of DescribeMeshOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeMeshOutput.t, DescribeMeshOutput.error) Result.t Lwt.t
 val describe_route :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRouteInput.t ->
-        (DescribeRouteOutput.t,
-          [ `AWS of DescribeRouteOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeRouteOutput.t, DescribeRouteOutput.error) Result.t Lwt.t
 val describe_virtual_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeVirtualGatewayInput.t ->
-        (DescribeVirtualGatewayOutput.t,
-          [ `AWS of DescribeVirtualGatewayOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeVirtualGatewayOutput.t, DescribeVirtualGatewayOutput.error)
+          Result.t Lwt.t
 val describe_virtual_node :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeVirtualNodeInput.t ->
-        (DescribeVirtualNodeOutput.t,
-          [ `AWS of DescribeVirtualNodeOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeVirtualNodeOutput.t, DescribeVirtualNodeOutput.error)
+          Result.t Lwt.t
 val describe_virtual_router :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeVirtualRouterInput.t ->
-        (DescribeVirtualRouterOutput.t,
-          [ `AWS of DescribeVirtualRouterOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeVirtualRouterOutput.t, DescribeVirtualRouterOutput.error)
+          Result.t Lwt.t
 val describe_virtual_service :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeVirtualServiceInput.t ->
-        (DescribeVirtualServiceOutput.t,
-          [ `AWS of DescribeVirtualServiceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeVirtualServiceOutput.t, DescribeVirtualServiceOutput.error)
+          Result.t Lwt.t
 val list_gateway_routes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListGatewayRoutesInput.t ->
-        (ListGatewayRoutesOutput.t,
-          [ `AWS of ListGatewayRoutesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListGatewayRoutesOutput.t, ListGatewayRoutesOutput.error) Result.t
+          Lwt.t
 val list_meshes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListMeshesInput.t ->
-        (ListMeshesOutput.t,
-          [ `AWS of ListMeshesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListMeshesOutput.t, ListMeshesOutput.error) Result.t Lwt.t
 val list_routes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRoutesInput.t ->
-        (ListRoutesOutput.t,
-          [ `AWS of ListRoutesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListRoutesOutput.t, ListRoutesOutput.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceInput.t ->
-        (ListTagsForResourceOutput.t,
-          [ `AWS of ListTagsForResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceOutput.t, ListTagsForResourceOutput.error)
+          Result.t Lwt.t
 val list_virtual_gateways :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListVirtualGatewaysInput.t ->
-        (ListVirtualGatewaysOutput.t,
-          [ `AWS of ListVirtualGatewaysOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListVirtualGatewaysOutput.t, ListVirtualGatewaysOutput.error)
+          Result.t Lwt.t
 val list_virtual_nodes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListVirtualNodesInput.t ->
-        (ListVirtualNodesOutput.t,
-          [ `AWS of ListVirtualNodesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListVirtualNodesOutput.t, ListVirtualNodesOutput.error) Result.t
+          Lwt.t
 val list_virtual_routers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListVirtualRoutersInput.t ->
-        (ListVirtualRoutersOutput.t,
-          [ `AWS of ListVirtualRoutersOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListVirtualRoutersOutput.t, ListVirtualRoutersOutput.error) Result.t
+          Lwt.t
 val list_virtual_services :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListVirtualServicesInput.t ->
-        (ListVirtualServicesOutput.t,
-          [ `AWS of ListVirtualServicesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListVirtualServicesOutput.t, ListVirtualServicesOutput.error)
+          Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceInput.t ->
-        (TagResourceOutput.t,
-          [ `AWS of TagResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceOutput.t, TagResourceOutput.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceInput.t ->
-        (UntagResourceOutput.t,
-          [ `AWS of UntagResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceOutput.t, UntagResourceOutput.error) Result.t Lwt.t
 val update_gateway_route :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateGatewayRouteInput.t ->
-        (UpdateGatewayRouteOutput.t,
-          [ `AWS of UpdateGatewayRouteOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateGatewayRouteOutput.t, UpdateGatewayRouteOutput.error) Result.t
+          Lwt.t
 val update_mesh :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateMeshInput.t ->
-        (UpdateMeshOutput.t,
-          [ `AWS of UpdateMeshOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateMeshOutput.t, UpdateMeshOutput.error) Result.t Lwt.t
 val update_route :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateRouteInput.t ->
-        (UpdateRouteOutput.t,
-          [ `AWS of UpdateRouteOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateRouteOutput.t, UpdateRouteOutput.error) Result.t Lwt.t
 val update_virtual_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateVirtualGatewayInput.t ->
-        (UpdateVirtualGatewayOutput.t,
-          [ `AWS of UpdateVirtualGatewayOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateVirtualGatewayOutput.t, UpdateVirtualGatewayOutput.error)
+          Result.t Lwt.t
 val update_virtual_node :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateVirtualNodeInput.t ->
-        (UpdateVirtualNodeOutput.t,
-          [ `AWS of UpdateVirtualNodeOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateVirtualNodeOutput.t, UpdateVirtualNodeOutput.error) Result.t
+          Lwt.t
 val update_virtual_router :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateVirtualRouterInput.t ->
-        (UpdateVirtualRouterOutput.t,
-          [ `AWS of UpdateVirtualRouterOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateVirtualRouterOutput.t, UpdateVirtualRouterOutput.error)
+          Result.t Lwt.t
 val update_virtual_service :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateVirtualServiceInput.t ->
-        (UpdateVirtualServiceOutput.t,
-          [ `AWS of UpdateVirtualServiceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateVirtualServiceOutput.t, UpdateVirtualServiceOutput.error)
+          Result.t Lwt.t

@@ -4,255 +4,191 @@ val batch_evaluate_feature :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchEvaluateFeatureRequest.t ->
-        (BatchEvaluateFeatureResponse.t,
-          [ `AWS of BatchEvaluateFeatureResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (BatchEvaluateFeatureResponse.t, BatchEvaluateFeatureResponse.error)
+          Result.t Async.Deferred.t
 val create_experiment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateExperimentRequest.t ->
-        (CreateExperimentResponse.t,
-          [ `AWS of CreateExperimentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateExperimentResponse.t, CreateExperimentResponse.error) Result.t
           Async.Deferred.t
 val create_feature :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateFeatureRequest.t ->
-        (CreateFeatureResponse.t,
-          [ `AWS of CreateFeatureResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateFeatureResponse.t, CreateFeatureResponse.error) Result.t
           Async.Deferred.t
 val create_launch :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateLaunchRequest.t ->
-        (CreateLaunchResponse.t,
-          [ `AWS of CreateLaunchResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateLaunchResponse.t, CreateLaunchResponse.error) Result.t
           Async.Deferred.t
 val create_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateProjectRequest.t ->
-        (CreateProjectResponse.t,
-          [ `AWS of CreateProjectResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateProjectResponse.t, CreateProjectResponse.error) Result.t
           Async.Deferred.t
 val delete_experiment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteExperimentRequest.t ->
-        (DeleteExperimentResponse.t,
-          [ `AWS of DeleteExperimentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteExperimentResponse.t, DeleteExperimentResponse.error) Result.t
           Async.Deferred.t
 val delete_feature :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteFeatureRequest.t ->
-        (DeleteFeatureResponse.t,
-          [ `AWS of DeleteFeatureResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteFeatureResponse.t, DeleteFeatureResponse.error) Result.t
           Async.Deferred.t
 val delete_launch :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteLaunchRequest.t ->
-        (DeleteLaunchResponse.t,
-          [ `AWS of DeleteLaunchResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteLaunchResponse.t, DeleteLaunchResponse.error) Result.t
           Async.Deferred.t
 val delete_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteProjectRequest.t ->
-        (DeleteProjectResponse.t,
-          [ `AWS of DeleteProjectResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteProjectResponse.t, DeleteProjectResponse.error) Result.t
           Async.Deferred.t
 val evaluate_feature :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EvaluateFeatureRequest.t ->
-        (EvaluateFeatureResponse.t,
-          [ `AWS of EvaluateFeatureResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (EvaluateFeatureResponse.t, EvaluateFeatureResponse.error) Result.t
           Async.Deferred.t
 val get_experiment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetExperimentRequest.t ->
-        (GetExperimentResponse.t,
-          [ `AWS of GetExperimentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetExperimentResponse.t, GetExperimentResponse.error) Result.t
           Async.Deferred.t
 val get_experiment_results :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetExperimentResultsRequest.t ->
-        (GetExperimentResultsResponse.t,
-          [ `AWS of GetExperimentResultsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetExperimentResultsResponse.t, GetExperimentResultsResponse.error)
+          Result.t Async.Deferred.t
 val get_feature :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetFeatureRequest.t ->
-        (GetFeatureResponse.t,
-          [ `AWS of GetFeatureResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetFeatureResponse.t, GetFeatureResponse.error) Result.t
           Async.Deferred.t
 val get_launch :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLaunchRequest.t ->
-        (GetLaunchResponse.t,
-          [ `AWS of GetLaunchResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetLaunchResponse.t, GetLaunchResponse.error) Result.t
           Async.Deferred.t
 val get_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetProjectRequest.t ->
-        (GetProjectResponse.t,
-          [ `AWS of GetProjectResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetProjectResponse.t, GetProjectResponse.error) Result.t
           Async.Deferred.t
 val list_experiments :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListExperimentsRequest.t ->
-        (ListExperimentsResponse.t,
-          [ `AWS of ListExperimentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListExperimentsResponse.t, ListExperimentsResponse.error) Result.t
           Async.Deferred.t
 val list_features :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFeaturesRequest.t ->
-        (ListFeaturesResponse.t,
-          [ `AWS of ListFeaturesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListFeaturesResponse.t, ListFeaturesResponse.error) Result.t
           Async.Deferred.t
 val list_launches :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListLaunchesRequest.t ->
-        (ListLaunchesResponse.t,
-          [ `AWS of ListLaunchesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListLaunchesResponse.t, ListLaunchesResponse.error) Result.t
           Async.Deferred.t
 val list_projects :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListProjectsRequest.t ->
-        (ListProjectsResponse.t,
-          [ `AWS of ListProjectsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListProjectsResponse.t, ListProjectsResponse.error) Result.t
           Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val put_project_events :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutProjectEventsRequest.t ->
-        (PutProjectEventsResponse.t,
-          [ `AWS of PutProjectEventsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (PutProjectEventsResponse.t, PutProjectEventsResponse.error) Result.t
           Async.Deferred.t
 val start_experiment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartExperimentRequest.t ->
-        (StartExperimentResponse.t,
-          [ `AWS of StartExperimentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StartExperimentResponse.t, StartExperimentResponse.error) Result.t
           Async.Deferred.t
 val start_launch :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartLaunchRequest.t ->
-        (StartLaunchResponse.t,
-          [ `AWS of StartLaunchResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StartLaunchResponse.t, StartLaunchResponse.error) Result.t
           Async.Deferred.t
 val stop_experiment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopExperimentRequest.t ->
-        (StopExperimentResponse.t,
-          [ `AWS of StopExperimentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StopExperimentResponse.t, StopExperimentResponse.error) Result.t
           Async.Deferred.t
 val stop_launch :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopLaunchRequest.t ->
-        (StopLaunchResponse.t,
-          [ `AWS of StopLaunchResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StopLaunchResponse.t, StopLaunchResponse.error) Result.t
           Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
 val update_experiment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateExperimentRequest.t ->
-        (UpdateExperimentResponse.t,
-          [ `AWS of UpdateExperimentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateExperimentResponse.t, UpdateExperimentResponse.error) Result.t
           Async.Deferred.t
 val update_feature :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateFeatureRequest.t ->
-        (UpdateFeatureResponse.t,
-          [ `AWS of UpdateFeatureResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateFeatureResponse.t, UpdateFeatureResponse.error) Result.t
           Async.Deferred.t
 val update_launch :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateLaunchRequest.t ->
-        (UpdateLaunchResponse.t,
-          [ `AWS of UpdateLaunchResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateLaunchResponse.t, UpdateLaunchResponse.error) Result.t
           Async.Deferred.t
 val update_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateProjectRequest.t ->
-        (UpdateProjectResponse.t,
-          [ `AWS of UpdateProjectResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateProjectResponse.t, UpdateProjectResponse.error) Result.t
           Async.Deferred.t
 val update_project_data_delivery :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateProjectDataDeliveryRequest.t ->
         (UpdateProjectDataDeliveryResponse.t,
-          [ `AWS of UpdateProjectDataDeliveryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateProjectDataDeliveryResponse.error) Result.t Async.Deferred.t

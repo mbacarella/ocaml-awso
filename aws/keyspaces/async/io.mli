@@ -4,103 +4,77 @@ val create_keyspace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateKeyspaceRequest.t ->
-        (CreateKeyspaceResponse.t,
-          [ `AWS of CreateKeyspaceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateKeyspaceResponse.t, CreateKeyspaceResponse.error) Result.t
           Async.Deferred.t
 val create_table :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTableRequest.t ->
-        (CreateTableResponse.t,
-          [ `AWS of CreateTableResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateTableResponse.t, CreateTableResponse.error) Result.t
           Async.Deferred.t
 val delete_keyspace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteKeyspaceRequest.t ->
-        (DeleteKeyspaceResponse.t,
-          [ `AWS of DeleteKeyspaceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteKeyspaceResponse.t, DeleteKeyspaceResponse.error) Result.t
           Async.Deferred.t
 val delete_table :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTableRequest.t ->
-        (DeleteTableResponse.t,
-          [ `AWS of DeleteTableResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteTableResponse.t, DeleteTableResponse.error) Result.t
           Async.Deferred.t
 val get_keyspace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetKeyspaceRequest.t ->
-        (GetKeyspaceResponse.t,
-          [ `AWS of GetKeyspaceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetKeyspaceResponse.t, GetKeyspaceResponse.error) Result.t
           Async.Deferred.t
 val get_table :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTableRequest.t ->
-        (GetTableResponse.t,
-          [ `AWS of GetTableResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetTableResponse.t, GetTableResponse.error) Result.t
           Async.Deferred.t
 val list_keyspaces :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListKeyspacesRequest.t ->
-        (ListKeyspacesResponse.t,
-          [ `AWS of ListKeyspacesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListKeyspacesResponse.t, ListKeyspacesResponse.error) Result.t
           Async.Deferred.t
 val list_tables :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTablesRequest.t ->
-        (ListTablesResponse.t,
-          [ `AWS of ListTablesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListTablesResponse.t, ListTablesResponse.error) Result.t
           Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val restore_table :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RestoreTableRequest.t ->
-        (RestoreTableResponse.t,
-          [ `AWS of RestoreTableResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RestoreTableResponse.t, RestoreTableResponse.error) Result.t
           Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
 val update_table :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateTableRequest.t ->
-        (UpdateTableResponse.t,
-          [ `AWS of UpdateTableResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateTableResponse.t, UpdateTableResponse.error) Result.t
           Async.Deferred.t

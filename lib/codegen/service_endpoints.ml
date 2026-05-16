@@ -122,7 +122,7 @@ let uri_of_endpoint ~service data =
       request_uri_as_exp uri ~op ~service ~query_params)
     |> Ast_helper.Exp.match_ [%expr endpoint]
   in
-  [%expr fun [@ocaml.warning "-27"] endpoint x -> [%e match_]]
+  [%expr fun[@ocaml.warning "-27"] endpoint x -> [%e match_]]
 ;;
 
 (* This expect test is non-trivial to fix and I'm not sure what its value is.
@@ -277,9 +277,9 @@ let type_decl data =
       let res =
         [%type:
           ( [%t Endpoint.request_type endpoint]
-          , [%t Endpoint.result_ok_type endpoint]
-          , [%t Endpoint.result_error_type endpoint] )
-          t]
+            , [%t Endpoint.result_ok_type endpoint]
+            , [%t Endpoint.result_error_type endpoint] )
+            t]
       in
       Ast_helper.Type.constructor (Ast_convenience.mknoloc cstr) ~res)
   in

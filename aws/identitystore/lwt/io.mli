@@ -4,27 +4,19 @@ val describe_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeGroupRequest.t ->
-        (DescribeGroupResponse.t,
-          [ `AWS of DescribeGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeGroupResponse.t, DescribeGroupResponse.error) Result.t Lwt.t
 val describe_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeUserRequest.t ->
-        (DescribeUserResponse.t,
-          [ `AWS of DescribeUserResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeUserResponse.t, DescribeUserResponse.error) Result.t Lwt.t
 val list_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListGroupsRequest.t ->
-        (ListGroupsResponse.t,
-          [ `AWS of ListGroupsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListGroupsResponse.t, ListGroupsResponse.error) Result.t Lwt.t
 val list_users :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListUsersRequest.t ->
-        (ListUsersResponse.t,
-          [ `AWS of ListUsersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListUsersResponse.t, ListUsersResponse.error) Result.t Lwt.t

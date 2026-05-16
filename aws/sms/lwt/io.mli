@@ -4,244 +4,200 @@ val create_app :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAppRequest.t ->
-        (CreateAppResponse.t,
-          [ `AWS of CreateAppResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateAppResponse.t, CreateAppResponse.error) Result.t Lwt.t
 val create_replication_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateReplicationJobRequest.t ->
-        (CreateReplicationJobResponse.t,
-          [ `AWS of CreateReplicationJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateReplicationJobResponse.t, CreateReplicationJobResponse.error)
+          Result.t Lwt.t
 val delete_app :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAppRequest.t ->
-        (DeleteAppResponse.t,
-          [ `AWS of DeleteAppResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteAppResponse.t, DeleteAppResponse.error) Result.t Lwt.t
 val delete_app_launch_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAppLaunchConfigurationRequest.t ->
         (DeleteAppLaunchConfigurationResponse.t,
-          [ `AWS of DeleteAppLaunchConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteAppLaunchConfigurationResponse.error) Result.t Lwt.t
 val delete_app_replication_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAppReplicationConfigurationRequest.t ->
         (DeleteAppReplicationConfigurationResponse.t,
-          [ `AWS of DeleteAppReplicationConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteAppReplicationConfigurationResponse.error) Result.t Lwt.t
 val delete_app_validation_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAppValidationConfigurationRequest.t ->
         (DeleteAppValidationConfigurationResponse.t,
-          [ `AWS of DeleteAppValidationConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteAppValidationConfigurationResponse.error) Result.t Lwt.t
 val delete_replication_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteReplicationJobRequest.t ->
-        (DeleteReplicationJobResponse.t,
-          [ `AWS of DeleteReplicationJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteReplicationJobResponse.t, DeleteReplicationJobResponse.error)
+          Result.t Lwt.t
 val delete_server_catalog :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteServerCatalogRequest.t ->
-        (DeleteServerCatalogResponse.t,
-          [ `AWS of DeleteServerCatalogResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteServerCatalogResponse.t, DeleteServerCatalogResponse.error)
+          Result.t Lwt.t
 val disassociate_connector :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateConnectorRequest.t ->
         (DisassociateConnectorResponse.t,
-          [ `AWS of DisassociateConnectorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateConnectorResponse.error) Result.t Lwt.t
 val generate_change_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GenerateChangeSetRequest.t ->
-        (GenerateChangeSetResponse.t,
-          [ `AWS of GenerateChangeSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GenerateChangeSetResponse.t, GenerateChangeSetResponse.error)
+          Result.t Lwt.t
 val generate_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GenerateTemplateRequest.t ->
-        (GenerateTemplateResponse.t,
-          [ `AWS of GenerateTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GenerateTemplateResponse.t, GenerateTemplateResponse.error) Result.t
+          Lwt.t
 val get_app :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAppRequest.t ->
-        (GetAppResponse.t,
-          [ `AWS of GetAppResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetAppResponse.t, GetAppResponse.error) Result.t Lwt.t
 val get_app_launch_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAppLaunchConfigurationRequest.t ->
         (GetAppLaunchConfigurationResponse.t,
-          [ `AWS of GetAppLaunchConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetAppLaunchConfigurationResponse.error) Result.t Lwt.t
 val get_app_replication_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAppReplicationConfigurationRequest.t ->
         (GetAppReplicationConfigurationResponse.t,
-          [ `AWS of GetAppReplicationConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetAppReplicationConfigurationResponse.error) Result.t Lwt.t
 val get_app_validation_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAppValidationConfigurationRequest.t ->
         (GetAppValidationConfigurationResponse.t,
-          [ `AWS of GetAppValidationConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetAppValidationConfigurationResponse.error) Result.t Lwt.t
 val get_app_validation_output :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAppValidationOutputRequest.t ->
         (GetAppValidationOutputResponse.t,
-          [ `AWS of GetAppValidationOutputResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetAppValidationOutputResponse.error) Result.t Lwt.t
 val get_connectors :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetConnectorsRequest.t ->
-        (GetConnectorsResponse.t,
-          [ `AWS of GetConnectorsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetConnectorsResponse.t, GetConnectorsResponse.error) Result.t Lwt.t
 val get_replication_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetReplicationJobsRequest.t ->
-        (GetReplicationJobsResponse.t,
-          [ `AWS of GetReplicationJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetReplicationJobsResponse.t, GetReplicationJobsResponse.error)
+          Result.t Lwt.t
 val get_replication_runs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetReplicationRunsRequest.t ->
-        (GetReplicationRunsResponse.t,
-          [ `AWS of GetReplicationRunsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetReplicationRunsResponse.t, GetReplicationRunsResponse.error)
+          Result.t Lwt.t
 val get_servers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetServersRequest.t ->
-        (GetServersResponse.t,
-          [ `AWS of GetServersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetServersResponse.t, GetServersResponse.error) Result.t Lwt.t
 val import_app_catalog :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ImportAppCatalogRequest.t ->
-        (ImportAppCatalogResponse.t,
-          [ `AWS of ImportAppCatalogResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ImportAppCatalogResponse.t, ImportAppCatalogResponse.error) Result.t
+          Lwt.t
 val import_server_catalog :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ImportServerCatalogRequest.t ->
-        (ImportServerCatalogResponse.t,
-          [ `AWS of ImportServerCatalogResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ImportServerCatalogResponse.t, ImportServerCatalogResponse.error)
+          Result.t Lwt.t
 val launch_app :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       LaunchAppRequest.t ->
-        (LaunchAppResponse.t,
-          [ `AWS of LaunchAppResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (LaunchAppResponse.t, LaunchAppResponse.error) Result.t Lwt.t
 val list_apps :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAppsRequest.t ->
-        (ListAppsResponse.t,
-          [ `AWS of ListAppsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListAppsResponse.t, ListAppsResponse.error) Result.t Lwt.t
 val notify_app_validation_output :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       NotifyAppValidationOutputRequest.t ->
         (NotifyAppValidationOutputResponse.t,
-          [ `AWS of NotifyAppValidationOutputResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          NotifyAppValidationOutputResponse.error) Result.t Lwt.t
 val put_app_launch_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutAppLaunchConfigurationRequest.t ->
         (PutAppLaunchConfigurationResponse.t,
-          [ `AWS of PutAppLaunchConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutAppLaunchConfigurationResponse.error) Result.t Lwt.t
 val put_app_replication_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutAppReplicationConfigurationRequest.t ->
         (PutAppReplicationConfigurationResponse.t,
-          [ `AWS of PutAppReplicationConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutAppReplicationConfigurationResponse.error) Result.t Lwt.t
 val put_app_validation_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutAppValidationConfigurationRequest.t ->
         (PutAppValidationConfigurationResponse.t,
-          [ `AWS of PutAppValidationConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutAppValidationConfigurationResponse.error) Result.t Lwt.t
 val start_app_replication :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartAppReplicationRequest.t ->
-        (StartAppReplicationResponse.t,
-          [ `AWS of StartAppReplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartAppReplicationResponse.t, StartAppReplicationResponse.error)
+          Result.t Lwt.t
 val start_on_demand_app_replication :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartOnDemandAppReplicationRequest.t ->
         (StartOnDemandAppReplicationResponse.t,
-          [ `AWS of StartOnDemandAppReplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartOnDemandAppReplicationResponse.error) Result.t Lwt.t
 val start_on_demand_replication_run :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartOnDemandReplicationRunRequest.t ->
         (StartOnDemandReplicationRunResponse.t,
-          [ `AWS of StartOnDemandReplicationRunResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartOnDemandReplicationRunResponse.error) Result.t Lwt.t
 val stop_app_replication :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopAppReplicationRequest.t ->
-        (StopAppReplicationResponse.t,
-          [ `AWS of StopAppReplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StopAppReplicationResponse.t, StopAppReplicationResponse.error)
+          Result.t Lwt.t
 val terminate_app :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TerminateAppRequest.t ->
-        (TerminateAppResponse.t,
-          [ `AWS of TerminateAppResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TerminateAppResponse.t, TerminateAppResponse.error) Result.t Lwt.t
 val update_app :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateAppRequest.t ->
-        (UpdateAppResponse.t,
-          [ `AWS of UpdateAppResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateAppResponse.t, UpdateAppResponse.error) Result.t Lwt.t
 val update_replication_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateReplicationJobRequest.t ->
-        (UpdateReplicationJobResponse.t,
-          [ `AWS of UpdateReplicationJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateReplicationJobResponse.t, UpdateReplicationJobResponse.error)
+          Result.t Lwt.t

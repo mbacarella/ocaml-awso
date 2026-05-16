@@ -3,298 +3,218 @@ open Awso_wellarchitected.Values
 val associate_lenses :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      AssociateLensesInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      AssociateLensesInput.t -> (unit, unit) Result.t Async.Deferred.t
 val create_lens_share :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateLensShareInput.t ->
-        (CreateLensShareOutput.t,
-          [ `AWS of CreateLensShareOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateLensShareOutput.t, CreateLensShareOutput.error) Result.t
           Async.Deferred.t
 val create_lens_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateLensVersionInput.t ->
-        (CreateLensVersionOutput.t,
-          [ `AWS of CreateLensVersionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateLensVersionOutput.t, CreateLensVersionOutput.error) Result.t
           Async.Deferred.t
 val create_milestone :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateMilestoneInput.t ->
-        (CreateMilestoneOutput.t,
-          [ `AWS of CreateMilestoneOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateMilestoneOutput.t, CreateMilestoneOutput.error) Result.t
           Async.Deferred.t
 val create_workload :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateWorkloadInput.t ->
-        (CreateWorkloadOutput.t,
-          [ `AWS of CreateWorkloadOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateWorkloadOutput.t, CreateWorkloadOutput.error) Result.t
           Async.Deferred.t
 val create_workload_share :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateWorkloadShareInput.t ->
-        (CreateWorkloadShareOutput.t,
-          [ `AWS of CreateWorkloadShareOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateWorkloadShareOutput.t, CreateWorkloadShareOutput.error)
+          Result.t Async.Deferred.t
 val delete_lens :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteLensInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteLensInput.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_lens_share :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteLensShareInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteLensShareInput.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_workload :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteWorkloadInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteWorkloadInput.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_workload_share :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteWorkloadShareInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteWorkloadShareInput.t -> (unit, unit) Result.t Async.Deferred.t
 val disassociate_lenses :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DisassociateLensesInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DisassociateLensesInput.t -> (unit, unit) Result.t Async.Deferred.t
 val export_lens :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ExportLensInput.t ->
-        (ExportLensOutput.t,
-          [ `AWS of ExportLensOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ExportLensOutput.t, ExportLensOutput.error) Result.t
           Async.Deferred.t
 val get_answer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAnswerInput.t ->
-        (GetAnswerOutput.t,
-          [ `AWS of GetAnswerOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetAnswerOutput.t, GetAnswerOutput.error) Result.t Async.Deferred.t
 val get_lens :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLensInput.t ->
-        (GetLensOutput.t,
-          [ `AWS of GetLensOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetLensOutput.t, GetLensOutput.error) Result.t Async.Deferred.t
 val get_lens_review :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLensReviewInput.t ->
-        (GetLensReviewOutput.t,
-          [ `AWS of GetLensReviewOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetLensReviewOutput.t, GetLensReviewOutput.error) Result.t
           Async.Deferred.t
 val get_lens_review_report :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLensReviewReportInput.t ->
-        (GetLensReviewReportOutput.t,
-          [ `AWS of GetLensReviewReportOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetLensReviewReportOutput.t, GetLensReviewReportOutput.error)
+          Result.t Async.Deferred.t
 val get_lens_version_difference :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetLensVersionDifferenceInput.t ->
         (GetLensVersionDifferenceOutput.t,
-          [ `AWS of GetLensVersionDifferenceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetLensVersionDifferenceOutput.error) Result.t Async.Deferred.t
 val get_milestone :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMilestoneInput.t ->
-        (GetMilestoneOutput.t,
-          [ `AWS of GetMilestoneOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetMilestoneOutput.t, GetMilestoneOutput.error) Result.t
           Async.Deferred.t
 val get_workload :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetWorkloadInput.t ->
-        (GetWorkloadOutput.t,
-          [ `AWS of GetWorkloadOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetWorkloadOutput.t, GetWorkloadOutput.error) Result.t
           Async.Deferred.t
 val import_lens :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ImportLensInput.t ->
-        (ImportLensOutput.t,
-          [ `AWS of ImportLensOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ImportLensOutput.t, ImportLensOutput.error) Result.t
           Async.Deferred.t
 val list_answers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAnswersInput.t ->
-        (ListAnswersOutput.t,
-          [ `AWS of ListAnswersOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListAnswersOutput.t, ListAnswersOutput.error) Result.t
           Async.Deferred.t
 val list_lens_review_improvements :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListLensReviewImprovementsInput.t ->
         (ListLensReviewImprovementsOutput.t,
-          [ `AWS of ListLensReviewImprovementsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListLensReviewImprovementsOutput.error) Result.t Async.Deferred.t
 val list_lens_reviews :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListLensReviewsInput.t ->
-        (ListLensReviewsOutput.t,
-          [ `AWS of ListLensReviewsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListLensReviewsOutput.t, ListLensReviewsOutput.error) Result.t
           Async.Deferred.t
 val list_lens_shares :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListLensSharesInput.t ->
-        (ListLensSharesOutput.t,
-          [ `AWS of ListLensSharesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListLensSharesOutput.t, ListLensSharesOutput.error) Result.t
           Async.Deferred.t
 val list_lenses :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListLensesInput.t ->
-        (ListLensesOutput.t,
-          [ `AWS of ListLensesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListLensesOutput.t, ListLensesOutput.error) Result.t
           Async.Deferred.t
 val list_milestones :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListMilestonesInput.t ->
-        (ListMilestonesOutput.t,
-          [ `AWS of ListMilestonesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListMilestonesOutput.t, ListMilestonesOutput.error) Result.t
           Async.Deferred.t
 val list_notifications :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListNotificationsInput.t ->
-        (ListNotificationsOutput.t,
-          [ `AWS of ListNotificationsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListNotificationsOutput.t, ListNotificationsOutput.error) Result.t
           Async.Deferred.t
 val list_share_invitations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListShareInvitationsInput.t ->
-        (ListShareInvitationsOutput.t,
-          [ `AWS of ListShareInvitationsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListShareInvitationsOutput.t, ListShareInvitationsOutput.error)
+          Result.t Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceInput.t ->
-        (ListTagsForResourceOutput.t,
-          [ `AWS of ListTagsForResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceOutput.t, ListTagsForResourceOutput.error)
+          Result.t Async.Deferred.t
 val list_workload_shares :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListWorkloadSharesInput.t ->
-        (ListWorkloadSharesOutput.t,
-          [ `AWS of ListWorkloadSharesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListWorkloadSharesOutput.t, ListWorkloadSharesOutput.error) Result.t
           Async.Deferred.t
 val list_workloads :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListWorkloadsInput.t ->
-        (ListWorkloadsOutput.t,
-          [ `AWS of ListWorkloadsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListWorkloadsOutput.t, ListWorkloadsOutput.error) Result.t
           Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceInput.t ->
-        (TagResourceOutput.t,
-          [ `AWS of TagResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceOutput.t, TagResourceOutput.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceInput.t ->
-        (UntagResourceOutput.t,
-          [ `AWS of UntagResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceOutput.t, UntagResourceOutput.error) Result.t
           Async.Deferred.t
 val update_answer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateAnswerInput.t ->
-        (UpdateAnswerOutput.t,
-          [ `AWS of UpdateAnswerOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateAnswerOutput.t, UpdateAnswerOutput.error) Result.t
           Async.Deferred.t
 val update_lens_review :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateLensReviewInput.t ->
-        (UpdateLensReviewOutput.t,
-          [ `AWS of UpdateLensReviewOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateLensReviewOutput.t, UpdateLensReviewOutput.error) Result.t
           Async.Deferred.t
 val update_share_invitation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateShareInvitationInput.t ->
-        (UpdateShareInvitationOutput.t,
-          [ `AWS of UpdateShareInvitationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateShareInvitationOutput.t, UpdateShareInvitationOutput.error)
+          Result.t Async.Deferred.t
 val update_workload :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateWorkloadInput.t ->
-        (UpdateWorkloadOutput.t,
-          [ `AWS of UpdateWorkloadOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateWorkloadOutput.t, UpdateWorkloadOutput.error) Result.t
           Async.Deferred.t
 val update_workload_share :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateWorkloadShareInput.t ->
-        (UpdateWorkloadShareOutput.t,
-          [ `AWS of UpdateWorkloadShareOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateWorkloadShareOutput.t, UpdateWorkloadShareOutput.error)
+          Result.t Async.Deferred.t
 val upgrade_lens_review :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UpgradeLensReviewInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      UpgradeLensReviewInput.t -> (unit, unit) Result.t Async.Deferred.t

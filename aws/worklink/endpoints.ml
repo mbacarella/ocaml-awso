@@ -971,319 +971,335 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | AssociateDomain ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some AssociateDomainResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (AssociateDomainResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (AssociateDomainResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some AssociateDomainResponse.error_of_json))
   | AssociateWebsiteAuthorizationProvider ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (AssociateWebsiteAuthorizationProviderResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                AssociateWebsiteAuthorizationProviderResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (AssociateWebsiteAuthorizationProviderResponse.of_json
-                (response_to_json resp)))
+                AssociateWebsiteAuthorizationProviderResponse.error_of_json))
   | AssociateWebsiteCertificateAuthority ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some AssociateWebsiteCertificateAuthorityResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (AssociateWebsiteCertificateAuthorityResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (AssociateWebsiteCertificateAuthorityResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some AssociateWebsiteCertificateAuthorityResponse.error_of_json))
   | CreateFleet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateFleetResponse.error_of_json)
-       | Ok resp -> Ok (CreateFleetResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateFleetResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateFleetResponse.error_of_json))
   | DeleteFleet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteFleetResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteFleetResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteFleetResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some DeleteFleetResponse.error_of_json))
   | DescribeAuditStreamConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeAuditStreamConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeAuditStreamConfigurationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeAuditStreamConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAuditStreamConfigurationResponse.error_of_json))
   | DescribeCompanyNetworkConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeCompanyNetworkConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeCompanyNetworkConfigurationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeCompanyNetworkConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeCompanyNetworkConfigurationResponse.error_of_json))
   | DescribeDevice ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeDeviceResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeDeviceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeDeviceResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeDeviceResponse.error_of_json))
   | DescribeDevicePolicyConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeDevicePolicyConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeDevicePolicyConfigurationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeDevicePolicyConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeDevicePolicyConfigurationResponse.error_of_json))
   | DescribeDomain ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeDomainResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeDomainResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeDomainResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeDomainResponse.error_of_json))
   | DescribeFleetMetadata ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeFleetMetadataResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeFleetMetadataResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeFleetMetadataResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeFleetMetadataResponse.error_of_json))
   | DescribeIdentityProviderConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (DescribeIdentityProviderConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                DescribeIdentityProviderConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeIdentityProviderConfigurationResponse.of_json
-                (response_to_json resp)))
+                DescribeIdentityProviderConfigurationResponse.error_of_json))
   | DescribeWebsiteCertificateAuthority ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeWebsiteCertificateAuthorityResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeWebsiteCertificateAuthorityResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeWebsiteCertificateAuthorityResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeWebsiteCertificateAuthorityResponse.error_of_json))
   | DisassociateDomain ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DisassociateDomainResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DisassociateDomainResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DisassociateDomainResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DisassociateDomainResponse.error_of_json))
   | DisassociateWebsiteAuthorizationProvider ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DisassociateWebsiteAuthorizationProviderResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
              (Some
-                DisassociateWebsiteAuthorizationProviderResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DisassociateWebsiteAuthorizationProviderResponse.of_header_and_body
-                (headers, ())))
+                DisassociateWebsiteAuthorizationProviderResponse.error_of_json))
   | DisassociateWebsiteCertificateAuthority ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DisassociateWebsiteCertificateAuthorityResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
              (Some
-                DisassociateWebsiteCertificateAuthorityResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DisassociateWebsiteCertificateAuthorityResponse.of_header_and_body
-                (headers, ())))
+                DisassociateWebsiteCertificateAuthorityResponse.error_of_json))
   | ListDevices ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListDevicesResponse.error_of_json)
-       | Ok resp -> Ok (ListDevicesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListDevicesResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListDevicesResponse.error_of_json))
   | ListDomains ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListDomainsResponse.error_of_json)
-       | Ok resp -> Ok (ListDomainsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListDomainsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListDomainsResponse.error_of_json))
   | ListFleets ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListFleetsResponse.error_of_json)
-       | Ok resp -> Ok (ListFleetsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListFleetsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListFleetsResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | ListWebsiteAuthorizationProviders ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListWebsiteAuthorizationProvidersResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListWebsiteAuthorizationProvidersResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListWebsiteAuthorizationProvidersResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListWebsiteAuthorizationProvidersResponse.error_of_json))
   | ListWebsiteCertificateAuthorities ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListWebsiteCertificateAuthoritiesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListWebsiteCertificateAuthoritiesResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListWebsiteCertificateAuthoritiesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListWebsiteCertificateAuthoritiesResponse.error_of_json))
   | RestoreDomainAccess ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RestoreDomainAccessResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (RestoreDomainAccessResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (RestoreDomainAccessResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some RestoreDomainAccessResponse.error_of_json))
   | RevokeDomainAccess ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RevokeDomainAccessResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (RevokeDomainAccessResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (RevokeDomainAccessResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some RevokeDomainAccessResponse.error_of_json))
   | SignOutUser ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some SignOutUserResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (SignOutUserResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (SignOutUserResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some SignOutUserResponse.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UntagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateAuditStreamConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateAuditStreamConfigurationResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (UpdateAuditStreamConfigurationResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateAuditStreamConfigurationResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateAuditStreamConfigurationResponse.error_of_json))
   | UpdateCompanyNetworkConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateCompanyNetworkConfigurationResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (UpdateCompanyNetworkConfigurationResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateCompanyNetworkConfigurationResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateCompanyNetworkConfigurationResponse.error_of_json))
   | UpdateDevicePolicyConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateDevicePolicyConfigurationResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (UpdateDevicePolicyConfigurationResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateDevicePolicyConfigurationResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateDevicePolicyConfigurationResponse.error_of_json))
   | UpdateDomainMetadata ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateDomainMetadataResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UpdateDomainMetadataResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateDomainMetadataResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some UpdateDomainMetadataResponse.error_of_json))
   | UpdateFleetMetadata ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateFleetMetadataResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UpdateFleetMetadataResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateFleetMetadataResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some UpdateFleetMetadataResponse.error_of_json))
   | UpdateIdentityProviderConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateIdentityProviderConfigurationResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (UpdateIdentityProviderConfigurationResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateIdentityProviderConfigurationResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateIdentityProviderConfigurationResponse.error_of_json))

@@ -4,95 +4,71 @@ val create_component :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateComponentRequest.t ->
-        (CreateComponentResponse.t,
-          [ `AWS of CreateComponentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateComponentResponse.t, CreateComponentResponse.error) Result.t
+          Lwt.t
 val create_theme :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateThemeRequest.t ->
-        (CreateThemeResponse.t,
-          [ `AWS of CreateThemeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateThemeResponse.t, CreateThemeResponse.error) Result.t Lwt.t
 val delete_component :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteComponentRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteComponentRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_theme :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteThemeRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteThemeRequest.t -> (unit, unit) Result.t Lwt.t
 val exchange_code_for_token :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ExchangeCodeForTokenRequest.t ->
-        (ExchangeCodeForTokenResponse.t,
-          [ `AWS of ExchangeCodeForTokenResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ExchangeCodeForTokenResponse.t, ExchangeCodeForTokenResponse.error)
+          Result.t Lwt.t
 val export_components :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ExportComponentsRequest.t ->
-        (ExportComponentsResponse.t,
-          [ `AWS of ExportComponentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ExportComponentsResponse.t, ExportComponentsResponse.error) Result.t
+          Lwt.t
 val export_themes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ExportThemesRequest.t ->
-        (ExportThemesResponse.t,
-          [ `AWS of ExportThemesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ExportThemesResponse.t, ExportThemesResponse.error) Result.t Lwt.t
 val get_component :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetComponentRequest.t ->
-        (GetComponentResponse.t,
-          [ `AWS of GetComponentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetComponentResponse.t, GetComponentResponse.error) Result.t Lwt.t
 val get_theme :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetThemeRequest.t ->
-        (GetThemeResponse.t,
-          [ `AWS of GetThemeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetThemeResponse.t, GetThemeResponse.error) Result.t Lwt.t
 val list_components :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListComponentsRequest.t ->
-        (ListComponentsResponse.t,
-          [ `AWS of ListComponentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListComponentsResponse.t, ListComponentsResponse.error) Result.t
+          Lwt.t
 val list_themes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListThemesRequest.t ->
-        (ListThemesResponse.t,
-          [ `AWS of ListThemesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListThemesResponse.t, ListThemesResponse.error) Result.t Lwt.t
 val refresh_token :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RefreshTokenRequest.t ->
-        (RefreshTokenResponse.t,
-          [ `AWS of RefreshTokenResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RefreshTokenResponse.t, RefreshTokenResponse.error) Result.t Lwt.t
 val update_component :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateComponentRequest.t ->
-        (UpdateComponentResponse.t,
-          [ `AWS of UpdateComponentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateComponentResponse.t, UpdateComponentResponse.error) Result.t
+          Lwt.t
 val update_theme :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateThemeRequest.t ->
-        (UpdateThemeResponse.t,
-          [ `AWS of UpdateThemeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateThemeResponse.t, UpdateThemeResponse.error) Result.t Lwt.t

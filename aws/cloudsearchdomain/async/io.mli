@@ -4,23 +4,15 @@ val search :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SearchRequest.t ->
-        (SearchResponse.t,
-          [ `AWS of SearchResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (SearchResponse.t, SearchResponse.error) Result.t Async.Deferred.t
 val suggest :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SuggestRequest.t ->
-        (SuggestResponse.t,
-          [ `AWS of SuggestResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (SuggestResponse.t, SuggestResponse.error) Result.t Async.Deferred.t
 val upload_documents :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UploadDocumentsRequest.t ->
-        (UploadDocumentsResponse.t,
-          [ `AWS of UploadDocumentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UploadDocumentsResponse.t, UploadDocumentsResponse.error) Result.t
           Async.Deferred.t

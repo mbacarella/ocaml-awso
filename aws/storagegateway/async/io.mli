@@ -4,719 +4,545 @@ val activate_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ActivateGatewayInput.t ->
-        (ActivateGatewayOutput.t,
-          [ `AWS of ActivateGatewayOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ActivateGatewayOutput.t, ActivateGatewayOutput.error) Result.t
           Async.Deferred.t
 val add_cache :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AddCacheInput.t ->
-        (AddCacheOutput.t,
-          [ `AWS of AddCacheOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (AddCacheOutput.t, AddCacheOutput.error) Result.t Async.Deferred.t
 val add_tags_to_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AddTagsToResourceInput.t ->
-        (AddTagsToResourceOutput.t,
-          [ `AWS of AddTagsToResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AddTagsToResourceOutput.t, AddTagsToResourceOutput.error) Result.t
           Async.Deferred.t
 val add_upload_buffer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AddUploadBufferInput.t ->
-        (AddUploadBufferOutput.t,
-          [ `AWS of AddUploadBufferOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AddUploadBufferOutput.t, AddUploadBufferOutput.error) Result.t
           Async.Deferred.t
 val add_working_storage :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AddWorkingStorageInput.t ->
-        (AddWorkingStorageOutput.t,
-          [ `AWS of AddWorkingStorageOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AddWorkingStorageOutput.t, AddWorkingStorageOutput.error) Result.t
           Async.Deferred.t
 val assign_tape_pool :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssignTapePoolInput.t ->
-        (AssignTapePoolOutput.t,
-          [ `AWS of AssignTapePoolOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AssignTapePoolOutput.t, AssignTapePoolOutput.error) Result.t
           Async.Deferred.t
 val associate_file_system :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateFileSystemInput.t ->
-        (AssociateFileSystemOutput.t,
-          [ `AWS of AssociateFileSystemOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (AssociateFileSystemOutput.t, AssociateFileSystemOutput.error)
+          Result.t Async.Deferred.t
 val attach_volume :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AttachVolumeInput.t ->
-        (AttachVolumeOutput.t,
-          [ `AWS of AttachVolumeOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AttachVolumeOutput.t, AttachVolumeOutput.error) Result.t
           Async.Deferred.t
 val cancel_archival :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelArchivalInput.t ->
-        (CancelArchivalOutput.t,
-          [ `AWS of CancelArchivalOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CancelArchivalOutput.t, CancelArchivalOutput.error) Result.t
           Async.Deferred.t
 val cancel_retrieval :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelRetrievalInput.t ->
-        (CancelRetrievalOutput.t,
-          [ `AWS of CancelRetrievalOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CancelRetrievalOutput.t, CancelRetrievalOutput.error) Result.t
           Async.Deferred.t
 val create_cachedi_s_c_s_i_volume :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateCachediSCSIVolumeInput.t ->
         (CreateCachediSCSIVolumeOutput.t,
-          [ `AWS of CreateCachediSCSIVolumeOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateCachediSCSIVolumeOutput.error) Result.t Async.Deferred.t
 val create_n_f_s_file_share :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateNFSFileShareInput.t ->
-        (CreateNFSFileShareOutput.t,
-          [ `AWS of CreateNFSFileShareOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateNFSFileShareOutput.t, CreateNFSFileShareOutput.error) Result.t
           Async.Deferred.t
 val create_s_m_b_file_share :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSMBFileShareInput.t ->
-        (CreateSMBFileShareOutput.t,
-          [ `AWS of CreateSMBFileShareOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateSMBFileShareOutput.t, CreateSMBFileShareOutput.error) Result.t
           Async.Deferred.t
 val create_snapshot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSnapshotInput.t ->
-        (CreateSnapshotOutput.t,
-          [ `AWS of CreateSnapshotOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateSnapshotOutput.t, CreateSnapshotOutput.error) Result.t
           Async.Deferred.t
 val create_snapshot_from_volume_recovery_point :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSnapshotFromVolumeRecoveryPointInput.t ->
         (CreateSnapshotFromVolumeRecoveryPointOutput.t,
-          [ `AWS of CreateSnapshotFromVolumeRecoveryPointOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          CreateSnapshotFromVolumeRecoveryPointOutput.error) Result.t
           Async.Deferred.t
 val create_storedi_s_c_s_i_volume :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateStorediSCSIVolumeInput.t ->
         (CreateStorediSCSIVolumeOutput.t,
-          [ `AWS of CreateStorediSCSIVolumeOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateStorediSCSIVolumeOutput.error) Result.t Async.Deferred.t
 val create_tape_pool :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTapePoolInput.t ->
-        (CreateTapePoolOutput.t,
-          [ `AWS of CreateTapePoolOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateTapePoolOutput.t, CreateTapePoolOutput.error) Result.t
           Async.Deferred.t
 val create_tape_with_barcode :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTapeWithBarcodeInput.t ->
-        (CreateTapeWithBarcodeOutput.t,
-          [ `AWS of CreateTapeWithBarcodeOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateTapeWithBarcodeOutput.t, CreateTapeWithBarcodeOutput.error)
+          Result.t Async.Deferred.t
 val create_tapes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTapesInput.t ->
-        (CreateTapesOutput.t,
-          [ `AWS of CreateTapesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateTapesOutput.t, CreateTapesOutput.error) Result.t
           Async.Deferred.t
 val delete_automatic_tape_creation_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAutomaticTapeCreationPolicyInput.t ->
         (DeleteAutomaticTapeCreationPolicyOutput.t,
-          [ `AWS of DeleteAutomaticTapeCreationPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DeleteAutomaticTapeCreationPolicyOutput.error) Result.t
           Async.Deferred.t
 val delete_bandwidth_rate_limit :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteBandwidthRateLimitInput.t ->
         (DeleteBandwidthRateLimitOutput.t,
-          [ `AWS of DeleteBandwidthRateLimitOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeleteBandwidthRateLimitOutput.error) Result.t Async.Deferred.t
 val delete_chap_credentials :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteChapCredentialsInput.t ->
-        (DeleteChapCredentialsOutput.t,
-          [ `AWS of DeleteChapCredentialsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteChapCredentialsOutput.t, DeleteChapCredentialsOutput.error)
+          Result.t Async.Deferred.t
 val delete_file_share :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteFileShareInput.t ->
-        (DeleteFileShareOutput.t,
-          [ `AWS of DeleteFileShareOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteFileShareOutput.t, DeleteFileShareOutput.error) Result.t
           Async.Deferred.t
 val delete_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteGatewayInput.t ->
-        (DeleteGatewayOutput.t,
-          [ `AWS of DeleteGatewayOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteGatewayOutput.t, DeleteGatewayOutput.error) Result.t
           Async.Deferred.t
 val delete_snapshot_schedule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSnapshotScheduleInput.t ->
-        (DeleteSnapshotScheduleOutput.t,
-          [ `AWS of DeleteSnapshotScheduleOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteSnapshotScheduleOutput.t, DeleteSnapshotScheduleOutput.error)
+          Result.t Async.Deferred.t
 val delete_tape :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTapeInput.t ->
-        (DeleteTapeOutput.t,
-          [ `AWS of DeleteTapeOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteTapeOutput.t, DeleteTapeOutput.error) Result.t
           Async.Deferred.t
 val delete_tape_archive :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTapeArchiveInput.t ->
-        (DeleteTapeArchiveOutput.t,
-          [ `AWS of DeleteTapeArchiveOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteTapeArchiveOutput.t, DeleteTapeArchiveOutput.error) Result.t
           Async.Deferred.t
 val delete_tape_pool :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTapePoolInput.t ->
-        (DeleteTapePoolOutput.t,
-          [ `AWS of DeleteTapePoolOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteTapePoolOutput.t, DeleteTapePoolOutput.error) Result.t
           Async.Deferred.t
 val delete_volume :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteVolumeInput.t ->
-        (DeleteVolumeOutput.t,
-          [ `AWS of DeleteVolumeOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteVolumeOutput.t, DeleteVolumeOutput.error) Result.t
           Async.Deferred.t
 val describe_availability_monitor_test :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAvailabilityMonitorTestInput.t ->
         (DescribeAvailabilityMonitorTestOutput.t,
-          [ `AWS of DescribeAvailabilityMonitorTestOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeAvailabilityMonitorTestOutput.error) Result.t
           Async.Deferred.t
 val describe_bandwidth_rate_limit :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeBandwidthRateLimitInput.t ->
         (DescribeBandwidthRateLimitOutput.t,
-          [ `AWS of DescribeBandwidthRateLimitOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeBandwidthRateLimitOutput.error) Result.t Async.Deferred.t
 val describe_bandwidth_rate_limit_schedule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeBandwidthRateLimitScheduleInput.t ->
         (DescribeBandwidthRateLimitScheduleOutput.t,
-          [ `AWS of DescribeBandwidthRateLimitScheduleOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeBandwidthRateLimitScheduleOutput.error) Result.t
           Async.Deferred.t
 val describe_cache :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeCacheInput.t ->
-        (DescribeCacheOutput.t,
-          [ `AWS of DescribeCacheOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeCacheOutput.t, DescribeCacheOutput.error) Result.t
           Async.Deferred.t
 val describe_cachedi_s_c_s_i_volumes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeCachediSCSIVolumesInput.t ->
         (DescribeCachediSCSIVolumesOutput.t,
-          [ `AWS of DescribeCachediSCSIVolumesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeCachediSCSIVolumesOutput.error) Result.t Async.Deferred.t
 val describe_chap_credentials :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeChapCredentialsInput.t ->
         (DescribeChapCredentialsOutput.t,
-          [ `AWS of DescribeChapCredentialsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeChapCredentialsOutput.error) Result.t Async.Deferred.t
 val describe_file_system_associations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeFileSystemAssociationsInput.t ->
         (DescribeFileSystemAssociationsOutput.t,
-          [ `AWS of DescribeFileSystemAssociationsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeFileSystemAssociationsOutput.error) Result.t
           Async.Deferred.t
 val describe_gateway_information :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeGatewayInformationInput.t ->
         (DescribeGatewayInformationOutput.t,
-          [ `AWS of DescribeGatewayInformationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeGatewayInformationOutput.error) Result.t Async.Deferred.t
 val describe_maintenance_start_time :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeMaintenanceStartTimeInput.t ->
         (DescribeMaintenanceStartTimeOutput.t,
-          [ `AWS of DescribeMaintenanceStartTimeOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeMaintenanceStartTimeOutput.error) Result.t Async.Deferred.t
 val describe_n_f_s_file_shares :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeNFSFileSharesInput.t ->
-        (DescribeNFSFileSharesOutput.t,
-          [ `AWS of DescribeNFSFileSharesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeNFSFileSharesOutput.t, DescribeNFSFileSharesOutput.error)
+          Result.t Async.Deferred.t
 val describe_s_m_b_file_shares :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSMBFileSharesInput.t ->
-        (DescribeSMBFileSharesOutput.t,
-          [ `AWS of DescribeSMBFileSharesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeSMBFileSharesOutput.t, DescribeSMBFileSharesOutput.error)
+          Result.t Async.Deferred.t
 val describe_s_m_b_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSMBSettingsInput.t ->
-        (DescribeSMBSettingsOutput.t,
-          [ `AWS of DescribeSMBSettingsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeSMBSettingsOutput.t, DescribeSMBSettingsOutput.error)
+          Result.t Async.Deferred.t
 val describe_snapshot_schedule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSnapshotScheduleInput.t ->
         (DescribeSnapshotScheduleOutput.t,
-          [ `AWS of DescribeSnapshotScheduleOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeSnapshotScheduleOutput.error) Result.t Async.Deferred.t
 val describe_storedi_s_c_s_i_volumes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeStorediSCSIVolumesInput.t ->
         (DescribeStorediSCSIVolumesOutput.t,
-          [ `AWS of DescribeStorediSCSIVolumesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeStorediSCSIVolumesOutput.error) Result.t Async.Deferred.t
 val describe_tape_archives :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTapeArchivesInput.t ->
-        (DescribeTapeArchivesOutput.t,
-          [ `AWS of DescribeTapeArchivesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeTapeArchivesOutput.t, DescribeTapeArchivesOutput.error)
+          Result.t Async.Deferred.t
 val describe_tape_recovery_points :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTapeRecoveryPointsInput.t ->
         (DescribeTapeRecoveryPointsOutput.t,
-          [ `AWS of DescribeTapeRecoveryPointsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeTapeRecoveryPointsOutput.error) Result.t Async.Deferred.t
 val describe_tapes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTapesInput.t ->
-        (DescribeTapesOutput.t,
-          [ `AWS of DescribeTapesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeTapesOutput.t, DescribeTapesOutput.error) Result.t
           Async.Deferred.t
 val describe_upload_buffer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeUploadBufferInput.t ->
-        (DescribeUploadBufferOutput.t,
-          [ `AWS of DescribeUploadBufferOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeUploadBufferOutput.t, DescribeUploadBufferOutput.error)
+          Result.t Async.Deferred.t
 val describe_v_t_l_devices :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeVTLDevicesInput.t ->
-        (DescribeVTLDevicesOutput.t,
-          [ `AWS of DescribeVTLDevicesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeVTLDevicesOutput.t, DescribeVTLDevicesOutput.error) Result.t
           Async.Deferred.t
 val describe_working_storage :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeWorkingStorageInput.t ->
-        (DescribeWorkingStorageOutput.t,
-          [ `AWS of DescribeWorkingStorageOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeWorkingStorageOutput.t, DescribeWorkingStorageOutput.error)
+          Result.t Async.Deferred.t
 val detach_volume :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DetachVolumeInput.t ->
-        (DetachVolumeOutput.t,
-          [ `AWS of DetachVolumeOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DetachVolumeOutput.t, DetachVolumeOutput.error) Result.t
           Async.Deferred.t
 val disable_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisableGatewayInput.t ->
-        (DisableGatewayOutput.t,
-          [ `AWS of DisableGatewayOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DisableGatewayOutput.t, DisableGatewayOutput.error) Result.t
           Async.Deferred.t
 val disassociate_file_system :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateFileSystemInput.t ->
-        (DisassociateFileSystemOutput.t,
-          [ `AWS of DisassociateFileSystemOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DisassociateFileSystemOutput.t, DisassociateFileSystemOutput.error)
+          Result.t Async.Deferred.t
 val join_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       JoinDomainInput.t ->
-        (JoinDomainOutput.t,
-          [ `AWS of JoinDomainOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (JoinDomainOutput.t, JoinDomainOutput.error) Result.t
           Async.Deferred.t
 val list_automatic_tape_creation_policies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAutomaticTapeCreationPoliciesInput.t ->
         (ListAutomaticTapeCreationPoliciesOutput.t,
-          [ `AWS of ListAutomaticTapeCreationPoliciesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListAutomaticTapeCreationPoliciesOutput.error) Result.t
           Async.Deferred.t
 val list_file_shares :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFileSharesInput.t ->
-        (ListFileSharesOutput.t,
-          [ `AWS of ListFileSharesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListFileSharesOutput.t, ListFileSharesOutput.error) Result.t
           Async.Deferred.t
 val list_file_system_associations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFileSystemAssociationsInput.t ->
         (ListFileSystemAssociationsOutput.t,
-          [ `AWS of ListFileSystemAssociationsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListFileSystemAssociationsOutput.error) Result.t Async.Deferred.t
 val list_gateways :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListGatewaysInput.t ->
-        (ListGatewaysOutput.t,
-          [ `AWS of ListGatewaysOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListGatewaysOutput.t, ListGatewaysOutput.error) Result.t
           Async.Deferred.t
 val list_local_disks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListLocalDisksInput.t ->
-        (ListLocalDisksOutput.t,
-          [ `AWS of ListLocalDisksOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListLocalDisksOutput.t, ListLocalDisksOutput.error) Result.t
           Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceInput.t ->
-        (ListTagsForResourceOutput.t,
-          [ `AWS of ListTagsForResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceOutput.t, ListTagsForResourceOutput.error)
+          Result.t Async.Deferred.t
 val list_tape_pools :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTapePoolsInput.t ->
-        (ListTapePoolsOutput.t,
-          [ `AWS of ListTapePoolsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListTapePoolsOutput.t, ListTapePoolsOutput.error) Result.t
           Async.Deferred.t
 val list_tapes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTapesInput.t ->
-        (ListTapesOutput.t,
-          [ `AWS of ListTapesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTapesOutput.t, ListTapesOutput.error) Result.t Async.Deferred.t
 val list_volume_initiators :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListVolumeInitiatorsInput.t ->
-        (ListVolumeInitiatorsOutput.t,
-          [ `AWS of ListVolumeInitiatorsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListVolumeInitiatorsOutput.t, ListVolumeInitiatorsOutput.error)
+          Result.t Async.Deferred.t
 val list_volume_recovery_points :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListVolumeRecoveryPointsInput.t ->
         (ListVolumeRecoveryPointsOutput.t,
-          [ `AWS of ListVolumeRecoveryPointsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListVolumeRecoveryPointsOutput.error) Result.t Async.Deferred.t
 val list_volumes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListVolumesInput.t ->
-        (ListVolumesOutput.t,
-          [ `AWS of ListVolumesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListVolumesOutput.t, ListVolumesOutput.error) Result.t
           Async.Deferred.t
 val notify_when_uploaded :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       NotifyWhenUploadedInput.t ->
-        (NotifyWhenUploadedOutput.t,
-          [ `AWS of NotifyWhenUploadedOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (NotifyWhenUploadedOutput.t, NotifyWhenUploadedOutput.error) Result.t
           Async.Deferred.t
 val refresh_cache :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RefreshCacheInput.t ->
-        (RefreshCacheOutput.t,
-          [ `AWS of RefreshCacheOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RefreshCacheOutput.t, RefreshCacheOutput.error) Result.t
           Async.Deferred.t
 val remove_tags_from_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RemoveTagsFromResourceInput.t ->
-        (RemoveTagsFromResourceOutput.t,
-          [ `AWS of RemoveTagsFromResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (RemoveTagsFromResourceOutput.t, RemoveTagsFromResourceOutput.error)
+          Result.t Async.Deferred.t
 val reset_cache :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ResetCacheInput.t ->
-        (ResetCacheOutput.t,
-          [ `AWS of ResetCacheOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ResetCacheOutput.t, ResetCacheOutput.error) Result.t
           Async.Deferred.t
 val retrieve_tape_archive :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RetrieveTapeArchiveInput.t ->
-        (RetrieveTapeArchiveOutput.t,
-          [ `AWS of RetrieveTapeArchiveOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (RetrieveTapeArchiveOutput.t, RetrieveTapeArchiveOutput.error)
+          Result.t Async.Deferred.t
 val retrieve_tape_recovery_point :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RetrieveTapeRecoveryPointInput.t ->
         (RetrieveTapeRecoveryPointOutput.t,
-          [ `AWS of RetrieveTapeRecoveryPointOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          RetrieveTapeRecoveryPointOutput.error) Result.t Async.Deferred.t
 val set_local_console_password :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SetLocalConsolePasswordInput.t ->
         (SetLocalConsolePasswordOutput.t,
-          [ `AWS of SetLocalConsolePasswordOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          SetLocalConsolePasswordOutput.error) Result.t Async.Deferred.t
 val set_s_m_b_guest_password :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SetSMBGuestPasswordInput.t ->
-        (SetSMBGuestPasswordOutput.t,
-          [ `AWS of SetSMBGuestPasswordOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (SetSMBGuestPasswordOutput.t, SetSMBGuestPasswordOutput.error)
+          Result.t Async.Deferred.t
 val shutdown_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ShutdownGatewayInput.t ->
-        (ShutdownGatewayOutput.t,
-          [ `AWS of ShutdownGatewayOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ShutdownGatewayOutput.t, ShutdownGatewayOutput.error) Result.t
           Async.Deferred.t
 val start_availability_monitor_test :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartAvailabilityMonitorTestInput.t ->
         (StartAvailabilityMonitorTestOutput.t,
-          [ `AWS of StartAvailabilityMonitorTestOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          StartAvailabilityMonitorTestOutput.error) Result.t Async.Deferred.t
 val start_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartGatewayInput.t ->
-        (StartGatewayOutput.t,
-          [ `AWS of StartGatewayOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StartGatewayOutput.t, StartGatewayOutput.error) Result.t
           Async.Deferred.t
 val update_automatic_tape_creation_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateAutomaticTapeCreationPolicyInput.t ->
         (UpdateAutomaticTapeCreationPolicyOutput.t,
-          [ `AWS of UpdateAutomaticTapeCreationPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          UpdateAutomaticTapeCreationPolicyOutput.error) Result.t
           Async.Deferred.t
 val update_bandwidth_rate_limit :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateBandwidthRateLimitInput.t ->
         (UpdateBandwidthRateLimitOutput.t,
-          [ `AWS of UpdateBandwidthRateLimitOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateBandwidthRateLimitOutput.error) Result.t Async.Deferred.t
 val update_bandwidth_rate_limit_schedule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateBandwidthRateLimitScheduleInput.t ->
         (UpdateBandwidthRateLimitScheduleOutput.t,
-          [ `AWS of UpdateBandwidthRateLimitScheduleOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          UpdateBandwidthRateLimitScheduleOutput.error) Result.t
           Async.Deferred.t
 val update_chap_credentials :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateChapCredentialsInput.t ->
-        (UpdateChapCredentialsOutput.t,
-          [ `AWS of UpdateChapCredentialsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateChapCredentialsOutput.t, UpdateChapCredentialsOutput.error)
+          Result.t Async.Deferred.t
 val update_file_system_association :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateFileSystemAssociationInput.t ->
         (UpdateFileSystemAssociationOutput.t,
-          [ `AWS of UpdateFileSystemAssociationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateFileSystemAssociationOutput.error) Result.t Async.Deferred.t
 val update_gateway_information :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateGatewayInformationInput.t ->
         (UpdateGatewayInformationOutput.t,
-          [ `AWS of UpdateGatewayInformationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateGatewayInformationOutput.error) Result.t Async.Deferred.t
 val update_gateway_software_now :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateGatewaySoftwareNowInput.t ->
         (UpdateGatewaySoftwareNowOutput.t,
-          [ `AWS of UpdateGatewaySoftwareNowOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateGatewaySoftwareNowOutput.error) Result.t Async.Deferred.t
 val update_maintenance_start_time :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateMaintenanceStartTimeInput.t ->
         (UpdateMaintenanceStartTimeOutput.t,
-          [ `AWS of UpdateMaintenanceStartTimeOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateMaintenanceStartTimeOutput.error) Result.t Async.Deferred.t
 val update_n_f_s_file_share :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateNFSFileShareInput.t ->
-        (UpdateNFSFileShareOutput.t,
-          [ `AWS of UpdateNFSFileShareOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateNFSFileShareOutput.t, UpdateNFSFileShareOutput.error) Result.t
           Async.Deferred.t
 val update_s_m_b_file_share :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSMBFileShareInput.t ->
-        (UpdateSMBFileShareOutput.t,
-          [ `AWS of UpdateSMBFileShareOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateSMBFileShareOutput.t, UpdateSMBFileShareOutput.error) Result.t
           Async.Deferred.t
 val update_s_m_b_file_share_visibility :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSMBFileShareVisibilityInput.t ->
         (UpdateSMBFileShareVisibilityOutput.t,
-          [ `AWS of UpdateSMBFileShareVisibilityOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateSMBFileShareVisibilityOutput.error) Result.t Async.Deferred.t
 val update_s_m_b_local_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSMBLocalGroupsInput.t ->
-        (UpdateSMBLocalGroupsOutput.t,
-          [ `AWS of UpdateSMBLocalGroupsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateSMBLocalGroupsOutput.t, UpdateSMBLocalGroupsOutput.error)
+          Result.t Async.Deferred.t
 val update_s_m_b_security_strategy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSMBSecurityStrategyInput.t ->
         (UpdateSMBSecurityStrategyOutput.t,
-          [ `AWS of UpdateSMBSecurityStrategyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateSMBSecurityStrategyOutput.error) Result.t Async.Deferred.t
 val update_snapshot_schedule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSnapshotScheduleInput.t ->
-        (UpdateSnapshotScheduleOutput.t,
-          [ `AWS of UpdateSnapshotScheduleOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateSnapshotScheduleOutput.t, UpdateSnapshotScheduleOutput.error)
+          Result.t Async.Deferred.t
 val update_v_t_l_device_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateVTLDeviceTypeInput.t ->
-        (UpdateVTLDeviceTypeOutput.t,
-          [ `AWS of UpdateVTLDeviceTypeOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateVTLDeviceTypeOutput.t, UpdateVTLDeviceTypeOutput.error)
+          Result.t Async.Deferred.t

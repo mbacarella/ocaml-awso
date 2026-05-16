@@ -4,160 +4,116 @@ val create_member :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateMemberInput.t ->
-        (CreateMemberOutput.t,
-          [ `AWS of CreateMemberOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateMemberOutput.t, CreateMemberOutput.error) Result.t Lwt.t
 val create_network :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateNetworkInput.t ->
-        (CreateNetworkOutput.t,
-          [ `AWS of CreateNetworkOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateNetworkOutput.t, CreateNetworkOutput.error) Result.t Lwt.t
 val create_node :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateNodeInput.t ->
-        (CreateNodeOutput.t,
-          [ `AWS of CreateNodeOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateNodeOutput.t, CreateNodeOutput.error) Result.t Lwt.t
 val create_proposal :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateProposalInput.t ->
-        (CreateProposalOutput.t,
-          [ `AWS of CreateProposalOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateProposalOutput.t, CreateProposalOutput.error) Result.t Lwt.t
 val delete_member :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteMemberInput.t ->
-        (DeleteMemberOutput.t,
-          [ `AWS of DeleteMemberOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteMemberOutput.t, DeleteMemberOutput.error) Result.t Lwt.t
 val delete_node :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteNodeInput.t ->
-        (DeleteNodeOutput.t,
-          [ `AWS of DeleteNodeOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteNodeOutput.t, DeleteNodeOutput.error) Result.t Lwt.t
 val get_member :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMemberInput.t ->
-        (GetMemberOutput.t,
-          [ `AWS of GetMemberOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetMemberOutput.t, GetMemberOutput.error) Result.t Lwt.t
 val get_network :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetNetworkInput.t ->
-        (GetNetworkOutput.t,
-          [ `AWS of GetNetworkOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetNetworkOutput.t, GetNetworkOutput.error) Result.t Lwt.t
 val get_node :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      GetNodeInput.t ->
-        (GetNodeOutput.t,
-          [ `AWS of GetNodeOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+      GetNodeInput.t -> (GetNodeOutput.t, GetNodeOutput.error) Result.t Lwt.t
 val get_proposal :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetProposalInput.t ->
-        (GetProposalOutput.t,
-          [ `AWS of GetProposalOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetProposalOutput.t, GetProposalOutput.error) Result.t Lwt.t
 val list_invitations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListInvitationsInput.t ->
-        (ListInvitationsOutput.t,
-          [ `AWS of ListInvitationsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListInvitationsOutput.t, ListInvitationsOutput.error) Result.t Lwt.t
 val list_members :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListMembersInput.t ->
-        (ListMembersOutput.t,
-          [ `AWS of ListMembersOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListMembersOutput.t, ListMembersOutput.error) Result.t Lwt.t
 val list_networks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListNetworksInput.t ->
-        (ListNetworksOutput.t,
-          [ `AWS of ListNetworksOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListNetworksOutput.t, ListNetworksOutput.error) Result.t Lwt.t
 val list_nodes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListNodesInput.t ->
-        (ListNodesOutput.t,
-          [ `AWS of ListNodesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListNodesOutput.t, ListNodesOutput.error) Result.t Lwt.t
 val list_proposal_votes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListProposalVotesInput.t ->
-        (ListProposalVotesOutput.t,
-          [ `AWS of ListProposalVotesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListProposalVotesOutput.t, ListProposalVotesOutput.error) Result.t
+          Lwt.t
 val list_proposals :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListProposalsInput.t ->
-        (ListProposalsOutput.t,
-          [ `AWS of ListProposalsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListProposalsOutput.t, ListProposalsOutput.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val reject_invitation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RejectInvitationInput.t ->
-        (RejectInvitationOutput.t,
-          [ `AWS of RejectInvitationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RejectInvitationOutput.t, RejectInvitationOutput.error) Result.t
+          Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_member :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateMemberInput.t ->
-        (UpdateMemberOutput.t,
-          [ `AWS of UpdateMemberOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateMemberOutput.t, UpdateMemberOutput.error) Result.t Lwt.t
 val update_node :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateNodeInput.t ->
-        (UpdateNodeOutput.t,
-          [ `AWS of UpdateNodeOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateNodeOutput.t, UpdateNodeOutput.error) Result.t Lwt.t
 val vote_on_proposal :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       VoteOnProposalInput.t ->
-        (VoteOnProposalOutput.t,
-          [ `AWS of VoteOnProposalOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (VoteOnProposalOutput.t, VoteOnProposalOutput.error) Result.t Lwt.t

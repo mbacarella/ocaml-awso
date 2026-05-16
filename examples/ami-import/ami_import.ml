@@ -25,15 +25,10 @@ let detect_architecture image =
     | false -> return default)
 ;;
 
-let raise_transport_error ~name err =
-  failwithf "%s: %s" name (Awso.Http.Io.Error.yojson_of_call err |> Yojson.Safe.pretty_to_string) ()
-;;
-
 let dispatch_exn ~name ~error_to_json ~f =
   match%bind f () with
   | Ok v -> return v
-  | Error (`Transport err) -> raise_transport_error ~name err
-  | Error (`AWS aws) ->
+  | Error aws ->
     failwithf "%s: %s" name (aws |> error_to_json |> Yojson.Safe.to_string) ()
 ;;
 

@@ -4,119 +4,89 @@ val batch_create_table_rows :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchCreateTableRowsRequest.t ->
-        (BatchCreateTableRowsResult.t,
-          [ `AWS of BatchCreateTableRowsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (BatchCreateTableRowsResult.t, BatchCreateTableRowsResult.error)
+          Result.t Async.Deferred.t
 val batch_delete_table_rows :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchDeleteTableRowsRequest.t ->
-        (BatchDeleteTableRowsResult.t,
-          [ `AWS of BatchDeleteTableRowsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (BatchDeleteTableRowsResult.t, BatchDeleteTableRowsResult.error)
+          Result.t Async.Deferred.t
 val batch_update_table_rows :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchUpdateTableRowsRequest.t ->
-        (BatchUpdateTableRowsResult.t,
-          [ `AWS of BatchUpdateTableRowsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (BatchUpdateTableRowsResult.t, BatchUpdateTableRowsResult.error)
+          Result.t Async.Deferred.t
 val batch_upsert_table_rows :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchUpsertTableRowsRequest.t ->
-        (BatchUpsertTableRowsResult.t,
-          [ `AWS of BatchUpsertTableRowsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (BatchUpsertTableRowsResult.t, BatchUpsertTableRowsResult.error)
+          Result.t Async.Deferred.t
 val describe_table_data_import_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTableDataImportJobRequest.t ->
         (DescribeTableDataImportJobResult.t,
-          [ `AWS of DescribeTableDataImportJobResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeTableDataImportJobResult.error) Result.t Async.Deferred.t
 val get_screen_data :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetScreenDataRequest.t ->
-        (GetScreenDataResult.t,
-          [ `AWS of GetScreenDataResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetScreenDataResult.t, GetScreenDataResult.error) Result.t
           Async.Deferred.t
 val invoke_screen_automation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       InvokeScreenAutomationRequest.t ->
-        (InvokeScreenAutomationResult.t,
-          [ `AWS of InvokeScreenAutomationResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (InvokeScreenAutomationResult.t, InvokeScreenAutomationResult.error)
+          Result.t Async.Deferred.t
 val list_table_columns :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTableColumnsRequest.t ->
-        (ListTableColumnsResult.t,
-          [ `AWS of ListTableColumnsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListTableColumnsResult.t, ListTableColumnsResult.error) Result.t
           Async.Deferred.t
 val list_table_rows :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTableRowsRequest.t ->
-        (ListTableRowsResult.t,
-          [ `AWS of ListTableRowsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListTableRowsResult.t, ListTableRowsResult.error) Result.t
           Async.Deferred.t
 val list_tables :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTablesRequest.t ->
-        (ListTablesResult.t,
-          [ `AWS of ListTablesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListTablesResult.t, ListTablesResult.error) Result.t
           Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResult.t,
-          [ `AWS of ListTagsForResourceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResult.t, ListTagsForResourceResult.error)
+          Result.t Async.Deferred.t
 val query_table_rows :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       QueryTableRowsRequest.t ->
-        (QueryTableRowsResult.t,
-          [ `AWS of QueryTableRowsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (QueryTableRowsResult.t, QueryTableRowsResult.error) Result.t
           Async.Deferred.t
 val start_table_data_import_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartTableDataImportJobRequest.t ->
         (StartTableDataImportJobResult.t,
-          [ `AWS of StartTableDataImportJobResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          StartTableDataImportJobResult.error) Result.t Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResult.t,
-          [ `AWS of TagResourceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResult.t, TagResourceResult.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResult.t,
-          [ `AWS of UntagResourceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResult.t, UntagResourceResult.error) Result.t
           Async.Deferred.t

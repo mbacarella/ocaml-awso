@@ -8,9 +8,7 @@ let list_identity_pools cfg ?(max_results = default_max_results) ()
   : IdentityPoolShortDescription.t list Deferred.t
   =
   let maxResults = QueryLimit.make max_results in
-  Io.list_identity_pools
-    ~cfg
-    (ListIdentityPoolsInput.make ~maxResults ())
+  Io.list_identity_pools ~cfg (ListIdentityPoolsInput.make ~maxResults ())
   >>| function
   | Ok response -> Option.value response.identityPools ~default:[]
   | _ -> failwithf "list_identity_pools error" ()

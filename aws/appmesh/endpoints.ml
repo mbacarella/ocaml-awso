@@ -589,256 +589,251 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpdateVirtualRouter -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateVirtualService -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | CreateGatewayRoute ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateGatewayRouteOutput.error_of_json)
-       | Ok resp ->
-           Ok (CreateGatewayRouteOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateGatewayRouteOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateGatewayRouteOutput.error_of_json))
   | CreateMesh ->
-      (match resp with
-       | Error err -> handle_error err (Some CreateMeshOutput.error_of_json)
-       | Ok resp -> Ok (CreateMeshOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateMeshOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateMeshOutput.error_of_json))
   | CreateRoute ->
-      (match resp with
-       | Error err -> handle_error err (Some CreateRouteOutput.error_of_json)
-       | Ok resp -> Ok (CreateRouteOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateRouteOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateRouteOutput.error_of_json))
   | CreateVirtualGateway ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateVirtualGatewayOutput.error_of_json)
-       | Ok resp ->
-           Ok (CreateVirtualGatewayOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateVirtualGatewayOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateVirtualGatewayOutput.error_of_json))
   | CreateVirtualNode ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateVirtualNodeOutput.error_of_json)
-       | Ok resp ->
-           Ok (CreateVirtualNodeOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateVirtualNodeOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateVirtualNodeOutput.error_of_json))
   | CreateVirtualRouter ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateVirtualRouterOutput.error_of_json)
-       | Ok resp ->
-           Ok (CreateVirtualRouterOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateVirtualRouterOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateVirtualRouterOutput.error_of_json))
   | CreateVirtualService ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateVirtualServiceOutput.error_of_json)
-       | Ok resp ->
-           Ok (CreateVirtualServiceOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateVirtualServiceOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateVirtualServiceOutput.error_of_json))
   | DeleteGatewayRoute ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteGatewayRouteOutput.error_of_json)
-       | Ok resp ->
-           Ok (DeleteGatewayRouteOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteGatewayRouteOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DeleteGatewayRouteOutput.error_of_json))
   | DeleteMesh ->
-      (match resp with
-       | Error err -> handle_error err (Some DeleteMeshOutput.error_of_json)
-       | Ok resp -> Ok (DeleteMeshOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteMeshOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteMeshOutput.error_of_json))
   | DeleteRoute ->
-      (match resp with
-       | Error err -> handle_error err (Some DeleteRouteOutput.error_of_json)
-       | Ok resp -> Ok (DeleteRouteOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteRouteOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteRouteOutput.error_of_json))
   | DeleteVirtualGateway ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteVirtualGatewayOutput.error_of_json)
-       | Ok resp ->
-           Ok (DeleteVirtualGatewayOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteVirtualGatewayOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteVirtualGatewayOutput.error_of_json))
   | DeleteVirtualNode ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteVirtualNodeOutput.error_of_json)
-       | Ok resp ->
-           Ok (DeleteVirtualNodeOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteVirtualNodeOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DeleteVirtualNodeOutput.error_of_json))
   | DeleteVirtualRouter ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteVirtualRouterOutput.error_of_json)
-       | Ok resp ->
-           Ok (DeleteVirtualRouterOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteVirtualRouterOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteVirtualRouterOutput.error_of_json))
   | DeleteVirtualService ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteVirtualServiceOutput.error_of_json)
-       | Ok resp ->
-           Ok (DeleteVirtualServiceOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteVirtualServiceOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteVirtualServiceOutput.error_of_json))
   | DescribeGatewayRoute ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeGatewayRouteOutput.error_of_json)
-       | Ok resp ->
-           Ok (DescribeGatewayRouteOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeGatewayRouteOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeGatewayRouteOutput.error_of_json))
   | DescribeMesh ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeMeshOutput.error_of_json)
-       | Ok resp -> Ok (DescribeMeshOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeMeshOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DescribeMeshOutput.error_of_json))
   | DescribeRoute ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeRouteOutput.error_of_json)
-       | Ok resp -> Ok (DescribeRouteOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeRouteOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DescribeRouteOutput.error_of_json))
   | DescribeVirtualGateway ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeVirtualGatewayOutput.error_of_json)
-       | Ok resp ->
-           Ok (DescribeVirtualGatewayOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeVirtualGatewayOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeVirtualGatewayOutput.error_of_json))
   | DescribeVirtualNode ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeVirtualNodeOutput.error_of_json)
-       | Ok resp ->
-           Ok (DescribeVirtualNodeOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeVirtualNodeOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeVirtualNodeOutput.error_of_json))
   | DescribeVirtualRouter ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeVirtualRouterOutput.error_of_json)
-       | Ok resp ->
-           Ok (DescribeVirtualRouterOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeVirtualRouterOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeVirtualRouterOutput.error_of_json))
   | DescribeVirtualService ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeVirtualServiceOutput.error_of_json)
-       | Ok resp ->
-           Ok (DescribeVirtualServiceOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeVirtualServiceOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeVirtualServiceOutput.error_of_json))
   | ListGatewayRoutes ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListGatewayRoutesOutput.error_of_json)
-       | Ok resp ->
-           Ok (ListGatewayRoutesOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListGatewayRoutesOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListGatewayRoutesOutput.error_of_json))
   | ListMeshes ->
-      (match resp with
-       | Error err -> handle_error err (Some ListMeshesOutput.error_of_json)
-       | Ok resp -> Ok (ListMeshesOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListMeshesOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListMeshesOutput.error_of_json))
   | ListRoutes ->
-      (match resp with
-       | Error err -> handle_error err (Some ListRoutesOutput.error_of_json)
-       | Ok resp -> Ok (ListRoutesOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListRoutesOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListRoutesOutput.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceOutput.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceOutput.error_of_json))
   | ListVirtualGateways ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListVirtualGatewaysOutput.error_of_json)
-       | Ok resp ->
-           Ok (ListVirtualGatewaysOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListVirtualGatewaysOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListVirtualGatewaysOutput.error_of_json))
   | ListVirtualNodes ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListVirtualNodesOutput.error_of_json)
-       | Ok resp ->
-           Ok (ListVirtualNodesOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListVirtualNodesOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListVirtualNodesOutput.error_of_json))
   | ListVirtualRouters ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListVirtualRoutersOutput.error_of_json)
-       | Ok resp ->
-           Ok (ListVirtualRoutersOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListVirtualRoutersOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListVirtualRoutersOutput.error_of_json))
   | ListVirtualServices ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListVirtualServicesOutput.error_of_json)
-       | Ok resp ->
-           Ok (ListVirtualServicesOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListVirtualServicesOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListVirtualServicesOutput.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err -> handle_error err (Some TagResourceOutput.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TagResourceOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceOutput.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceOutput.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceOutput.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UntagResourceOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceOutput.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceOutput.error_of_json))
   | UpdateGatewayRoute ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateGatewayRouteOutput.error_of_json)
-       | Ok resp ->
-           Ok (UpdateGatewayRouteOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateGatewayRouteOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateGatewayRouteOutput.error_of_json))
   | UpdateMesh ->
-      (match resp with
-       | Error err -> handle_error err (Some UpdateMeshOutput.error_of_json)
-       | Ok resp -> Ok (UpdateMeshOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateMeshOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateMeshOutput.error_of_json))
   | UpdateRoute ->
-      (match resp with
-       | Error err -> handle_error err (Some UpdateRouteOutput.error_of_json)
-       | Ok resp -> Ok (UpdateRouteOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateRouteOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateRouteOutput.error_of_json))
   | UpdateVirtualGateway ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateVirtualGatewayOutput.error_of_json)
-       | Ok resp ->
-           Ok (UpdateVirtualGatewayOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateVirtualGatewayOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateVirtualGatewayOutput.error_of_json))
   | UpdateVirtualNode ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateVirtualNodeOutput.error_of_json)
-       | Ok resp ->
-           Ok (UpdateVirtualNodeOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateVirtualNodeOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateVirtualNodeOutput.error_of_json))
   | UpdateVirtualRouter ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateVirtualRouterOutput.error_of_json)
-       | Ok resp ->
-           Ok (UpdateVirtualRouterOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateVirtualRouterOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateVirtualRouterOutput.error_of_json))
   | UpdateVirtualService ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateVirtualServiceOutput.error_of_json)
-       | Ok resp ->
-           Ok (UpdateVirtualServiceOutput.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateVirtualServiceOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateVirtualServiceOutput.error_of_json))

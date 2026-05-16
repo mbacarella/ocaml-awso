@@ -788,206 +788,202 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | BatchGetTraces ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some BatchGetTracesResult.error_of_json)
-       | Ok resp -> Ok (BatchGetTracesResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (BatchGetTracesResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some BatchGetTracesResult.error_of_json))
   | CreateGroup ->
-      (match resp with
-       | Error err -> handle_error err (Some CreateGroupResult.error_of_json)
-       | Ok resp -> Ok (CreateGroupResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateGroupResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateGroupResult.error_of_json))
   | CreateSamplingRule ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateSamplingRuleResult.error_of_json)
-       | Ok resp ->
-           Ok (CreateSamplingRuleResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateSamplingRuleResult.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateSamplingRuleResult.error_of_json))
   | DeleteGroup ->
-      (match resp with
-       | Error err -> handle_error err (Some DeleteGroupResult.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteGroupResult.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteGroupResult.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some DeleteGroupResult.error_of_json))
   | DeleteSamplingRule ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteSamplingRuleResult.error_of_json)
-       | Ok resp ->
-           Ok (DeleteSamplingRuleResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteSamplingRuleResult.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DeleteSamplingRuleResult.error_of_json))
   | GetEncryptionConfig ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetEncryptionConfigResult.error_of_json)
-       | Ok resp ->
-           Ok (GetEncryptionConfigResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetEncryptionConfigResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetEncryptionConfigResult.error_of_json))
   | GetGroup ->
-      (match resp with
-       | Error err -> handle_error err (Some GetGroupResult.error_of_json)
-       | Ok resp -> Ok (GetGroupResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetGroupResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetGroupResult.error_of_json))
   | GetGroups ->
-      (match resp with
-       | Error err -> handle_error err (Some GetGroupsResult.error_of_json)
-       | Ok resp -> Ok (GetGroupsResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetGroupsResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetGroupsResult.error_of_json))
   | GetInsight ->
-      (match resp with
-       | Error err -> handle_error err (Some GetInsightResult.error_of_json)
-       | Ok resp -> Ok (GetInsightResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetInsightResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetInsightResult.error_of_json))
   | GetInsightEvents ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetInsightEventsResult.error_of_json)
-       | Ok resp ->
-           Ok (GetInsightEventsResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetInsightEventsResult.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetInsightEventsResult.error_of_json))
   | GetInsightImpactGraph ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetInsightImpactGraphResult.error_of_json)
-       | Ok resp ->
-           Ok (GetInsightImpactGraphResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetInsightImpactGraphResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetInsightImpactGraphResult.error_of_json))
   | GetInsightSummaries ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetInsightSummariesResult.error_of_json)
-       | Ok resp ->
-           Ok (GetInsightSummariesResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetInsightSummariesResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetInsightSummariesResult.error_of_json))
   | GetSamplingRules ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetSamplingRulesResult.error_of_json)
-       | Ok resp ->
-           Ok (GetSamplingRulesResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetSamplingRulesResult.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetSamplingRulesResult.error_of_json))
   | GetSamplingStatisticSummaries ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetSamplingStatisticSummariesResult.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetSamplingStatisticSummariesResult.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetSamplingStatisticSummariesResult.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetSamplingStatisticSummariesResult.error_of_json))
   | GetSamplingTargets ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetSamplingTargetsResult.error_of_json)
-       | Ok resp ->
-           Ok (GetSamplingTargetsResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetSamplingTargetsResult.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetSamplingTargetsResult.error_of_json))
   | GetServiceGraph ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetServiceGraphResult.error_of_json)
-       | Ok resp ->
-           Ok (GetServiceGraphResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetServiceGraphResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetServiceGraphResult.error_of_json))
   | GetTimeSeriesServiceStatistics ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetTimeSeriesServiceStatisticsResult.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetTimeSeriesServiceStatisticsResult.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetTimeSeriesServiceStatisticsResult.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetTimeSeriesServiceStatisticsResult.error_of_json))
   | GetTraceGraph ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetTraceGraphResult.error_of_json)
-       | Ok resp -> Ok (GetTraceGraphResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetTraceGraphResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetTraceGraphResult.error_of_json))
   | GetTraceSummaries ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetTraceSummariesResult.error_of_json)
-       | Ok resp ->
-           Ok (GetTraceSummariesResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetTraceSummariesResult.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetTraceSummariesResult.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | PutEncryptionConfig ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutEncryptionConfigResult.error_of_json)
-       | Ok resp ->
-           Ok (PutEncryptionConfigResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (PutEncryptionConfigResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some PutEncryptionConfigResult.error_of_json))
   | PutTelemetryRecords ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutTelemetryRecordsResult.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (PutTelemetryRecordsResult.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (PutTelemetryRecordsResult.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some PutTelemetryRecordsResult.error_of_json))
   | PutTraceSegments ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutTraceSegmentsResult.error_of_json)
-       | Ok resp ->
-           Ok (PutTraceSegmentsResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (PutTraceSegmentsResult.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some PutTraceSegmentsResult.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UntagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateGroup ->
-      (match resp with
-       | Error err -> handle_error err (Some UpdateGroupResult.error_of_json)
-       | Ok resp -> Ok (UpdateGroupResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateGroupResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateGroupResult.error_of_json))
   | UpdateSamplingRule ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateSamplingRuleResult.error_of_json)
-       | Ok resp ->
-           Ok (UpdateSamplingRuleResult.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateSamplingRuleResult.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateSamplingRuleResult.error_of_json))

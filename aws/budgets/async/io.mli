@@ -4,183 +4,144 @@ val create_budget :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateBudgetRequest.t ->
-        (CreateBudgetResponse.t,
-          [ `AWS of CreateBudgetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateBudgetResponse.t, CreateBudgetResponse.error) Result.t
           Async.Deferred.t
 val create_budget_action :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateBudgetActionRequest.t ->
-        (CreateBudgetActionResponse.t,
-          [ `AWS of CreateBudgetActionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateBudgetActionResponse.t, CreateBudgetActionResponse.error)
+          Result.t Async.Deferred.t
 val create_notification :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateNotificationRequest.t ->
-        (CreateNotificationResponse.t,
-          [ `AWS of CreateNotificationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateNotificationResponse.t, CreateNotificationResponse.error)
+          Result.t Async.Deferred.t
 val create_subscriber :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSubscriberRequest.t ->
-        (CreateSubscriberResponse.t,
-          [ `AWS of CreateSubscriberResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateSubscriberResponse.t, CreateSubscriberResponse.error) Result.t
           Async.Deferred.t
 val delete_budget :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteBudgetRequest.t ->
-        (DeleteBudgetResponse.t,
-          [ `AWS of DeleteBudgetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteBudgetResponse.t, DeleteBudgetResponse.error) Result.t
           Async.Deferred.t
 val delete_budget_action :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteBudgetActionRequest.t ->
-        (DeleteBudgetActionResponse.t,
-          [ `AWS of DeleteBudgetActionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteBudgetActionResponse.t, DeleteBudgetActionResponse.error)
+          Result.t Async.Deferred.t
 val delete_notification :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteNotificationRequest.t ->
-        (DeleteNotificationResponse.t,
-          [ `AWS of DeleteNotificationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteNotificationResponse.t, DeleteNotificationResponse.error)
+          Result.t Async.Deferred.t
 val delete_subscriber :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSubscriberRequest.t ->
-        (DeleteSubscriberResponse.t,
-          [ `AWS of DeleteSubscriberResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteSubscriberResponse.t, DeleteSubscriberResponse.error) Result.t
           Async.Deferred.t
 val describe_budget :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeBudgetRequest.t ->
-        (DescribeBudgetResponse.t,
-          [ `AWS of DescribeBudgetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeBudgetResponse.t, DescribeBudgetResponse.error) Result.t
           Async.Deferred.t
 val describe_budget_action :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeBudgetActionRequest.t ->
-        (DescribeBudgetActionResponse.t,
-          [ `AWS of DescribeBudgetActionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeBudgetActionResponse.t, DescribeBudgetActionResponse.error)
+          Result.t Async.Deferred.t
 val describe_budget_action_histories :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeBudgetActionHistoriesRequest.t ->
         (DescribeBudgetActionHistoriesResponse.t,
-          [ `AWS of DescribeBudgetActionHistoriesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeBudgetActionHistoriesResponse.error) Result.t
           Async.Deferred.t
 val describe_budget_actions_for_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeBudgetActionsForAccountRequest.t ->
         (DescribeBudgetActionsForAccountResponse.t,
-          [ `AWS of DescribeBudgetActionsForAccountResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeBudgetActionsForAccountResponse.error) Result.t
           Async.Deferred.t
 val describe_budget_actions_for_budget :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeBudgetActionsForBudgetRequest.t ->
         (DescribeBudgetActionsForBudgetResponse.t,
-          [ `AWS of DescribeBudgetActionsForBudgetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeBudgetActionsForBudgetResponse.error) Result.t
           Async.Deferred.t
 val describe_budget_notifications_for_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeBudgetNotificationsForAccountRequest.t ->
         (DescribeBudgetNotificationsForAccountResponse.t,
-          [ `AWS of DescribeBudgetNotificationsForAccountResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeBudgetNotificationsForAccountResponse.error) Result.t
           Async.Deferred.t
 val describe_budget_performance_history :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeBudgetPerformanceHistoryRequest.t ->
         (DescribeBudgetPerformanceHistoryResponse.t,
-          [ `AWS of DescribeBudgetPerformanceHistoryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeBudgetPerformanceHistoryResponse.error) Result.t
           Async.Deferred.t
 val describe_budgets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeBudgetsRequest.t ->
-        (DescribeBudgetsResponse.t,
-          [ `AWS of DescribeBudgetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeBudgetsResponse.t, DescribeBudgetsResponse.error) Result.t
           Async.Deferred.t
 val describe_notifications_for_budget :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeNotificationsForBudgetRequest.t ->
         (DescribeNotificationsForBudgetResponse.t,
-          [ `AWS of DescribeNotificationsForBudgetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeNotificationsForBudgetResponse.error) Result.t
           Async.Deferred.t
 val describe_subscribers_for_notification :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSubscribersForNotificationRequest.t ->
         (DescribeSubscribersForNotificationResponse.t,
-          [ `AWS of DescribeSubscribersForNotificationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeSubscribersForNotificationResponse.error) Result.t
           Async.Deferred.t
 val execute_budget_action :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ExecuteBudgetActionRequest.t ->
-        (ExecuteBudgetActionResponse.t,
-          [ `AWS of ExecuteBudgetActionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ExecuteBudgetActionResponse.t, ExecuteBudgetActionResponse.error)
+          Result.t Async.Deferred.t
 val update_budget :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateBudgetRequest.t ->
-        (UpdateBudgetResponse.t,
-          [ `AWS of UpdateBudgetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateBudgetResponse.t, UpdateBudgetResponse.error) Result.t
           Async.Deferred.t
 val update_budget_action :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateBudgetActionRequest.t ->
-        (UpdateBudgetActionResponse.t,
-          [ `AWS of UpdateBudgetActionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateBudgetActionResponse.t, UpdateBudgetActionResponse.error)
+          Result.t Async.Deferred.t
 val update_notification :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateNotificationRequest.t ->
-        (UpdateNotificationResponse.t,
-          [ `AWS of UpdateNotificationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateNotificationResponse.t, UpdateNotificationResponse.error)
+          Result.t Async.Deferred.t
 val update_subscriber :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSubscriberRequest.t ->
-        (UpdateSubscriberResponse.t,
-          [ `AWS of UpdateSubscriberResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateSubscriberResponse.t, UpdateSubscriberResponse.error) Result.t
           Async.Deferred.t

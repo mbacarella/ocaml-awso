@@ -4,41 +4,35 @@ val create_scaling_plan :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateScalingPlanRequest.t ->
-        (CreateScalingPlanResponse.t,
-          [ `AWS of CreateScalingPlanResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateScalingPlanResponse.t, CreateScalingPlanResponse.error)
+          Result.t Lwt.t
 val delete_scaling_plan :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteScalingPlanRequest.t ->
-        (DeleteScalingPlanResponse.t,
-          [ `AWS of DeleteScalingPlanResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteScalingPlanResponse.t, DeleteScalingPlanResponse.error)
+          Result.t Lwt.t
 val describe_scaling_plan_resources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeScalingPlanResourcesRequest.t ->
         (DescribeScalingPlanResourcesResponse.t,
-          [ `AWS of DescribeScalingPlanResourcesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeScalingPlanResourcesResponse.error) Result.t Lwt.t
 val describe_scaling_plans :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeScalingPlansRequest.t ->
-        (DescribeScalingPlansResponse.t,
-          [ `AWS of DescribeScalingPlansResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeScalingPlansResponse.t, DescribeScalingPlansResponse.error)
+          Result.t Lwt.t
 val get_scaling_plan_resource_forecast_data :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetScalingPlanResourceForecastDataRequest.t ->
         (GetScalingPlanResourceForecastDataResponse.t,
-          [ `AWS of GetScalingPlanResourceForecastDataResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetScalingPlanResourceForecastDataResponse.error) Result.t Lwt.t
 val update_scaling_plan :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateScalingPlanRequest.t ->
-        (UpdateScalingPlanResponse.t,
-          [ `AWS of UpdateScalingPlanResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateScalingPlanResponse.t, UpdateScalingPlanResponse.error)
+          Result.t Lwt.t

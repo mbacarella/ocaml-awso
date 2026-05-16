@@ -5,110 +5,88 @@ val associate_device_with_placement :
     ?cfg:Awso.Cfg.t ->
       AssociateDeviceWithPlacementRequest.t ->
         (AssociateDeviceWithPlacementResponse.t,
-          [ `AWS of AssociateDeviceWithPlacementResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssociateDeviceWithPlacementResponse.error) Result.t Lwt.t
 val create_placement :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePlacementRequest.t ->
-        (CreatePlacementResponse.t,
-          [ `AWS of CreatePlacementResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreatePlacementResponse.t, CreatePlacementResponse.error) Result.t
+          Lwt.t
 val create_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateProjectRequest.t ->
-        (CreateProjectResponse.t,
-          [ `AWS of CreateProjectResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateProjectResponse.t, CreateProjectResponse.error) Result.t Lwt.t
 val delete_placement :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePlacementRequest.t ->
-        (DeletePlacementResponse.t,
-          [ `AWS of DeletePlacementResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeletePlacementResponse.t, DeletePlacementResponse.error) Result.t
+          Lwt.t
 val delete_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteProjectRequest.t ->
-        (DeleteProjectResponse.t,
-          [ `AWS of DeleteProjectResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteProjectResponse.t, DeleteProjectResponse.error) Result.t Lwt.t
 val describe_placement :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePlacementRequest.t ->
-        (DescribePlacementResponse.t,
-          [ `AWS of DescribePlacementResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribePlacementResponse.t, DescribePlacementResponse.error)
+          Result.t Lwt.t
 val describe_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeProjectRequest.t ->
-        (DescribeProjectResponse.t,
-          [ `AWS of DescribeProjectResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeProjectResponse.t, DescribeProjectResponse.error) Result.t
+          Lwt.t
 val disassociate_device_from_placement :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateDeviceFromPlacementRequest.t ->
         (DisassociateDeviceFromPlacementResponse.t,
-          [ `AWS of DisassociateDeviceFromPlacementResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateDeviceFromPlacementResponse.error) Result.t Lwt.t
 val get_devices_in_placement :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDevicesInPlacementRequest.t ->
         (GetDevicesInPlacementResponse.t,
-          [ `AWS of GetDevicesInPlacementResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetDevicesInPlacementResponse.error) Result.t Lwt.t
 val list_placements :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPlacementsRequest.t ->
-        (ListPlacementsResponse.t,
-          [ `AWS of ListPlacementsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListPlacementsResponse.t, ListPlacementsResponse.error) Result.t
+          Lwt.t
 val list_projects :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListProjectsRequest.t ->
-        (ListProjectsResponse.t,
-          [ `AWS of ListProjectsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListProjectsResponse.t, ListProjectsResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_placement :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePlacementRequest.t ->
-        (UpdatePlacementResponse.t,
-          [ `AWS of UpdatePlacementResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdatePlacementResponse.t, UpdatePlacementResponse.error) Result.t
+          Lwt.t
 val update_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateProjectRequest.t ->
-        (UpdateProjectResponse.t,
-          [ `AWS of UpdateProjectResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateProjectResponse.t, UpdateProjectResponse.error) Result.t Lwt.t

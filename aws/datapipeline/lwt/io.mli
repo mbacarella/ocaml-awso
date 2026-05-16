@@ -4,130 +4,98 @@ val activate_pipeline :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ActivatePipelineInput.t ->
-        (ActivatePipelineOutput.t,
-          [ `AWS of ActivatePipelineOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ActivatePipelineOutput.t, ActivatePipelineOutput.error) Result.t
+          Lwt.t
 val add_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      AddTagsInput.t ->
-        (AddTagsOutput.t,
-          [ `AWS of AddTagsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+      AddTagsInput.t -> (AddTagsOutput.t, AddTagsOutput.error) Result.t Lwt.t
 val create_pipeline :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePipelineInput.t ->
-        (CreatePipelineOutput.t,
-          [ `AWS of CreatePipelineOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreatePipelineOutput.t, CreatePipelineOutput.error) Result.t Lwt.t
 val deactivate_pipeline :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeactivatePipelineInput.t ->
-        (DeactivatePipelineOutput.t,
-          [ `AWS of DeactivatePipelineOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeactivatePipelineOutput.t, DeactivatePipelineOutput.error) Result.t
+          Lwt.t
 val delete_pipeline :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeletePipelineInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeletePipelineInput.t -> (unit, unit) Result.t Lwt.t
 val describe_objects :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeObjectsInput.t ->
-        (DescribeObjectsOutput.t,
-          [ `AWS of DescribeObjectsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeObjectsOutput.t, DescribeObjectsOutput.error) Result.t Lwt.t
 val describe_pipelines :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePipelinesInput.t ->
-        (DescribePipelinesOutput.t,
-          [ `AWS of DescribePipelinesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribePipelinesOutput.t, DescribePipelinesOutput.error) Result.t
+          Lwt.t
 val evaluate_expression :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EvaluateExpressionInput.t ->
-        (EvaluateExpressionOutput.t,
-          [ `AWS of EvaluateExpressionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (EvaluateExpressionOutput.t, EvaluateExpressionOutput.error) Result.t
+          Lwt.t
 val get_pipeline_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPipelineDefinitionInput.t ->
-        (GetPipelineDefinitionOutput.t,
-          [ `AWS of GetPipelineDefinitionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetPipelineDefinitionOutput.t, GetPipelineDefinitionOutput.error)
+          Result.t Lwt.t
 val list_pipelines :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPipelinesInput.t ->
-        (ListPipelinesOutput.t,
-          [ `AWS of ListPipelinesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListPipelinesOutput.t, ListPipelinesOutput.error) Result.t Lwt.t
 val poll_for_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PollForTaskInput.t ->
-        (PollForTaskOutput.t,
-          [ `AWS of PollForTaskOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PollForTaskOutput.t, PollForTaskOutput.error) Result.t Lwt.t
 val put_pipeline_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutPipelineDefinitionInput.t ->
-        (PutPipelineDefinitionOutput.t,
-          [ `AWS of PutPipelineDefinitionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutPipelineDefinitionOutput.t, PutPipelineDefinitionOutput.error)
+          Result.t Lwt.t
 val query_objects :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       QueryObjectsInput.t ->
-        (QueryObjectsOutput.t,
-          [ `AWS of QueryObjectsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (QueryObjectsOutput.t, QueryObjectsOutput.error) Result.t Lwt.t
 val remove_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RemoveTagsInput.t ->
-        (RemoveTagsOutput.t,
-          [ `AWS of RemoveTagsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RemoveTagsOutput.t, RemoveTagsOutput.error) Result.t Lwt.t
 val report_task_progress :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ReportTaskProgressInput.t ->
-        (ReportTaskProgressOutput.t,
-          [ `AWS of ReportTaskProgressOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ReportTaskProgressOutput.t, ReportTaskProgressOutput.error) Result.t
+          Lwt.t
 val report_task_runner_heartbeat :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ReportTaskRunnerHeartbeatInput.t ->
         (ReportTaskRunnerHeartbeatOutput.t,
-          [ `AWS of ReportTaskRunnerHeartbeatOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ReportTaskRunnerHeartbeatOutput.error) Result.t Lwt.t
 val set_status :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      SetStatusInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> SetStatusInput.t -> (unit, unit) Result.t Lwt.t
 val set_task_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SetTaskStatusInput.t ->
-        (SetTaskStatusOutput.t,
-          [ `AWS of SetTaskStatusOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SetTaskStatusOutput.t, SetTaskStatusOutput.error) Result.t Lwt.t
 val validate_pipeline_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ValidatePipelineDefinitionInput.t ->
         (ValidatePipelineDefinitionOutput.t,
-          [ `AWS of ValidatePipelineDefinitionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ValidatePipelineDefinitionOutput.error) Result.t Lwt.t

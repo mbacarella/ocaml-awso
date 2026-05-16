@@ -4,55 +4,42 @@ val describe_report_creation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeReportCreationInput.t ->
-        (DescribeReportCreationOutput.t,
-          [ `AWS of DescribeReportCreationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeReportCreationOutput.t, DescribeReportCreationOutput.error)
+          Result.t Lwt.t
 val get_compliance_summary :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetComplianceSummaryInput.t ->
-        (GetComplianceSummaryOutput.t,
-          [ `AWS of GetComplianceSummaryOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetComplianceSummaryOutput.t, GetComplianceSummaryOutput.error)
+          Result.t Lwt.t
 val get_resources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetResourcesInput.t ->
-        (GetResourcesOutput.t,
-          [ `AWS of GetResourcesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetResourcesOutput.t, GetResourcesOutput.error) Result.t Lwt.t
 val get_tag_keys :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTagKeysInput.t ->
-        (GetTagKeysOutput.t,
-          [ `AWS of GetTagKeysOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetTagKeysOutput.t, GetTagKeysOutput.error) Result.t Lwt.t
 val get_tag_values :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTagValuesInput.t ->
-        (GetTagValuesOutput.t,
-          [ `AWS of GetTagValuesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetTagValuesOutput.t, GetTagValuesOutput.error) Result.t Lwt.t
 val start_report_creation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartReportCreationInput.t ->
-        (StartReportCreationOutput.t,
-          [ `AWS of StartReportCreationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartReportCreationOutput.t, StartReportCreationOutput.error)
+          Result.t Lwt.t
 val tag_resources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourcesInput.t ->
-        (TagResourcesOutput.t,
-          [ `AWS of TagResourcesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourcesOutput.t, TagResourcesOutput.error) Result.t Lwt.t
 val untag_resources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourcesInput.t ->
-        (UntagResourcesOutput.t,
-          [ `AWS of UntagResourcesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourcesOutput.t, UntagResourcesOutput.error) Result.t Lwt.t

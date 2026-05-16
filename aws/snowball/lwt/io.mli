@@ -4,174 +4,135 @@ val cancel_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelClusterRequest.t ->
-        (CancelClusterResult.t,
-          [ `AWS of CancelClusterResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CancelClusterResult.t, CancelClusterResult.error) Result.t Lwt.t
 val cancel_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelJobRequest.t ->
-        (CancelJobResult.t,
-          [ `AWS of CancelJobResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CancelJobResult.t, CancelJobResult.error) Result.t Lwt.t
 val create_address :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAddressRequest.t ->
-        (CreateAddressResult.t,
-          [ `AWS of CreateAddressResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateAddressResult.t, CreateAddressResult.error) Result.t Lwt.t
 val create_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateClusterRequest.t ->
-        (CreateClusterResult.t,
-          [ `AWS of CreateClusterResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateClusterResult.t, CreateClusterResult.error) Result.t Lwt.t
 val create_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateJobRequest.t ->
-        (CreateJobResult.t,
-          [ `AWS of CreateJobResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateJobResult.t, CreateJobResult.error) Result.t Lwt.t
 val create_long_term_pricing :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateLongTermPricingRequest.t ->
-        (CreateLongTermPricingResult.t,
-          [ `AWS of CreateLongTermPricingResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateLongTermPricingResult.t, CreateLongTermPricingResult.error)
+          Result.t Lwt.t
 val create_return_shipping_label :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateReturnShippingLabelRequest.t ->
         (CreateReturnShippingLabelResult.t,
-          [ `AWS of CreateReturnShippingLabelResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateReturnShippingLabelResult.error) Result.t Lwt.t
 val describe_address :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAddressRequest.t ->
-        (DescribeAddressResult.t,
-          [ `AWS of DescribeAddressResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeAddressResult.t, DescribeAddressResult.error) Result.t Lwt.t
 val describe_addresses :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAddressesRequest.t ->
-        (DescribeAddressesResult.t,
-          [ `AWS of DescribeAddressesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeAddressesResult.t, DescribeAddressesResult.error) Result.t
+          Lwt.t
 val describe_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeClusterRequest.t ->
-        (DescribeClusterResult.t,
-          [ `AWS of DescribeClusterResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeClusterResult.t, DescribeClusterResult.error) Result.t Lwt.t
 val describe_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeJobRequest.t ->
-        (DescribeJobResult.t,
-          [ `AWS of DescribeJobResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeJobResult.t, DescribeJobResult.error) Result.t Lwt.t
 val describe_return_shipping_label :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeReturnShippingLabelRequest.t ->
         (DescribeReturnShippingLabelResult.t,
-          [ `AWS of DescribeReturnShippingLabelResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeReturnShippingLabelResult.error) Result.t Lwt.t
 val get_job_manifest :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetJobManifestRequest.t ->
-        (GetJobManifestResult.t,
-          [ `AWS of GetJobManifestResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetJobManifestResult.t, GetJobManifestResult.error) Result.t Lwt.t
 val get_job_unlock_code :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetJobUnlockCodeRequest.t ->
-        (GetJobUnlockCodeResult.t,
-          [ `AWS of GetJobUnlockCodeResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetJobUnlockCodeResult.t, GetJobUnlockCodeResult.error) Result.t
+          Lwt.t
 val get_snowball_usage :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSnowballUsageRequest.t ->
-        (GetSnowballUsageResult.t,
-          [ `AWS of GetSnowballUsageResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetSnowballUsageResult.t, GetSnowballUsageResult.error) Result.t
+          Lwt.t
 val get_software_updates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSoftwareUpdatesRequest.t ->
-        (GetSoftwareUpdatesResult.t,
-          [ `AWS of GetSoftwareUpdatesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetSoftwareUpdatesResult.t, GetSoftwareUpdatesResult.error) Result.t
+          Lwt.t
 val list_cluster_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListClusterJobsRequest.t ->
-        (ListClusterJobsResult.t,
-          [ `AWS of ListClusterJobsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListClusterJobsResult.t, ListClusterJobsResult.error) Result.t Lwt.t
 val list_clusters :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListClustersRequest.t ->
-        (ListClustersResult.t,
-          [ `AWS of ListClustersResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListClustersResult.t, ListClustersResult.error) Result.t Lwt.t
 val list_compatible_images :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCompatibleImagesRequest.t ->
-        (ListCompatibleImagesResult.t,
-          [ `AWS of ListCompatibleImagesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListCompatibleImagesResult.t, ListCompatibleImagesResult.error)
+          Result.t Lwt.t
 val list_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListJobsRequest.t ->
-        (ListJobsResult.t,
-          [ `AWS of ListJobsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListJobsResult.t, ListJobsResult.error) Result.t Lwt.t
 val list_long_term_pricing :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListLongTermPricingRequest.t ->
-        (ListLongTermPricingResult.t,
-          [ `AWS of ListLongTermPricingResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListLongTermPricingResult.t, ListLongTermPricingResult.error)
+          Result.t Lwt.t
 val update_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateClusterRequest.t ->
-        (UpdateClusterResult.t,
-          [ `AWS of UpdateClusterResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateClusterResult.t, UpdateClusterResult.error) Result.t Lwt.t
 val update_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateJobRequest.t ->
-        (UpdateJobResult.t,
-          [ `AWS of UpdateJobResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateJobResult.t, UpdateJobResult.error) Result.t Lwt.t
 val update_job_shipment_state :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateJobShipmentStateRequest.t ->
-        (UpdateJobShipmentStateResult.t,
-          [ `AWS of UpdateJobShipmentStateResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateJobShipmentStateResult.t, UpdateJobShipmentStateResult.error)
+          Result.t Lwt.t
 val update_long_term_pricing :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateLongTermPricingRequest.t ->
-        (UpdateLongTermPricingResult.t,
-          [ `AWS of UpdateLongTermPricingResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateLongTermPricingResult.t, UpdateLongTermPricingResult.error)
+          Result.t Lwt.t

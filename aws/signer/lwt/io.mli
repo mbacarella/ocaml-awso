@@ -4,115 +4,93 @@ val add_profile_permission :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AddProfilePermissionRequest.t ->
-        (AddProfilePermissionResponse.t,
-          [ `AWS of AddProfilePermissionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AddProfilePermissionResponse.t, AddProfilePermissionResponse.error)
+          Result.t Lwt.t
 val cancel_signing_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      CancelSigningProfileRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      CancelSigningProfileRequest.t -> (unit, unit) Result.t Lwt.t
 val describe_signing_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSigningJobRequest.t ->
-        (DescribeSigningJobResponse.t,
-          [ `AWS of DescribeSigningJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeSigningJobResponse.t, DescribeSigningJobResponse.error)
+          Result.t Lwt.t
 val get_signing_platform :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSigningPlatformRequest.t ->
-        (GetSigningPlatformResponse.t,
-          [ `AWS of GetSigningPlatformResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetSigningPlatformResponse.t, GetSigningPlatformResponse.error)
+          Result.t Lwt.t
 val get_signing_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSigningProfileRequest.t ->
-        (GetSigningProfileResponse.t,
-          [ `AWS of GetSigningProfileResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetSigningProfileResponse.t, GetSigningProfileResponse.error)
+          Result.t Lwt.t
 val list_profile_permissions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListProfilePermissionsRequest.t ->
         (ListProfilePermissionsResponse.t,
-          [ `AWS of ListProfilePermissionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListProfilePermissionsResponse.error) Result.t Lwt.t
 val list_signing_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSigningJobsRequest.t ->
-        (ListSigningJobsResponse.t,
-          [ `AWS of ListSigningJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListSigningJobsResponse.t, ListSigningJobsResponse.error) Result.t
+          Lwt.t
 val list_signing_platforms :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSigningPlatformsRequest.t ->
-        (ListSigningPlatformsResponse.t,
-          [ `AWS of ListSigningPlatformsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListSigningPlatformsResponse.t, ListSigningPlatformsResponse.error)
+          Result.t Lwt.t
 val list_signing_profiles :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSigningProfilesRequest.t ->
-        (ListSigningProfilesResponse.t,
-          [ `AWS of ListSigningProfilesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListSigningProfilesResponse.t, ListSigningProfilesResponse.error)
+          Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val put_signing_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutSigningProfileRequest.t ->
-        (PutSigningProfileResponse.t,
-          [ `AWS of PutSigningProfileResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutSigningProfileResponse.t, PutSigningProfileResponse.error)
+          Result.t Lwt.t
 val remove_profile_permission :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RemoveProfilePermissionRequest.t ->
         (RemoveProfilePermissionResponse.t,
-          [ `AWS of RemoveProfilePermissionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          RemoveProfilePermissionResponse.error) Result.t Lwt.t
 val revoke_signature :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      RevokeSignatureRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      RevokeSignatureRequest.t -> (unit, unit) Result.t Lwt.t
 val revoke_signing_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      RevokeSigningProfileRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      RevokeSigningProfileRequest.t -> (unit, unit) Result.t Lwt.t
 val start_signing_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartSigningJobRequest.t ->
-        (StartSigningJobResponse.t,
-          [ `AWS of StartSigningJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartSigningJobResponse.t, StartSigningJobResponse.error) Result.t
+          Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t

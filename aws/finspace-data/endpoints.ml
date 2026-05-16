@@ -495,187 +495,172 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpdatePermissionGroup -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateUser -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | CreateChangeset ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateChangesetResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateChangesetResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateChangesetResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateChangesetResponse.error_of_json))
   | CreateDataView ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateDataViewResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateDataViewResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateDataViewResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateDataViewResponse.error_of_json))
   | CreateDataset ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateDatasetResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateDatasetResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateDatasetResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateDatasetResponse.error_of_json))
   | CreatePermissionGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreatePermissionGroupResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreatePermissionGroupResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreatePermissionGroupResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreatePermissionGroupResponse.error_of_json))
   | CreateUser ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateUserResponse.error_of_json)
-       | Ok resp -> Ok (CreateUserResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateUserResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateUserResponse.error_of_json))
   | DeleteDataset ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteDatasetResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteDatasetResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteDatasetResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteDatasetResponse.error_of_json))
   | DeletePermissionGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeletePermissionGroupResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeletePermissionGroupResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeletePermissionGroupResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeletePermissionGroupResponse.error_of_json))
   | DisableUser ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DisableUserResponse.error_of_json)
-       | Ok resp -> Ok (DisableUserResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DisableUserResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DisableUserResponse.error_of_json))
   | EnableUser ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some EnableUserResponse.error_of_json)
-       | Ok resp -> Ok (EnableUserResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (EnableUserResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some EnableUserResponse.error_of_json))
   | GetChangeset ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetChangesetResponse.error_of_json)
-       | Ok resp -> Ok (GetChangesetResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetChangesetResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetChangesetResponse.error_of_json))
   | GetDataView ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetDataViewResponse.error_of_json)
-       | Ok resp -> Ok (GetDataViewResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetDataViewResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetDataViewResponse.error_of_json))
   | GetDataset ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetDatasetResponse.error_of_json)
-       | Ok resp -> Ok (GetDatasetResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetDatasetResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetDatasetResponse.error_of_json))
   | GetProgrammaticAccessCredentials ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetProgrammaticAccessCredentialsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetProgrammaticAccessCredentialsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetProgrammaticAccessCredentialsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetProgrammaticAccessCredentialsResponse.error_of_json))
   | GetUser ->
-      (match resp with
-       | Error err -> handle_error err (Some GetUserResponse.error_of_json)
-       | Ok resp -> Ok (GetUserResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetUserResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetUserResponse.error_of_json))
   | GetWorkingLocation ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetWorkingLocationResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetWorkingLocationResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetWorkingLocationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetWorkingLocationResponse.error_of_json))
   | ListChangesets ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListChangesetsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListChangesetsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListChangesetsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListChangesetsResponse.error_of_json))
   | ListDataViews ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListDataViewsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListDataViewsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListDataViewsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListDataViewsResponse.error_of_json))
   | ListDatasets ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListDatasetsResponse.error_of_json)
-       | Ok resp -> Ok (ListDatasetsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListDatasetsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListDatasetsResponse.error_of_json))
   | ListPermissionGroups ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListPermissionGroupsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListPermissionGroupsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListPermissionGroupsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListPermissionGroupsResponse.error_of_json))
   | ListUsers ->
-      (match resp with
-       | Error err -> handle_error err (Some ListUsersResponse.error_of_json)
-       | Ok resp -> Ok (ListUsersResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListUsersResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListUsersResponse.error_of_json))
   | ResetUserPassword ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ResetUserPasswordResponse.error_of_json)
-       | Ok resp ->
-           Ok (ResetUserPasswordResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ResetUserPasswordResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ResetUserPasswordResponse.error_of_json))
   | UpdateChangeset ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateChangesetResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateChangesetResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateChangesetResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateChangesetResponse.error_of_json))
   | UpdateDataset ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateDatasetResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateDatasetResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateDatasetResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateDatasetResponse.error_of_json))
   | UpdatePermissionGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdatePermissionGroupResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdatePermissionGroupResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdatePermissionGroupResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdatePermissionGroupResponse.error_of_json))
   | UpdateUser ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateUserResponse.error_of_json)
-       | Ok resp -> Ok (UpdateUserResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateUserResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateUserResponse.error_of_json))

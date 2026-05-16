@@ -4,6 +4,4 @@ val get_entitlements :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEntitlementsRequest.t ->
-        (GetEntitlementsResult.t,
-          [ `AWS of GetEntitlementsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetEntitlementsResult.t, GetEntitlementsResult.error) Result.t Lwt.t

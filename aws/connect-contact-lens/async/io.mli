@@ -5,6 +5,5 @@ val list_realtime_contact_analysis_segments :
     ?cfg:Awso.Cfg.t ->
       ListRealtimeContactAnalysisSegmentsRequest.t ->
         (ListRealtimeContactAnalysisSegmentsResponse.t,
-          [ `AWS of ListRealtimeContactAnalysisSegmentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListRealtimeContactAnalysisSegmentsResponse.error) Result.t
           Async.Deferred.t

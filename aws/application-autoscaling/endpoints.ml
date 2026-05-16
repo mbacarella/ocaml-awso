@@ -139,101 +139,110 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target", "AnyScaleFrontendService.RegisterScalableTarget")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    let generic_error () = Error (`Transport err) in
-    match err with
-    | `Too_many_redirects -> generic_error ()
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-        (match (error_of_json, ((code >= 400) && (code <= 599))) with
-         | (Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             (match json |> (Yojson.Safe.Util.member "__type") with
-              | `String error_type ->
-                  Error (`AWS (error_of_json error_type json))
-              | `Null -> generic_error ()
-              | _ ->
-                  failwith
-                    (sprintf "Error '__type' did not have string type: %s"
-                       body))
-         | (None, _) | (_, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = None }) in
+    match (error_of_json, ((code >= 400) && (code <= 599))) with
+    | (Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        (match json |> (Yojson.Safe.Util.member "__type") with
+         | `String error_type -> error_of_json error_type json
+         | `Null -> bail ()
+         | _ ->
+             failwith
+               (sprintf "Error '__type' did not have string type: %s" body))
+    | (None, _) | (_, false) -> bail () in
+  let _ = parse_aws_error in
+  let _ = resp in
   match endpoint with
   | DeleteScalingPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteScalingPolicyResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteScalingPolicyResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteScalingPolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteScalingPolicyResponse.error_of_json))
   | DeleteScheduledAction ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteScheduledActionResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteScheduledActionResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteScheduledActionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteScheduledActionResponse.error_of_json))
   | DeregisterScalableTarget ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeregisterScalableTargetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeregisterScalableTargetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeregisterScalableTargetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeregisterScalableTargetResponse.error_of_json))
   | DescribeScalableTargets ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeScalableTargetsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeScalableTargetsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeScalableTargetsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeScalableTargetsResponse.error_of_json))
   | DescribeScalingActivities ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeScalingActivitiesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeScalingActivitiesResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeScalingActivitiesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeScalingActivitiesResponse.error_of_json))
   | DescribeScalingPolicies ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeScalingPoliciesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeScalingPoliciesResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeScalingPoliciesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeScalingPoliciesResponse.error_of_json))
   | DescribeScheduledActions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeScheduledActionsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeScheduledActionsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeScheduledActionsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeScheduledActionsResponse.error_of_json))
   | PutScalingPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutScalingPolicyResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (PutScalingPolicyResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutScalingPolicyResponse.of_json json)
+      else
+        Error (parse_aws_error (Some PutScalingPolicyResponse.error_of_json))
   | PutScheduledAction ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutScheduledActionResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (PutScheduledActionResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutScheduledActionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some PutScheduledActionResponse.error_of_json))
   | RegisterScalableTarget ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some RegisterScalableTargetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (RegisterScalableTargetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (RegisterScalableTargetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some RegisterScalableTargetResponse.error_of_json))

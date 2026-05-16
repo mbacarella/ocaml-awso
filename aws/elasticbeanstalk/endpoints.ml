@@ -827,297 +827,326 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_xml =
-    let generic_error () = Error (`Transport err) in
-    match err with
-    | `Too_many_redirects -> generic_error ()
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-        (match (error_of_xml, ((code >= 400) && (code <= 599))) with
-         | (None, _) | (_, false) -> generic_error ()
-         | (Some error_of_xml, true) ->
-             (match Awso.Xml.parse_response body with
-              | `Data _ -> generic_error ()
-              | `El (((_, "ErrorResponse"), _), _) as error_response_xml ->
-                  let error_xml =
-                    Awso.Xml.child_exn error_response_xml "Error" in
-                  (try
-                     let error_code =
-                       match Awso.Xml.child_exn error_xml "Code" with
-                       | `Data error_code -> error_code
-                       | `El (_, children) ->
-                           (List.map children
-                              ~f:(function | `Data s -> s | `El _ -> ""))
-                             |> (String.concat ~sep:"") in
-                     Error
-                       (`AWS
-                          (error_of_xml (String.strip error_code) error_xml))
-                   with | Failure _ -> generic_error ())
-              | `El _ -> generic_error ())) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let parse_aws_error error_of_xml =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = None }) in
+    match (error_of_xml, ((code >= 400) && (code <= 599))) with
+    | (None, _) | (_, false) -> bail ()
+    | (Some error_of_xml, true) ->
+        (match Awso.Xml.parse_response body with
+         | `Data _ -> bail ()
+         | `El (((_, "ErrorResponse"), _), _) as error_response_xml ->
+             let error_xml = Awso.Xml.child_exn error_response_xml "Error" in
+             (try
+                let error_code =
+                  match Awso.Xml.child_exn error_xml "Code" with
+                  | `Data error_code -> error_code
+                  | `El (_, children) ->
+                      (List.map children
+                         ~f:(function | `Data s -> s | `El _ -> ""))
+                        |> (String.concat ~sep:"") in
+                error_of_xml (String.strip error_code) error_xml
+              with | Failure _ -> bail ())
+         | `El _ -> bail ()) in
+  let _ = parse_aws_error in
+  let _ = resp in
   match endpoint with
-  | AbortEnvironmentUpdate -> Ok ()
+  | AbortEnvironmentUpdate ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | ApplyEnvironmentManagedAction ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ApplyEnvironmentManagedActionResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ApplyEnvironmentManagedActionResult.of_xml xml))
-  | AssociateEnvironmentOperationsRole -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ApplyEnvironmentManagedActionResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ApplyEnvironmentManagedActionResult.error_of_xml))
+  | AssociateEnvironmentOperationsRole ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | CheckDNSAvailability ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CheckDNSAvailabilityResultMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CheckDNSAvailabilityResultMessage.of_xml xml)
+      else Error (parse_aws_error None)
   | ComposeEnvironments ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some EnvironmentDescriptionsMessage.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (EnvironmentDescriptionsMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (EnvironmentDescriptionsMessage.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some EnvironmentDescriptionsMessage.error_of_xml))
   | CreateApplication ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ApplicationDescriptionMessage.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ApplicationDescriptionMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ApplicationDescriptionMessage.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some ApplicationDescriptionMessage.error_of_xml))
   | CreateApplicationVersion ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ApplicationVersionDescriptionMessage.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ApplicationVersionDescriptionMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ApplicationVersionDescriptionMessage.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ApplicationVersionDescriptionMessage.error_of_xml))
   | CreateConfigurationTemplate ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ConfigurationSettingsDescription.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ConfigurationSettingsDescription.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ConfigurationSettingsDescription.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ConfigurationSettingsDescription.error_of_xml))
   | CreateEnvironment ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some EnvironmentDescription.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (EnvironmentDescription.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (EnvironmentDescription.of_xml xml)
+      else Error (parse_aws_error (Some EnvironmentDescription.error_of_xml))
   | CreatePlatformVersion ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreatePlatformVersionResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreatePlatformVersionResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreatePlatformVersionResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some CreatePlatformVersionResult.error_of_xml))
   | CreateStorageLocation ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateStorageLocationResultMessage.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateStorageLocationResultMessage.of_xml xml))
-  | DeleteApplication -> Ok ()
-  | DeleteApplicationVersion -> Ok ()
-  | DeleteConfigurationTemplate -> Ok ()
-  | DeleteEnvironmentConfiguration -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateStorageLocationResultMessage.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateStorageLocationResultMessage.error_of_xml))
+  | DeleteApplication ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteApplicationVersion ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteConfigurationTemplate ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteEnvironmentConfiguration ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeletePlatformVersion ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeletePlatformVersionResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeletePlatformVersionResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeletePlatformVersionResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DeletePlatformVersionResult.error_of_xml))
   | DescribeAccountAttributes ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeAccountAttributesResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeAccountAttributesResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeAccountAttributesResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAccountAttributesResult.error_of_xml))
   | DescribeApplicationVersions ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ApplicationVersionDescriptionsMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ApplicationVersionDescriptionsMessage.of_xml xml)
+      else Error (parse_aws_error None)
   | DescribeApplications ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ApplicationDescriptionsMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ApplicationDescriptionsMessage.of_xml xml)
+      else Error (parse_aws_error None)
   | DescribeConfigurationOptions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ConfigurationOptionsDescription.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ConfigurationOptionsDescription.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ConfigurationOptionsDescription.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ConfigurationOptionsDescription.error_of_xml))
   | DescribeConfigurationSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ConfigurationSettingsDescriptions.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ConfigurationSettingsDescriptions.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ConfigurationSettingsDescriptions.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ConfigurationSettingsDescriptions.error_of_xml))
   | DescribeEnvironmentHealth ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeEnvironmentHealthResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeEnvironmentHealthResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeEnvironmentHealthResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeEnvironmentHealthResult.error_of_xml))
   | DescribeEnvironmentManagedActionHistory ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeEnvironmentManagedActionHistoryResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeEnvironmentManagedActionHistoryResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeEnvironmentManagedActionHistoryResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeEnvironmentManagedActionHistoryResult.error_of_xml))
   | DescribeEnvironmentManagedActions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeEnvironmentManagedActionsResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeEnvironmentManagedActionsResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeEnvironmentManagedActionsResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeEnvironmentManagedActionsResult.error_of_xml))
   | DescribeEnvironmentResources ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some EnvironmentResourceDescriptionsMessage.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (EnvironmentResourceDescriptionsMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (EnvironmentResourceDescriptionsMessage.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some EnvironmentResourceDescriptionsMessage.error_of_xml))
   | DescribeEnvironments ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (EnvironmentDescriptionsMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (EnvironmentDescriptionsMessage.of_xml xml)
+      else Error (parse_aws_error None)
   | DescribeEvents ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (EventDescriptionsMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (EventDescriptionsMessage.of_xml xml)
+      else Error (parse_aws_error None)
   | DescribeInstancesHealth ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeInstancesHealthResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeInstancesHealthResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeInstancesHealthResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DescribeInstancesHealthResult.error_of_xml))
   | DescribePlatformVersion ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribePlatformVersionResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribePlatformVersionResult.of_xml xml))
-  | DisassociateEnvironmentOperationsRole -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribePlatformVersionResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DescribePlatformVersionResult.error_of_xml))
+  | DisassociateEnvironmentOperationsRole ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | ListAvailableSolutionStacks ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListAvailableSolutionStacksResultMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListAvailableSolutionStacksResultMessage.of_xml xml)
+      else Error (parse_aws_error None)
   | ListPlatformBranches ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListPlatformBranchesResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListPlatformBranchesResult.of_xml xml)
+      else Error (parse_aws_error None)
   | ListPlatformVersions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListPlatformVersionsResult.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListPlatformVersionsResult.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListPlatformVersionsResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some ListPlatformVersionsResult.error_of_xml))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ResourceTagsDescriptionMessage.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ResourceTagsDescriptionMessage.of_xml xml))
-  | RebuildEnvironment -> Ok ()
-  | RequestEnvironmentInfo -> Ok ()
-  | RestartAppServer -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ResourceTagsDescriptionMessage.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some ResourceTagsDescriptionMessage.error_of_xml))
+  | RebuildEnvironment ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | RequestEnvironmentInfo ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | RestartAppServer ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | RetrieveEnvironmentInfo ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (RetrieveEnvironmentInfoResultMessage.of_xml xml))
-  | SwapEnvironmentCNAMEs -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (RetrieveEnvironmentInfoResultMessage.of_xml xml)
+      else Error (parse_aws_error None)
+  | SwapEnvironmentCNAMEs ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | TerminateEnvironment ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some EnvironmentDescription.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (EnvironmentDescription.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (EnvironmentDescription.of_xml xml)
+      else Error (parse_aws_error (Some EnvironmentDescription.error_of_xml))
   | UpdateApplication ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ApplicationDescriptionMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ApplicationDescriptionMessage.of_xml xml)
+      else Error (parse_aws_error None)
   | UpdateApplicationResourceLifecycle ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ApplicationResourceLifecycleDescriptionMessage.of_xml xml)
+      else
+        Error
+          (parse_aws_error
              (Some
-                ApplicationResourceLifecycleDescriptionMessage.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ApplicationResourceLifecycleDescriptionMessage.of_xml xml))
+                ApplicationResourceLifecycleDescriptionMessage.error_of_xml))
   | UpdateApplicationVersion ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ApplicationVersionDescriptionMessage.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ApplicationVersionDescriptionMessage.of_xml xml)
+      else Error (parse_aws_error None)
   | UpdateConfigurationTemplate ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ConfigurationSettingsDescription.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ConfigurationSettingsDescription.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ConfigurationSettingsDescription.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ConfigurationSettingsDescription.error_of_xml))
   | UpdateEnvironment ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some EnvironmentDescription.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (EnvironmentDescription.of_xml xml))
-  | UpdateTagsForResource -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (EnvironmentDescription.of_xml xml)
+      else Error (parse_aws_error (Some EnvironmentDescription.error_of_xml))
+  | UpdateTagsForResource ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | ValidateConfigurationSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ConfigurationSettingsValidationMessages.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ConfigurationSettingsValidationMessages.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ConfigurationSettingsValidationMessages.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ConfigurationSettingsValidationMessages.error_of_xml))

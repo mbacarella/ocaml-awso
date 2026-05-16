@@ -296,163 +296,168 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             "AWSLookoutEquipmentFrontendService.UpdateInferenceScheduler")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    let generic_error () = Error (`Transport err) in
-    match err with
-    | `Too_many_redirects -> generic_error ()
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-        (match (error_of_json, ((code >= 400) && (code <= 599))) with
-         | (Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             (match json |> (Yojson.Safe.Util.member "__type") with
-              | `String error_type ->
-                  Error (`AWS (error_of_json error_type json))
-              | `Null -> generic_error ()
-              | _ ->
-                  failwith
-                    (sprintf "Error '__type' did not have string type: %s"
-                       body))
-         | (None, _) | (_, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = None }) in
+    match (error_of_json, ((code >= 400) && (code <= 599))) with
+    | (Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        (match json |> (Yojson.Safe.Util.member "__type") with
+         | `String error_type -> error_of_json error_type json
+         | `Null -> bail ()
+         | _ ->
+             failwith
+               (sprintf "Error '__type' did not have string type: %s" body))
+    | (None, _) | (_, false) -> bail () in
+  let _ = parse_aws_error in
+  let _ = resp in
   match endpoint with
   | CreateDataset ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateDatasetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateDatasetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateDatasetResponse.of_json json)
+      else Error (parse_aws_error (Some CreateDatasetResponse.error_of_json))
   | CreateInferenceScheduler ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateInferenceSchedulerResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateInferenceSchedulerResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateInferenceSchedulerResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateInferenceSchedulerResponse.error_of_json))
   | CreateModel ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateModelResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateModelResponse.of_json json))
-  | DeleteDataset -> Ok ()
-  | DeleteInferenceScheduler -> Ok ()
-  | DeleteModel -> Ok ()
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateModelResponse.of_json json)
+      else Error (parse_aws_error (Some CreateModelResponse.error_of_json))
+  | DeleteDataset ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteInferenceScheduler ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteModel -> if is_success then Ok () else Error (parse_aws_error None)
   | DescribeDataIngestionJob ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeDataIngestionJobResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeDataIngestionJobResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeDataIngestionJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeDataIngestionJobResponse.error_of_json))
   | DescribeDataset ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeDatasetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeDatasetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeDatasetResponse.of_json json)
+      else
+        Error (parse_aws_error (Some DescribeDatasetResponse.error_of_json))
   | DescribeInferenceScheduler ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeInferenceSchedulerResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeInferenceSchedulerResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeInferenceSchedulerResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeInferenceSchedulerResponse.error_of_json))
   | DescribeModel ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeModelResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeModelResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeModelResponse.of_json json)
+      else Error (parse_aws_error (Some DescribeModelResponse.error_of_json))
   | ListDataIngestionJobs ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListDataIngestionJobsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListDataIngestionJobsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListDataIngestionJobsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListDataIngestionJobsResponse.error_of_json))
   | ListDatasets ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListDatasetsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListDatasetsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListDatasetsResponse.of_json json)
+      else Error (parse_aws_error (Some ListDatasetsResponse.error_of_json))
   | ListInferenceExecutions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListInferenceExecutionsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListInferenceExecutionsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListInferenceExecutionsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListInferenceExecutionsResponse.error_of_json))
   | ListInferenceSchedulers ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListInferenceSchedulersResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListInferenceSchedulersResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListInferenceSchedulersResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListInferenceSchedulersResponse.error_of_json))
   | ListModels ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListModelsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListModelsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListModelsResponse.of_json json)
+      else Error (parse_aws_error (Some ListModelsResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListTagsForResourceResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListTagsForResourceResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | StartDataIngestionJob ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some StartDataIngestionJobResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (StartDataIngestionJobResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartDataIngestionJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some StartDataIngestionJobResponse.error_of_json))
   | StartInferenceScheduler ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some StartInferenceSchedulerResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (StartInferenceSchedulerResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartInferenceSchedulerResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StartInferenceSchedulerResponse.error_of_json))
   | StopInferenceScheduler ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some StopInferenceSchedulerResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (StopInferenceSchedulerResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StopInferenceSchedulerResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StopInferenceSchedulerResponse.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (TagResourceResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (TagResourceResponse.of_json json)
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UntagResourceResponse.of_json json))
-  | UpdateInferenceScheduler -> Ok ()
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UntagResourceResponse.of_json json)
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
+  | UpdateInferenceScheduler ->
+      if is_success then Ok () else Error (parse_aws_error None)

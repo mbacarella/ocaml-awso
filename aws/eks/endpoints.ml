@@ -849,266 +849,255 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | AssociateEncryptionConfig ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some AssociateEncryptionConfigResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (AssociateEncryptionConfigResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (AssociateEncryptionConfigResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some AssociateEncryptionConfigResponse.error_of_json))
   | AssociateIdentityProviderConfig ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some AssociateIdentityProviderConfigResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (AssociateIdentityProviderConfigResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (AssociateIdentityProviderConfigResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some AssociateIdentityProviderConfigResponse.error_of_json))
   | CreateAddon ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateAddonResponse.error_of_json)
-       | Ok resp -> Ok (CreateAddonResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateAddonResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateAddonResponse.error_of_json))
   | CreateCluster ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateClusterResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateClusterResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateClusterResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateClusterResponse.error_of_json))
   | CreateFargateProfile ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateFargateProfileResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateFargateProfileResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateFargateProfileResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateFargateProfileResponse.error_of_json))
   | CreateNodegroup ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateNodegroupResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateNodegroupResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateNodegroupResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateNodegroupResponse.error_of_json))
   | DeleteAddon ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteAddonResponse.error_of_json)
-       | Ok resp -> Ok (DeleteAddonResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteAddonResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteAddonResponse.error_of_json))
   | DeleteCluster ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteClusterResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteClusterResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteClusterResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteClusterResponse.error_of_json))
   | DeleteFargateProfile ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteFargateProfileResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteFargateProfileResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteFargateProfileResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteFargateProfileResponse.error_of_json))
   | DeleteNodegroup ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteNodegroupResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteNodegroupResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteNodegroupResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DeleteNodegroupResponse.error_of_json))
   | DeregisterCluster ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeregisterClusterResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeregisterClusterResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeregisterClusterResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeregisterClusterResponse.error_of_json))
   | DescribeAddon ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeAddonResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeAddonResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeAddonResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DescribeAddonResponse.error_of_json))
   | DescribeAddonVersions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeAddonVersionsResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeAddonVersionsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeAddonVersionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeAddonVersionsResponse.error_of_json))
   | DescribeCluster ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeClusterResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeClusterResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeClusterResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeClusterResponse.error_of_json))
   | DescribeFargateProfile ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeFargateProfileResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeFargateProfileResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (DescribeFargateProfileResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeFargateProfileResponse.error_of_json))
   | DescribeIdentityProviderConfig ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeIdentityProviderConfigResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeIdentityProviderConfigResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeIdentityProviderConfigResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeIdentityProviderConfigResponse.error_of_json))
   | DescribeNodegroup ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeNodegroupResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeNodegroupResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeNodegroupResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeNodegroupResponse.error_of_json))
   | DescribeUpdate ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeUpdateResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeUpdateResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeUpdateResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeUpdateResponse.error_of_json))
   | DisassociateIdentityProviderConfig ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DisassociateIdentityProviderConfigResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DisassociateIdentityProviderConfigResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DisassociateIdentityProviderConfigResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DisassociateIdentityProviderConfigResponse.error_of_json))
   | ListAddons ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListAddonsResponse.error_of_json)
-       | Ok resp -> Ok (ListAddonsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListAddonsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListAddonsResponse.error_of_json))
   | ListClusters ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListClustersResponse.error_of_json)
-       | Ok resp -> Ok (ListClustersResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListClustersResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListClustersResponse.error_of_json))
   | ListFargateProfiles ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListFargateProfilesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListFargateProfilesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListFargateProfilesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListFargateProfilesResponse.error_of_json))
   | ListIdentityProviderConfigs ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListIdentityProviderConfigsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListIdentityProviderConfigsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListIdentityProviderConfigsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListIdentityProviderConfigsResponse.error_of_json))
   | ListNodegroups ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListNodegroupsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListNodegroupsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListNodegroupsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListNodegroupsResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | ListUpdates ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListUpdatesResponse.error_of_json)
-       | Ok resp -> Ok (ListUpdatesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListUpdatesResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListUpdatesResponse.error_of_json))
   | RegisterCluster ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RegisterClusterResponse.error_of_json)
-       | Ok resp ->
-           Ok (RegisterClusterResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (RegisterClusterResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some RegisterClusterResponse.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UntagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateAddon ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateAddonResponse.error_of_json)
-       | Ok resp -> Ok (UpdateAddonResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateAddonResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateAddonResponse.error_of_json))
   | UpdateClusterConfig ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateClusterConfigResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateClusterConfigResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateClusterConfigResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateClusterConfigResponse.error_of_json))
   | UpdateClusterVersion ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateClusterVersionResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateClusterVersionResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateClusterVersionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateClusterVersionResponse.error_of_json))
   | UpdateNodegroupConfig ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateNodegroupConfigResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateNodegroupConfigResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateNodegroupConfigResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateNodegroupConfigResponse.error_of_json))
   | UpdateNodegroupVersion ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateNodegroupVersionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateNodegroupVersionResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (UpdateNodegroupVersionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateNodegroupVersionResponse.error_of_json))

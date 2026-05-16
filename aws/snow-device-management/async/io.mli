@@ -4,99 +4,72 @@ val cancel_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelTaskInput.t ->
-        (CancelTaskOutput.t,
-          [ `AWS of CancelTaskOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CancelTaskOutput.t, CancelTaskOutput.error) Result.t
           Async.Deferred.t
 val create_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTaskInput.t ->
-        (CreateTaskOutput.t,
-          [ `AWS of CreateTaskOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateTaskOutput.t, CreateTaskOutput.error) Result.t
           Async.Deferred.t
 val describe_device :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDeviceInput.t ->
-        (DescribeDeviceOutput.t,
-          [ `AWS of DescribeDeviceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeDeviceOutput.t, DescribeDeviceOutput.error) Result.t
           Async.Deferred.t
 val describe_device_ec2_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDeviceEc2Input.t ->
-        (DescribeDeviceEc2Output.t,
-          [ `AWS of DescribeDeviceEc2Output.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeDeviceEc2Output.t, DescribeDeviceEc2Output.error) Result.t
           Async.Deferred.t
 val describe_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeExecutionInput.t ->
-        (DescribeExecutionOutput.t,
-          [ `AWS of DescribeExecutionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeExecutionOutput.t, DescribeExecutionOutput.error) Result.t
           Async.Deferred.t
 val describe_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTaskInput.t ->
-        (DescribeTaskOutput.t,
-          [ `AWS of DescribeTaskOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeTaskOutput.t, DescribeTaskOutput.error) Result.t
           Async.Deferred.t
 val list_device_resources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDeviceResourcesInput.t ->
-        (ListDeviceResourcesOutput.t,
-          [ `AWS of ListDeviceResourcesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListDeviceResourcesOutput.t, ListDeviceResourcesOutput.error)
+          Result.t Async.Deferred.t
 val list_devices :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDevicesInput.t ->
-        (ListDevicesOutput.t,
-          [ `AWS of ListDevicesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListDevicesOutput.t, ListDevicesOutput.error) Result.t
           Async.Deferred.t
 val list_executions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListExecutionsInput.t ->
-        (ListExecutionsOutput.t,
-          [ `AWS of ListExecutionsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListExecutionsOutput.t, ListExecutionsOutput.error) Result.t
           Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceInput.t ->
-        (ListTagsForResourceOutput.t,
-          [ `AWS of ListTagsForResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceOutput.t, ListTagsForResourceOutput.error)
+          Result.t Async.Deferred.t
 val list_tasks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTasksInput.t ->
-        (ListTasksOutput.t,
-          [ `AWS of ListTasksOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTasksOutput.t, ListTasksOutput.error) Result.t Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      TagResourceInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      TagResourceInput.t -> (unit, unit) Result.t Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UntagResourceInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      UntagResourceInput.t -> (unit, unit) Result.t Async.Deferred.t

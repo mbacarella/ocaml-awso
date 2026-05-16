@@ -5,318 +5,262 @@ val add_custom_routing_endpoints :
     ?cfg:Awso.Cfg.t ->
       AddCustomRoutingEndpointsRequest.t ->
         (AddCustomRoutingEndpointsResponse.t,
-          [ `AWS of AddCustomRoutingEndpointsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AddCustomRoutingEndpointsResponse.error) Result.t Lwt.t
 val advertise_byoip_cidr :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AdvertiseByoipCidrRequest.t ->
-        (AdvertiseByoipCidrResponse.t,
-          [ `AWS of AdvertiseByoipCidrResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AdvertiseByoipCidrResponse.t, AdvertiseByoipCidrResponse.error)
+          Result.t Lwt.t
 val allow_custom_routing_traffic :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      AllowCustomRoutingTrafficRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      AllowCustomRoutingTrafficRequest.t -> (unit, unit) Result.t Lwt.t
 val create_accelerator :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAcceleratorRequest.t ->
-        (CreateAcceleratorResponse.t,
-          [ `AWS of CreateAcceleratorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateAcceleratorResponse.t, CreateAcceleratorResponse.error)
+          Result.t Lwt.t
 val create_custom_routing_accelerator :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateCustomRoutingAcceleratorRequest.t ->
         (CreateCustomRoutingAcceleratorResponse.t,
-          [ `AWS of CreateCustomRoutingAcceleratorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateCustomRoutingAcceleratorResponse.error) Result.t Lwt.t
 val create_custom_routing_endpoint_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateCustomRoutingEndpointGroupRequest.t ->
         (CreateCustomRoutingEndpointGroupResponse.t,
-          [ `AWS of CreateCustomRoutingEndpointGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateCustomRoutingEndpointGroupResponse.error) Result.t Lwt.t
 val create_custom_routing_listener :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateCustomRoutingListenerRequest.t ->
         (CreateCustomRoutingListenerResponse.t,
-          [ `AWS of CreateCustomRoutingListenerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateCustomRoutingListenerResponse.error) Result.t Lwt.t
 val create_endpoint_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateEndpointGroupRequest.t ->
-        (CreateEndpointGroupResponse.t,
-          [ `AWS of CreateEndpointGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateEndpointGroupResponse.t, CreateEndpointGroupResponse.error)
+          Result.t Lwt.t
 val create_listener :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateListenerRequest.t ->
-        (CreateListenerResponse.t,
-          [ `AWS of CreateListenerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateListenerResponse.t, CreateListenerResponse.error) Result.t
+          Lwt.t
 val delete_accelerator :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteAcceleratorRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteAcceleratorRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_custom_routing_accelerator :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteCustomRoutingAcceleratorRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteCustomRoutingAcceleratorRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_custom_routing_endpoint_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteCustomRoutingEndpointGroupRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+        (unit, unit) Result.t Lwt.t
 val delete_custom_routing_listener :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteCustomRoutingListenerRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteCustomRoutingListenerRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_endpoint_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteEndpointGroupRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteEndpointGroupRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_listener :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteListenerRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteListenerRequest.t -> (unit, unit) Result.t Lwt.t
 val deny_custom_routing_traffic :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DenyCustomRoutingTrafficRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DenyCustomRoutingTrafficRequest.t -> (unit, unit) Result.t Lwt.t
 val deprovision_byoip_cidr :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeprovisionByoipCidrRequest.t ->
-        (DeprovisionByoipCidrResponse.t,
-          [ `AWS of DeprovisionByoipCidrResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeprovisionByoipCidrResponse.t, DeprovisionByoipCidrResponse.error)
+          Result.t Lwt.t
 val describe_accelerator :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAcceleratorRequest.t ->
-        (DescribeAcceleratorResponse.t,
-          [ `AWS of DescribeAcceleratorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeAcceleratorResponse.t, DescribeAcceleratorResponse.error)
+          Result.t Lwt.t
 val describe_accelerator_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAcceleratorAttributesRequest.t ->
         (DescribeAcceleratorAttributesResponse.t,
-          [ `AWS of DescribeAcceleratorAttributesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeAcceleratorAttributesResponse.error) Result.t Lwt.t
 val describe_custom_routing_accelerator :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeCustomRoutingAcceleratorRequest.t ->
         (DescribeCustomRoutingAcceleratorResponse.t,
-          [ `AWS of DescribeCustomRoutingAcceleratorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeCustomRoutingAcceleratorResponse.error) Result.t Lwt.t
 val describe_custom_routing_accelerator_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeCustomRoutingAcceleratorAttributesRequest.t ->
         (DescribeCustomRoutingAcceleratorAttributesResponse.t,
-          [ `AWS of DescribeCustomRoutingAcceleratorAttributesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeCustomRoutingAcceleratorAttributesResponse.error) Result.t
+          Lwt.t
 val describe_custom_routing_endpoint_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeCustomRoutingEndpointGroupRequest.t ->
         (DescribeCustomRoutingEndpointGroupResponse.t,
-          [ `AWS of DescribeCustomRoutingEndpointGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeCustomRoutingEndpointGroupResponse.error) Result.t Lwt.t
 val describe_custom_routing_listener :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeCustomRoutingListenerRequest.t ->
         (DescribeCustomRoutingListenerResponse.t,
-          [ `AWS of DescribeCustomRoutingListenerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeCustomRoutingListenerResponse.error) Result.t Lwt.t
 val describe_endpoint_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEndpointGroupRequest.t ->
         (DescribeEndpointGroupResponse.t,
-          [ `AWS of DescribeEndpointGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeEndpointGroupResponse.error) Result.t Lwt.t
 val describe_listener :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeListenerRequest.t ->
-        (DescribeListenerResponse.t,
-          [ `AWS of DescribeListenerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeListenerResponse.t, DescribeListenerResponse.error) Result.t
+          Lwt.t
 val list_accelerators :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAcceleratorsRequest.t ->
-        (ListAcceleratorsResponse.t,
-          [ `AWS of ListAcceleratorsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListAcceleratorsResponse.t, ListAcceleratorsResponse.error) Result.t
+          Lwt.t
 val list_byoip_cidrs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListByoipCidrsRequest.t ->
-        (ListByoipCidrsResponse.t,
-          [ `AWS of ListByoipCidrsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListByoipCidrsResponse.t, ListByoipCidrsResponse.error) Result.t
+          Lwt.t
 val list_custom_routing_accelerators :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCustomRoutingAcceleratorsRequest.t ->
         (ListCustomRoutingAcceleratorsResponse.t,
-          [ `AWS of ListCustomRoutingAcceleratorsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListCustomRoutingAcceleratorsResponse.error) Result.t Lwt.t
 val list_custom_routing_endpoint_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCustomRoutingEndpointGroupsRequest.t ->
         (ListCustomRoutingEndpointGroupsResponse.t,
-          [ `AWS of ListCustomRoutingEndpointGroupsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListCustomRoutingEndpointGroupsResponse.error) Result.t Lwt.t
 val list_custom_routing_listeners :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCustomRoutingListenersRequest.t ->
         (ListCustomRoutingListenersResponse.t,
-          [ `AWS of ListCustomRoutingListenersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListCustomRoutingListenersResponse.error) Result.t Lwt.t
 val list_custom_routing_port_mappings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCustomRoutingPortMappingsRequest.t ->
         (ListCustomRoutingPortMappingsResponse.t,
-          [ `AWS of ListCustomRoutingPortMappingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListCustomRoutingPortMappingsResponse.error) Result.t Lwt.t
 val list_custom_routing_port_mappings_by_destination :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCustomRoutingPortMappingsByDestinationRequest.t ->
         (ListCustomRoutingPortMappingsByDestinationResponse.t,
-          [ `AWS of ListCustomRoutingPortMappingsByDestinationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListCustomRoutingPortMappingsByDestinationResponse.error) Result.t
+          Lwt.t
 val list_endpoint_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEndpointGroupsRequest.t ->
-        (ListEndpointGroupsResponse.t,
-          [ `AWS of ListEndpointGroupsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListEndpointGroupsResponse.t, ListEndpointGroupsResponse.error)
+          Result.t Lwt.t
 val list_listeners :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListListenersRequest.t ->
-        (ListListenersResponse.t,
-          [ `AWS of ListListenersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListListenersResponse.t, ListListenersResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val provision_byoip_cidr :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ProvisionByoipCidrRequest.t ->
-        (ProvisionByoipCidrResponse.t,
-          [ `AWS of ProvisionByoipCidrResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ProvisionByoipCidrResponse.t, ProvisionByoipCidrResponse.error)
+          Result.t Lwt.t
 val remove_custom_routing_endpoints :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      RemoveCustomRoutingEndpointsRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      RemoveCustomRoutingEndpointsRequest.t -> (unit, unit) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_accelerator :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateAcceleratorRequest.t ->
-        (UpdateAcceleratorResponse.t,
-          [ `AWS of UpdateAcceleratorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateAcceleratorResponse.t, UpdateAcceleratorResponse.error)
+          Result.t Lwt.t
 val update_accelerator_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateAcceleratorAttributesRequest.t ->
         (UpdateAcceleratorAttributesResponse.t,
-          [ `AWS of UpdateAcceleratorAttributesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateAcceleratorAttributesResponse.error) Result.t Lwt.t
 val update_custom_routing_accelerator :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateCustomRoutingAcceleratorRequest.t ->
         (UpdateCustomRoutingAcceleratorResponse.t,
-          [ `AWS of UpdateCustomRoutingAcceleratorResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateCustomRoutingAcceleratorResponse.error) Result.t Lwt.t
 val update_custom_routing_accelerator_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateCustomRoutingAcceleratorAttributesRequest.t ->
         (UpdateCustomRoutingAcceleratorAttributesResponse.t,
-          [ `AWS of UpdateCustomRoutingAcceleratorAttributesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateCustomRoutingAcceleratorAttributesResponse.error) Result.t
+          Lwt.t
 val update_custom_routing_listener :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateCustomRoutingListenerRequest.t ->
         (UpdateCustomRoutingListenerResponse.t,
-          [ `AWS of UpdateCustomRoutingListenerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateCustomRoutingListenerResponse.error) Result.t Lwt.t
 val update_endpoint_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateEndpointGroupRequest.t ->
-        (UpdateEndpointGroupResponse.t,
-          [ `AWS of UpdateEndpointGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateEndpointGroupResponse.t, UpdateEndpointGroupResponse.error)
+          Result.t Lwt.t
 val update_listener :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateListenerRequest.t ->
-        (UpdateListenerResponse.t,
-          [ `AWS of UpdateListenerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateListenerResponse.t, UpdateListenerResponse.error) Result.t
+          Lwt.t
 val withdraw_byoip_cidr :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       WithdrawByoipCidrRequest.t ->
-        (WithdrawByoipCidrResponse.t,
-          [ `AWS of WithdrawByoipCidrResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (WithdrawByoipCidrResponse.t, WithdrawByoipCidrResponse.error)
+          Result.t Lwt.t

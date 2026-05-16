@@ -10,7 +10,7 @@ val put_object
   -> ( ETag.t
      , [ `Missing_etag
        | `Put_object of
-         [ `AWS of PutObjectOutput.error | `Transport of Awso.Http.Io.Error.call ]
+         PutObjectOutput.error
        ] )
      Result.t
      Deferred.t
@@ -19,11 +19,7 @@ val delete_object
   :  Awso.Cfg.t
   -> bucket:string
   -> key:string
-  -> ( DeleteObjectOutput.t
-     , [ `AWS of DeleteObjectOutput.error | `Transport of Awso.Http.Io.Error.call ]
-     )
-     Result.t
-     Deferred.t
+  -> (DeleteObjectOutput.t, DeleteObjectOutput.error) Result.t Deferred.t
 
 val put_file
   :  Awso.Cfg.t
@@ -31,8 +27,7 @@ val put_file
   -> key:string
   -> string
   -> ( string
-     , [> `Put_object of
-          [ `AWS of PutObjectOutput.error | `Transport of Awso.Http.Io.Error.call ]
+     , [> `Put_object of PutObjectOutput.error
        | `Missing_etag
        ] )
      result
@@ -56,10 +51,7 @@ val initialize_multipart
   -> bucket:string
   -> key:string
   -> ( [> `Upload_id of string ]
-     , [> `Create_multipart_upload of
-          [ `AWS of CreateMultipartUploadOutput.error
-          | `Transport of Awso.Http.Io.Error.call
-          ]
+     , [> `Create_multipart_upload of CreateMultipartUploadOutput.error
        | `Missing_upload_id
        ] )
      result
@@ -79,12 +71,8 @@ val multipart
   -> string
   -> ( 'acc * CompletedPart.t list
      , [> `Callback_error of 'acc * CompletedPart.t list * 'error
-       | `Complete_multipart_upload of
-         [ `AWS of CompleteMultipartUploadOutput.error
-         | `Transport of Awso.Http.Io.Error.call
-         ]
-       | `Upload_part of
-         [ `AWS of UploadPartOutput.error | `Transport of Awso.Http.Io.Error.call ]
+       | `Complete_multipart_upload of CompleteMultipartUploadOutput.error
+       | `Upload_part of UploadPartOutput.error
        ] )
      result
      Deferred.t
@@ -95,11 +83,7 @@ val get_object
   -> bucket:string
   -> key:string
   -> unit
-  -> ( GetObjectOutput.t
-     , [ `AWS of GetObjectOutput.error | `Transport of Awso.Http.Io.Error.call ]
-     )
-     result
-     Deferred.t
+  -> (GetObjectOutput.t, GetObjectOutput.error) result Deferred.t
 
 module Source : sig
   val default_chunk_size : Byte_units.t
@@ -132,9 +116,7 @@ val map_bucket
   -> bucket:string
   -> f:(Object.t -> 'a Deferred.t)
   -> ( 'a list
-     , [ `AWS of ListObjectsV2Output.error
-       | `Transport of Awso.Http.Io.Error.call
-       ] )
+     , ListObjectsV2Output.error )
      result
      Deferred.t
 
@@ -143,8 +125,6 @@ val iter_bucket
   -> bucket:string
   -> f:(Object.t -> unit Deferred.t)
   -> ( unit
-     , [ `AWS of ListObjectsV2Output.error
-       | `Transport of Awso.Http.Io.Error.call
-       ] )
+     , ListObjectsV2Output.error )
      result
      Deferred.t

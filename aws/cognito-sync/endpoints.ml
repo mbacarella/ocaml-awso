@@ -312,155 +312,153 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | BulkPublish ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some BulkPublishResponse.error_of_json)
-       | Ok resp -> Ok (BulkPublishResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (BulkPublishResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some BulkPublishResponse.error_of_json))
   | DeleteDataset ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteDatasetResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteDatasetResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteDatasetResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteDatasetResponse.error_of_json))
   | DescribeDataset ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeDatasetResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeDatasetResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeDatasetResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeDatasetResponse.error_of_json))
   | DescribeIdentityPoolUsage ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeIdentityPoolUsageResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeIdentityPoolUsageResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeIdentityPoolUsageResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeIdentityPoolUsageResponse.error_of_json))
   | DescribeIdentityUsage ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeIdentityUsageResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeIdentityUsageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeIdentityUsageResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeIdentityUsageResponse.error_of_json))
   | GetBulkPublishDetails ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetBulkPublishDetailsResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetBulkPublishDetailsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetBulkPublishDetailsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetBulkPublishDetailsResponse.error_of_json))
   | GetCognitoEvents ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetCognitoEventsResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetCognitoEventsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetCognitoEventsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetCognitoEventsResponse.error_of_json))
   | GetIdentityPoolConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetIdentityPoolConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetIdentityPoolConfigurationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetIdentityPoolConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetIdentityPoolConfigurationResponse.error_of_json))
   | ListDatasets ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListDatasetsResponse.error_of_json)
-       | Ok resp -> Ok (ListDatasetsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListDatasetsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListDatasetsResponse.error_of_json))
   | ListIdentityPoolUsage ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListIdentityPoolUsageResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListIdentityPoolUsageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListIdentityPoolUsageResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListIdentityPoolUsageResponse.error_of_json))
   | ListRecords ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListRecordsResponse.error_of_json)
-       | Ok resp -> Ok (ListRecordsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListRecordsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListRecordsResponse.error_of_json))
   | RegisterDevice ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RegisterDeviceResponse.error_of_json)
-       | Ok resp ->
-           Ok (RegisterDeviceResponse.of_json (response_to_json resp)))
-  | SetCognitoEvents -> Ok ()
+      if is_success
+      then Ok (RegisterDeviceResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some RegisterDeviceResponse.error_of_json))
+  | SetCognitoEvents ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | SetIdentityPoolConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some SetIdentityPoolConfigurationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (SetIdentityPoolConfigurationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (SetIdentityPoolConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some SetIdentityPoolConfigurationResponse.error_of_json))
   | SubscribeToDataset ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some SubscribeToDatasetResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (SubscribeToDatasetResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (SubscribeToDatasetResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some SubscribeToDatasetResponse.error_of_json))
   | UnsubscribeFromDataset ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UnsubscribeFromDatasetResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (UnsubscribeFromDatasetResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UnsubscribeFromDatasetResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UnsubscribeFromDatasetResponse.error_of_json))
   | UpdateRecords ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateRecordsResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateRecordsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateRecordsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateRecordsResponse.error_of_json))

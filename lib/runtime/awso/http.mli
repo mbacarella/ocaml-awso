@@ -114,8 +114,8 @@ module Monad : sig
   end
 
   module Make (T : sig
-    type 'a t
-  end) : S with type 'a s = 'a T.t
+      type 'a t
+    end) : S with type 'a s = 'a T.t
 
   type 'm t =
     { bind : 'a 'b. ('a, 'm) app -> ('a -> ('b, 'm) app) -> ('b, 'm) app
@@ -225,6 +225,8 @@ module Status : sig
     | `Code of int
     ]
   [@@deriving yojson_of]
+
+  val to_code : t -> int
 end
 
 module Request : sig
@@ -271,11 +273,8 @@ module Io : sig
       }
     [@@deriving yojson]
 
-    type call =
-      [ `Bad_response of bad_response
-      | `Too_many_redirects
-      ]
-    [@@deriving yojson]
+    exception Bad_response of bad_response
+    exception Too_many_redirects
   end
 
   module type S = sig
@@ -288,7 +287,7 @@ module Io : sig
       -> Meth.t
       -> Request.t
       -> Uri.t
-      -> (Response.t, Error.call) result t
+      -> Response.t t
 
     val resolve_cfg : Cfg.t option -> Cfg.t t
   end

@@ -562,329 +562,352 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             "AmazonEC2ContainerRegistry_V20150921.UploadLayerPart")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    let generic_error () = Error (`Transport err) in
-    match err with
-    | `Too_many_redirects -> generic_error ()
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-        (match (error_of_json, ((code >= 400) && (code <= 599))) with
-         | (Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             (match json |> (Yojson.Safe.Util.member "__type") with
-              | `String error_type ->
-                  Error (`AWS (error_of_json error_type json))
-              | `Null -> generic_error ()
-              | _ ->
-                  failwith
-                    (sprintf "Error '__type' did not have string type: %s"
-                       body))
-         | (None, _) | (_, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = None }) in
+    match (error_of_json, ((code >= 400) && (code <= 599))) with
+    | (Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        (match json |> (Yojson.Safe.Util.member "__type") with
+         | `String error_type -> error_of_json error_type json
+         | `Null -> bail ()
+         | _ ->
+             failwith
+               (sprintf "Error '__type' did not have string type: %s" body))
+    | (None, _) | (_, false) -> bail () in
+  let _ = parse_aws_error in
+  let _ = resp in
   match endpoint with
   | BatchCheckLayerAvailability ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some BatchCheckLayerAvailabilityResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (BatchCheckLayerAvailabilityResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (BatchCheckLayerAvailabilityResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some BatchCheckLayerAvailabilityResponse.error_of_json))
   | BatchDeleteImage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some BatchDeleteImageResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (BatchDeleteImageResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (BatchDeleteImageResponse.of_json json)
+      else
+        Error (parse_aws_error (Some BatchDeleteImageResponse.error_of_json))
   | BatchGetImage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some BatchGetImageResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (BatchGetImageResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (BatchGetImageResponse.of_json json)
+      else Error (parse_aws_error (Some BatchGetImageResponse.error_of_json))
   | BatchGetRepositoryScanningConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (BatchGetRepositoryScanningConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
              (Some
-                BatchGetRepositoryScanningConfigurationResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (BatchGetRepositoryScanningConfigurationResponse.of_json json))
+                BatchGetRepositoryScanningConfigurationResponse.error_of_json))
   | CompleteLayerUpload ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CompleteLayerUploadResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CompleteLayerUploadResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CompleteLayerUploadResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CompleteLayerUploadResponse.error_of_json))
   | CreatePullThroughCacheRule ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreatePullThroughCacheRuleResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreatePullThroughCacheRuleResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreatePullThroughCacheRuleResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreatePullThroughCacheRuleResponse.error_of_json))
   | CreateRepository ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateRepositoryResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateRepositoryResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateRepositoryResponse.of_json json)
+      else
+        Error (parse_aws_error (Some CreateRepositoryResponse.error_of_json))
   | DeleteLifecyclePolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteLifecyclePolicyResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteLifecyclePolicyResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteLifecyclePolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteLifecyclePolicyResponse.error_of_json))
   | DeletePullThroughCacheRule ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeletePullThroughCacheRuleResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeletePullThroughCacheRuleResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeletePullThroughCacheRuleResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeletePullThroughCacheRuleResponse.error_of_json))
   | DeleteRegistryPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteRegistryPolicyResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteRegistryPolicyResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteRegistryPolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteRegistryPolicyResponse.error_of_json))
   | DeleteRepository ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteRepositoryResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteRepositoryResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteRepositoryResponse.of_json json)
+      else
+        Error (parse_aws_error (Some DeleteRepositoryResponse.error_of_json))
   | DeleteRepositoryPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteRepositoryPolicyResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteRepositoryPolicyResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteRepositoryPolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteRepositoryPolicyResponse.error_of_json))
   | DescribeImageReplicationStatus ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeImageReplicationStatusResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeImageReplicationStatusResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeImageReplicationStatusResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeImageReplicationStatusResponse.error_of_json))
   | DescribeImageScanFindings ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeImageScanFindingsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeImageScanFindingsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeImageScanFindingsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeImageScanFindingsResponse.error_of_json))
   | DescribeImages ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeImagesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeImagesResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeImagesResponse.of_json json)
+      else
+        Error (parse_aws_error (Some DescribeImagesResponse.error_of_json))
   | DescribePullThroughCacheRules ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribePullThroughCacheRulesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribePullThroughCacheRulesResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribePullThroughCacheRulesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribePullThroughCacheRulesResponse.error_of_json))
   | DescribeRegistry ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeRegistryResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeRegistryResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeRegistryResponse.of_json json)
+      else
+        Error (parse_aws_error (Some DescribeRegistryResponse.error_of_json))
   | DescribeRepositories ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeRepositoriesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DescribeRepositoriesResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeRepositoriesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeRepositoriesResponse.error_of_json))
   | GetAuthorizationToken ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetAuthorizationTokenResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetAuthorizationTokenResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetAuthorizationTokenResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetAuthorizationTokenResponse.error_of_json))
   | GetDownloadUrlForLayer ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetDownloadUrlForLayerResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetDownloadUrlForLayerResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetDownloadUrlForLayerResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetDownloadUrlForLayerResponse.error_of_json))
   | GetLifecyclePolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetLifecyclePolicyResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetLifecyclePolicyResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetLifecyclePolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetLifecyclePolicyResponse.error_of_json))
   | GetLifecyclePolicyPreview ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetLifecyclePolicyPreviewResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetLifecyclePolicyPreviewResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetLifecyclePolicyPreviewResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetLifecyclePolicyPreviewResponse.error_of_json))
   | GetRegistryPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetRegistryPolicyResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetRegistryPolicyResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetRegistryPolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetRegistryPolicyResponse.error_of_json))
   | GetRegistryScanningConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetRegistryScanningConfigurationResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetRegistryScanningConfigurationResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetRegistryScanningConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetRegistryScanningConfigurationResponse.error_of_json))
   | GetRepositoryPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetRepositoryPolicyResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetRepositoryPolicyResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetRepositoryPolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetRepositoryPolicyResponse.error_of_json))
   | InitiateLayerUpload ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some InitiateLayerUploadResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (InitiateLayerUploadResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (InitiateLayerUploadResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some InitiateLayerUploadResponse.error_of_json))
   | ListImages ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListImagesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListImagesResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListImagesResponse.of_json json)
+      else Error (parse_aws_error (Some ListImagesResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListTagsForResourceResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListTagsForResourceResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | PutImage ->
-      (match resp with
-       | Error err -> handle_error err (Some PutImageResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (PutImageResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutImageResponse.of_json json)
+      else Error (parse_aws_error (Some PutImageResponse.error_of_json))
   | PutImageScanningConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PutImageScanningConfigurationResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (PutImageScanningConfigurationResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutImageScanningConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some PutImageScanningConfigurationResponse.error_of_json))
   | PutImageTagMutability ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PutImageTagMutabilityResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (PutImageTagMutabilityResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutImageTagMutabilityResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some PutImageTagMutabilityResponse.error_of_json))
   | PutLifecyclePolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutLifecyclePolicyResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (PutLifecyclePolicyResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutLifecyclePolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some PutLifecyclePolicyResponse.error_of_json))
   | PutRegistryPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutRegistryPolicyResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (PutRegistryPolicyResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutRegistryPolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some PutRegistryPolicyResponse.error_of_json))
   | PutRegistryScanningConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PutRegistryScanningConfigurationResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (PutRegistryScanningConfigurationResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutRegistryScanningConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some PutRegistryScanningConfigurationResponse.error_of_json))
   | PutReplicationConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PutReplicationConfigurationResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (PutReplicationConfigurationResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutReplicationConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some PutReplicationConfigurationResponse.error_of_json))
   | SetRepositoryPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some SetRepositoryPolicyResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (SetRepositoryPolicyResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (SetRepositoryPolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some SetRepositoryPolicyResponse.error_of_json))
   | StartImageScan ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StartImageScanResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (StartImageScanResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartImageScanResponse.of_json json)
+      else
+        Error (parse_aws_error (Some StartImageScanResponse.error_of_json))
   | StartLifecyclePolicyPreview ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some StartLifecyclePolicyPreviewResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (StartLifecyclePolicyPreviewResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartLifecyclePolicyPreviewResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StartLifecyclePolicyPreviewResponse.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (TagResourceResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (TagResourceResponse.of_json json)
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UntagResourceResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UntagResourceResponse.of_json json)
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UploadLayerPart ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UploadLayerPartResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UploadLayerPartResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UploadLayerPartResponse.of_json json)
+      else
+        Error (parse_aws_error (Some UploadLayerPartResponse.error_of_json))

@@ -4,119 +4,89 @@ val cancel_job_run :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelJobRunRequest.t ->
-        (CancelJobRunResponse.t,
-          [ `AWS of CancelJobRunResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CancelJobRunResponse.t, CancelJobRunResponse.error) Result.t
           Async.Deferred.t
 val create_managed_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateManagedEndpointRequest.t ->
         (CreateManagedEndpointResponse.t,
-          [ `AWS of CreateManagedEndpointResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateManagedEndpointResponse.error) Result.t Async.Deferred.t
 val create_virtual_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateVirtualClusterRequest.t ->
-        (CreateVirtualClusterResponse.t,
-          [ `AWS of CreateVirtualClusterResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateVirtualClusterResponse.t, CreateVirtualClusterResponse.error)
+          Result.t Async.Deferred.t
 val delete_managed_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteManagedEndpointRequest.t ->
         (DeleteManagedEndpointResponse.t,
-          [ `AWS of DeleteManagedEndpointResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeleteManagedEndpointResponse.error) Result.t Async.Deferred.t
 val delete_virtual_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteVirtualClusterRequest.t ->
-        (DeleteVirtualClusterResponse.t,
-          [ `AWS of DeleteVirtualClusterResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteVirtualClusterResponse.t, DeleteVirtualClusterResponse.error)
+          Result.t Async.Deferred.t
 val describe_job_run :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeJobRunRequest.t ->
-        (DescribeJobRunResponse.t,
-          [ `AWS of DescribeJobRunResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeJobRunResponse.t, DescribeJobRunResponse.error) Result.t
           Async.Deferred.t
 val describe_managed_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeManagedEndpointRequest.t ->
         (DescribeManagedEndpointResponse.t,
-          [ `AWS of DescribeManagedEndpointResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeManagedEndpointResponse.error) Result.t Async.Deferred.t
 val describe_virtual_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeVirtualClusterRequest.t ->
         (DescribeVirtualClusterResponse.t,
-          [ `AWS of DescribeVirtualClusterResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeVirtualClusterResponse.error) Result.t Async.Deferred.t
 val list_job_runs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListJobRunsRequest.t ->
-        (ListJobRunsResponse.t,
-          [ `AWS of ListJobRunsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListJobRunsResponse.t, ListJobRunsResponse.error) Result.t
           Async.Deferred.t
 val list_managed_endpoints :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListManagedEndpointsRequest.t ->
-        (ListManagedEndpointsResponse.t,
-          [ `AWS of ListManagedEndpointsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListManagedEndpointsResponse.t, ListManagedEndpointsResponse.error)
+          Result.t Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val list_virtual_clusters :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListVirtualClustersRequest.t ->
-        (ListVirtualClustersResponse.t,
-          [ `AWS of ListVirtualClustersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListVirtualClustersResponse.t, ListVirtualClustersResponse.error)
+          Result.t Async.Deferred.t
 val start_job_run :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartJobRunRequest.t ->
-        (StartJobRunResponse.t,
-          [ `AWS of StartJobRunResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StartJobRunResponse.t, StartJobRunResponse.error) Result.t
           Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t

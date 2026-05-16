@@ -5,12 +5,10 @@ val get_personalized_ranking :
     ?cfg:Awso.Cfg.t ->
       GetPersonalizedRankingRequest.t ->
         (GetPersonalizedRankingResponse.t,
-          [ `AWS of GetPersonalizedRankingResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetPersonalizedRankingResponse.error) Result.t Lwt.t
 val get_recommendations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRecommendationsRequest.t ->
-        (GetRecommendationsResponse.t,
-          [ `AWS of GetRecommendationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetRecommendationsResponse.t, GetRecommendationsResponse.error)
+          Result.t Lwt.t

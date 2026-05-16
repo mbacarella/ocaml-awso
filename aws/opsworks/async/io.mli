@@ -3,516 +3,374 @@ open Awso_opsworks.Values
 val assign_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      AssignInstanceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      AssignInstanceRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val assign_volume :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      AssignVolumeRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      AssignVolumeRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val associate_elastic_ip :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      AssociateElasticIpRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      AssociateElasticIpRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val attach_elastic_load_balancer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AttachElasticLoadBalancerRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val clone_stack :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CloneStackRequest.t ->
-        (CloneStackResult.t,
-          [ `AWS of CloneStackResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CloneStackResult.t, CloneStackResult.error) Result.t
           Async.Deferred.t
 val create_app :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAppRequest.t ->
-        (CreateAppResult.t,
-          [ `AWS of CreateAppResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateAppResult.t, CreateAppResult.error) Result.t Async.Deferred.t
 val create_deployment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDeploymentRequest.t ->
-        (CreateDeploymentResult.t,
-          [ `AWS of CreateDeploymentResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateDeploymentResult.t, CreateDeploymentResult.error) Result.t
           Async.Deferred.t
 val create_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateInstanceRequest.t ->
-        (CreateInstanceResult.t,
-          [ `AWS of CreateInstanceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateInstanceResult.t, CreateInstanceResult.error) Result.t
           Async.Deferred.t
 val create_layer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateLayerRequest.t ->
-        (CreateLayerResult.t,
-          [ `AWS of CreateLayerResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateLayerResult.t, CreateLayerResult.error) Result.t
           Async.Deferred.t
 val create_stack :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateStackRequest.t ->
-        (CreateStackResult.t,
-          [ `AWS of CreateStackResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateStackResult.t, CreateStackResult.error) Result.t
           Async.Deferred.t
 val create_user_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateUserProfileRequest.t ->
-        (CreateUserProfileResult.t,
-          [ `AWS of CreateUserProfileResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateUserProfileResult.t, CreateUserProfileResult.error) Result.t
           Async.Deferred.t
 val delete_app :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteAppRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteAppRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteInstanceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteInstanceRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_layer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteLayerRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteLayerRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_stack :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteStackRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteStackRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_user_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteUserProfileRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteUserProfileRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val deregister_ecs_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeregisterEcsClusterRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeregisterEcsClusterRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val deregister_elastic_ip :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeregisterElasticIpRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeregisterElasticIpRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val deregister_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeregisterInstanceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeregisterInstanceRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val deregister_rds_db_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeregisterRdsDbInstanceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val deregister_volume :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeregisterVolumeRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeregisterVolumeRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val describe_agent_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAgentVersionsRequest.t ->
-        (DescribeAgentVersionsResult.t,
-          [ `AWS of DescribeAgentVersionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeAgentVersionsResult.t, DescribeAgentVersionsResult.error)
+          Result.t Async.Deferred.t
 val describe_apps :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAppsRequest.t ->
-        (DescribeAppsResult.t,
-          [ `AWS of DescribeAppsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeAppsResult.t, DescribeAppsResult.error) Result.t
           Async.Deferred.t
 val describe_commands :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeCommandsRequest.t ->
-        (DescribeCommandsResult.t,
-          [ `AWS of DescribeCommandsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeCommandsResult.t, DescribeCommandsResult.error) Result.t
           Async.Deferred.t
 val describe_deployments :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDeploymentsRequest.t ->
-        (DescribeDeploymentsResult.t,
-          [ `AWS of DescribeDeploymentsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeDeploymentsResult.t, DescribeDeploymentsResult.error)
+          Result.t Async.Deferred.t
 val describe_ecs_clusters :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEcsClustersRequest.t ->
-        (DescribeEcsClustersResult.t,
-          [ `AWS of DescribeEcsClustersResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeEcsClustersResult.t, DescribeEcsClustersResult.error)
+          Result.t Async.Deferred.t
 val describe_elastic_ips :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeElasticIpsRequest.t ->
-        (DescribeElasticIpsResult.t,
-          [ `AWS of DescribeElasticIpsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeElasticIpsResult.t, DescribeElasticIpsResult.error) Result.t
           Async.Deferred.t
 val describe_elastic_load_balancers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeElasticLoadBalancersRequest.t ->
         (DescribeElasticLoadBalancersResult.t,
-          [ `AWS of DescribeElasticLoadBalancersResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeElasticLoadBalancersResult.error) Result.t Async.Deferred.t
 val describe_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeInstancesRequest.t ->
-        (DescribeInstancesResult.t,
-          [ `AWS of DescribeInstancesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeInstancesResult.t, DescribeInstancesResult.error) Result.t
           Async.Deferred.t
 val describe_layers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeLayersRequest.t ->
-        (DescribeLayersResult.t,
-          [ `AWS of DescribeLayersResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeLayersResult.t, DescribeLayersResult.error) Result.t
           Async.Deferred.t
 val describe_load_based_auto_scaling :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeLoadBasedAutoScalingRequest.t ->
         (DescribeLoadBasedAutoScalingResult.t,
-          [ `AWS of DescribeLoadBasedAutoScalingResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeLoadBasedAutoScalingResult.error) Result.t Async.Deferred.t
 val describe_my_user_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       unit ->
-        (DescribeMyUserProfileResult.t,
-          [ `AWS of DescribeMyUserProfileResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeMyUserProfileResult.t, DescribeMyUserProfileResult.error)
+          Result.t Async.Deferred.t
 val describe_operating_systems :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       unit ->
         (DescribeOperatingSystemsResponse.t,
-          [ `AWS of DescribeOperatingSystemsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeOperatingSystemsResponse.error) Result.t Async.Deferred.t
 val describe_permissions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePermissionsRequest.t ->
-        (DescribePermissionsResult.t,
-          [ `AWS of DescribePermissionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribePermissionsResult.t, DescribePermissionsResult.error)
+          Result.t Async.Deferred.t
 val describe_raid_arrays :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRaidArraysRequest.t ->
-        (DescribeRaidArraysResult.t,
-          [ `AWS of DescribeRaidArraysResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeRaidArraysResult.t, DescribeRaidArraysResult.error) Result.t
           Async.Deferred.t
 val describe_rds_db_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRdsDbInstancesRequest.t ->
-        (DescribeRdsDbInstancesResult.t,
-          [ `AWS of DescribeRdsDbInstancesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeRdsDbInstancesResult.t, DescribeRdsDbInstancesResult.error)
+          Result.t Async.Deferred.t
 val describe_service_errors :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeServiceErrorsRequest.t ->
-        (DescribeServiceErrorsResult.t,
-          [ `AWS of DescribeServiceErrorsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeServiceErrorsResult.t, DescribeServiceErrorsResult.error)
+          Result.t Async.Deferred.t
 val describe_stack_provisioning_parameters :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeStackProvisioningParametersRequest.t ->
         (DescribeStackProvisioningParametersResult.t,
-          [ `AWS of DescribeStackProvisioningParametersResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeStackProvisioningParametersResult.error) Result.t
           Async.Deferred.t
 val describe_stack_summary :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeStackSummaryRequest.t ->
-        (DescribeStackSummaryResult.t,
-          [ `AWS of DescribeStackSummaryResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeStackSummaryResult.t, DescribeStackSummaryResult.error)
+          Result.t Async.Deferred.t
 val describe_stacks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeStacksRequest.t ->
-        (DescribeStacksResult.t,
-          [ `AWS of DescribeStacksResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeStacksResult.t, DescribeStacksResult.error) Result.t
           Async.Deferred.t
 val describe_time_based_auto_scaling :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTimeBasedAutoScalingRequest.t ->
         (DescribeTimeBasedAutoScalingResult.t,
-          [ `AWS of DescribeTimeBasedAutoScalingResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeTimeBasedAutoScalingResult.error) Result.t Async.Deferred.t
 val describe_user_profiles :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeUserProfilesRequest.t ->
-        (DescribeUserProfilesResult.t,
-          [ `AWS of DescribeUserProfilesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeUserProfilesResult.t, DescribeUserProfilesResult.error)
+          Result.t Async.Deferred.t
 val describe_volumes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeVolumesRequest.t ->
-        (DescribeVolumesResult.t,
-          [ `AWS of DescribeVolumesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeVolumesResult.t, DescribeVolumesResult.error) Result.t
           Async.Deferred.t
 val detach_elastic_load_balancer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DetachElasticLoadBalancerRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val disassociate_elastic_ip :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateElasticIpRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val get_hostname_suggestion :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetHostnameSuggestionRequest.t ->
-        (GetHostnameSuggestionResult.t,
-          [ `AWS of GetHostnameSuggestionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetHostnameSuggestionResult.t, GetHostnameSuggestionResult.error)
+          Result.t Async.Deferred.t
 val grant_access :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GrantAccessRequest.t ->
-        (GrantAccessResult.t,
-          [ `AWS of GrantAccessResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GrantAccessResult.t, GrantAccessResult.error) Result.t
           Async.Deferred.t
 val list_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsRequest.t ->
-        (ListTagsResult.t,
-          [ `AWS of ListTagsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsResult.t, ListTagsResult.error) Result.t Async.Deferred.t
 val reboot_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      RebootInstanceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      RebootInstanceRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val register_ecs_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegisterEcsClusterRequest.t ->
-        (RegisterEcsClusterResult.t,
-          [ `AWS of RegisterEcsClusterResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RegisterEcsClusterResult.t, RegisterEcsClusterResult.error) Result.t
           Async.Deferred.t
 val register_elastic_ip :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegisterElasticIpRequest.t ->
-        (RegisterElasticIpResult.t,
-          [ `AWS of RegisterElasticIpResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RegisterElasticIpResult.t, RegisterElasticIpResult.error) Result.t
           Async.Deferred.t
 val register_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegisterInstanceRequest.t ->
-        (RegisterInstanceResult.t,
-          [ `AWS of RegisterInstanceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RegisterInstanceResult.t, RegisterInstanceResult.error) Result.t
           Async.Deferred.t
 val register_rds_db_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegisterRdsDbInstanceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val register_volume :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegisterVolumeRequest.t ->
-        (RegisterVolumeResult.t,
-          [ `AWS of RegisterVolumeResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RegisterVolumeResult.t, RegisterVolumeResult.error) Result.t
           Async.Deferred.t
 val set_load_based_auto_scaling :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SetLoadBasedAutoScalingRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val set_permission :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      SetPermissionRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      SetPermissionRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val set_time_based_auto_scaling :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SetTimeBasedAutoScalingRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val start_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      StartInstanceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      StartInstanceRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val start_stack :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      StartStackRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      StartStackRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val stop_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      StopInstanceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      StopInstanceRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val stop_stack :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      StopStackRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      StopStackRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      TagResourceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      TagResourceRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val unassign_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UnassignInstanceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      UnassignInstanceRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val unassign_volume :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UnassignVolumeRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      UnassignVolumeRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UntagResourceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      UntagResourceRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val update_app :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UpdateAppRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      UpdateAppRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val update_elastic_ip :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UpdateElasticIpRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      UpdateElasticIpRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val update_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UpdateInstanceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      UpdateInstanceRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val update_layer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UpdateLayerRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      UpdateLayerRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val update_my_user_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UpdateMyUserProfileRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      UpdateMyUserProfileRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val update_rds_db_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UpdateRdsDbInstanceRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      UpdateRdsDbInstanceRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val update_stack :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UpdateStackRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      UpdateStackRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val update_user_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UpdateUserProfileRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      UpdateUserProfileRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val update_volume :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UpdateVolumeRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      UpdateVolumeRequest.t -> (unit, unit) Result.t Async.Deferred.t

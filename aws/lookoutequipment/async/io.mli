@@ -4,167 +4,125 @@ val create_dataset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDatasetRequest.t ->
-        (CreateDatasetResponse.t,
-          [ `AWS of CreateDatasetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateDatasetResponse.t, CreateDatasetResponse.error) Result.t
           Async.Deferred.t
 val create_inference_scheduler :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateInferenceSchedulerRequest.t ->
         (CreateInferenceSchedulerResponse.t,
-          [ `AWS of CreateInferenceSchedulerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateInferenceSchedulerResponse.error) Result.t Async.Deferred.t
 val create_model :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateModelRequest.t ->
-        (CreateModelResponse.t,
-          [ `AWS of CreateModelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateModelResponse.t, CreateModelResponse.error) Result.t
           Async.Deferred.t
 val delete_dataset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteDatasetRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteDatasetRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_inference_scheduler :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteInferenceSchedulerRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val delete_model :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteModelRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteModelRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val describe_data_ingestion_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDataIngestionJobRequest.t ->
         (DescribeDataIngestionJobResponse.t,
-          [ `AWS of DescribeDataIngestionJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeDataIngestionJobResponse.error) Result.t Async.Deferred.t
 val describe_dataset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDatasetRequest.t ->
-        (DescribeDatasetResponse.t,
-          [ `AWS of DescribeDatasetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeDatasetResponse.t, DescribeDatasetResponse.error) Result.t
           Async.Deferred.t
 val describe_inference_scheduler :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeInferenceSchedulerRequest.t ->
         (DescribeInferenceSchedulerResponse.t,
-          [ `AWS of DescribeInferenceSchedulerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeInferenceSchedulerResponse.error) Result.t Async.Deferred.t
 val describe_model :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeModelRequest.t ->
-        (DescribeModelResponse.t,
-          [ `AWS of DescribeModelResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeModelResponse.t, DescribeModelResponse.error) Result.t
           Async.Deferred.t
 val list_data_ingestion_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDataIngestionJobsRequest.t ->
         (ListDataIngestionJobsResponse.t,
-          [ `AWS of ListDataIngestionJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListDataIngestionJobsResponse.error) Result.t Async.Deferred.t
 val list_datasets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDatasetsRequest.t ->
-        (ListDatasetsResponse.t,
-          [ `AWS of ListDatasetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListDatasetsResponse.t, ListDatasetsResponse.error) Result.t
           Async.Deferred.t
 val list_inference_executions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListInferenceExecutionsRequest.t ->
         (ListInferenceExecutionsResponse.t,
-          [ `AWS of ListInferenceExecutionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListInferenceExecutionsResponse.error) Result.t Async.Deferred.t
 val list_inference_schedulers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListInferenceSchedulersRequest.t ->
         (ListInferenceSchedulersResponse.t,
-          [ `AWS of ListInferenceSchedulersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListInferenceSchedulersResponse.error) Result.t Async.Deferred.t
 val list_models :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListModelsRequest.t ->
-        (ListModelsResponse.t,
-          [ `AWS of ListModelsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListModelsResponse.t, ListModelsResponse.error) Result.t
           Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val start_data_ingestion_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartDataIngestionJobRequest.t ->
         (StartDataIngestionJobResponse.t,
-          [ `AWS of StartDataIngestionJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          StartDataIngestionJobResponse.error) Result.t Async.Deferred.t
 val start_inference_scheduler :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartInferenceSchedulerRequest.t ->
         (StartInferenceSchedulerResponse.t,
-          [ `AWS of StartInferenceSchedulerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          StartInferenceSchedulerResponse.error) Result.t Async.Deferred.t
 val stop_inference_scheduler :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopInferenceSchedulerRequest.t ->
         (StopInferenceSchedulerResponse.t,
-          [ `AWS of StopInferenceSchedulerResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          StopInferenceSchedulerResponse.error) Result.t Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
 val update_inference_scheduler :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateInferenceSchedulerRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t

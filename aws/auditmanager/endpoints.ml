@@ -1028,531 +1028,535 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | AssociateAssessmentReportEvidenceFolder ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (AssociateAssessmentReportEvidenceFolderResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
              (Some
-                AssociateAssessmentReportEvidenceFolderResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (AssociateAssessmentReportEvidenceFolderResponse.of_header_and_body
-                (headers, ())))
+                AssociateAssessmentReportEvidenceFolderResponse.error_of_json))
   | BatchAssociateAssessmentReportEvidence ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (BatchAssociateAssessmentReportEvidenceResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                BatchAssociateAssessmentReportEvidenceResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (BatchAssociateAssessmentReportEvidenceResponse.of_json
-                (response_to_json resp)))
+                BatchAssociateAssessmentReportEvidenceResponse.error_of_json))
   | BatchCreateDelegationByAssessment ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some BatchCreateDelegationByAssessmentResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (BatchCreateDelegationByAssessmentResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (BatchCreateDelegationByAssessmentResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchCreateDelegationByAssessmentResponse.error_of_json))
   | BatchDeleteDelegationByAssessment ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some BatchDeleteDelegationByAssessmentResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (BatchDeleteDelegationByAssessmentResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (BatchDeleteDelegationByAssessmentResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchDeleteDelegationByAssessmentResponse.error_of_json))
   | BatchDisassociateAssessmentReportEvidence ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (BatchDisassociateAssessmentReportEvidenceResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                BatchDisassociateAssessmentReportEvidenceResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (BatchDisassociateAssessmentReportEvidenceResponse.of_json
-                (response_to_json resp)))
+                BatchDisassociateAssessmentReportEvidenceResponse.error_of_json))
   | BatchImportEvidenceToAssessmentControl ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (BatchImportEvidenceToAssessmentControlResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                BatchImportEvidenceToAssessmentControlResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (BatchImportEvidenceToAssessmentControlResponse.of_json
-                (response_to_json resp)))
+                BatchImportEvidenceToAssessmentControlResponse.error_of_json))
   | CreateAssessment ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateAssessmentResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateAssessmentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateAssessmentResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateAssessmentResponse.error_of_json))
   | CreateAssessmentFramework ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateAssessmentFrameworkResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateAssessmentFrameworkResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (CreateAssessmentFrameworkResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateAssessmentFrameworkResponse.error_of_json))
   | CreateAssessmentReport ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateAssessmentReportResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateAssessmentReportResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (CreateAssessmentReportResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateAssessmentReportResponse.error_of_json))
   | CreateControl ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateControlResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateControlResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateControlResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateControlResponse.error_of_json))
   | DeleteAssessment ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteAssessmentResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteAssessmentResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteAssessmentResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some DeleteAssessmentResponse.error_of_json))
   | DeleteAssessmentFramework ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteAssessmentFrameworkResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DeleteAssessmentFrameworkResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeleteAssessmentFrameworkResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteAssessmentFrameworkResponse.error_of_json))
   | DeleteAssessmentFrameworkShare ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteAssessmentFrameworkShareResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DeleteAssessmentFrameworkShareResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeleteAssessmentFrameworkShareResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteAssessmentFrameworkShareResponse.error_of_json))
   | DeleteAssessmentReport ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteAssessmentReportResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DeleteAssessmentReportResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteAssessmentReportResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteAssessmentReportResponse.error_of_json))
   | DeleteControl ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteControlResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteControlResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteControlResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some DeleteControlResponse.error_of_json))
   | DeregisterAccount ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeregisterAccountResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeregisterAccountResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeregisterAccountResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeregisterAccountResponse.error_of_json))
   | DeregisterOrganizationAdminAccount ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeregisterOrganizationAdminAccountResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DeregisterOrganizationAdminAccountResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeregisterOrganizationAdminAccountResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeregisterOrganizationAdminAccountResponse.error_of_json))
   | DisassociateAssessmentReportEvidenceFolder ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DisassociateAssessmentReportEvidenceFolderResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
              (Some
-                DisassociateAssessmentReportEvidenceFolderResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DisassociateAssessmentReportEvidenceFolderResponse.of_header_and_body
-                (headers, ())))
+                DisassociateAssessmentReportEvidenceFolderResponse.error_of_json))
   | GetAccountStatus ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetAccountStatusResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetAccountStatusResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetAccountStatusResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetAccountStatusResponse.error_of_json))
   | GetAssessment ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetAssessmentResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetAssessmentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetAssessmentResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetAssessmentResponse.error_of_json))
   | GetAssessmentFramework ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetAssessmentFrameworkResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetAssessmentFrameworkResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (GetAssessmentFrameworkResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetAssessmentFrameworkResponse.error_of_json))
   | GetAssessmentReportUrl ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetAssessmentReportUrlResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetAssessmentReportUrlResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (GetAssessmentReportUrlResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetAssessmentReportUrlResponse.error_of_json))
   | GetChangeLogs ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetChangeLogsResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetChangeLogsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetChangeLogsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetChangeLogsResponse.error_of_json))
   | GetControl ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetControlResponse.error_of_json)
-       | Ok resp -> Ok (GetControlResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetControlResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetControlResponse.error_of_json))
   | GetDelegations ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetDelegationsResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetDelegationsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetDelegationsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetDelegationsResponse.error_of_json))
   | GetEvidence ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetEvidenceResponse.error_of_json)
-       | Ok resp -> Ok (GetEvidenceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetEvidenceResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetEvidenceResponse.error_of_json))
   | GetEvidenceByEvidenceFolder ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetEvidenceByEvidenceFolderResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetEvidenceByEvidenceFolderResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetEvidenceByEvidenceFolderResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetEvidenceByEvidenceFolderResponse.error_of_json))
   | GetEvidenceFolder ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetEvidenceFolderResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetEvidenceFolderResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetEvidenceFolderResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetEvidenceFolderResponse.error_of_json))
   | GetEvidenceFoldersByAssessment ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetEvidenceFoldersByAssessmentResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetEvidenceFoldersByAssessmentResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetEvidenceFoldersByAssessmentResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetEvidenceFoldersByAssessmentResponse.error_of_json))
   | GetEvidenceFoldersByAssessmentControl ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (GetEvidenceFoldersByAssessmentControlResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                GetEvidenceFoldersByAssessmentControlResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetEvidenceFoldersByAssessmentControlResponse.of_json
-                (response_to_json resp)))
+                GetEvidenceFoldersByAssessmentControlResponse.error_of_json))
   | GetInsights ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetInsightsResponse.error_of_json)
-       | Ok resp -> Ok (GetInsightsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetInsightsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetInsightsResponse.error_of_json))
   | GetInsightsByAssessment ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetInsightsByAssessmentResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetInsightsByAssessmentResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (GetInsightsByAssessmentResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetInsightsByAssessmentResponse.error_of_json))
   | GetOrganizationAdminAccount ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetOrganizationAdminAccountResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetOrganizationAdminAccountResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetOrganizationAdminAccountResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetOrganizationAdminAccountResponse.error_of_json))
   | GetServicesInScope ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetServicesInScopeResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetServicesInScopeResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetServicesInScopeResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetServicesInScopeResponse.error_of_json))
   | GetSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetSettingsResponse.error_of_json)
-       | Ok resp -> Ok (GetSettingsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetSettingsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetSettingsResponse.error_of_json))
   | ListAssessmentControlInsightsByControlDomain ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (ListAssessmentControlInsightsByControlDomainResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                ListAssessmentControlInsightsByControlDomainResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListAssessmentControlInsightsByControlDomainResponse.of_json
-                (response_to_json resp)))
+                ListAssessmentControlInsightsByControlDomainResponse.error_of_json))
   | ListAssessmentFrameworkShareRequests ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListAssessmentFrameworkShareRequestsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListAssessmentFrameworkShareRequestsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListAssessmentFrameworkShareRequestsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListAssessmentFrameworkShareRequestsResponse.error_of_json))
   | ListAssessmentFrameworks ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListAssessmentFrameworksResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListAssessmentFrameworksResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListAssessmentFrameworksResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListAssessmentFrameworksResponse.error_of_json))
   | ListAssessmentReports ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListAssessmentReportsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListAssessmentReportsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListAssessmentReportsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListAssessmentReportsResponse.error_of_json))
   | ListAssessments ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListAssessmentsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListAssessmentsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListAssessmentsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListAssessmentsResponse.error_of_json))
   | ListControlDomainInsights ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListControlDomainInsightsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListControlDomainInsightsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListControlDomainInsightsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListControlDomainInsightsResponse.error_of_json))
   | ListControlDomainInsightsByAssessment ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        Ok
+          (ListControlDomainInsightsByAssessmentResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
              (Some
-                ListControlDomainInsightsByAssessmentResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListControlDomainInsightsByAssessmentResponse.of_json
-                (response_to_json resp)))
+                ListControlDomainInsightsByAssessmentResponse.error_of_json))
   | ListControlInsightsByControlDomain ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListControlInsightsByControlDomainResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListControlInsightsByControlDomainResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListControlInsightsByControlDomainResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListControlInsightsByControlDomainResponse.error_of_json))
   | ListControls ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListControlsResponse.error_of_json)
-       | Ok resp -> Ok (ListControlsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListControlsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListControlsResponse.error_of_json))
   | ListKeywordsForDataSource ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListKeywordsForDataSourceResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListKeywordsForDataSourceResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListKeywordsForDataSourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListKeywordsForDataSourceResponse.error_of_json))
   | ListNotifications ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListNotificationsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListNotificationsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListNotificationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListNotificationsResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | RegisterAccount ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RegisterAccountResponse.error_of_json)
-       | Ok resp ->
-           Ok (RegisterAccountResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (RegisterAccountResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some RegisterAccountResponse.error_of_json))
   | RegisterOrganizationAdminAccount ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some RegisterOrganizationAdminAccountResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (RegisterOrganizationAdminAccountResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (RegisterOrganizationAdminAccountResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some RegisterOrganizationAdminAccountResponse.error_of_json))
   | StartAssessmentFrameworkShare ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some StartAssessmentFrameworkShareResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (StartAssessmentFrameworkShareResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (StartAssessmentFrameworkShareResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some StartAssessmentFrameworkShareResponse.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UntagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateAssessment ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateAssessmentResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateAssessmentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateAssessmentResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateAssessmentResponse.error_of_json))
   | UpdateAssessmentControl ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateAssessmentControlResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateAssessmentControlResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (UpdateAssessmentControlResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateAssessmentControlResponse.error_of_json))
   | UpdateAssessmentControlSetStatus ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateAssessmentControlSetStatusResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateAssessmentControlSetStatusResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (UpdateAssessmentControlSetStatusResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateAssessmentControlSetStatusResponse.error_of_json))
   | UpdateAssessmentFramework ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateAssessmentFrameworkResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateAssessmentFrameworkResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (UpdateAssessmentFrameworkResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateAssessmentFrameworkResponse.error_of_json))
   | UpdateAssessmentFrameworkShare ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateAssessmentFrameworkShareResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateAssessmentFrameworkShareResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (UpdateAssessmentFrameworkShareResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateAssessmentFrameworkShareResponse.error_of_json))
   | UpdateAssessmentStatus ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateAssessmentStatusResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateAssessmentStatusResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (UpdateAssessmentStatusResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateAssessmentStatusResponse.error_of_json))
   | UpdateControl ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateControlResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateControlResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateControlResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateControlResponse.error_of_json))
   | UpdateSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateSettingsResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateSettingsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateSettingsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateSettingsResponse.error_of_json))
   | ValidateAssessmentReportIntegrity ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ValidateAssessmentReportIntegrityResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ValidateAssessmentReportIntegrityResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ValidateAssessmentReportIntegrityResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ValidateAssessmentReportIntegrityResponse.error_of_json))

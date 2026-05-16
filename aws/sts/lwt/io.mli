@@ -4,55 +4,46 @@ val assume_role :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssumeRoleRequest.t ->
-        (AssumeRoleResponse.t,
-          [ `AWS of AssumeRoleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AssumeRoleResponse.t, AssumeRoleResponse.error) Result.t Lwt.t
 val assume_role_with_s_a_m_l :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssumeRoleWithSAMLRequest.t ->
-        (AssumeRoleWithSAMLResponse.t,
-          [ `AWS of AssumeRoleWithSAMLResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AssumeRoleWithSAMLResponse.t, AssumeRoleWithSAMLResponse.error)
+          Result.t Lwt.t
 val assume_role_with_web_identity :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssumeRoleWithWebIdentityRequest.t ->
         (AssumeRoleWithWebIdentityResponse.t,
-          [ `AWS of AssumeRoleWithWebIdentityResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssumeRoleWithWebIdentityResponse.error) Result.t Lwt.t
 val decode_authorization_message :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DecodeAuthorizationMessageRequest.t ->
         (DecodeAuthorizationMessageResponse.t,
-          [ `AWS of DecodeAuthorizationMessageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DecodeAuthorizationMessageResponse.error) Result.t Lwt.t
 val get_access_key_info :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAccessKeyInfoRequest.t ->
-        (GetAccessKeyInfoResponse.t,
-          [ `AWS of GetAccessKeyInfoResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetAccessKeyInfoResponse.t, GetAccessKeyInfoResponse.error) Result.t
+          Lwt.t
 val get_caller_identity :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCallerIdentityRequest.t ->
-        (GetCallerIdentityResponse.t,
-          [ `AWS of GetCallerIdentityResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetCallerIdentityResponse.t, GetCallerIdentityResponse.error)
+          Result.t Lwt.t
 val get_federation_token :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetFederationTokenRequest.t ->
-        (GetFederationTokenResponse.t,
-          [ `AWS of GetFederationTokenResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetFederationTokenResponse.t, GetFederationTokenResponse.error)
+          Result.t Lwt.t
 val get_session_token :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSessionTokenRequest.t ->
-        (GetSessionTokenResponse.t,
-          [ `AWS of GetSessionTokenResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetSessionTokenResponse.t, GetSessionTokenResponse.error) Result.t
+          Lwt.t

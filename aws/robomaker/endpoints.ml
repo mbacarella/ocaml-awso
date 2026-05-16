@@ -1693,467 +1693,460 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | BatchDeleteWorlds ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some BatchDeleteWorldsResponse.error_of_json)
-       | Ok resp ->
-           Ok (BatchDeleteWorldsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (BatchDeleteWorldsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some BatchDeleteWorldsResponse.error_of_json))
   | BatchDescribeSimulationJob ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some BatchDescribeSimulationJobResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (BatchDescribeSimulationJobResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (BatchDescribeSimulationJobResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchDescribeSimulationJobResponse.error_of_json))
   | CancelDeploymentJob ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CancelDeploymentJobResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (CancelDeploymentJobResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CancelDeploymentJobResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some CancelDeploymentJobResponse.error_of_json))
   | CancelSimulationJob ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CancelSimulationJobResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (CancelSimulationJobResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CancelSimulationJobResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some CancelSimulationJobResponse.error_of_json))
   | CancelSimulationJobBatch ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CancelSimulationJobBatchResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (CancelSimulationJobBatchResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (CancelSimulationJobBatchResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some CancelSimulationJobBatchResponse.error_of_json))
   | CancelWorldExportJob ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CancelWorldExportJobResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (CancelWorldExportJobResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CancelWorldExportJobResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some CancelWorldExportJobResponse.error_of_json))
   | CancelWorldGenerationJob ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CancelWorldGenerationJobResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (CancelWorldGenerationJobResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (CancelWorldGenerationJobResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some CancelWorldGenerationJobResponse.error_of_json))
   | CreateDeploymentJob ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateDeploymentJobResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateDeploymentJobResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateDeploymentJobResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateDeploymentJobResponse.error_of_json))
   | CreateFleet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateFleetResponse.error_of_json)
-       | Ok resp -> Ok (CreateFleetResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateFleetResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateFleetResponse.error_of_json))
   | CreateRobot ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateRobotResponse.error_of_json)
-       | Ok resp -> Ok (CreateRobotResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateRobotResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateRobotResponse.error_of_json))
   | CreateRobotApplication ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateRobotApplicationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateRobotApplicationResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (CreateRobotApplicationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateRobotApplicationResponse.error_of_json))
   | CreateRobotApplicationVersion ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateRobotApplicationVersionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateRobotApplicationVersionResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (CreateRobotApplicationVersionResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateRobotApplicationVersionResponse.error_of_json))
   | CreateSimulationApplication ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateSimulationApplicationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateSimulationApplicationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (CreateSimulationApplicationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateSimulationApplicationResponse.error_of_json))
   | CreateSimulationApplicationVersion ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateSimulationApplicationVersionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateSimulationApplicationVersionResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (CreateSimulationApplicationVersionResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateSimulationApplicationVersionResponse.error_of_json))
   | CreateSimulationJob ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateSimulationJobResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateSimulationJobResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateSimulationJobResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateSimulationJobResponse.error_of_json))
   | CreateWorldExportJob ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateWorldExportJobResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateWorldExportJobResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateWorldExportJobResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateWorldExportJobResponse.error_of_json))
   | CreateWorldGenerationJob ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateWorldGenerationJobResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateWorldGenerationJobResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (CreateWorldGenerationJobResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateWorldGenerationJobResponse.error_of_json))
   | CreateWorldTemplate ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateWorldTemplateResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateWorldTemplateResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateWorldTemplateResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateWorldTemplateResponse.error_of_json))
   | DeleteFleet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteFleetResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteFleetResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteFleetResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some DeleteFleetResponse.error_of_json))
   | DeleteRobot ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteRobotResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteRobotResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteRobotResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some DeleteRobotResponse.error_of_json))
   | DeleteRobotApplication ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteRobotApplicationResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DeleteRobotApplicationResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteRobotApplicationResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteRobotApplicationResponse.error_of_json))
   | DeleteSimulationApplication ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteSimulationApplicationResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (DeleteSimulationApplicationResponse.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeleteSimulationApplicationResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteSimulationApplicationResponse.error_of_json))
   | DeleteWorldTemplate ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteWorldTemplateResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteWorldTemplateResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteWorldTemplateResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteWorldTemplateResponse.error_of_json))
   | DeregisterRobot ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeregisterRobotResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeregisterRobotResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeregisterRobotResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DeregisterRobotResponse.error_of_json))
   | DescribeDeploymentJob ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeDeploymentJobResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeDeploymentJobResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeDeploymentJobResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeDeploymentJobResponse.error_of_json))
   | DescribeFleet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeFleetResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeFleetResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeFleetResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DescribeFleetResponse.error_of_json))
   | DescribeRobot ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeRobotResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeRobotResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeRobotResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DescribeRobotResponse.error_of_json))
   | DescribeRobotApplication ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeRobotApplicationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeRobotApplicationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (DescribeRobotApplicationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeRobotApplicationResponse.error_of_json))
   | DescribeSimulationApplication ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeSimulationApplicationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeSimulationApplicationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeSimulationApplicationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeSimulationApplicationResponse.error_of_json))
   | DescribeSimulationJob ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeSimulationJobResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeSimulationJobResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeSimulationJobResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeSimulationJobResponse.error_of_json))
   | DescribeSimulationJobBatch ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeSimulationJobBatchResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeSimulationJobBatchResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeSimulationJobBatchResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeSimulationJobBatchResponse.error_of_json))
   | DescribeWorld ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeWorldResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeWorldResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeWorldResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DescribeWorldResponse.error_of_json))
   | DescribeWorldExportJob ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeWorldExportJobResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeWorldExportJobResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (DescribeWorldExportJobResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeWorldExportJobResponse.error_of_json))
   | DescribeWorldGenerationJob ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeWorldGenerationJobResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeWorldGenerationJobResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeWorldGenerationJobResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeWorldGenerationJobResponse.error_of_json))
   | DescribeWorldTemplate ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeWorldTemplateResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeWorldTemplateResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeWorldTemplateResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeWorldTemplateResponse.error_of_json))
   | GetWorldTemplateBody ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetWorldTemplateBodyResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetWorldTemplateBodyResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetWorldTemplateBodyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetWorldTemplateBodyResponse.error_of_json))
   | ListDeploymentJobs ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListDeploymentJobsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListDeploymentJobsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListDeploymentJobsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListDeploymentJobsResponse.error_of_json))
   | ListFleets ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListFleetsResponse.error_of_json)
-       | Ok resp -> Ok (ListFleetsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListFleetsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListFleetsResponse.error_of_json))
   | ListRobotApplications ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListRobotApplicationsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListRobotApplicationsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListRobotApplicationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListRobotApplicationsResponse.error_of_json))
   | ListRobots ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListRobotsResponse.error_of_json)
-       | Ok resp -> Ok (ListRobotsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListRobotsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListRobotsResponse.error_of_json))
   | ListSimulationApplications ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListSimulationApplicationsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListSimulationApplicationsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListSimulationApplicationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListSimulationApplicationsResponse.error_of_json))
   | ListSimulationJobBatches ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListSimulationJobBatchesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListSimulationJobBatchesResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListSimulationJobBatchesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListSimulationJobBatchesResponse.error_of_json))
   | ListSimulationJobs ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListSimulationJobsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListSimulationJobsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListSimulationJobsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListSimulationJobsResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | ListWorldExportJobs ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListWorldExportJobsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListWorldExportJobsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListWorldExportJobsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListWorldExportJobsResponse.error_of_json))
   | ListWorldGenerationJobs ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListWorldGenerationJobsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListWorldGenerationJobsResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListWorldGenerationJobsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListWorldGenerationJobsResponse.error_of_json))
   | ListWorldTemplates ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListWorldTemplatesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListWorldTemplatesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListWorldTemplatesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListWorldTemplatesResponse.error_of_json))
   | ListWorlds ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListWorldsResponse.error_of_json)
-       | Ok resp -> Ok (ListWorldsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListWorldsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListWorldsResponse.error_of_json))
   | RegisterRobot ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RegisterRobotResponse.error_of_json)
-       | Ok resp ->
-           Ok (RegisterRobotResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (RegisterRobotResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some RegisterRobotResponse.error_of_json))
   | RestartSimulationJob ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RestartSimulationJobResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (RestartSimulationJobResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (RestartSimulationJobResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some RestartSimulationJobResponse.error_of_json))
   | StartSimulationJobBatch ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some StartSimulationJobBatchResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (StartSimulationJobBatchResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (StartSimulationJobBatchResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some StartSimulationJobBatchResponse.error_of_json))
   | SyncDeploymentJob ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some SyncDeploymentJobResponse.error_of_json)
-       | Ok resp ->
-           Ok (SyncDeploymentJobResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (SyncDeploymentJobResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some SyncDeploymentJobResponse.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UntagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateRobotApplication ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateRobotApplicationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateRobotApplicationResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (UpdateRobotApplicationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateRobotApplicationResponse.error_of_json))
   | UpdateSimulationApplication ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateSimulationApplicationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateSimulationApplicationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (UpdateSimulationApplicationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateSimulationApplicationResponse.error_of_json))
   | UpdateWorldTemplate ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateWorldTemplateResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateWorldTemplateResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateWorldTemplateResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateWorldTemplateResponse.error_of_json))

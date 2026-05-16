@@ -5,14 +5,8 @@ open! Async
 let dispatch_exn ~name ~f ~error_to_json =
   match%bind f () with
   | Ok v -> return v
-  | Error (`AWS aws) ->
+  | Error aws ->
     failwithf "%s: %s" name (aws |> error_to_json |> Yojson.Safe.to_string) ()
-  | Error (`Transport err) ->
-    failwithf
-      "%s: transport error: %s"
-      name
-      (err |> Awso.Http.Io.Error.yojson_of_call |> Yojson.Safe.pretty_to_string)
-      ()
 ;;
 
 let unit_json () = `Assoc []

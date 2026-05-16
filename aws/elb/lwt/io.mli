@@ -3,203 +3,170 @@ open Awso_elb.Values
 val add_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      AddTagsInput.t ->
-        (AddTagsOutput.t,
-          [ `AWS of AddTagsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+      AddTagsInput.t -> (AddTagsOutput.t, AddTagsOutput.error) Result.t Lwt.t
 val apply_security_groups_to_load_balancer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ApplySecurityGroupsToLoadBalancerInput.t ->
         (ApplySecurityGroupsToLoadBalancerOutput.t,
-          [ `AWS of ApplySecurityGroupsToLoadBalancerOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ApplySecurityGroupsToLoadBalancerOutput.error) Result.t Lwt.t
 val attach_load_balancer_to_subnets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AttachLoadBalancerToSubnetsInput.t ->
         (AttachLoadBalancerToSubnetsOutput.t,
-          [ `AWS of AttachLoadBalancerToSubnetsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AttachLoadBalancerToSubnetsOutput.error) Result.t Lwt.t
 val configure_health_check :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ConfigureHealthCheckInput.t ->
-        (ConfigureHealthCheckOutput.t,
-          [ `AWS of ConfigureHealthCheckOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ConfigureHealthCheckOutput.t, ConfigureHealthCheckOutput.error)
+          Result.t Lwt.t
 val create_app_cookie_stickiness_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAppCookieStickinessPolicyInput.t ->
         (CreateAppCookieStickinessPolicyOutput.t,
-          [ `AWS of CreateAppCookieStickinessPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateAppCookieStickinessPolicyOutput.error) Result.t Lwt.t
 val create_l_b_cookie_stickiness_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateLBCookieStickinessPolicyInput.t ->
         (CreateLBCookieStickinessPolicyOutput.t,
-          [ `AWS of CreateLBCookieStickinessPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateLBCookieStickinessPolicyOutput.error) Result.t Lwt.t
 val create_load_balancer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAccessPointInput.t ->
-        (CreateAccessPointOutput.t,
-          [ `AWS of CreateAccessPointOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateAccessPointOutput.t, CreateAccessPointOutput.error) Result.t
+          Lwt.t
 val create_load_balancer_listeners :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateLoadBalancerListenerInput.t ->
         (CreateLoadBalancerListenerOutput.t,
-          [ `AWS of CreateLoadBalancerListenerOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateLoadBalancerListenerOutput.error) Result.t Lwt.t
 val create_load_balancer_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateLoadBalancerPolicyInput.t ->
         (CreateLoadBalancerPolicyOutput.t,
-          [ `AWS of CreateLoadBalancerPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateLoadBalancerPolicyOutput.error) Result.t Lwt.t
 val delete_load_balancer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAccessPointInput.t ->
-        (DeleteAccessPointOutput.t,
-          [ `AWS of DeleteAccessPointOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteAccessPointOutput.t, DeleteAccessPointOutput.error) Result.t
+          Lwt.t
 val delete_load_balancer_listeners :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteLoadBalancerListenerInput.t ->
         (DeleteLoadBalancerListenerOutput.t,
-          [ `AWS of DeleteLoadBalancerListenerOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteLoadBalancerListenerOutput.error) Result.t Lwt.t
 val delete_load_balancer_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteLoadBalancerPolicyInput.t ->
         (DeleteLoadBalancerPolicyOutput.t,
-          [ `AWS of DeleteLoadBalancerPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteLoadBalancerPolicyOutput.error) Result.t Lwt.t
 val deregister_instances_from_load_balancer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeregisterEndPointsInput.t ->
-        (DeregisterEndPointsOutput.t,
-          [ `AWS of DeregisterEndPointsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeregisterEndPointsOutput.t, DeregisterEndPointsOutput.error)
+          Result.t Lwt.t
 val describe_account_limits :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAccountLimitsInput.t ->
-        (DescribeAccountLimitsOutput.t,
-          [ `AWS of DescribeAccountLimitsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeAccountLimitsOutput.t, DescribeAccountLimitsOutput.error)
+          Result.t Lwt.t
 val describe_instance_health :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEndPointStateInput.t ->
-        (DescribeEndPointStateOutput.t,
-          [ `AWS of DescribeEndPointStateOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeEndPointStateOutput.t, DescribeEndPointStateOutput.error)
+          Result.t Lwt.t
 val describe_load_balancer_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeLoadBalancerAttributesInput.t ->
         (DescribeLoadBalancerAttributesOutput.t,
-          [ `AWS of DescribeLoadBalancerAttributesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeLoadBalancerAttributesOutput.error) Result.t Lwt.t
 val describe_load_balancer_policies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeLoadBalancerPoliciesInput.t ->
         (DescribeLoadBalancerPoliciesOutput.t,
-          [ `AWS of DescribeLoadBalancerPoliciesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeLoadBalancerPoliciesOutput.error) Result.t Lwt.t
 val describe_load_balancer_policy_types :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeLoadBalancerPolicyTypesInput.t ->
         (DescribeLoadBalancerPolicyTypesOutput.t,
-          [ `AWS of DescribeLoadBalancerPolicyTypesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeLoadBalancerPolicyTypesOutput.error) Result.t Lwt.t
 val describe_load_balancers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAccessPointsInput.t ->
-        (DescribeAccessPointsOutput.t,
-          [ `AWS of DescribeAccessPointsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeAccessPointsOutput.t, DescribeAccessPointsOutput.error)
+          Result.t Lwt.t
 val describe_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeTagsInput.t ->
-        (DescribeTagsOutput.t,
-          [ `AWS of DescribeTagsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeTagsOutput.t, DescribeTagsOutput.error) Result.t Lwt.t
 val detach_load_balancer_from_subnets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DetachLoadBalancerFromSubnetsInput.t ->
         (DetachLoadBalancerFromSubnetsOutput.t,
-          [ `AWS of DetachLoadBalancerFromSubnetsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DetachLoadBalancerFromSubnetsOutput.error) Result.t Lwt.t
 val disable_availability_zones_for_load_balancer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RemoveAvailabilityZonesInput.t ->
         (RemoveAvailabilityZonesOutput.t,
-          [ `AWS of RemoveAvailabilityZonesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          RemoveAvailabilityZonesOutput.error) Result.t Lwt.t
 val enable_availability_zones_for_load_balancer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AddAvailabilityZonesInput.t ->
-        (AddAvailabilityZonesOutput.t,
-          [ `AWS of AddAvailabilityZonesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AddAvailabilityZonesOutput.t, AddAvailabilityZonesOutput.error)
+          Result.t Lwt.t
 val modify_load_balancer_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyLoadBalancerAttributesInput.t ->
         (ModifyLoadBalancerAttributesOutput.t,
-          [ `AWS of ModifyLoadBalancerAttributesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ModifyLoadBalancerAttributesOutput.error) Result.t Lwt.t
 val register_instances_with_load_balancer :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegisterEndPointsInput.t ->
-        (RegisterEndPointsOutput.t,
-          [ `AWS of RegisterEndPointsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RegisterEndPointsOutput.t, RegisterEndPointsOutput.error) Result.t
+          Lwt.t
 val remove_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RemoveTagsInput.t ->
-        (RemoveTagsOutput.t,
-          [ `AWS of RemoveTagsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (RemoveTagsOutput.t, RemoveTagsOutput.error) Result.t Lwt.t
 val set_load_balancer_listener_s_s_l_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SetLoadBalancerListenerSSLCertificateInput.t ->
         (SetLoadBalancerListenerSSLCertificateOutput.t,
-          [ `AWS of SetLoadBalancerListenerSSLCertificateOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          SetLoadBalancerListenerSSLCertificateOutput.error) Result.t Lwt.t
 val set_load_balancer_policies_for_backend_server :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SetLoadBalancerPoliciesForBackendServerInput.t ->
         (SetLoadBalancerPoliciesForBackendServerOutput.t,
-          [ `AWS of SetLoadBalancerPoliciesForBackendServerOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          SetLoadBalancerPoliciesForBackendServerOutput.error) Result.t Lwt.t
 val set_load_balancer_policies_of_listener :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SetLoadBalancerPoliciesOfListenerInput.t ->
         (SetLoadBalancerPoliciesOfListenerOutput.t,
-          [ `AWS of SetLoadBalancerPoliciesOfListenerOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          SetLoadBalancerPoliciesOfListenerOutput.error) Result.t Lwt.t

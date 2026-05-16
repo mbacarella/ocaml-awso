@@ -1232,416 +1232,432 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       let body = Option.map req.body ~f:Body.to_header in
       Awso.Http.Request.make ?body (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_xml =
-    let generic_error () = Error (`Transport err) in
-    match err with
-    | `Too_many_redirects -> generic_error ()
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-        (match (error_of_xml, ((code >= 400) && (code <= 599))) with
-         | (None, _) | (_, false) -> generic_error ()
-         | (Some error_of_xml, true) ->
-             (match Awso.Xml.parse_response body with
-              | `Data _ -> generic_error ()
-              | `El (((_, "Error"), _), _) as xml ->
-                  (try
-                     let error_code =
-                       match Awso.Xml.child_exn xml "Code" with
-                       | `Data error_code -> error_code
-                       | `El (_, children) ->
-                           (List.map children
-                              ~f:(function | `Data s -> s | `El _ -> ""))
-                             |> (String.concat ~sep:"") in
-                     Error
-                       (`AWS (error_of_xml (String.strip error_code) xml))
-                   with | Failure _ -> generic_error ())
-              | `El _ -> generic_error ())) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let parse_aws_error error_of_xml =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = None }) in
+    match (error_of_xml, ((code >= 400) && (code <= 599))) with
+    | (None, _) | (_, false) -> bail ()
+    | (Some error_of_xml, true) ->
+        (match Awso.Xml.parse_response body with
+         | `Data _ -> bail ()
+         | `El (((_, "Error"), _), _) as xml ->
+             (try
+                let error_code =
+                  match Awso.Xml.child_exn xml "Code" with
+                  | `Data error_code -> error_code
+                  | `El (_, children) ->
+                      (List.map children
+                         ~f:(function | `Data s -> s | `El _ -> ""))
+                        |> (String.concat ~sep:"") in
+                error_of_xml (String.strip error_code) xml
+              with | Failure _ -> bail ())
+         | `El _ -> bail ()) in
   let response_to_xml resp =
     Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+  let _ = parse_aws_error in
+  let _ = response_to_xml in
+  let _ = resp in
   match endpoint with
   | AbortMultipartUpload ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some AbortMultipartUploadOutput.error_of_xml)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (AbortMultipartUploadOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (AbortMultipartUploadOutput.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some AbortMultipartUploadOutput.error_of_xml))
   | CompleteMultipartUpload ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           Ok (CompleteMultipartUploadOutput.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (CompleteMultipartUploadOutput.of_xml (response_to_xml resp))
+      else Error (parse_aws_error None)
   | CopyObject ->
-      (match resp with
-       | Error err -> handle_error err (Some CopyObjectOutput.error_of_xml)
-       | Ok resp -> Ok (CopyObjectOutput.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (CopyObjectOutput.of_xml (response_to_xml resp))
+      else Error (parse_aws_error (Some CopyObjectOutput.error_of_xml))
   | CreateBucket ->
-      (match resp with
-       | Error err -> handle_error err (Some CreateBucketOutput.error_of_xml)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (CreateBucketOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CreateBucketOutput.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some CreateBucketOutput.error_of_xml))
   | CreateMultipartUpload ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           Ok (CreateMultipartUploadOutput.of_xml (response_to_xml resp)))
-  | DeleteBucket -> Ok ()
-  | DeleteBucketAnalyticsConfiguration -> Ok ()
-  | DeleteBucketCors -> Ok ()
-  | DeleteBucketEncryption -> Ok ()
-  | DeleteBucketIntelligentTieringConfiguration -> Ok ()
-  | DeleteBucketInventoryConfiguration -> Ok ()
-  | DeleteBucketLifecycle -> Ok ()
-  | DeleteBucketMetricsConfiguration -> Ok ()
-  | DeleteBucketOwnershipControls -> Ok ()
-  | DeleteBucketPolicy -> Ok ()
-  | DeleteBucketReplication -> Ok ()
-  | DeleteBucketTagging -> Ok ()
-  | DeleteBucketWebsite -> Ok ()
+      if is_success
+      then Ok (CreateMultipartUploadOutput.of_xml (response_to_xml resp))
+      else Error (parse_aws_error None)
+  | DeleteBucket ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteBucketAnalyticsConfiguration ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteBucketCors ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteBucketEncryption ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteBucketIntelligentTieringConfiguration ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteBucketInventoryConfiguration ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteBucketLifecycle ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteBucketMetricsConfiguration ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteBucketOwnershipControls ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteBucketPolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteBucketReplication ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteBucketTagging ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteBucketWebsite ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteObject ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteObjectOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteObjectOutput.of_header_and_body (headers, ()))
+      else Error (parse_aws_error None)
   | DeleteObjectTagging ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteObjectTaggingOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteObjectTaggingOutput.of_header_and_body (headers, ()))
+      else Error (parse_aws_error None)
   | DeleteObjects ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp -> Ok (DeleteObjectsOutput.of_xml (response_to_xml resp)))
-  | DeletePublicAccessBlock -> Ok ()
+      if is_success
+      then Ok (DeleteObjectsOutput.of_xml (response_to_xml resp))
+      else Error (parse_aws_error None)
+  | DeletePublicAccessBlock ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | GetBucketAccelerateConfiguration ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           Ok
-             (GetBucketAccelerateConfigurationOutput.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok
+          (GetBucketAccelerateConfigurationOutput.of_xml
+             (response_to_xml resp))
+      else Error (parse_aws_error None)
   | GetBucketAcl ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp -> Ok (GetBucketAclOutput.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetBucketAclOutput.of_xml (response_to_xml resp))
+      else Error (parse_aws_error None)
   | GetBucketAnalyticsConfiguration ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           Ok
-             (GetBucketAnalyticsConfigurationOutput.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok
+          (GetBucketAnalyticsConfigurationOutput.of_xml
+             (response_to_xml resp))
+      else Error (parse_aws_error None)
   | GetBucketCors ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp -> Ok (GetBucketCorsOutput.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetBucketCorsOutput.of_xml (response_to_xml resp))
+      else Error (parse_aws_error None)
   | GetBucketEncryption ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           Ok (GetBucketEncryptionOutput.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetBucketEncryptionOutput.of_xml (response_to_xml resp))
+      else Error (parse_aws_error None)
   | GetBucketIntelligentTieringConfiguration ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           Ok
-             (GetBucketIntelligentTieringConfigurationOutput.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok
+          (GetBucketIntelligentTieringConfigurationOutput.of_xml
+             (response_to_xml resp))
+      else Error (parse_aws_error None)
   | GetBucketInventoryConfiguration ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           Ok
-             (GetBucketInventoryConfigurationOutput.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok
+          (GetBucketInventoryConfigurationOutput.of_xml
+             (response_to_xml resp))
+      else Error (parse_aws_error None)
   | GetBucketLifecycle ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           Ok (GetBucketLifecycleOutput.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetBucketLifecycleOutput.of_xml (response_to_xml resp))
+      else Error (parse_aws_error None)
   | GetBucketLifecycleConfiguration ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           Ok
-             (GetBucketLifecycleConfigurationOutput.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok
+          (GetBucketLifecycleConfigurationOutput.of_xml
+             (response_to_xml resp))
+      else Error (parse_aws_error None)
   | GetBucketLocation ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           Ok (GetBucketLocationOutput.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetBucketLocationOutput.of_xml (response_to_xml resp))
+      else Error (parse_aws_error None)
   | GetBucketLogging ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp -> Ok (GetBucketLoggingOutput.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetBucketLoggingOutput.of_xml (response_to_xml resp))
+      else Error (parse_aws_error None)
   | GetBucketMetricsConfiguration ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           Ok
-             (GetBucketMetricsConfigurationOutput.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok
+          (GetBucketMetricsConfigurationOutput.of_xml (response_to_xml resp))
+      else Error (parse_aws_error None)
   | GetBucketNotification ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           Ok
-             (NotificationConfigurationDeprecated.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok
+          (NotificationConfigurationDeprecated.of_xml (response_to_xml resp))
+      else Error (parse_aws_error None)
   | GetBucketNotificationConfiguration ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           Ok (NotificationConfiguration.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (NotificationConfiguration.of_xml (response_to_xml resp))
+      else Error (parse_aws_error None)
   | GetBucketOwnershipControls ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           Ok
-             (GetBucketOwnershipControlsOutput.of_xml (response_to_xml resp)))
+      if is_success
+      then
+        Ok (GetBucketOwnershipControlsOutput.of_xml (response_to_xml resp))
+      else Error (parse_aws_error None)
   | GetBucketPolicy ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp -> Ok (GetBucketPolicyOutput.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetBucketPolicyOutput.of_xml (response_to_xml resp))
+      else Error (parse_aws_error None)
   | GetBucketPolicyStatus ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           Ok (GetBucketPolicyStatusOutput.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetBucketPolicyStatusOutput.of_xml (response_to_xml resp))
+      else Error (parse_aws_error None)
   | GetBucketReplication ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           Ok (GetBucketReplicationOutput.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetBucketReplicationOutput.of_xml (response_to_xml resp))
+      else Error (parse_aws_error None)
   | GetBucketRequestPayment ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           Ok (GetBucketRequestPaymentOutput.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetBucketRequestPaymentOutput.of_xml (response_to_xml resp))
+      else Error (parse_aws_error None)
   | GetBucketTagging ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp -> Ok (GetBucketTaggingOutput.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetBucketTaggingOutput.of_xml (response_to_xml resp))
+      else Error (parse_aws_error None)
   | GetBucketVersioning ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           Ok (GetBucketVersioningOutput.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetBucketVersioningOutput.of_xml (response_to_xml resp))
+      else Error (parse_aws_error None)
   | GetBucketWebsite ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp -> Ok (GetBucketWebsiteOutput.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetBucketWebsiteOutput.of_xml (response_to_xml resp))
+      else Error (parse_aws_error None)
   | GetObject ->
-      (match resp with
-       | Error err -> handle_error err (Some GetObjectOutput.error_of_xml)
-       | Ok resp ->
-           let body = Body.of_string (Awso.Http.Response.body resp) in
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (GetObjectOutput.of_header_and_body (headers, body)))
+      if is_success
+      then
+        let body = Body.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetObjectOutput.of_header_and_body (headers, body))
+      else Error (parse_aws_error (Some GetObjectOutput.error_of_xml))
   | GetObjectAcl ->
-      (match resp with
-       | Error err -> handle_error err (Some GetObjectAclOutput.error_of_xml)
-       | Ok resp -> Ok (GetObjectAclOutput.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetObjectAclOutput.of_xml (response_to_xml resp))
+      else Error (parse_aws_error (Some GetObjectAclOutput.error_of_xml))
   | GetObjectAttributes ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetObjectAttributesOutput.error_of_xml)
-       | Ok resp ->
-           Ok (GetObjectAttributesOutput.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetObjectAttributesOutput.of_xml (response_to_xml resp))
+      else
+        Error (parse_aws_error (Some GetObjectAttributesOutput.error_of_xml))
   | GetObjectLegalHold ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           Ok (GetObjectLegalHoldOutput.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetObjectLegalHoldOutput.of_xml (response_to_xml resp))
+      else Error (parse_aws_error None)
   | GetObjectLockConfiguration ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           Ok
-             (GetObjectLockConfigurationOutput.of_xml (response_to_xml resp)))
+      if is_success
+      then
+        Ok (GetObjectLockConfigurationOutput.of_xml (response_to_xml resp))
+      else Error (parse_aws_error None)
   | GetObjectRetention ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           Ok (GetObjectRetentionOutput.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetObjectRetentionOutput.of_xml (response_to_xml resp))
+      else Error (parse_aws_error None)
   | GetObjectTagging ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp -> Ok (GetObjectTaggingOutput.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (GetObjectTaggingOutput.of_xml (response_to_xml resp))
+      else Error (parse_aws_error None)
   | GetObjectTorrent ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let body = Body.of_string (Awso.Http.Response.body resp) in
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (GetObjectTorrentOutput.of_header_and_body (headers, body)))
+      if is_success
+      then
+        let body = Body.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetObjectTorrentOutput.of_header_and_body (headers, body))
+      else Error (parse_aws_error None)
   | GetPublicAccessBlock ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           Ok (GetPublicAccessBlockOutput.of_xml (response_to_xml resp)))
-  | HeadBucket -> Ok ()
+      if is_success
+      then Ok (GetPublicAccessBlockOutput.of_xml (response_to_xml resp))
+      else Error (parse_aws_error None)
+  | HeadBucket -> if is_success then Ok () else Error (parse_aws_error None)
   | HeadObject ->
-      (match resp with
-       | Error err -> handle_error err (Some HeadObjectOutput.error_of_xml)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (HeadObjectOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (HeadObjectOutput.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some HeadObjectOutput.error_of_xml))
   | ListBucketAnalyticsConfigurations ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           Ok
-             (ListBucketAnalyticsConfigurationsOutput.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok
+          (ListBucketAnalyticsConfigurationsOutput.of_xml
+             (response_to_xml resp))
+      else Error (parse_aws_error None)
   | ListBucketIntelligentTieringConfigurations ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           Ok
-             (ListBucketIntelligentTieringConfigurationsOutput.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok
+          (ListBucketIntelligentTieringConfigurationsOutput.of_xml
+             (response_to_xml resp))
+      else Error (parse_aws_error None)
   | ListBucketInventoryConfigurations ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           Ok
-             (ListBucketInventoryConfigurationsOutput.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok
+          (ListBucketInventoryConfigurationsOutput.of_xml
+             (response_to_xml resp))
+      else Error (parse_aws_error None)
   | ListBucketMetricsConfigurations ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           Ok
-             (ListBucketMetricsConfigurationsOutput.of_xml
-                (response_to_xml resp)))
+      if is_success
+      then
+        Ok
+          (ListBucketMetricsConfigurationsOutput.of_xml
+             (response_to_xml resp))
+      else Error (parse_aws_error None)
   | ListBuckets ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp -> Ok (ListBucketsOutput.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (ListBucketsOutput.of_xml (response_to_xml resp))
+      else Error (parse_aws_error None)
   | ListMultipartUploads ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           Ok (ListMultipartUploadsOutput.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (ListMultipartUploadsOutput.of_xml (response_to_xml resp))
+      else Error (parse_aws_error None)
   | ListObjectVersions ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           Ok (ListObjectVersionsOutput.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (ListObjectVersionsOutput.of_xml (response_to_xml resp))
+      else Error (parse_aws_error None)
   | ListObjects ->
-      (match resp with
-       | Error err -> handle_error err (Some ListObjectsOutput.error_of_xml)
-       | Ok resp -> Ok (ListObjectsOutput.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (ListObjectsOutput.of_xml (response_to_xml resp))
+      else Error (parse_aws_error (Some ListObjectsOutput.error_of_xml))
   | ListObjectsV2 ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListObjectsV2Output.error_of_xml)
-       | Ok resp -> Ok (ListObjectsV2Output.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (ListObjectsV2Output.of_xml (response_to_xml resp))
+      else Error (parse_aws_error (Some ListObjectsV2Output.error_of_xml))
   | ListParts ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp -> Ok (ListPartsOutput.of_xml (response_to_xml resp)))
-  | PutBucketAccelerateConfiguration -> Ok ()
-  | PutBucketAcl -> Ok ()
-  | PutBucketAnalyticsConfiguration -> Ok ()
-  | PutBucketCors -> Ok ()
-  | PutBucketEncryption -> Ok ()
-  | PutBucketIntelligentTieringConfiguration -> Ok ()
-  | PutBucketInventoryConfiguration -> Ok ()
-  | PutBucketLifecycle -> Ok ()
-  | PutBucketLifecycleConfiguration -> Ok ()
-  | PutBucketLogging -> Ok ()
-  | PutBucketMetricsConfiguration -> Ok ()
-  | PutBucketNotification -> Ok ()
-  | PutBucketNotificationConfiguration -> Ok ()
-  | PutBucketOwnershipControls -> Ok ()
-  | PutBucketPolicy -> Ok ()
-  | PutBucketReplication -> Ok ()
-  | PutBucketRequestPayment -> Ok ()
-  | PutBucketTagging -> Ok ()
-  | PutBucketVersioning -> Ok ()
-  | PutBucketWebsite -> Ok ()
+      if is_success
+      then Ok (ListPartsOutput.of_xml (response_to_xml resp))
+      else Error (parse_aws_error None)
+  | PutBucketAccelerateConfiguration ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | PutBucketAcl ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | PutBucketAnalyticsConfiguration ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | PutBucketCors ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | PutBucketEncryption ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | PutBucketIntelligentTieringConfiguration ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | PutBucketInventoryConfiguration ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | PutBucketLifecycle ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | PutBucketLifecycleConfiguration ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | PutBucketLogging ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | PutBucketMetricsConfiguration ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | PutBucketNotification ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | PutBucketNotificationConfiguration ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | PutBucketOwnershipControls ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | PutBucketPolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | PutBucketReplication ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | PutBucketRequestPayment ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | PutBucketTagging ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | PutBucketVersioning ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | PutBucketWebsite ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | PutObject ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (PutObjectOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (PutObjectOutput.of_header_and_body (headers, ()))
+      else Error (parse_aws_error None)
   | PutObjectAcl ->
-      (match resp with
-       | Error err -> handle_error err (Some PutObjectAclOutput.error_of_xml)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (PutObjectAclOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (PutObjectAclOutput.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some PutObjectAclOutput.error_of_xml))
   | PutObjectLegalHold ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (PutObjectLegalHoldOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (PutObjectLegalHoldOutput.of_header_and_body (headers, ()))
+      else Error (parse_aws_error None)
   | PutObjectLockConfiguration ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (PutObjectLockConfigurationOutput.of_header_and_body
-                (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (PutObjectLockConfigurationOutput.of_header_and_body (headers, ()))
+      else Error (parse_aws_error None)
   | PutObjectRetention ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (PutObjectRetentionOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (PutObjectRetentionOutput.of_header_and_body (headers, ()))
+      else Error (parse_aws_error None)
   | PutObjectTagging ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (PutObjectTaggingOutput.of_header_and_body (headers, ())))
-  | PutPublicAccessBlock -> Ok ()
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (PutObjectTaggingOutput.of_header_and_body (headers, ()))
+      else Error (parse_aws_error None)
+  | PutPublicAccessBlock ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | RestoreObject ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RestoreObjectOutput.error_of_xml)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (RestoreObjectOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (RestoreObjectOutput.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some RestoreObjectOutput.error_of_xml))
   | SelectObjectContent ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           Ok (SelectObjectContentOutput.of_xml (response_to_xml resp)))
+      if is_success
+      then Ok (SelectObjectContentOutput.of_xml (response_to_xml resp))
+      else Error (parse_aws_error None)
   | UploadPart ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UploadPartOutput.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UploadPartOutput.of_header_and_body (headers, ()))
+      else Error (parse_aws_error None)
   | UploadPartCopy ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp -> Ok (UploadPartCopyOutput.of_xml (response_to_xml resp)))
-  | WriteGetObjectResponse -> Ok ()
+      if is_success
+      then Ok (UploadPartCopyOutput.of_xml (response_to_xml resp))
+      else Error (parse_aws_error None)
+  | WriteGetObjectResponse ->
+      if is_success then Ok () else Error (parse_aws_error None)

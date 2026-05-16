@@ -249,109 +249,105 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | BatchAcknowledgeAlarm ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some BatchAcknowledgeAlarmResponse.error_of_json)
-       | Ok resp ->
-           Ok (BatchAcknowledgeAlarmResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (BatchAcknowledgeAlarmResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some BatchAcknowledgeAlarmResponse.error_of_json))
   | BatchDisableAlarm ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some BatchDisableAlarmResponse.error_of_json)
-       | Ok resp ->
-           Ok (BatchDisableAlarmResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (BatchDisableAlarmResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some BatchDisableAlarmResponse.error_of_json))
   | BatchEnableAlarm ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some BatchEnableAlarmResponse.error_of_json)
-       | Ok resp ->
-           Ok (BatchEnableAlarmResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (BatchEnableAlarmResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some BatchEnableAlarmResponse.error_of_json))
   | BatchPutMessage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some BatchPutMessageResponse.error_of_json)
-       | Ok resp ->
-           Ok (BatchPutMessageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (BatchPutMessageResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some BatchPutMessageResponse.error_of_json))
   | BatchResetAlarm ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some BatchResetAlarmResponse.error_of_json)
-       | Ok resp ->
-           Ok (BatchResetAlarmResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (BatchResetAlarmResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some BatchResetAlarmResponse.error_of_json))
   | BatchSnoozeAlarm ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some BatchSnoozeAlarmResponse.error_of_json)
-       | Ok resp ->
-           Ok (BatchSnoozeAlarmResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (BatchSnoozeAlarmResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some BatchSnoozeAlarmResponse.error_of_json))
   | BatchUpdateDetector ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some BatchUpdateDetectorResponse.error_of_json)
-       | Ok resp ->
-           Ok (BatchUpdateDetectorResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (BatchUpdateDetectorResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some BatchUpdateDetectorResponse.error_of_json))
   | DescribeAlarm ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeAlarmResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeAlarmResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeAlarmResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DescribeAlarmResponse.error_of_json))
   | DescribeDetector ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeDetectorResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeDetectorResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeDetectorResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeDetectorResponse.error_of_json))
   | ListAlarms ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListAlarmsResponse.error_of_json)
-       | Ok resp -> Ok (ListAlarmsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListAlarmsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListAlarmsResponse.error_of_json))
   | ListDetectors ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListDetectorsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListDetectorsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListDetectorsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListDetectorsResponse.error_of_json))

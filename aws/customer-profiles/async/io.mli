@@ -4,303 +4,229 @@ val add_profile_key :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AddProfileKeyRequest.t ->
-        (AddProfileKeyResponse.t,
-          [ `AWS of AddProfileKeyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AddProfileKeyResponse.t, AddProfileKeyResponse.error) Result.t
           Async.Deferred.t
 val create_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDomainRequest.t ->
-        (CreateDomainResponse.t,
-          [ `AWS of CreateDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateDomainResponse.t, CreateDomainResponse.error) Result.t
           Async.Deferred.t
 val create_integration_workflow :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateIntegrationWorkflowRequest.t ->
         (CreateIntegrationWorkflowResponse.t,
-          [ `AWS of CreateIntegrationWorkflowResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateIntegrationWorkflowResponse.error) Result.t Async.Deferred.t
 val create_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateProfileRequest.t ->
-        (CreateProfileResponse.t,
-          [ `AWS of CreateProfileResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateProfileResponse.t, CreateProfileResponse.error) Result.t
           Async.Deferred.t
 val delete_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDomainRequest.t ->
-        (DeleteDomainResponse.t,
-          [ `AWS of DeleteDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteDomainResponse.t, DeleteDomainResponse.error) Result.t
           Async.Deferred.t
 val delete_integration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteIntegrationRequest.t ->
-        (DeleteIntegrationResponse.t,
-          [ `AWS of DeleteIntegrationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteIntegrationResponse.t, DeleteIntegrationResponse.error)
+          Result.t Async.Deferred.t
 val delete_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteProfileRequest.t ->
-        (DeleteProfileResponse.t,
-          [ `AWS of DeleteProfileResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteProfileResponse.t, DeleteProfileResponse.error) Result.t
           Async.Deferred.t
 val delete_profile_key :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteProfileKeyRequest.t ->
-        (DeleteProfileKeyResponse.t,
-          [ `AWS of DeleteProfileKeyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteProfileKeyResponse.t, DeleteProfileKeyResponse.error) Result.t
           Async.Deferred.t
 val delete_profile_object :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteProfileObjectRequest.t ->
-        (DeleteProfileObjectResponse.t,
-          [ `AWS of DeleteProfileObjectResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteProfileObjectResponse.t, DeleteProfileObjectResponse.error)
+          Result.t Async.Deferred.t
 val delete_profile_object_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteProfileObjectTypeRequest.t ->
         (DeleteProfileObjectTypeResponse.t,
-          [ `AWS of DeleteProfileObjectTypeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeleteProfileObjectTypeResponse.error) Result.t Async.Deferred.t
 val delete_workflow :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteWorkflowRequest.t ->
-        (DeleteWorkflowResponse.t,
-          [ `AWS of DeleteWorkflowResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteWorkflowResponse.t, DeleteWorkflowResponse.error) Result.t
           Async.Deferred.t
 val get_auto_merging_preview :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAutoMergingPreviewRequest.t ->
         (GetAutoMergingPreviewResponse.t,
-          [ `AWS of GetAutoMergingPreviewResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetAutoMergingPreviewResponse.error) Result.t Async.Deferred.t
 val get_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDomainRequest.t ->
-        (GetDomainResponse.t,
-          [ `AWS of GetDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetDomainResponse.t, GetDomainResponse.error) Result.t
           Async.Deferred.t
 val get_identity_resolution_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetIdentityResolutionJobRequest.t ->
         (GetIdentityResolutionJobResponse.t,
-          [ `AWS of GetIdentityResolutionJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetIdentityResolutionJobResponse.error) Result.t Async.Deferred.t
 val get_integration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetIntegrationRequest.t ->
-        (GetIntegrationResponse.t,
-          [ `AWS of GetIntegrationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetIntegrationResponse.t, GetIntegrationResponse.error) Result.t
           Async.Deferred.t
 val get_matches :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetMatchesRequest.t ->
-        (GetMatchesResponse.t,
-          [ `AWS of GetMatchesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetMatchesResponse.t, GetMatchesResponse.error) Result.t
           Async.Deferred.t
 val get_profile_object_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetProfileObjectTypeRequest.t ->
-        (GetProfileObjectTypeResponse.t,
-          [ `AWS of GetProfileObjectTypeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetProfileObjectTypeResponse.t, GetProfileObjectTypeResponse.error)
+          Result.t Async.Deferred.t
 val get_profile_object_type_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetProfileObjectTypeTemplateRequest.t ->
         (GetProfileObjectTypeTemplateResponse.t,
-          [ `AWS of GetProfileObjectTypeTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetProfileObjectTypeTemplateResponse.error) Result.t
           Async.Deferred.t
 val get_workflow :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetWorkflowRequest.t ->
-        (GetWorkflowResponse.t,
-          [ `AWS of GetWorkflowResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetWorkflowResponse.t, GetWorkflowResponse.error) Result.t
           Async.Deferred.t
 val get_workflow_steps :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetWorkflowStepsRequest.t ->
-        (GetWorkflowStepsResponse.t,
-          [ `AWS of GetWorkflowStepsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetWorkflowStepsResponse.t, GetWorkflowStepsResponse.error) Result.t
           Async.Deferred.t
 val list_account_integrations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAccountIntegrationsRequest.t ->
         (ListAccountIntegrationsResponse.t,
-          [ `AWS of ListAccountIntegrationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListAccountIntegrationsResponse.error) Result.t Async.Deferred.t
 val list_domains :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDomainsRequest.t ->
-        (ListDomainsResponse.t,
-          [ `AWS of ListDomainsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListDomainsResponse.t, ListDomainsResponse.error) Result.t
           Async.Deferred.t
 val list_identity_resolution_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListIdentityResolutionJobsRequest.t ->
         (ListIdentityResolutionJobsResponse.t,
-          [ `AWS of ListIdentityResolutionJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListIdentityResolutionJobsResponse.error) Result.t Async.Deferred.t
 val list_integrations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListIntegrationsRequest.t ->
-        (ListIntegrationsResponse.t,
-          [ `AWS of ListIntegrationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListIntegrationsResponse.t, ListIntegrationsResponse.error) Result.t
           Async.Deferred.t
 val list_profile_object_type_templates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListProfileObjectTypeTemplatesRequest.t ->
         (ListProfileObjectTypeTemplatesResponse.t,
-          [ `AWS of ListProfileObjectTypeTemplatesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListProfileObjectTypeTemplatesResponse.error) Result.t
           Async.Deferred.t
 val list_profile_object_types :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListProfileObjectTypesRequest.t ->
         (ListProfileObjectTypesResponse.t,
-          [ `AWS of ListProfileObjectTypesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListProfileObjectTypesResponse.error) Result.t Async.Deferred.t
 val list_profile_objects :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListProfileObjectsRequest.t ->
-        (ListProfileObjectsResponse.t,
-          [ `AWS of ListProfileObjectsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListProfileObjectsResponse.t, ListProfileObjectsResponse.error)
+          Result.t Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val list_workflows :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListWorkflowsRequest.t ->
-        (ListWorkflowsResponse.t,
-          [ `AWS of ListWorkflowsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListWorkflowsResponse.t, ListWorkflowsResponse.error) Result.t
           Async.Deferred.t
 val merge_profiles :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       MergeProfilesRequest.t ->
-        (MergeProfilesResponse.t,
-          [ `AWS of MergeProfilesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (MergeProfilesResponse.t, MergeProfilesResponse.error) Result.t
           Async.Deferred.t
 val put_integration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutIntegrationRequest.t ->
-        (PutIntegrationResponse.t,
-          [ `AWS of PutIntegrationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (PutIntegrationResponse.t, PutIntegrationResponse.error) Result.t
           Async.Deferred.t
 val put_profile_object :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutProfileObjectRequest.t ->
-        (PutProfileObjectResponse.t,
-          [ `AWS of PutProfileObjectResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (PutProfileObjectResponse.t, PutProfileObjectResponse.error) Result.t
           Async.Deferred.t
 val put_profile_object_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutProfileObjectTypeRequest.t ->
-        (PutProfileObjectTypeResponse.t,
-          [ `AWS of PutProfileObjectTypeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (PutProfileObjectTypeResponse.t, PutProfileObjectTypeResponse.error)
+          Result.t Async.Deferred.t
 val search_profiles :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SearchProfilesRequest.t ->
-        (SearchProfilesResponse.t,
-          [ `AWS of SearchProfilesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (SearchProfilesResponse.t, SearchProfilesResponse.error) Result.t
           Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
 val update_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDomainRequest.t ->
-        (UpdateDomainResponse.t,
-          [ `AWS of UpdateDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateDomainResponse.t, UpdateDomainResponse.error) Result.t
           Async.Deferred.t
 val update_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateProfileRequest.t ->
-        (UpdateProfileResponse.t,
-          [ `AWS of UpdateProfileResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateProfileResponse.t, UpdateProfileResponse.error) Result.t
           Async.Deferred.t

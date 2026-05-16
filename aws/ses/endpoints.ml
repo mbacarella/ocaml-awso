@@ -1256,470 +1256,493 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_xml =
-    let generic_error () = Error (`Transport err) in
-    match err with
-    | `Too_many_redirects -> generic_error ()
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-        (match (error_of_xml, ((code >= 400) && (code <= 599))) with
-         | (None, _) | (_, false) -> generic_error ()
-         | (Some error_of_xml, true) ->
-             (match Awso.Xml.parse_response body with
-              | `Data _ -> generic_error ()
-              | `El (((_, "ErrorResponse"), _), _) as error_response_xml ->
-                  let error_xml =
-                    Awso.Xml.child_exn error_response_xml "Error" in
-                  (try
-                     let error_code =
-                       match Awso.Xml.child_exn error_xml "Code" with
-                       | `Data error_code -> error_code
-                       | `El (_, children) ->
-                           (List.map children
-                              ~f:(function | `Data s -> s | `El _ -> ""))
-                             |> (String.concat ~sep:"") in
-                     Error
-                       (`AWS
-                          (error_of_xml (String.strip error_code) error_xml))
-                   with | Failure _ -> generic_error ())
-              | `El _ -> generic_error ())) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let parse_aws_error error_of_xml =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = None }) in
+    match (error_of_xml, ((code >= 400) && (code <= 599))) with
+    | (None, _) | (_, false) -> bail ()
+    | (Some error_of_xml, true) ->
+        (match Awso.Xml.parse_response body with
+         | `Data _ -> bail ()
+         | `El (((_, "ErrorResponse"), _), _) as error_response_xml ->
+             let error_xml = Awso.Xml.child_exn error_response_xml "Error" in
+             (try
+                let error_code =
+                  match Awso.Xml.child_exn error_xml "Code" with
+                  | `Data error_code -> error_code
+                  | `El (_, children) ->
+                      (List.map children
+                         ~f:(function | `Data s -> s | `El _ -> ""))
+                        |> (String.concat ~sep:"") in
+                error_of_xml (String.strip error_code) error_xml
+              with | Failure _ -> bail ())
+         | `El _ -> bail ()) in
+  let _ = parse_aws_error in
+  let _ = resp in
   match endpoint with
   | CloneReceiptRuleSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CloneReceiptRuleSetResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CloneReceiptRuleSetResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CloneReceiptRuleSetResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some CloneReceiptRuleSetResponse.error_of_xml))
   | CreateConfigurationSet ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateConfigurationSetResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateConfigurationSetResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateConfigurationSetResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some CreateConfigurationSetResponse.error_of_xml))
   | CreateConfigurationSetEventDestination ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateConfigurationSetEventDestinationResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
              (Some
-                CreateConfigurationSetEventDestinationResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateConfigurationSetEventDestinationResponse.of_xml xml))
+                CreateConfigurationSetEventDestinationResponse.error_of_xml))
   | CreateConfigurationSetTrackingOptions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateConfigurationSetTrackingOptionsResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateConfigurationSetTrackingOptionsResponse.of_xml xml))
-  | CreateCustomVerificationEmailTemplate -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateConfigurationSetTrackingOptionsResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateConfigurationSetTrackingOptionsResponse.error_of_xml))
+  | CreateCustomVerificationEmailTemplate ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | CreateReceiptFilter ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateReceiptFilterResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateReceiptFilterResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateReceiptFilterResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some CreateReceiptFilterResponse.error_of_xml))
   | CreateReceiptRule ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateReceiptRuleResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateReceiptRuleResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateReceiptRuleResponse.of_xml xml)
+      else
+        Error (parse_aws_error (Some CreateReceiptRuleResponse.error_of_xml))
   | CreateReceiptRuleSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateReceiptRuleSetResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateReceiptRuleSetResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateReceiptRuleSetResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some CreateReceiptRuleSetResponse.error_of_xml))
   | CreateTemplate ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateTemplateResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (CreateTemplateResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (CreateTemplateResponse.of_xml xml)
+      else Error (parse_aws_error (Some CreateTemplateResponse.error_of_xml))
   | DeleteConfigurationSet ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteConfigurationSetResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeleteConfigurationSetResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteConfigurationSetResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DeleteConfigurationSetResponse.error_of_xml))
   | DeleteConfigurationSetEventDestination ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteConfigurationSetEventDestinationResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
              (Some
-                DeleteConfigurationSetEventDestinationResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeleteConfigurationSetEventDestinationResponse.of_xml xml))
+                DeleteConfigurationSetEventDestinationResponse.error_of_xml))
   | DeleteConfigurationSetTrackingOptions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteConfigurationSetTrackingOptionsResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeleteConfigurationSetTrackingOptionsResponse.of_xml xml))
-  | DeleteCustomVerificationEmailTemplate -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteConfigurationSetTrackingOptionsResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteConfigurationSetTrackingOptionsResponse.error_of_xml))
+  | DeleteCustomVerificationEmailTemplate ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteIdentity ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeleteIdentityResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteIdentityResponse.of_xml xml)
+      else Error (parse_aws_error None)
   | DeleteIdentityPolicy ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeleteIdentityPolicyResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteIdentityPolicyResponse.of_xml xml)
+      else Error (parse_aws_error None)
   | DeleteReceiptFilter ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeleteReceiptFilterResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteReceiptFilterResponse.of_xml xml)
+      else Error (parse_aws_error None)
   | DeleteReceiptRule ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteReceiptRuleResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeleteReceiptRuleResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteReceiptRuleResponse.of_xml xml)
+      else
+        Error (parse_aws_error (Some DeleteReceiptRuleResponse.error_of_xml))
   | DeleteReceiptRuleSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteReceiptRuleSetResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeleteReceiptRuleSetResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteReceiptRuleSetResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DeleteReceiptRuleSetResponse.error_of_xml))
   | DeleteTemplate ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DeleteTemplateResponse.of_xml xml))
-  | DeleteVerifiedEmailAddress -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteTemplateResponse.of_xml xml)
+      else Error (parse_aws_error None)
+  | DeleteVerifiedEmailAddress ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DescribeActiveReceiptRuleSet ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeActiveReceiptRuleSetResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeActiveReceiptRuleSetResponse.of_xml xml)
+      else Error (parse_aws_error None)
   | DescribeConfigurationSet ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeConfigurationSetResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeConfigurationSetResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeConfigurationSetResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeConfigurationSetResponse.error_of_xml))
   | DescribeReceiptRule ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeReceiptRuleResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeReceiptRuleResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeReceiptRuleResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DescribeReceiptRuleResponse.error_of_xml))
   | DescribeReceiptRuleSet ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeReceiptRuleSetResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (DescribeReceiptRuleSetResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeReceiptRuleSetResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DescribeReceiptRuleSetResponse.error_of_xml))
   | GetAccountSendingEnabled ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetAccountSendingEnabledResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetAccountSendingEnabledResponse.of_xml xml)
+      else Error (parse_aws_error None)
   | GetCustomVerificationEmailTemplate ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetCustomVerificationEmailTemplateResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetCustomVerificationEmailTemplateResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetCustomVerificationEmailTemplateResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some GetCustomVerificationEmailTemplateResponse.error_of_xml))
   | GetIdentityDkimAttributes ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetIdentityDkimAttributesResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetIdentityDkimAttributesResponse.of_xml xml)
+      else Error (parse_aws_error None)
   | GetIdentityMailFromDomainAttributes ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetIdentityMailFromDomainAttributesResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetIdentityMailFromDomainAttributesResponse.of_xml xml)
+      else Error (parse_aws_error None)
   | GetIdentityNotificationAttributes ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetIdentityNotificationAttributesResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetIdentityNotificationAttributesResponse.of_xml xml)
+      else Error (parse_aws_error None)
   | GetIdentityPolicies ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetIdentityPoliciesResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetIdentityPoliciesResponse.of_xml xml)
+      else Error (parse_aws_error None)
   | GetIdentityVerificationAttributes ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetIdentityVerificationAttributesResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetIdentityVerificationAttributesResponse.of_xml xml)
+      else Error (parse_aws_error None)
   | GetSendQuota ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetSendQuotaResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetSendQuotaResponse.of_xml xml)
+      else Error (parse_aws_error None)
   | GetSendStatistics ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetSendStatisticsResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetSendStatisticsResponse.of_xml xml)
+      else Error (parse_aws_error None)
   | GetTemplate ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetTemplateResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (GetTemplateResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetTemplateResponse.of_xml xml)
+      else Error (parse_aws_error (Some GetTemplateResponse.error_of_xml))
   | ListConfigurationSets ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListConfigurationSetsResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListConfigurationSetsResponse.of_xml xml)
+      else Error (parse_aws_error None)
   | ListCustomVerificationEmailTemplates ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListCustomVerificationEmailTemplatesResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListCustomVerificationEmailTemplatesResponse.of_xml xml)
+      else Error (parse_aws_error None)
   | ListIdentities ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListIdentitiesResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListIdentitiesResponse.of_xml xml)
+      else Error (parse_aws_error None)
   | ListIdentityPolicies ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListIdentityPoliciesResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListIdentityPoliciesResponse.of_xml xml)
+      else Error (parse_aws_error None)
   | ListReceiptFilters ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListReceiptFiltersResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListReceiptFiltersResponse.of_xml xml)
+      else Error (parse_aws_error None)
   | ListReceiptRuleSets ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListReceiptRuleSetsResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListReceiptRuleSetsResponse.of_xml xml)
+      else Error (parse_aws_error None)
   | ListTemplates ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListTemplatesResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListTemplatesResponse.of_xml xml)
+      else Error (parse_aws_error None)
   | ListVerifiedEmailAddresses ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ListVerifiedEmailAddressesResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListVerifiedEmailAddressesResponse.of_xml xml)
+      else Error (parse_aws_error None)
   | PutConfigurationSetDeliveryOptions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PutConfigurationSetDeliveryOptionsResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (PutConfigurationSetDeliveryOptionsResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (PutConfigurationSetDeliveryOptionsResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some PutConfigurationSetDeliveryOptionsResponse.error_of_xml))
   | PutIdentityPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutIdentityPolicyResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (PutIdentityPolicyResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (PutIdentityPolicyResponse.of_xml xml)
+      else
+        Error (parse_aws_error (Some PutIdentityPolicyResponse.error_of_xml))
   | ReorderReceiptRuleSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ReorderReceiptRuleSetResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (ReorderReceiptRuleSetResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ReorderReceiptRuleSetResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some ReorderReceiptRuleSetResponse.error_of_xml))
   | SendBounce ->
-      (match resp with
-       | Error err -> handle_error err (Some SendBounceResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (SendBounceResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (SendBounceResponse.of_xml xml)
+      else Error (parse_aws_error (Some SendBounceResponse.error_of_xml))
   | SendBulkTemplatedEmail ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some SendBulkTemplatedEmailResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (SendBulkTemplatedEmailResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (SendBulkTemplatedEmailResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some SendBulkTemplatedEmailResponse.error_of_xml))
   | SendCustomVerificationEmail ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some SendCustomVerificationEmailResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (SendCustomVerificationEmailResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (SendCustomVerificationEmailResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some SendCustomVerificationEmailResponse.error_of_xml))
   | SendEmail ->
-      (match resp with
-       | Error err -> handle_error err (Some SendEmailResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (SendEmailResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (SendEmailResponse.of_xml xml)
+      else Error (parse_aws_error (Some SendEmailResponse.error_of_xml))
   | SendRawEmail ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some SendRawEmailResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (SendRawEmailResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (SendRawEmailResponse.of_xml xml)
+      else Error (parse_aws_error (Some SendRawEmailResponse.error_of_xml))
   | SendTemplatedEmail ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some SendTemplatedEmailResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (SendTemplatedEmailResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (SendTemplatedEmailResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some SendTemplatedEmailResponse.error_of_xml))
   | SetActiveReceiptRuleSet ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some SetActiveReceiptRuleSetResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (SetActiveReceiptRuleSetResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (SetActiveReceiptRuleSetResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some SetActiveReceiptRuleSetResponse.error_of_xml))
   | SetIdentityDkimEnabled ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (SetIdentityDkimEnabledResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (SetIdentityDkimEnabledResponse.of_xml xml)
+      else Error (parse_aws_error None)
   | SetIdentityFeedbackForwardingEnabled ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (SetIdentityFeedbackForwardingEnabledResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (SetIdentityFeedbackForwardingEnabledResponse.of_xml xml)
+      else Error (parse_aws_error None)
   | SetIdentityHeadersInNotificationsEnabled ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (SetIdentityHeadersInNotificationsEnabledResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (SetIdentityHeadersInNotificationsEnabledResponse.of_xml xml)
+      else Error (parse_aws_error None)
   | SetIdentityMailFromDomain ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (SetIdentityMailFromDomainResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (SetIdentityMailFromDomainResponse.of_xml xml)
+      else Error (parse_aws_error None)
   | SetIdentityNotificationTopic ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (SetIdentityNotificationTopicResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (SetIdentityNotificationTopicResponse.of_xml xml)
+      else Error (parse_aws_error None)
   | SetReceiptRulePosition ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some SetReceiptRulePositionResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (SetReceiptRulePositionResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (SetReceiptRulePositionResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some SetReceiptRulePositionResponse.error_of_xml))
   | TestRenderTemplate ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TestRenderTemplateResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (TestRenderTemplateResponse.of_xml xml))
-  | UpdateAccountSendingEnabled -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (TestRenderTemplateResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some TestRenderTemplateResponse.error_of_xml))
+  | UpdateAccountSendingEnabled ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | UpdateConfigurationSetEventDestination ->
-      (match resp with
-       | Error err ->
-           handle_error err
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (UpdateConfigurationSetEventDestinationResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
              (Some
-                UpdateConfigurationSetEventDestinationResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (UpdateConfigurationSetEventDestinationResponse.of_xml xml))
-  | UpdateConfigurationSetReputationMetricsEnabled -> Ok ()
-  | UpdateConfigurationSetSendingEnabled -> Ok ()
+                UpdateConfigurationSetEventDestinationResponse.error_of_xml))
+  | UpdateConfigurationSetReputationMetricsEnabled ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateConfigurationSetSendingEnabled ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | UpdateConfigurationSetTrackingOptions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateConfigurationSetTrackingOptionsResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (UpdateConfigurationSetTrackingOptionsResponse.of_xml xml))
-  | UpdateCustomVerificationEmailTemplate -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (UpdateConfigurationSetTrackingOptionsResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateConfigurationSetTrackingOptionsResponse.error_of_xml))
+  | UpdateCustomVerificationEmailTemplate ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | UpdateReceiptRule ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateReceiptRuleResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (UpdateReceiptRuleResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (UpdateReceiptRuleResponse.of_xml xml)
+      else
+        Error (parse_aws_error (Some UpdateReceiptRuleResponse.error_of_xml))
   | UpdateTemplate ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateTemplateResponse.error_of_xml)
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (UpdateTemplateResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (UpdateTemplateResponse.of_xml xml)
+      else Error (parse_aws_error (Some UpdateTemplateResponse.error_of_xml))
   | VerifyDomainDkim ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (VerifyDomainDkimResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (VerifyDomainDkimResponse.of_xml xml)
+      else Error (parse_aws_error None)
   | VerifyDomainIdentity ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (VerifyDomainIdentityResponse.of_xml xml))
-  | VerifyEmailAddress -> Ok ()
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (VerifyDomainIdentityResponse.of_xml xml)
+      else Error (parse_aws_error None)
+  | VerifyEmailAddress ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | VerifyEmailIdentity ->
-      (match resp with
-       | Error err -> handle_error err None
-       | Ok resp ->
-           let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-           Ok (VerifyEmailIdentityResponse.of_xml xml))
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (VerifyEmailIdentityResponse.of_xml xml)
+      else Error (parse_aws_error None)

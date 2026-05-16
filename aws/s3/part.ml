@@ -31,12 +31,15 @@ let build_parts_from_size ~part_size size =
         }
   in
   let rec range_acc acc i =
-    if Int64.( >= ) i num_parts then acc
-    else range_acc ({ start_offset = part_start_offset i; size = part_size; number = to_int_exn i } :: acc) (Int64.succ i)
+    if Int64.( >= ) i num_parts
+    then acc
+    else
+      range_acc
+        ({ start_offset = part_start_offset i; size = part_size; number = to_int_exn i }
+         :: acc)
+        (Int64.succ i)
   in
-  range_acc [] 0L
-  |> cons_maybe last_part_opt
-  |> List.rev
+  range_acc [] 0L |> cons_maybe last_part_opt |> List.rev
 ;;
 
 let to_json { number; start_offset; size } : Yojson.Safe.t =

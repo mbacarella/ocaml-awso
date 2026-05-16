@@ -5,290 +5,244 @@ val accept_inbound_cross_cluster_search_connection :
     ?cfg:Awso.Cfg.t ->
       AcceptInboundCrossClusterSearchConnectionRequest.t ->
         (AcceptInboundCrossClusterSearchConnectionResponse.t,
-          [ `AWS of AcceptInboundCrossClusterSearchConnectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AcceptInboundCrossClusterSearchConnectionResponse.error) Result.t
+          Lwt.t
 val add_tags :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      AddTagsRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> AddTagsRequest.t -> (unit, unit) Result.t Lwt.t
 val associate_package :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociatePackageRequest.t ->
-        (AssociatePackageResponse.t,
-          [ `AWS of AssociatePackageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AssociatePackageResponse.t, AssociatePackageResponse.error) Result.t
+          Lwt.t
 val cancel_elasticsearch_service_software_update :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelElasticsearchServiceSoftwareUpdateRequest.t ->
         (CancelElasticsearchServiceSoftwareUpdateResponse.t,
-          [ `AWS of CancelElasticsearchServiceSoftwareUpdateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CancelElasticsearchServiceSoftwareUpdateResponse.error) Result.t
+          Lwt.t
 val create_elasticsearch_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateElasticsearchDomainRequest.t ->
         (CreateElasticsearchDomainResponse.t,
-          [ `AWS of CreateElasticsearchDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateElasticsearchDomainResponse.error) Result.t Lwt.t
 val create_outbound_cross_cluster_search_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateOutboundCrossClusterSearchConnectionRequest.t ->
         (CreateOutboundCrossClusterSearchConnectionResponse.t,
-          [ `AWS of CreateOutboundCrossClusterSearchConnectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateOutboundCrossClusterSearchConnectionResponse.error) Result.t
+          Lwt.t
 val create_package :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePackageRequest.t ->
-        (CreatePackageResponse.t,
-          [ `AWS of CreatePackageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreatePackageResponse.t, CreatePackageResponse.error) Result.t Lwt.t
 val delete_elasticsearch_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteElasticsearchDomainRequest.t ->
         (DeleteElasticsearchDomainResponse.t,
-          [ `AWS of DeleteElasticsearchDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteElasticsearchDomainResponse.error) Result.t Lwt.t
 val delete_elasticsearch_service_role :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      unit ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> unit -> (unit, unit) Result.t Lwt.t
 val delete_inbound_cross_cluster_search_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteInboundCrossClusterSearchConnectionRequest.t ->
         (DeleteInboundCrossClusterSearchConnectionResponse.t,
-          [ `AWS of DeleteInboundCrossClusterSearchConnectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteInboundCrossClusterSearchConnectionResponse.error) Result.t
+          Lwt.t
 val delete_outbound_cross_cluster_search_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteOutboundCrossClusterSearchConnectionRequest.t ->
         (DeleteOutboundCrossClusterSearchConnectionResponse.t,
-          [ `AWS of DeleteOutboundCrossClusterSearchConnectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteOutboundCrossClusterSearchConnectionResponse.error) Result.t
+          Lwt.t
 val delete_package :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePackageRequest.t ->
-        (DeletePackageResponse.t,
-          [ `AWS of DeletePackageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeletePackageResponse.t, DeletePackageResponse.error) Result.t Lwt.t
 val describe_domain_auto_tunes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDomainAutoTunesRequest.t ->
         (DescribeDomainAutoTunesResponse.t,
-          [ `AWS of DescribeDomainAutoTunesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeDomainAutoTunesResponse.error) Result.t Lwt.t
 val describe_domain_change_progress :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDomainChangeProgressRequest.t ->
         (DescribeDomainChangeProgressResponse.t,
-          [ `AWS of DescribeDomainChangeProgressResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeDomainChangeProgressResponse.error) Result.t Lwt.t
 val describe_elasticsearch_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeElasticsearchDomainRequest.t ->
         (DescribeElasticsearchDomainResponse.t,
-          [ `AWS of DescribeElasticsearchDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeElasticsearchDomainResponse.error) Result.t Lwt.t
 val describe_elasticsearch_domain_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeElasticsearchDomainConfigRequest.t ->
         (DescribeElasticsearchDomainConfigResponse.t,
-          [ `AWS of DescribeElasticsearchDomainConfigResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeElasticsearchDomainConfigResponse.error) Result.t Lwt.t
 val describe_elasticsearch_domains :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeElasticsearchDomainsRequest.t ->
         (DescribeElasticsearchDomainsResponse.t,
-          [ `AWS of DescribeElasticsearchDomainsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeElasticsearchDomainsResponse.error) Result.t Lwt.t
 val describe_elasticsearch_instance_type_limits :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeElasticsearchInstanceTypeLimitsRequest.t ->
         (DescribeElasticsearchInstanceTypeLimitsResponse.t,
-          [ `AWS of DescribeElasticsearchInstanceTypeLimitsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeElasticsearchInstanceTypeLimitsResponse.error) Result.t
+          Lwt.t
 val describe_inbound_cross_cluster_search_connections :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeInboundCrossClusterSearchConnectionsRequest.t ->
         (DescribeInboundCrossClusterSearchConnectionsResponse.t,
-          [
-            `AWS of
-              DescribeInboundCrossClusterSearchConnectionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeInboundCrossClusterSearchConnectionsResponse.error)
+          Result.t Lwt.t
 val describe_outbound_cross_cluster_search_connections :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeOutboundCrossClusterSearchConnectionsRequest.t ->
         (DescribeOutboundCrossClusterSearchConnectionsResponse.t,
-          [
-            `AWS of
-              DescribeOutboundCrossClusterSearchConnectionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeOutboundCrossClusterSearchConnectionsResponse.error)
+          Result.t Lwt.t
 val describe_packages :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePackagesRequest.t ->
-        (DescribePackagesResponse.t,
-          [ `AWS of DescribePackagesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribePackagesResponse.t, DescribePackagesResponse.error) Result.t
+          Lwt.t
 val describe_reserved_elasticsearch_instance_offerings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeReservedElasticsearchInstanceOfferingsRequest.t ->
         (DescribeReservedElasticsearchInstanceOfferingsResponse.t,
-          [
-            `AWS of
-              DescribeReservedElasticsearchInstanceOfferingsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeReservedElasticsearchInstanceOfferingsResponse.error)
+          Result.t Lwt.t
 val describe_reserved_elasticsearch_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeReservedElasticsearchInstancesRequest.t ->
         (DescribeReservedElasticsearchInstancesResponse.t,
-          [ `AWS of DescribeReservedElasticsearchInstancesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeReservedElasticsearchInstancesResponse.error) Result.t
+          Lwt.t
 val dissociate_package :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DissociatePackageRequest.t ->
-        (DissociatePackageResponse.t,
-          [ `AWS of DissociatePackageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DissociatePackageResponse.t, DissociatePackageResponse.error)
+          Result.t Lwt.t
 val get_compatible_elasticsearch_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCompatibleElasticsearchVersionsRequest.t ->
         (GetCompatibleElasticsearchVersionsResponse.t,
-          [ `AWS of GetCompatibleElasticsearchVersionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetCompatibleElasticsearchVersionsResponse.error) Result.t Lwt.t
 val get_package_version_history :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPackageVersionHistoryRequest.t ->
         (GetPackageVersionHistoryResponse.t,
-          [ `AWS of GetPackageVersionHistoryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetPackageVersionHistoryResponse.error) Result.t Lwt.t
 val get_upgrade_history :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetUpgradeHistoryRequest.t ->
-        (GetUpgradeHistoryResponse.t,
-          [ `AWS of GetUpgradeHistoryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetUpgradeHistoryResponse.t, GetUpgradeHistoryResponse.error)
+          Result.t Lwt.t
 val get_upgrade_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetUpgradeStatusRequest.t ->
-        (GetUpgradeStatusResponse.t,
-          [ `AWS of GetUpgradeStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetUpgradeStatusResponse.t, GetUpgradeStatusResponse.error) Result.t
+          Lwt.t
 val list_domain_names :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDomainNamesRequest.t ->
-        (ListDomainNamesResponse.t,
-          [ `AWS of ListDomainNamesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListDomainNamesResponse.t, ListDomainNamesResponse.error) Result.t
+          Lwt.t
 val list_domains_for_package :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDomainsForPackageRequest.t ->
         (ListDomainsForPackageResponse.t,
-          [ `AWS of ListDomainsForPackageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListDomainsForPackageResponse.error) Result.t Lwt.t
 val list_elasticsearch_instance_types :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListElasticsearchInstanceTypesRequest.t ->
         (ListElasticsearchInstanceTypesResponse.t,
-          [ `AWS of ListElasticsearchInstanceTypesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListElasticsearchInstanceTypesResponse.error) Result.t Lwt.t
 val list_elasticsearch_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListElasticsearchVersionsRequest.t ->
         (ListElasticsearchVersionsResponse.t,
-          [ `AWS of ListElasticsearchVersionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListElasticsearchVersionsResponse.error) Result.t Lwt.t
 val list_packages_for_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPackagesForDomainRequest.t ->
         (ListPackagesForDomainResponse.t,
-          [ `AWS of ListPackagesForDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListPackagesForDomainResponse.error) Result.t Lwt.t
 val list_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsRequest.t ->
-        (ListTagsResponse.t,
-          [ `AWS of ListTagsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsResponse.t, ListTagsResponse.error) Result.t Lwt.t
 val purchase_reserved_elasticsearch_instance_offering :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PurchaseReservedElasticsearchInstanceOfferingRequest.t ->
         (PurchaseReservedElasticsearchInstanceOfferingResponse.t,
-          [
-            `AWS of
-              PurchaseReservedElasticsearchInstanceOfferingResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PurchaseReservedElasticsearchInstanceOfferingResponse.error)
+          Result.t Lwt.t
 val reject_inbound_cross_cluster_search_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RejectInboundCrossClusterSearchConnectionRequest.t ->
         (RejectInboundCrossClusterSearchConnectionResponse.t,
-          [ `AWS of RejectInboundCrossClusterSearchConnectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          RejectInboundCrossClusterSearchConnectionResponse.error) Result.t
+          Lwt.t
 val remove_tags :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      RemoveTagsRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> RemoveTagsRequest.t -> (unit, unit) Result.t Lwt.t
 val start_elasticsearch_service_software_update :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartElasticsearchServiceSoftwareUpdateRequest.t ->
         (StartElasticsearchServiceSoftwareUpdateResponse.t,
-          [ `AWS of StartElasticsearchServiceSoftwareUpdateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartElasticsearchServiceSoftwareUpdateResponse.error) Result.t
+          Lwt.t
 val update_elasticsearch_domain_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateElasticsearchDomainConfigRequest.t ->
         (UpdateElasticsearchDomainConfigResponse.t,
-          [ `AWS of UpdateElasticsearchDomainConfigResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateElasticsearchDomainConfigResponse.error) Result.t Lwt.t
 val update_package :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePackageRequest.t ->
-        (UpdatePackageResponse.t,
-          [ `AWS of UpdatePackageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdatePackageResponse.t, UpdatePackageResponse.error) Result.t Lwt.t
 val upgrade_elasticsearch_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpgradeElasticsearchDomainRequest.t ->
         (UpgradeElasticsearchDomainResponse.t,
-          [ `AWS of UpgradeElasticsearchDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpgradeElasticsearchDomainResponse.error) Result.t Lwt.t

@@ -5,154 +5,124 @@ val associate_service_quota_template :
     ?cfg:Awso.Cfg.t ->
       AssociateServiceQuotaTemplateRequest.t ->
         (AssociateServiceQuotaTemplateResponse.t,
-          [ `AWS of AssociateServiceQuotaTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          AssociateServiceQuotaTemplateResponse.error) Result.t
           Async.Deferred.t
 val delete_service_quota_increase_request_from_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteServiceQuotaIncreaseRequestFromTemplateRequest.t ->
         (DeleteServiceQuotaIncreaseRequestFromTemplateResponse.t,
-          [
-            `AWS of
-              DeleteServiceQuotaIncreaseRequestFromTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeleteServiceQuotaIncreaseRequestFromTemplateResponse.error)
+          Result.t Async.Deferred.t
 val disassociate_service_quota_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateServiceQuotaTemplateRequest.t ->
         (DisassociateServiceQuotaTemplateResponse.t,
-          [ `AWS of DisassociateServiceQuotaTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DisassociateServiceQuotaTemplateResponse.error) Result.t
           Async.Deferred.t
 val get_a_w_s_default_service_quota :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAWSDefaultServiceQuotaRequest.t ->
         (GetAWSDefaultServiceQuotaResponse.t,
-          [ `AWS of GetAWSDefaultServiceQuotaResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetAWSDefaultServiceQuotaResponse.error) Result.t Async.Deferred.t
 val get_association_for_service_quota_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAssociationForServiceQuotaTemplateRequest.t ->
         (GetAssociationForServiceQuotaTemplateResponse.t,
-          [ `AWS of GetAssociationForServiceQuotaTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetAssociationForServiceQuotaTemplateResponse.error) Result.t
           Async.Deferred.t
 val get_requested_service_quota_change :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetRequestedServiceQuotaChangeRequest.t ->
         (GetRequestedServiceQuotaChangeResponse.t,
-          [ `AWS of GetRequestedServiceQuotaChangeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetRequestedServiceQuotaChangeResponse.error) Result.t
           Async.Deferred.t
 val get_service_quota :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetServiceQuotaRequest.t ->
-        (GetServiceQuotaResponse.t,
-          [ `AWS of GetServiceQuotaResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetServiceQuotaResponse.t, GetServiceQuotaResponse.error) Result.t
           Async.Deferred.t
 val get_service_quota_increase_request_from_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetServiceQuotaIncreaseRequestFromTemplateRequest.t ->
         (GetServiceQuotaIncreaseRequestFromTemplateResponse.t,
-          [ `AWS of GetServiceQuotaIncreaseRequestFromTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetServiceQuotaIncreaseRequestFromTemplateResponse.error) Result.t
           Async.Deferred.t
 val list_a_w_s_default_service_quotas :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAWSDefaultServiceQuotasRequest.t ->
         (ListAWSDefaultServiceQuotasResponse.t,
-          [ `AWS of ListAWSDefaultServiceQuotasResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListAWSDefaultServiceQuotasResponse.error) Result.t
           Async.Deferred.t
 val list_requested_service_quota_change_history :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRequestedServiceQuotaChangeHistoryRequest.t ->
         (ListRequestedServiceQuotaChangeHistoryResponse.t,
-          [ `AWS of ListRequestedServiceQuotaChangeHistoryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListRequestedServiceQuotaChangeHistoryResponse.error) Result.t
           Async.Deferred.t
 val list_requested_service_quota_change_history_by_quota :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRequestedServiceQuotaChangeHistoryByQuotaRequest.t ->
         (ListRequestedServiceQuotaChangeHistoryByQuotaResponse.t,
-          [
-            `AWS of
-              ListRequestedServiceQuotaChangeHistoryByQuotaResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListRequestedServiceQuotaChangeHistoryByQuotaResponse.error)
+          Result.t Async.Deferred.t
 val list_service_quota_increase_requests_in_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListServiceQuotaIncreaseRequestsInTemplateRequest.t ->
         (ListServiceQuotaIncreaseRequestsInTemplateResponse.t,
-          [ `AWS of ListServiceQuotaIncreaseRequestsInTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListServiceQuotaIncreaseRequestsInTemplateResponse.error) Result.t
           Async.Deferred.t
 val list_service_quotas :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListServiceQuotasRequest.t ->
-        (ListServiceQuotasResponse.t,
-          [ `AWS of ListServiceQuotasResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListServiceQuotasResponse.t, ListServiceQuotasResponse.error)
+          Result.t Async.Deferred.t
 val list_services :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListServicesRequest.t ->
-        (ListServicesResponse.t,
-          [ `AWS of ListServicesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListServicesResponse.t, ListServicesResponse.error) Result.t
           Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val put_service_quota_increase_request_into_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutServiceQuotaIncreaseRequestIntoTemplateRequest.t ->
         (PutServiceQuotaIncreaseRequestIntoTemplateResponse.t,
-          [ `AWS of PutServiceQuotaIncreaseRequestIntoTemplateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          PutServiceQuotaIncreaseRequestIntoTemplateResponse.error) Result.t
           Async.Deferred.t
 val request_service_quota_increase :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RequestServiceQuotaIncreaseRequest.t ->
         (RequestServiceQuotaIncreaseResponse.t,
-          [ `AWS of RequestServiceQuotaIncreaseResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          RequestServiceQuotaIncreaseResponse.error) Result.t
           Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t

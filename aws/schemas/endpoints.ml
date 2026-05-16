@@ -488,194 +488,190 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpdateRegistry -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateSchema -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | CreateDiscoverer ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateDiscovererResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateDiscovererResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateDiscovererResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateDiscovererResponse.error_of_json))
   | CreateRegistry ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateRegistryResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateRegistryResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateRegistryResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateRegistryResponse.error_of_json))
   | CreateSchema ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateSchemaResponse.error_of_json)
-       | Ok resp -> Ok (CreateSchemaResponse.of_json (response_to_json resp)))
-  | DeleteDiscoverer -> Ok ()
-  | DeleteRegistry -> Ok ()
-  | DeleteResourcePolicy -> Ok ()
-  | DeleteSchema -> Ok ()
-  | DeleteSchemaVersion -> Ok ()
+      if is_success
+      then Ok (CreateSchemaResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateSchemaResponse.error_of_json))
+  | DeleteDiscoverer ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteRegistry ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteResourcePolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteSchema ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteSchemaVersion ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DescribeCodeBinding ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeCodeBindingResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeCodeBindingResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeCodeBindingResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeCodeBindingResponse.error_of_json))
   | DescribeDiscoverer ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeDiscovererResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeDiscovererResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeDiscovererResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeDiscovererResponse.error_of_json))
   | DescribeRegistry ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeRegistryResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeRegistryResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeRegistryResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeRegistryResponse.error_of_json))
   | DescribeSchema ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeSchemaResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeSchemaResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeSchemaResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeSchemaResponse.error_of_json))
   | ExportSchema ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ExportSchemaResponse.error_of_json)
-       | Ok resp -> Ok (ExportSchemaResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ExportSchemaResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ExportSchemaResponse.error_of_json))
   | GetCodeBindingSource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetCodeBindingSourceResponse.error_of_json)
-       | Ok resp ->
-           let body = Body.of_string (Awso.Http.Response.body resp) in
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (GetCodeBindingSourceResponse.of_header_and_body (headers, body)))
+      if is_success
+      then
+        let body = Body.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetCodeBindingSourceResponse.of_header_and_body (headers, body))
+      else
+        Error
+          (parse_aws_error (Some GetCodeBindingSourceResponse.error_of_json))
   | GetDiscoveredSchema ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetDiscoveredSchemaResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetDiscoveredSchemaResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetDiscoveredSchemaResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetDiscoveredSchemaResponse.error_of_json))
   | GetResourcePolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetResourcePolicyResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetResourcePolicyResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetResourcePolicyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetResourcePolicyResponse.error_of_json))
   | ListDiscoverers ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListDiscoverersResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListDiscoverersResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListDiscoverersResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListDiscoverersResponse.error_of_json))
   | ListRegistries ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListRegistriesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListRegistriesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListRegistriesResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListRegistriesResponse.error_of_json))
   | ListSchemaVersions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListSchemaVersionsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListSchemaVersionsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListSchemaVersionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListSchemaVersionsResponse.error_of_json))
   | ListSchemas ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListSchemasResponse.error_of_json)
-       | Ok resp -> Ok (ListSchemasResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListSchemasResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListSchemasResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | PutCodeBinding ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutCodeBindingResponse.error_of_json)
-       | Ok resp ->
-           Ok (PutCodeBindingResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (PutCodeBindingResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some PutCodeBindingResponse.error_of_json))
   | PutResourcePolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutResourcePolicyResponse.error_of_json)
-       | Ok resp ->
-           Ok (PutResourcePolicyResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (PutResourcePolicyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some PutResourcePolicyResponse.error_of_json))
   | SearchSchemas ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some SearchSchemasResponse.error_of_json)
-       | Ok resp ->
-           Ok (SearchSchemasResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (SearchSchemasResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some SearchSchemasResponse.error_of_json))
   | StartDiscoverer ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StartDiscovererResponse.error_of_json)
-       | Ok resp ->
-           Ok (StartDiscovererResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (StartDiscovererResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some StartDiscovererResponse.error_of_json))
   | StopDiscoverer ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StopDiscovererResponse.error_of_json)
-       | Ok resp ->
-           Ok (StopDiscovererResponse.of_json (response_to_json resp)))
-  | TagResource -> Ok ()
-  | UntagResource -> Ok ()
+      if is_success
+      then Ok (StopDiscovererResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some StopDiscovererResponse.error_of_json))
+  | TagResource -> if is_success then Ok () else Error (parse_aws_error None)
+  | UntagResource ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | UpdateDiscoverer ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateDiscovererResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateDiscovererResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateDiscovererResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateDiscovererResponse.error_of_json))
   | UpdateRegistry ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateRegistryResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateRegistryResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateRegistryResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateRegistryResponse.error_of_json))
   | UpdateSchema ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateSchemaResponse.error_of_json)
-       | Ok resp -> Ok (UpdateSchemaResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateSchemaResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateSchemaResponse.error_of_json))

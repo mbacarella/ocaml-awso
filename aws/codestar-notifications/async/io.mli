@@ -4,103 +4,76 @@ val create_notification_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateNotificationRuleRequest.t ->
-        (CreateNotificationRuleResult.t,
-          [ `AWS of CreateNotificationRuleResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateNotificationRuleResult.t, CreateNotificationRuleResult.error)
+          Result.t Async.Deferred.t
 val delete_notification_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteNotificationRuleRequest.t ->
-        (DeleteNotificationRuleResult.t,
-          [ `AWS of DeleteNotificationRuleResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteNotificationRuleResult.t, DeleteNotificationRuleResult.error)
+          Result.t Async.Deferred.t
 val delete_target :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTargetRequest.t ->
-        (DeleteTargetResult.t,
-          [ `AWS of DeleteTargetResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteTargetResult.t, DeleteTargetResult.error) Result.t
           Async.Deferred.t
 val describe_notification_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeNotificationRuleRequest.t ->
         (DescribeNotificationRuleResult.t,
-          [ `AWS of DescribeNotificationRuleResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeNotificationRuleResult.error) Result.t Async.Deferred.t
 val list_event_types :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEventTypesRequest.t ->
-        (ListEventTypesResult.t,
-          [ `AWS of ListEventTypesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListEventTypesResult.t, ListEventTypesResult.error) Result.t
           Async.Deferred.t
 val list_notification_rules :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListNotificationRulesRequest.t ->
-        (ListNotificationRulesResult.t,
-          [ `AWS of ListNotificationRulesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListNotificationRulesResult.t, ListNotificationRulesResult.error)
+          Result.t Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResult.t,
-          [ `AWS of ListTagsForResourceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResult.t, ListTagsForResourceResult.error)
+          Result.t Async.Deferred.t
 val list_targets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTargetsRequest.t ->
-        (ListTargetsResult.t,
-          [ `AWS of ListTargetsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListTargetsResult.t, ListTargetsResult.error) Result.t
           Async.Deferred.t
 val subscribe :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SubscribeRequest.t ->
-        (SubscribeResult.t,
-          [ `AWS of SubscribeResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (SubscribeResult.t, SubscribeResult.error) Result.t Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResult.t,
-          [ `AWS of TagResourceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResult.t, TagResourceResult.error) Result.t
           Async.Deferred.t
 val unsubscribe :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UnsubscribeRequest.t ->
-        (UnsubscribeResult.t,
-          [ `AWS of UnsubscribeResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UnsubscribeResult.t, UnsubscribeResult.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResult.t,
-          [ `AWS of UntagResourceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResult.t, UntagResourceResult.error) Result.t
           Async.Deferred.t
 val update_notification_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateNotificationRuleRequest.t ->
-        (UpdateNotificationRuleResult.t,
-          [ `AWS of UpdateNotificationRuleResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateNotificationRuleResult.t, UpdateNotificationRuleResult.error)
+          Result.t Async.Deferred.t

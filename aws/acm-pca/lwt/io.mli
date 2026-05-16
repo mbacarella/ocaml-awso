@@ -5,148 +5,112 @@ val create_certificate_authority :
     ?cfg:Awso.Cfg.t ->
       CreateCertificateAuthorityRequest.t ->
         (CreateCertificateAuthorityResponse.t,
-          [ `AWS of CreateCertificateAuthorityResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateCertificateAuthorityResponse.error) Result.t Lwt.t
 val create_certificate_authority_audit_report :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateCertificateAuthorityAuditReportRequest.t ->
         (CreateCertificateAuthorityAuditReportResponse.t,
-          [ `AWS of CreateCertificateAuthorityAuditReportResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateCertificateAuthorityAuditReportResponse.error) Result.t Lwt.t
 val create_permission :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      CreatePermissionRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      CreatePermissionRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_certificate_authority :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteCertificateAuthorityRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeleteCertificateAuthorityRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_permission :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeletePermissionRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeletePermissionRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_policy :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeletePolicyRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeletePolicyRequest.t -> (unit, unit) Result.t Lwt.t
 val describe_certificate_authority :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeCertificateAuthorityRequest.t ->
         (DescribeCertificateAuthorityResponse.t,
-          [ `AWS of DescribeCertificateAuthorityResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeCertificateAuthorityResponse.error) Result.t Lwt.t
 val describe_certificate_authority_audit_report :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeCertificateAuthorityAuditReportRequest.t ->
         (DescribeCertificateAuthorityAuditReportResponse.t,
-          [ `AWS of DescribeCertificateAuthorityAuditReportResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeCertificateAuthorityAuditReportResponse.error) Result.t
+          Lwt.t
 val get_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCertificateRequest.t ->
-        (GetCertificateResponse.t,
-          [ `AWS of GetCertificateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetCertificateResponse.t, GetCertificateResponse.error) Result.t
+          Lwt.t
 val get_certificate_authority_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCertificateAuthorityCertificateRequest.t ->
         (GetCertificateAuthorityCertificateResponse.t,
-          [ `AWS of GetCertificateAuthorityCertificateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetCertificateAuthorityCertificateResponse.error) Result.t Lwt.t
 val get_certificate_authority_csr :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCertificateAuthorityCsrRequest.t ->
         (GetCertificateAuthorityCsrResponse.t,
-          [ `AWS of GetCertificateAuthorityCsrResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetCertificateAuthorityCsrResponse.error) Result.t Lwt.t
 val get_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPolicyRequest.t ->
-        (GetPolicyResponse.t,
-          [ `AWS of GetPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetPolicyResponse.t, GetPolicyResponse.error) Result.t Lwt.t
 val import_certificate_authority_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ImportCertificateAuthorityCertificateRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+        (unit, unit) Result.t Lwt.t
 val issue_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       IssueCertificateRequest.t ->
-        (IssueCertificateResponse.t,
-          [ `AWS of IssueCertificateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (IssueCertificateResponse.t, IssueCertificateResponse.error) Result.t
+          Lwt.t
 val list_certificate_authorities :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCertificateAuthoritiesRequest.t ->
         (ListCertificateAuthoritiesResponse.t,
-          [ `AWS of ListCertificateAuthoritiesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListCertificateAuthoritiesResponse.error) Result.t Lwt.t
 val list_permissions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPermissionsRequest.t ->
-        (ListPermissionsResponse.t,
-          [ `AWS of ListPermissionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListPermissionsResponse.t, ListPermissionsResponse.error) Result.t
+          Lwt.t
 val list_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsRequest.t ->
-        (ListTagsResponse.t,
-          [ `AWS of ListTagsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsResponse.t, ListTagsResponse.error) Result.t Lwt.t
 val put_policy :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      PutPolicyRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> PutPolicyRequest.t -> (unit, unit) Result.t Lwt.t
 val restore_certificate_authority :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      RestoreCertificateAuthorityRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      RestoreCertificateAuthorityRequest.t -> (unit, unit) Result.t Lwt.t
 val revoke_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      RevokeCertificateRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      RevokeCertificateRequest.t -> (unit, unit) Result.t Lwt.t
 val tag_certificate_authority :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      TagCertificateAuthorityRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      TagCertificateAuthorityRequest.t -> (unit, unit) Result.t Lwt.t
 val untag_certificate_authority :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UntagCertificateAuthorityRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      UntagCertificateAuthorityRequest.t -> (unit, unit) Result.t Lwt.t
 val update_certificate_authority :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      UpdateCertificateAuthorityRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      UpdateCertificateAuthorityRequest.t -> (unit, unit) Result.t Lwt.t

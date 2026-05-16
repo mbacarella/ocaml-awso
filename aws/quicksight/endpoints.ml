@@ -2311,821 +2311,763 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateUser -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | CancelIngestion ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CancelIngestionResponse.error_of_json)
-       | Ok resp ->
-           Ok (CancelIngestionResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CancelIngestionResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CancelIngestionResponse.error_of_json))
   | CreateAccountCustomization ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateAccountCustomizationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateAccountCustomizationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (CreateAccountCustomizationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateAccountCustomizationResponse.error_of_json))
   | CreateAnalysis ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateAnalysisResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateAnalysisResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateAnalysisResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateAnalysisResponse.error_of_json))
   | CreateDashboard ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateDashboardResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateDashboardResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateDashboardResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateDashboardResponse.error_of_json))
   | CreateDataSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateDataSetResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateDataSetResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateDataSetResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateDataSetResponse.error_of_json))
   | CreateDataSource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateDataSourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateDataSourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateDataSourceResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateDataSourceResponse.error_of_json))
   | CreateFolder ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateFolderResponse.error_of_json)
-       | Ok resp -> Ok (CreateFolderResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateFolderResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateFolderResponse.error_of_json))
   | CreateFolderMembership ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateFolderMembershipResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateFolderMembershipResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (CreateFolderMembershipResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateFolderMembershipResponse.error_of_json))
   | CreateGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateGroupResponse.error_of_json)
-       | Ok resp -> Ok (CreateGroupResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateGroupResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateGroupResponse.error_of_json))
   | CreateGroupMembership ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateGroupMembershipResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateGroupMembershipResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateGroupMembershipResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateGroupMembershipResponse.error_of_json))
   | CreateIAMPolicyAssignment ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateIAMPolicyAssignmentResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateIAMPolicyAssignmentResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (CreateIAMPolicyAssignmentResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateIAMPolicyAssignmentResponse.error_of_json))
   | CreateIngestion ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateIngestionResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateIngestionResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateIngestionResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateIngestionResponse.error_of_json))
   | CreateNamespace ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateNamespaceResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateNamespaceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateNamespaceResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateNamespaceResponse.error_of_json))
   | CreateTemplate ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateTemplateResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateTemplateResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateTemplateResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateTemplateResponse.error_of_json))
   | CreateTemplateAlias ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateTemplateAliasResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateTemplateAliasResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateTemplateAliasResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateTemplateAliasResponse.error_of_json))
   | CreateTheme ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateThemeResponse.error_of_json)
-       | Ok resp -> Ok (CreateThemeResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateThemeResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateThemeResponse.error_of_json))
   | CreateThemeAlias ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateThemeAliasResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateThemeAliasResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateThemeAliasResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateThemeAliasResponse.error_of_json))
   | DeleteAccountCustomization ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteAccountCustomizationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DeleteAccountCustomizationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DeleteAccountCustomizationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteAccountCustomizationResponse.error_of_json))
   | DeleteAnalysis ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteAnalysisResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteAnalysisResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteAnalysisResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DeleteAnalysisResponse.error_of_json))
   | DeleteDashboard ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteDashboardResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteDashboardResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteDashboardResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DeleteDashboardResponse.error_of_json))
   | DeleteDataSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteDataSetResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteDataSetResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteDataSetResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteDataSetResponse.error_of_json))
   | DeleteDataSource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteDataSourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteDataSourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteDataSourceResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DeleteDataSourceResponse.error_of_json))
   | DeleteFolder ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteFolderResponse.error_of_json)
-       | Ok resp -> Ok (DeleteFolderResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteFolderResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteFolderResponse.error_of_json))
   | DeleteFolderMembership ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteFolderMembershipResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DeleteFolderMembershipResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (DeleteFolderMembershipResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteFolderMembershipResponse.error_of_json))
   | DeleteGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteGroupResponse.error_of_json)
-       | Ok resp -> Ok (DeleteGroupResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteGroupResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteGroupResponse.error_of_json))
   | DeleteGroupMembership ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteGroupMembershipResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteGroupMembershipResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteGroupMembershipResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteGroupMembershipResponse.error_of_json))
   | DeleteIAMPolicyAssignment ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteIAMPolicyAssignmentResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DeleteIAMPolicyAssignmentResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DeleteIAMPolicyAssignmentResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteIAMPolicyAssignmentResponse.error_of_json))
   | DeleteNamespace ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteNamespaceResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteNamespaceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteNamespaceResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DeleteNamespaceResponse.error_of_json))
   | DeleteTemplate ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteTemplateResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteTemplateResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteTemplateResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DeleteTemplateResponse.error_of_json))
   | DeleteTemplateAlias ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteTemplateAliasResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteTemplateAliasResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteTemplateAliasResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteTemplateAliasResponse.error_of_json))
   | DeleteTheme ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteThemeResponse.error_of_json)
-       | Ok resp -> Ok (DeleteThemeResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteThemeResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteThemeResponse.error_of_json))
   | DeleteThemeAlias ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteThemeAliasResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteThemeAliasResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteThemeAliasResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DeleteThemeAliasResponse.error_of_json))
   | DeleteUser ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteUserResponse.error_of_json)
-       | Ok resp -> Ok (DeleteUserResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteUserResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteUserResponse.error_of_json))
   | DeleteUserByPrincipalId ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteUserByPrincipalIdResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DeleteUserByPrincipalIdResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (DeleteUserByPrincipalIdResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteUserByPrincipalIdResponse.error_of_json))
   | DescribeAccountCustomization ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeAccountCustomizationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeAccountCustomizationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeAccountCustomizationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAccountCustomizationResponse.error_of_json))
   | DescribeAccountSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeAccountSettingsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeAccountSettingsResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (DescribeAccountSettingsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAccountSettingsResponse.error_of_json))
   | DescribeAnalysis ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeAnalysisResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeAnalysisResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeAnalysisResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeAnalysisResponse.error_of_json))
   | DescribeAnalysisPermissions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeAnalysisPermissionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeAnalysisPermissionsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeAnalysisPermissionsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAnalysisPermissionsResponse.error_of_json))
   | DescribeDashboard ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeDashboardResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeDashboardResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeDashboardResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeDashboardResponse.error_of_json))
   | DescribeDashboardPermissions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeDashboardPermissionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeDashboardPermissionsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeDashboardPermissionsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeDashboardPermissionsResponse.error_of_json))
   | DescribeDataSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeDataSetResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeDataSetResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeDataSetResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeDataSetResponse.error_of_json))
   | DescribeDataSetPermissions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeDataSetPermissionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeDataSetPermissionsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeDataSetPermissionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeDataSetPermissionsResponse.error_of_json))
   | DescribeDataSource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeDataSourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeDataSourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeDataSourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeDataSourceResponse.error_of_json))
   | DescribeDataSourcePermissions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeDataSourcePermissionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeDataSourcePermissionsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeDataSourcePermissionsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeDataSourcePermissionsResponse.error_of_json))
   | DescribeFolder ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeFolderResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeFolderResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeFolderResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeFolderResponse.error_of_json))
   | DescribeFolderPermissions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeFolderPermissionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeFolderPermissionsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeFolderPermissionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeFolderPermissionsResponse.error_of_json))
   | DescribeFolderResolvedPermissions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeFolderResolvedPermissionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeFolderResolvedPermissionsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeFolderResolvedPermissionsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeFolderResolvedPermissionsResponse.error_of_json))
   | DescribeGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeGroupResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeGroupResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeGroupResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DescribeGroupResponse.error_of_json))
   | DescribeGroupMembership ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeGroupMembershipResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeGroupMembershipResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (DescribeGroupMembershipResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeGroupMembershipResponse.error_of_json))
   | DescribeIAMPolicyAssignment ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeIAMPolicyAssignmentResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeIAMPolicyAssignmentResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeIAMPolicyAssignmentResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeIAMPolicyAssignmentResponse.error_of_json))
   | DescribeIngestion ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeIngestionResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeIngestionResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeIngestionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeIngestionResponse.error_of_json))
   | DescribeIpRestriction ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeIpRestrictionResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeIpRestrictionResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeIpRestrictionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeIpRestrictionResponse.error_of_json))
   | DescribeNamespace ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeNamespaceResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeNamespaceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeNamespaceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeNamespaceResponse.error_of_json))
   | DescribeTemplate ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeTemplateResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeTemplateResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeTemplateResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeTemplateResponse.error_of_json))
   | DescribeTemplateAlias ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeTemplateAliasResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeTemplateAliasResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeTemplateAliasResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeTemplateAliasResponse.error_of_json))
   | DescribeTemplatePermissions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeTemplatePermissionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeTemplatePermissionsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeTemplatePermissionsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeTemplatePermissionsResponse.error_of_json))
   | DescribeTheme ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeThemeResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeThemeResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeThemeResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DescribeThemeResponse.error_of_json))
   | DescribeThemeAlias ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeThemeAliasResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeThemeAliasResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeThemeAliasResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeThemeAliasResponse.error_of_json))
   | DescribeThemePermissions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeThemePermissionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeThemePermissionsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (DescribeThemePermissionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeThemePermissionsResponse.error_of_json))
   | DescribeUser ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeUserResponse.error_of_json)
-       | Ok resp -> Ok (DescribeUserResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeUserResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DescribeUserResponse.error_of_json))
   | GenerateEmbedUrlForAnonymousUser ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GenerateEmbedUrlForAnonymousUserResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GenerateEmbedUrlForAnonymousUserResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GenerateEmbedUrlForAnonymousUserResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GenerateEmbedUrlForAnonymousUserResponse.error_of_json))
   | GenerateEmbedUrlForRegisteredUser ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GenerateEmbedUrlForRegisteredUserResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GenerateEmbedUrlForRegisteredUserResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GenerateEmbedUrlForRegisteredUserResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GenerateEmbedUrlForRegisteredUserResponse.error_of_json))
   | GetDashboardEmbedUrl ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetDashboardEmbedUrlResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetDashboardEmbedUrlResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetDashboardEmbedUrlResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetDashboardEmbedUrlResponse.error_of_json))
   | GetSessionEmbedUrl ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetSessionEmbedUrlResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetSessionEmbedUrlResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetSessionEmbedUrlResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetSessionEmbedUrlResponse.error_of_json))
   | ListAnalyses ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListAnalysesResponse.error_of_json)
-       | Ok resp -> Ok (ListAnalysesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListAnalysesResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListAnalysesResponse.error_of_json))
   | ListDashboardVersions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListDashboardVersionsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListDashboardVersionsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListDashboardVersionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListDashboardVersionsResponse.error_of_json))
   | ListDashboards ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListDashboardsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListDashboardsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListDashboardsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListDashboardsResponse.error_of_json))
   | ListDataSets ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListDataSetsResponse.error_of_json)
-       | Ok resp -> Ok (ListDataSetsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListDataSetsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListDataSetsResponse.error_of_json))
   | ListDataSources ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListDataSourcesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListDataSourcesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListDataSourcesResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListDataSourcesResponse.error_of_json))
   | ListFolderMembers ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListFolderMembersResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListFolderMembersResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListFolderMembersResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListFolderMembersResponse.error_of_json))
   | ListFolders ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListFoldersResponse.error_of_json)
-       | Ok resp -> Ok (ListFoldersResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListFoldersResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListFoldersResponse.error_of_json))
   | ListGroupMemberships ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListGroupMembershipsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListGroupMembershipsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListGroupMembershipsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListGroupMembershipsResponse.error_of_json))
   | ListGroups ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListGroupsResponse.error_of_json)
-       | Ok resp -> Ok (ListGroupsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListGroupsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListGroupsResponse.error_of_json))
   | ListIAMPolicyAssignments ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListIAMPolicyAssignmentsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListIAMPolicyAssignmentsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListIAMPolicyAssignmentsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListIAMPolicyAssignmentsResponse.error_of_json))
   | ListIAMPolicyAssignmentsForUser ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListIAMPolicyAssignmentsForUserResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListIAMPolicyAssignmentsForUserResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListIAMPolicyAssignmentsForUserResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListIAMPolicyAssignmentsForUserResponse.error_of_json))
   | ListIngestions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListIngestionsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListIngestionsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListIngestionsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListIngestionsResponse.error_of_json))
   | ListNamespaces ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListNamespacesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListNamespacesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListNamespacesResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListNamespacesResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | ListTemplateAliases ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTemplateAliasesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTemplateAliasesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTemplateAliasesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTemplateAliasesResponse.error_of_json))
   | ListTemplateVersions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTemplateVersionsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTemplateVersionsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTemplateVersionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTemplateVersionsResponse.error_of_json))
   | ListTemplates ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTemplatesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTemplatesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTemplatesResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListTemplatesResponse.error_of_json))
   | ListThemeAliases ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListThemeAliasesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListThemeAliasesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListThemeAliasesResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListThemeAliasesResponse.error_of_json))
   | ListThemeVersions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListThemeVersionsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListThemeVersionsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListThemeVersionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListThemeVersionsResponse.error_of_json))
   | ListThemes ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListThemesResponse.error_of_json)
-       | Ok resp -> Ok (ListThemesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListThemesResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListThemesResponse.error_of_json))
   | ListUserGroups ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListUserGroupsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListUserGroupsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListUserGroupsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListUserGroupsResponse.error_of_json))
   | ListUsers ->
-      (match resp with
-       | Error err -> handle_error err (Some ListUsersResponse.error_of_json)
-       | Ok resp -> Ok (ListUsersResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListUsersResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListUsersResponse.error_of_json))
   | RegisterUser ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RegisterUserResponse.error_of_json)
-       | Ok resp -> Ok (RegisterUserResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (RegisterUserResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some RegisterUserResponse.error_of_json))
   | RestoreAnalysis ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some RestoreAnalysisResponse.error_of_json)
-       | Ok resp ->
-           Ok (RestoreAnalysisResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (RestoreAnalysisResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some RestoreAnalysisResponse.error_of_json))
   | SearchAnalyses ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some SearchAnalysesResponse.error_of_json)
-       | Ok resp ->
-           Ok (SearchAnalysesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (SearchAnalysesResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some SearchAnalysesResponse.error_of_json))
   | SearchDashboards ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some SearchDashboardsResponse.error_of_json)
-       | Ok resp ->
-           Ok (SearchDashboardsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (SearchDashboardsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some SearchDashboardsResponse.error_of_json))
   | SearchFolders ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some SearchFoldersResponse.error_of_json)
-       | Ok resp ->
-           Ok (SearchFoldersResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (SearchFoldersResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some SearchFoldersResponse.error_of_json))
   | SearchGroups ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some SearchGroupsResponse.error_of_json)
-       | Ok resp -> Ok (SearchGroupsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (SearchGroupsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some SearchGroupsResponse.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp -> Ok (TagResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (TagResourceResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (UntagResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UntagResourceResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateAccountCustomization ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateAccountCustomizationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateAccountCustomizationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (UpdateAccountCustomizationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateAccountCustomizationResponse.error_of_json))
   | UpdateAccountSettings ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateAccountSettingsResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateAccountSettingsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateAccountSettingsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateAccountSettingsResponse.error_of_json))
   | UpdateAnalysis ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateAnalysisResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateAnalysisResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateAnalysisResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateAnalysisResponse.error_of_json))
   | UpdateAnalysisPermissions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateAnalysisPermissionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateAnalysisPermissionsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (UpdateAnalysisPermissionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateAnalysisPermissionsResponse.error_of_json))
   | UpdateDashboard ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateDashboardResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateDashboardResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateDashboardResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateDashboardResponse.error_of_json))
   | UpdateDashboardPermissions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateDashboardPermissionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateDashboardPermissionsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (UpdateDashboardPermissionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateDashboardPermissionsResponse.error_of_json))
   | UpdateDashboardPublishedVersion ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateDashboardPublishedVersionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateDashboardPublishedVersionResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (UpdateDashboardPublishedVersionResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateDashboardPublishedVersionResponse.error_of_json))
   | UpdateDataSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateDataSetResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateDataSetResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateDataSetResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateDataSetResponse.error_of_json))
   | UpdateDataSetPermissions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateDataSetPermissionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateDataSetPermissionsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (UpdateDataSetPermissionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateDataSetPermissionsResponse.error_of_json))
   | UpdateDataSource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateDataSourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateDataSourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateDataSourceResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateDataSourceResponse.error_of_json))
   | UpdateDataSourcePermissions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateDataSourcePermissionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateDataSourcePermissionsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (UpdateDataSourcePermissionsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateDataSourcePermissionsResponse.error_of_json))
   | UpdateFolder ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateFolderResponse.error_of_json)
-       | Ok resp -> Ok (UpdateFolderResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateFolderResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateFolderResponse.error_of_json))
   | UpdateFolderPermissions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateFolderPermissionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateFolderPermissionsResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (UpdateFolderPermissionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateFolderPermissionsResponse.error_of_json))
   | UpdateGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateGroupResponse.error_of_json)
-       | Ok resp -> Ok (UpdateGroupResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateGroupResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateGroupResponse.error_of_json))
   | UpdateIAMPolicyAssignment ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateIAMPolicyAssignmentResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateIAMPolicyAssignmentResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (UpdateIAMPolicyAssignmentResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateIAMPolicyAssignmentResponse.error_of_json))
   | UpdateIpRestriction ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateIpRestrictionResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateIpRestrictionResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateIpRestrictionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateIpRestrictionResponse.error_of_json))
   | UpdateTemplate ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateTemplateResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateTemplateResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateTemplateResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateTemplateResponse.error_of_json))
   | UpdateTemplateAlias ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateTemplateAliasResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateTemplateAliasResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateTemplateAliasResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateTemplateAliasResponse.error_of_json))
   | UpdateTemplatePermissions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateTemplatePermissionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateTemplatePermissionsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (UpdateTemplatePermissionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateTemplatePermissionsResponse.error_of_json))
   | UpdateTheme ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateThemeResponse.error_of_json)
-       | Ok resp -> Ok (UpdateThemeResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateThemeResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateThemeResponse.error_of_json))
   | UpdateThemeAlias ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateThemeAliasResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateThemeAliasResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateThemeAliasResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateThemeAliasResponse.error_of_json))
   | UpdateThemePermissions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateThemePermissionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateThemePermissionsResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (UpdateThemePermissionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateThemePermissionsResponse.error_of_json))
   | UpdateUser ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateUserResponse.error_of_json)
-       | Ok resp -> Ok (UpdateUserResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateUserResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateUserResponse.error_of_json))

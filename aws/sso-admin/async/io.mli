@@ -5,254 +5,202 @@ val attach_managed_policy_to_permission_set :
     ?cfg:Awso.Cfg.t ->
       AttachManagedPolicyToPermissionSetRequest.t ->
         (AttachManagedPolicyToPermissionSetResponse.t,
-          [ `AWS of AttachManagedPolicyToPermissionSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          AttachManagedPolicyToPermissionSetResponse.error) Result.t
           Async.Deferred.t
 val create_account_assignment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAccountAssignmentRequest.t ->
         (CreateAccountAssignmentResponse.t,
-          [ `AWS of CreateAccountAssignmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateAccountAssignmentResponse.error) Result.t Async.Deferred.t
 val create_instance_access_control_attribute_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateInstanceAccessControlAttributeConfigurationRequest.t ->
         (CreateInstanceAccessControlAttributeConfigurationResponse.t,
-          [
-            `AWS of
-              CreateInstanceAccessControlAttributeConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateInstanceAccessControlAttributeConfigurationResponse.error)
+          Result.t Async.Deferred.t
 val create_permission_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePermissionSetRequest.t ->
-        (CreatePermissionSetResponse.t,
-          [ `AWS of CreatePermissionSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreatePermissionSetResponse.t, CreatePermissionSetResponse.error)
+          Result.t Async.Deferred.t
 val delete_account_assignment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAccountAssignmentRequest.t ->
         (DeleteAccountAssignmentResponse.t,
-          [ `AWS of DeleteAccountAssignmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeleteAccountAssignmentResponse.error) Result.t Async.Deferred.t
 val delete_inline_policy_from_permission_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteInlinePolicyFromPermissionSetRequest.t ->
         (DeleteInlinePolicyFromPermissionSetResponse.t,
-          [ `AWS of DeleteInlinePolicyFromPermissionSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DeleteInlinePolicyFromPermissionSetResponse.error) Result.t
           Async.Deferred.t
 val delete_instance_access_control_attribute_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteInstanceAccessControlAttributeConfigurationRequest.t ->
         (DeleteInstanceAccessControlAttributeConfigurationResponse.t,
-          [
-            `AWS of
-              DeleteInstanceAccessControlAttributeConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeleteInstanceAccessControlAttributeConfigurationResponse.error)
+          Result.t Async.Deferred.t
 val delete_permission_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePermissionSetRequest.t ->
-        (DeletePermissionSetResponse.t,
-          [ `AWS of DeletePermissionSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeletePermissionSetResponse.t, DeletePermissionSetResponse.error)
+          Result.t Async.Deferred.t
 val describe_account_assignment_creation_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAccountAssignmentCreationStatusRequest.t ->
         (DescribeAccountAssignmentCreationStatusResponse.t,
-          [ `AWS of DescribeAccountAssignmentCreationStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeAccountAssignmentCreationStatusResponse.error) Result.t
           Async.Deferred.t
 val describe_account_assignment_deletion_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAccountAssignmentDeletionStatusRequest.t ->
         (DescribeAccountAssignmentDeletionStatusResponse.t,
-          [ `AWS of DescribeAccountAssignmentDeletionStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeAccountAssignmentDeletionStatusResponse.error) Result.t
           Async.Deferred.t
 val describe_instance_access_control_attribute_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeInstanceAccessControlAttributeConfigurationRequest.t ->
         (DescribeInstanceAccessControlAttributeConfigurationResponse.t,
-          [
-            `AWS of
-              DescribeInstanceAccessControlAttributeConfigurationResponse.error
-               | `Transport of Awso.Http.Io.Error.call ])
+          DescribeInstanceAccessControlAttributeConfigurationResponse.error)
           Result.t Async.Deferred.t
 val describe_permission_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePermissionSetRequest.t ->
         (DescribePermissionSetResponse.t,
-          [ `AWS of DescribePermissionSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribePermissionSetResponse.error) Result.t Async.Deferred.t
 val describe_permission_set_provisioning_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePermissionSetProvisioningStatusRequest.t ->
         (DescribePermissionSetProvisioningStatusResponse.t,
-          [ `AWS of DescribePermissionSetProvisioningStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribePermissionSetProvisioningStatusResponse.error) Result.t
           Async.Deferred.t
 val detach_managed_policy_from_permission_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DetachManagedPolicyFromPermissionSetRequest.t ->
         (DetachManagedPolicyFromPermissionSetResponse.t,
-          [ `AWS of DetachManagedPolicyFromPermissionSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DetachManagedPolicyFromPermissionSetResponse.error) Result.t
           Async.Deferred.t
 val get_inline_policy_for_permission_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetInlinePolicyForPermissionSetRequest.t ->
         (GetInlinePolicyForPermissionSetResponse.t,
-          [ `AWS of GetInlinePolicyForPermissionSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          GetInlinePolicyForPermissionSetResponse.error) Result.t
           Async.Deferred.t
 val list_account_assignment_creation_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAccountAssignmentCreationStatusRequest.t ->
         (ListAccountAssignmentCreationStatusResponse.t,
-          [ `AWS of ListAccountAssignmentCreationStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListAccountAssignmentCreationStatusResponse.error) Result.t
           Async.Deferred.t
 val list_account_assignment_deletion_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAccountAssignmentDeletionStatusRequest.t ->
         (ListAccountAssignmentDeletionStatusResponse.t,
-          [ `AWS of ListAccountAssignmentDeletionStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListAccountAssignmentDeletionStatusResponse.error) Result.t
           Async.Deferred.t
 val list_account_assignments :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAccountAssignmentsRequest.t ->
         (ListAccountAssignmentsResponse.t,
-          [ `AWS of ListAccountAssignmentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListAccountAssignmentsResponse.error) Result.t Async.Deferred.t
 val list_accounts_for_provisioned_permission_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAccountsForProvisionedPermissionSetRequest.t ->
         (ListAccountsForProvisionedPermissionSetResponse.t,
-          [ `AWS of ListAccountsForProvisionedPermissionSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListAccountsForProvisionedPermissionSetResponse.error) Result.t
           Async.Deferred.t
 val list_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListInstancesRequest.t ->
-        (ListInstancesResponse.t,
-          [ `AWS of ListInstancesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListInstancesResponse.t, ListInstancesResponse.error) Result.t
           Async.Deferred.t
 val list_managed_policies_in_permission_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListManagedPoliciesInPermissionSetRequest.t ->
         (ListManagedPoliciesInPermissionSetResponse.t,
-          [ `AWS of ListManagedPoliciesInPermissionSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListManagedPoliciesInPermissionSetResponse.error) Result.t
           Async.Deferred.t
 val list_permission_set_provisioning_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPermissionSetProvisioningStatusRequest.t ->
         (ListPermissionSetProvisioningStatusResponse.t,
-          [ `AWS of ListPermissionSetProvisioningStatusResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListPermissionSetProvisioningStatusResponse.error) Result.t
           Async.Deferred.t
 val list_permission_sets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPermissionSetsRequest.t ->
-        (ListPermissionSetsResponse.t,
-          [ `AWS of ListPermissionSetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListPermissionSetsResponse.t, ListPermissionSetsResponse.error)
+          Result.t Async.Deferred.t
 val list_permission_sets_provisioned_to_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPermissionSetsProvisionedToAccountRequest.t ->
         (ListPermissionSetsProvisionedToAccountResponse.t,
-          [ `AWS of ListPermissionSetsProvisionedToAccountResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListPermissionSetsProvisionedToAccountResponse.error) Result.t
           Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val provision_permission_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ProvisionPermissionSetRequest.t ->
         (ProvisionPermissionSetResponse.t,
-          [ `AWS of ProvisionPermissionSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ProvisionPermissionSetResponse.error) Result.t Async.Deferred.t
 val put_inline_policy_to_permission_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutInlinePolicyToPermissionSetRequest.t ->
         (PutInlinePolicyToPermissionSetResponse.t,
-          [ `AWS of PutInlinePolicyToPermissionSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          PutInlinePolicyToPermissionSetResponse.error) Result.t
           Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
 val update_instance_access_control_attribute_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateInstanceAccessControlAttributeConfigurationRequest.t ->
         (UpdateInstanceAccessControlAttributeConfigurationResponse.t,
-          [
-            `AWS of
-              UpdateInstanceAccessControlAttributeConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateInstanceAccessControlAttributeConfigurationResponse.error)
+          Result.t Async.Deferred.t
 val update_permission_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePermissionSetRequest.t ->
-        (UpdatePermissionSetResponse.t,
-          [ `AWS of UpdatePermissionSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdatePermissionSetResponse.t, UpdatePermissionSetResponse.error)
+          Result.t Async.Deferred.t

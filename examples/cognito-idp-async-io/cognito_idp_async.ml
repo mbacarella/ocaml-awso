@@ -18,8 +18,7 @@ module List_user_pools = struct
     >>| function
     | Ok response ->
       response |> ListUserPoolsResponse.to_json |> Yojson.Safe.to_string |> print_endline
-    | Error (`Transport _) -> failwithf "list_user_pools: http error" ()
-    | Error (`AWS err) ->
+    | Error err ->
       failwithf
         "list_user_pools: %s"
         (err |> ListUserPoolsResponse.error_to_json |> Yojson.Safe.to_string)
@@ -43,8 +42,7 @@ module Create_user_pool = struct
     >>| function
     | Ok response ->
       response |> CreateUserPoolResponse.to_json |> Yojson.Safe.to_string |> print_endline
-    | Error (`Transport _) -> failwithf "create_user_pool: http error" ()
-    | Error (`AWS err) ->
+    | Error err ->
       failwithf
         "create_user_pool: %s"
         (err |> CreateUserPoolResponse.error_to_json |> Yojson.Safe.to_string)

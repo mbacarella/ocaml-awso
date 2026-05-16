@@ -4,55 +4,42 @@ val cancel_resource_request :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelResourceRequestInput.t ->
-        (CancelResourceRequestOutput.t,
-          [ `AWS of CancelResourceRequestOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CancelResourceRequestOutput.t, CancelResourceRequestOutput.error)
+          Result.t Lwt.t
 val create_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateResourceInput.t ->
-        (CreateResourceOutput.t,
-          [ `AWS of CreateResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateResourceOutput.t, CreateResourceOutput.error) Result.t Lwt.t
 val delete_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteResourceInput.t ->
-        (DeleteResourceOutput.t,
-          [ `AWS of DeleteResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteResourceOutput.t, DeleteResourceOutput.error) Result.t Lwt.t
 val get_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetResourceInput.t ->
-        (GetResourceOutput.t,
-          [ `AWS of GetResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetResourceOutput.t, GetResourceOutput.error) Result.t Lwt.t
 val get_resource_request_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetResourceRequestStatusInput.t ->
         (GetResourceRequestStatusOutput.t,
-          [ `AWS of GetResourceRequestStatusOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetResourceRequestStatusOutput.error) Result.t Lwt.t
 val list_resource_requests :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListResourceRequestsInput.t ->
-        (ListResourceRequestsOutput.t,
-          [ `AWS of ListResourceRequestsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListResourceRequestsOutput.t, ListResourceRequestsOutput.error)
+          Result.t Lwt.t
 val list_resources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListResourcesInput.t ->
-        (ListResourcesOutput.t,
-          [ `AWS of ListResourcesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListResourcesOutput.t, ListResourcesOutput.error) Result.t Lwt.t
 val update_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateResourceInput.t ->
-        (UpdateResourceOutput.t,
-          [ `AWS of UpdateResourceOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateResourceOutput.t, UpdateResourceOutput.error) Result.t Lwt.t

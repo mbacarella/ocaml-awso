@@ -5,54 +5,42 @@ val complete_attachment_upload :
     ?cfg:Awso.Cfg.t ->
       CompleteAttachmentUploadRequest.t ->
         (CompleteAttachmentUploadResponse.t,
-          [ `AWS of CompleteAttachmentUploadResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CompleteAttachmentUploadResponse.error) Result.t Lwt.t
 val create_participant_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateParticipantConnectionRequest.t ->
         (CreateParticipantConnectionResponse.t,
-          [ `AWS of CreateParticipantConnectionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateParticipantConnectionResponse.error) Result.t Lwt.t
 val disconnect_participant :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisconnectParticipantRequest.t ->
         (DisconnectParticipantResponse.t,
-          [ `AWS of DisconnectParticipantResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisconnectParticipantResponse.error) Result.t Lwt.t
 val get_attachment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAttachmentRequest.t ->
-        (GetAttachmentResponse.t,
-          [ `AWS of GetAttachmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetAttachmentResponse.t, GetAttachmentResponse.error) Result.t Lwt.t
 val get_transcript :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTranscriptRequest.t ->
-        (GetTranscriptResponse.t,
-          [ `AWS of GetTranscriptResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetTranscriptResponse.t, GetTranscriptResponse.error) Result.t Lwt.t
 val send_event :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SendEventRequest.t ->
-        (SendEventResponse.t,
-          [ `AWS of SendEventResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SendEventResponse.t, SendEventResponse.error) Result.t Lwt.t
 val send_message :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SendMessageRequest.t ->
-        (SendMessageResponse.t,
-          [ `AWS of SendMessageResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SendMessageResponse.t, SendMessageResponse.error) Result.t Lwt.t
 val start_attachment_upload :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartAttachmentUploadRequest.t ->
         (StartAttachmentUploadResponse.t,
-          [ `AWS of StartAttachmentUploadResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          StartAttachmentUploadResponse.error) Result.t Lwt.t

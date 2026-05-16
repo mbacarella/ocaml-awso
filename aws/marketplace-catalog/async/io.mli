@@ -4,47 +4,35 @@ val cancel_change_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelChangeSetRequest.t ->
-        (CancelChangeSetResponse.t,
-          [ `AWS of CancelChangeSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CancelChangeSetResponse.t, CancelChangeSetResponse.error) Result.t
           Async.Deferred.t
 val describe_change_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeChangeSetRequest.t ->
-        (DescribeChangeSetResponse.t,
-          [ `AWS of DescribeChangeSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeChangeSetResponse.t, DescribeChangeSetResponse.error)
+          Result.t Async.Deferred.t
 val describe_entity :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEntityRequest.t ->
-        (DescribeEntityResponse.t,
-          [ `AWS of DescribeEntityResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeEntityResponse.t, DescribeEntityResponse.error) Result.t
           Async.Deferred.t
 val list_change_sets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListChangeSetsRequest.t ->
-        (ListChangeSetsResponse.t,
-          [ `AWS of ListChangeSetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListChangeSetsResponse.t, ListChangeSetsResponse.error) Result.t
           Async.Deferred.t
 val list_entities :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEntitiesRequest.t ->
-        (ListEntitiesResponse.t,
-          [ `AWS of ListEntitiesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListEntitiesResponse.t, ListEntitiesResponse.error) Result.t
           Async.Deferred.t
 val start_change_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartChangeSetRequest.t ->
-        (StartChangeSetResponse.t,
-          [ `AWS of StartChangeSetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StartChangeSetResponse.t, StartChangeSetResponse.error) Result.t
           Async.Deferred.t

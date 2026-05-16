@@ -627,239 +627,234 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UntagResource -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | CreateBotVersion ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateBotVersionResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateBotVersionResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateBotVersionResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateBotVersionResponse.error_of_json))
   | CreateIntentVersion ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateIntentVersionResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateIntentVersionResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateIntentVersionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateIntentVersionResponse.error_of_json))
   | CreateSlotTypeVersion ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateSlotTypeVersionResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateSlotTypeVersionResponse.of_json (response_to_json resp)))
-  | DeleteBot -> Ok ()
-  | DeleteBotAlias -> Ok ()
-  | DeleteBotChannelAssociation -> Ok ()
-  | DeleteBotVersion -> Ok ()
-  | DeleteIntent -> Ok ()
-  | DeleteIntentVersion -> Ok ()
-  | DeleteSlotType -> Ok ()
-  | DeleteSlotTypeVersion -> Ok ()
-  | DeleteUtterances -> Ok ()
+      if is_success
+      then Ok (CreateSlotTypeVersionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateSlotTypeVersionResponse.error_of_json))
+  | DeleteBot -> if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteBotAlias ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteBotChannelAssociation ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteBotVersion ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteIntent ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteIntentVersion ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteSlotType ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteSlotTypeVersion ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteUtterances ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | GetBot ->
-      (match resp with
-       | Error err -> handle_error err (Some GetBotResponse.error_of_json)
-       | Ok resp -> Ok (GetBotResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetBotResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetBotResponse.error_of_json))
   | GetBotAlias ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetBotAliasResponse.error_of_json)
-       | Ok resp -> Ok (GetBotAliasResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetBotAliasResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetBotAliasResponse.error_of_json))
   | GetBotAliases ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetBotAliasesResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetBotAliasesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetBotAliasesResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetBotAliasesResponse.error_of_json))
   | GetBotChannelAssociation ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetBotChannelAssociationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetBotChannelAssociationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (GetBotChannelAssociationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetBotChannelAssociationResponse.error_of_json))
   | GetBotChannelAssociations ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetBotChannelAssociationsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetBotChannelAssociationsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetBotChannelAssociationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetBotChannelAssociationsResponse.error_of_json))
   | GetBotVersions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetBotVersionsResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetBotVersionsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetBotVersionsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetBotVersionsResponse.error_of_json))
   | GetBots ->
-      (match resp with
-       | Error err -> handle_error err (Some GetBotsResponse.error_of_json)
-       | Ok resp -> Ok (GetBotsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetBotsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetBotsResponse.error_of_json))
   | GetBuiltinIntent ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetBuiltinIntentResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetBuiltinIntentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetBuiltinIntentResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetBuiltinIntentResponse.error_of_json))
   | GetBuiltinIntents ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetBuiltinIntentsResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetBuiltinIntentsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetBuiltinIntentsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetBuiltinIntentsResponse.error_of_json))
   | GetBuiltinSlotTypes ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetBuiltinSlotTypesResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetBuiltinSlotTypesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetBuiltinSlotTypesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetBuiltinSlotTypesResponse.error_of_json))
   | GetExport ->
-      (match resp with
-       | Error err -> handle_error err (Some GetExportResponse.error_of_json)
-       | Ok resp -> Ok (GetExportResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetExportResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetExportResponse.error_of_json))
   | GetImport ->
-      (match resp with
-       | Error err -> handle_error err (Some GetImportResponse.error_of_json)
-       | Ok resp -> Ok (GetImportResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetImportResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetImportResponse.error_of_json))
   | GetIntent ->
-      (match resp with
-       | Error err -> handle_error err (Some GetIntentResponse.error_of_json)
-       | Ok resp -> Ok (GetIntentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetIntentResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetIntentResponse.error_of_json))
   | GetIntentVersions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetIntentVersionsResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetIntentVersionsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetIntentVersionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetIntentVersionsResponse.error_of_json))
   | GetIntents ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetIntentsResponse.error_of_json)
-       | Ok resp -> Ok (GetIntentsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetIntentsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetIntentsResponse.error_of_json))
   | GetMigration ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetMigrationResponse.error_of_json)
-       | Ok resp -> Ok (GetMigrationResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetMigrationResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetMigrationResponse.error_of_json))
   | GetMigrations ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetMigrationsResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetMigrationsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetMigrationsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetMigrationsResponse.error_of_json))
   | GetSlotType ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetSlotTypeResponse.error_of_json)
-       | Ok resp -> Ok (GetSlotTypeResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetSlotTypeResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetSlotTypeResponse.error_of_json))
   | GetSlotTypeVersions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetSlotTypeVersionsResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetSlotTypeVersionsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetSlotTypeVersionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetSlotTypeVersionsResponse.error_of_json))
   | GetSlotTypes ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetSlotTypesResponse.error_of_json)
-       | Ok resp -> Ok (GetSlotTypesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetSlotTypesResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetSlotTypesResponse.error_of_json))
   | GetUtterancesView ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetUtterancesViewResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetUtterancesViewResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetUtterancesViewResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetUtterancesViewResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | PutBot ->
-      (match resp with
-       | Error err -> handle_error err (Some PutBotResponse.error_of_json)
-       | Ok resp -> Ok (PutBotResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (PutBotResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some PutBotResponse.error_of_json))
   | PutBotAlias ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutBotAliasResponse.error_of_json)
-       | Ok resp -> Ok (PutBotAliasResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (PutBotAliasResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some PutBotAliasResponse.error_of_json))
   | PutIntent ->
-      (match resp with
-       | Error err -> handle_error err (Some PutIntentResponse.error_of_json)
-       | Ok resp -> Ok (PutIntentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (PutIntentResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some PutIntentResponse.error_of_json))
   | PutSlotType ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutSlotTypeResponse.error_of_json)
-       | Ok resp -> Ok (PutSlotTypeResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (PutSlotTypeResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some PutSlotTypeResponse.error_of_json))
   | StartImport ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StartImportResponse.error_of_json)
-       | Ok resp -> Ok (StartImportResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (StartImportResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some StartImportResponse.error_of_json))
   | StartMigration ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some StartMigrationResponse.error_of_json)
-       | Ok resp ->
-           Ok (StartMigrationResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (StartMigrationResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some StartMigrationResponse.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UntagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))

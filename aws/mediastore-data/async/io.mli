@@ -4,39 +4,29 @@ val delete_object :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteObjectRequest.t ->
-        (DeleteObjectResponse.t,
-          [ `AWS of DeleteObjectResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteObjectResponse.t, DeleteObjectResponse.error) Result.t
           Async.Deferred.t
 val describe_object :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeObjectRequest.t ->
-        (DescribeObjectResponse.t,
-          [ `AWS of DescribeObjectResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeObjectResponse.t, DescribeObjectResponse.error) Result.t
           Async.Deferred.t
 val get_object :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetObjectRequest.t ->
-        (GetObjectResponse.t,
-          [ `AWS of GetObjectResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetObjectResponse.t, GetObjectResponse.error) Result.t
           Async.Deferred.t
 val list_items :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListItemsRequest.t ->
-        (ListItemsResponse.t,
-          [ `AWS of ListItemsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListItemsResponse.t, ListItemsResponse.error) Result.t
           Async.Deferred.t
 val put_object :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutObjectRequest.t ->
-        (PutObjectResponse.t,
-          [ `AWS of PutObjectResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (PutObjectResponse.t, PutObjectResponse.error) Result.t
           Async.Deferred.t

@@ -4,63 +4,47 @@ val create_environment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateEnvironmentRequest.t ->
-        (CreateEnvironmentResponse.t,
-          [ `AWS of CreateEnvironmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateEnvironmentResponse.t, CreateEnvironmentResponse.error)
+          Result.t Async.Deferred.t
 val delete_environment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteEnvironmentRequest.t ->
-        (DeleteEnvironmentResponse.t,
-          [ `AWS of DeleteEnvironmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteEnvironmentResponse.t, DeleteEnvironmentResponse.error)
+          Result.t Async.Deferred.t
 val get_environment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEnvironmentRequest.t ->
-        (GetEnvironmentResponse.t,
-          [ `AWS of GetEnvironmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetEnvironmentResponse.t, GetEnvironmentResponse.error) Result.t
           Async.Deferred.t
 val list_environments :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEnvironmentsRequest.t ->
-        (ListEnvironmentsResponse.t,
-          [ `AWS of ListEnvironmentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListEnvironmentsResponse.t, ListEnvironmentsResponse.error) Result.t
           Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
 val update_environment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateEnvironmentRequest.t ->
-        (UpdateEnvironmentResponse.t,
-          [ `AWS of UpdateEnvironmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateEnvironmentResponse.t, UpdateEnvironmentResponse.error)
+          Result.t Async.Deferred.t

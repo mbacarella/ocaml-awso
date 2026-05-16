@@ -937,317 +937,306 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | AcceptInboundConnection ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some AcceptInboundConnectionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (AcceptInboundConnectionResponse.of_json (response_to_json resp)))
-  | AddTags -> Ok ()
+      if is_success
+      then
+        Ok (AcceptInboundConnectionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some AcceptInboundConnectionResponse.error_of_json))
+  | AddTags -> if is_success then Ok () else Error (parse_aws_error None)
   | AssociatePackage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some AssociatePackageResponse.error_of_json)
-       | Ok resp ->
-           Ok (AssociatePackageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (AssociatePackageResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some AssociatePackageResponse.error_of_json))
   | CancelServiceSoftwareUpdate ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CancelServiceSoftwareUpdateResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CancelServiceSoftwareUpdateResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (CancelServiceSoftwareUpdateResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CancelServiceSoftwareUpdateResponse.error_of_json))
   | CreateDomain ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateDomainResponse.error_of_json)
-       | Ok resp -> Ok (CreateDomainResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateDomainResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateDomainResponse.error_of_json))
   | CreateOutboundConnection ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateOutboundConnectionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateOutboundConnectionResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (CreateOutboundConnectionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateOutboundConnectionResponse.error_of_json))
   | CreatePackage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreatePackageResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreatePackageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreatePackageResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreatePackageResponse.error_of_json))
   | DeleteDomain ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteDomainResponse.error_of_json)
-       | Ok resp -> Ok (DeleteDomainResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteDomainResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteDomainResponse.error_of_json))
   | DeleteInboundConnection ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteInboundConnectionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DeleteInboundConnectionResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (DeleteInboundConnectionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteInboundConnectionResponse.error_of_json))
   | DeleteOutboundConnection ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteOutboundConnectionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DeleteOutboundConnectionResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (DeleteOutboundConnectionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteOutboundConnectionResponse.error_of_json))
   | DeletePackage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeletePackageResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeletePackageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeletePackageResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeletePackageResponse.error_of_json))
   | DescribeDomain ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeDomainResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeDomainResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeDomainResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeDomainResponse.error_of_json))
   | DescribeDomainAutoTunes ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeDomainAutoTunesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeDomainAutoTunesResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (DescribeDomainAutoTunesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeDomainAutoTunesResponse.error_of_json))
   | DescribeDomainChangeProgress ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeDomainChangeProgressResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeDomainChangeProgressResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeDomainChangeProgressResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeDomainChangeProgressResponse.error_of_json))
   | DescribeDomainConfig ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeDomainConfigResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeDomainConfigResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeDomainConfigResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeDomainConfigResponse.error_of_json))
   | DescribeDomains ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeDomainsResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeDomainsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeDomainsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeDomainsResponse.error_of_json))
   | DescribeInboundConnections ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeInboundConnectionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeInboundConnectionsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeInboundConnectionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeInboundConnectionsResponse.error_of_json))
   | DescribeInstanceTypeLimits ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeInstanceTypeLimitsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeInstanceTypeLimitsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeInstanceTypeLimitsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeInstanceTypeLimitsResponse.error_of_json))
   | DescribeOutboundConnections ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeOutboundConnectionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeOutboundConnectionsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeOutboundConnectionsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeOutboundConnectionsResponse.error_of_json))
   | DescribePackages ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribePackagesResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribePackagesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribePackagesResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribePackagesResponse.error_of_json))
   | DescribeReservedInstanceOfferings ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeReservedInstanceOfferingsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeReservedInstanceOfferingsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeReservedInstanceOfferingsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeReservedInstanceOfferingsResponse.error_of_json))
   | DescribeReservedInstances ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeReservedInstancesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeReservedInstancesResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeReservedInstancesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeReservedInstancesResponse.error_of_json))
   | DissociatePackage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DissociatePackageResponse.error_of_json)
-       | Ok resp ->
-           Ok (DissociatePackageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DissociatePackageResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DissociatePackageResponse.error_of_json))
   | GetCompatibleVersions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetCompatibleVersionsResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetCompatibleVersionsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetCompatibleVersionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetCompatibleVersionsResponse.error_of_json))
   | GetPackageVersionHistory ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetPackageVersionHistoryResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetPackageVersionHistoryResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (GetPackageVersionHistoryResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetPackageVersionHistoryResponse.error_of_json))
   | GetUpgradeHistory ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetUpgradeHistoryResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetUpgradeHistoryResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetUpgradeHistoryResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetUpgradeHistoryResponse.error_of_json))
   | GetUpgradeStatus ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetUpgradeStatusResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetUpgradeStatusResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetUpgradeStatusResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetUpgradeStatusResponse.error_of_json))
   | ListDomainNames ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListDomainNamesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListDomainNamesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListDomainNamesResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListDomainNamesResponse.error_of_json))
   | ListDomainsForPackage ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListDomainsForPackageResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListDomainsForPackageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListDomainsForPackageResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListDomainsForPackageResponse.error_of_json))
   | ListInstanceTypeDetails ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListInstanceTypeDetailsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListInstanceTypeDetailsResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListInstanceTypeDetailsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListInstanceTypeDetailsResponse.error_of_json))
   | ListPackagesForDomain ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListPackagesForDomainResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListPackagesForDomainResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListPackagesForDomainResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListPackagesForDomainResponse.error_of_json))
   | ListTags ->
-      (match resp with
-       | Error err -> handle_error err (Some ListTagsResponse.error_of_json)
-       | Ok resp -> Ok (ListTagsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListTagsResponse.error_of_json))
   | ListVersions ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListVersionsResponse.error_of_json)
-       | Ok resp -> Ok (ListVersionsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListVersionsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListVersionsResponse.error_of_json))
   | PurchaseReservedInstanceOffering ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PurchaseReservedInstanceOfferingResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (PurchaseReservedInstanceOfferingResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (PurchaseReservedInstanceOfferingResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some PurchaseReservedInstanceOfferingResponse.error_of_json))
   | RejectInboundConnection ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some RejectInboundConnectionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (RejectInboundConnectionResponse.of_json (response_to_json resp)))
-  | RemoveTags -> Ok ()
+      if is_success
+      then
+        Ok (RejectInboundConnectionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some RejectInboundConnectionResponse.error_of_json))
+  | RemoveTags -> if is_success then Ok () else Error (parse_aws_error None)
   | StartServiceSoftwareUpdate ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some StartServiceSoftwareUpdateResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (StartServiceSoftwareUpdateResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (StartServiceSoftwareUpdateResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some StartServiceSoftwareUpdateResponse.error_of_json))
   | UpdateDomainConfig ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateDomainConfigResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdateDomainConfigResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateDomainConfigResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateDomainConfigResponse.error_of_json))
   | UpdatePackage ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdatePackageResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpdatePackageResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdatePackageResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdatePackageResponse.error_of_json))
   | UpgradeDomain ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpgradeDomainResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpgradeDomainResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpgradeDomainResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpgradeDomainResponse.error_of_json))

@@ -4,263 +4,212 @@ val associate_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateDomainRequest.t ->
-        (AssociateDomainResponse.t,
-          [ `AWS of AssociateDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AssociateDomainResponse.t, AssociateDomainResponse.error) Result.t
           Async.Deferred.t
 val associate_website_authorization_provider :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateWebsiteAuthorizationProviderRequest.t ->
         (AssociateWebsiteAuthorizationProviderResponse.t,
-          [ `AWS of AssociateWebsiteAuthorizationProviderResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          AssociateWebsiteAuthorizationProviderResponse.error) Result.t
           Async.Deferred.t
 val associate_website_certificate_authority :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateWebsiteCertificateAuthorityRequest.t ->
         (AssociateWebsiteCertificateAuthorityResponse.t,
-          [ `AWS of AssociateWebsiteCertificateAuthorityResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          AssociateWebsiteCertificateAuthorityResponse.error) Result.t
           Async.Deferred.t
 val create_fleet :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateFleetRequest.t ->
-        (CreateFleetResponse.t,
-          [ `AWS of CreateFleetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateFleetResponse.t, CreateFleetResponse.error) Result.t
           Async.Deferred.t
 val delete_fleet :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteFleetRequest.t ->
-        (DeleteFleetResponse.t,
-          [ `AWS of DeleteFleetResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DeleteFleetResponse.t, DeleteFleetResponse.error) Result.t
           Async.Deferred.t
 val describe_audit_stream_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAuditStreamConfigurationRequest.t ->
         (DescribeAuditStreamConfigurationResponse.t,
-          [ `AWS of DescribeAuditStreamConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeAuditStreamConfigurationResponse.error) Result.t
           Async.Deferred.t
 val describe_company_network_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeCompanyNetworkConfigurationRequest.t ->
         (DescribeCompanyNetworkConfigurationResponse.t,
-          [ `AWS of DescribeCompanyNetworkConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeCompanyNetworkConfigurationResponse.error) Result.t
           Async.Deferred.t
 val describe_device :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDeviceRequest.t ->
-        (DescribeDeviceResponse.t,
-          [ `AWS of DescribeDeviceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeDeviceResponse.t, DescribeDeviceResponse.error) Result.t
           Async.Deferred.t
 val describe_device_policy_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDevicePolicyConfigurationRequest.t ->
         (DescribeDevicePolicyConfigurationResponse.t,
-          [ `AWS of DescribeDevicePolicyConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeDevicePolicyConfigurationResponse.error) Result.t
           Async.Deferred.t
 val describe_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDomainRequest.t ->
-        (DescribeDomainResponse.t,
-          [ `AWS of DescribeDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeDomainResponse.t, DescribeDomainResponse.error) Result.t
           Async.Deferred.t
 val describe_fleet_metadata :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeFleetMetadataRequest.t ->
         (DescribeFleetMetadataResponse.t,
-          [ `AWS of DescribeFleetMetadataResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeFleetMetadataResponse.error) Result.t Async.Deferred.t
 val describe_identity_provider_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeIdentityProviderConfigurationRequest.t ->
         (DescribeIdentityProviderConfigurationResponse.t,
-          [ `AWS of DescribeIdentityProviderConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeIdentityProviderConfigurationResponse.error) Result.t
           Async.Deferred.t
 val describe_website_certificate_authority :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeWebsiteCertificateAuthorityRequest.t ->
         (DescribeWebsiteCertificateAuthorityResponse.t,
-          [ `AWS of DescribeWebsiteCertificateAuthorityResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeWebsiteCertificateAuthorityResponse.error) Result.t
           Async.Deferred.t
 val disassociate_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateDomainRequest.t ->
-        (DisassociateDomainResponse.t,
-          [ `AWS of DisassociateDomainResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DisassociateDomainResponse.t, DisassociateDomainResponse.error)
+          Result.t Async.Deferred.t
 val disassociate_website_authorization_provider :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateWebsiteAuthorizationProviderRequest.t ->
         (DisassociateWebsiteAuthorizationProviderResponse.t,
-          [ `AWS of DisassociateWebsiteAuthorizationProviderResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DisassociateWebsiteAuthorizationProviderResponse.error) Result.t
           Async.Deferred.t
 val disassociate_website_certificate_authority :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateWebsiteCertificateAuthorityRequest.t ->
         (DisassociateWebsiteCertificateAuthorityResponse.t,
-          [ `AWS of DisassociateWebsiteCertificateAuthorityResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DisassociateWebsiteCertificateAuthorityResponse.error) Result.t
           Async.Deferred.t
 val list_devices :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDevicesRequest.t ->
-        (ListDevicesResponse.t,
-          [ `AWS of ListDevicesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListDevicesResponse.t, ListDevicesResponse.error) Result.t
           Async.Deferred.t
 val list_domains :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDomainsRequest.t ->
-        (ListDomainsResponse.t,
-          [ `AWS of ListDomainsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListDomainsResponse.t, ListDomainsResponse.error) Result.t
           Async.Deferred.t
 val list_fleets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFleetsRequest.t ->
-        (ListFleetsResponse.t,
-          [ `AWS of ListFleetsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListFleetsResponse.t, ListFleetsResponse.error) Result.t
           Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val list_website_authorization_providers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListWebsiteAuthorizationProvidersRequest.t ->
         (ListWebsiteAuthorizationProvidersResponse.t,
-          [ `AWS of ListWebsiteAuthorizationProvidersResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListWebsiteAuthorizationProvidersResponse.error) Result.t
           Async.Deferred.t
 val list_website_certificate_authorities :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListWebsiteCertificateAuthoritiesRequest.t ->
         (ListWebsiteCertificateAuthoritiesResponse.t,
-          [ `AWS of ListWebsiteCertificateAuthoritiesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListWebsiteCertificateAuthoritiesResponse.error) Result.t
           Async.Deferred.t
 val restore_domain_access :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RestoreDomainAccessRequest.t ->
-        (RestoreDomainAccessResponse.t,
-          [ `AWS of RestoreDomainAccessResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (RestoreDomainAccessResponse.t, RestoreDomainAccessResponse.error)
+          Result.t Async.Deferred.t
 val revoke_domain_access :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RevokeDomainAccessRequest.t ->
-        (RevokeDomainAccessResponse.t,
-          [ `AWS of RevokeDomainAccessResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (RevokeDomainAccessResponse.t, RevokeDomainAccessResponse.error)
+          Result.t Async.Deferred.t
 val sign_out_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SignOutUserRequest.t ->
-        (SignOutUserResponse.t,
-          [ `AWS of SignOutUserResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (SignOutUserResponse.t, SignOutUserResponse.error) Result.t
           Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
 val update_audit_stream_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateAuditStreamConfigurationRequest.t ->
         (UpdateAuditStreamConfigurationResponse.t,
-          [ `AWS of UpdateAuditStreamConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          UpdateAuditStreamConfigurationResponse.error) Result.t
           Async.Deferred.t
 val update_company_network_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateCompanyNetworkConfigurationRequest.t ->
         (UpdateCompanyNetworkConfigurationResponse.t,
-          [ `AWS of UpdateCompanyNetworkConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          UpdateCompanyNetworkConfigurationResponse.error) Result.t
           Async.Deferred.t
 val update_device_policy_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDevicePolicyConfigurationRequest.t ->
         (UpdateDevicePolicyConfigurationResponse.t,
-          [ `AWS of UpdateDevicePolicyConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          UpdateDevicePolicyConfigurationResponse.error) Result.t
           Async.Deferred.t
 val update_domain_metadata :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDomainMetadataRequest.t ->
-        (UpdateDomainMetadataResponse.t,
-          [ `AWS of UpdateDomainMetadataResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateDomainMetadataResponse.t, UpdateDomainMetadataResponse.error)
+          Result.t Async.Deferred.t
 val update_fleet_metadata :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateFleetMetadataRequest.t ->
-        (UpdateFleetMetadataResponse.t,
-          [ `AWS of UpdateFleetMetadataResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateFleetMetadataResponse.t, UpdateFleetMetadataResponse.error)
+          Result.t Async.Deferred.t
 val update_identity_provider_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateIdentityProviderConfigurationRequest.t ->
         (UpdateIdentityProviderConfigurationResponse.t,
-          [ `AWS of UpdateIdentityProviderConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          UpdateIdentityProviderConfigurationResponse.error) Result.t
           Async.Deferred.t

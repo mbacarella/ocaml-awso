@@ -4,7 +4,5 @@ val send_command :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SendCommandRequest.t ->
-        (SendCommandResult.t,
-          [ `AWS of SendCommandResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (SendCommandResult.t, SendCommandResult.error) Result.t
           Async.Deferred.t

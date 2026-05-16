@@ -4,167 +4,136 @@ val cancel_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelJobRequest.t ->
-        (CancelJobResponse.t,
-          [ `AWS of CancelJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CancelJobResponse.t, CancelJobResponse.error) Result.t Lwt.t
 val create_compute_environment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateComputeEnvironmentRequest.t ->
         (CreateComputeEnvironmentResponse.t,
-          [ `AWS of CreateComputeEnvironmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateComputeEnvironmentResponse.error) Result.t Lwt.t
 val create_job_queue :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateJobQueueRequest.t ->
-        (CreateJobQueueResponse.t,
-          [ `AWS of CreateJobQueueResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateJobQueueResponse.t, CreateJobQueueResponse.error) Result.t
+          Lwt.t
 val create_scheduling_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSchedulingPolicyRequest.t ->
         (CreateSchedulingPolicyResponse.t,
-          [ `AWS of CreateSchedulingPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateSchedulingPolicyResponse.error) Result.t Lwt.t
 val delete_compute_environment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteComputeEnvironmentRequest.t ->
         (DeleteComputeEnvironmentResponse.t,
-          [ `AWS of DeleteComputeEnvironmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteComputeEnvironmentResponse.error) Result.t Lwt.t
 val delete_job_queue :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteJobQueueRequest.t ->
-        (DeleteJobQueueResponse.t,
-          [ `AWS of DeleteJobQueueResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteJobQueueResponse.t, DeleteJobQueueResponse.error) Result.t
+          Lwt.t
 val delete_scheduling_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSchedulingPolicyRequest.t ->
         (DeleteSchedulingPolicyResponse.t,
-          [ `AWS of DeleteSchedulingPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteSchedulingPolicyResponse.error) Result.t Lwt.t
 val deregister_job_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeregisterJobDefinitionRequest.t ->
         (DeregisterJobDefinitionResponse.t,
-          [ `AWS of DeregisterJobDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeregisterJobDefinitionResponse.error) Result.t Lwt.t
 val describe_compute_environments :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeComputeEnvironmentsRequest.t ->
         (DescribeComputeEnvironmentsResponse.t,
-          [ `AWS of DescribeComputeEnvironmentsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeComputeEnvironmentsResponse.error) Result.t Lwt.t
 val describe_job_definitions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeJobDefinitionsRequest.t ->
         (DescribeJobDefinitionsResponse.t,
-          [ `AWS of DescribeJobDefinitionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeJobDefinitionsResponse.error) Result.t Lwt.t
 val describe_job_queues :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeJobQueuesRequest.t ->
-        (DescribeJobQueuesResponse.t,
-          [ `AWS of DescribeJobQueuesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeJobQueuesResponse.t, DescribeJobQueuesResponse.error)
+          Result.t Lwt.t
 val describe_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeJobsRequest.t ->
-        (DescribeJobsResponse.t,
-          [ `AWS of DescribeJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeJobsResponse.t, DescribeJobsResponse.error) Result.t Lwt.t
 val describe_scheduling_policies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSchedulingPoliciesRequest.t ->
         (DescribeSchedulingPoliciesResponse.t,
-          [ `AWS of DescribeSchedulingPoliciesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DescribeSchedulingPoliciesResponse.error) Result.t Lwt.t
 val list_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListJobsRequest.t ->
-        (ListJobsResponse.t,
-          [ `AWS of ListJobsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListJobsResponse.t, ListJobsResponse.error) Result.t Lwt.t
 val list_scheduling_policies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSchedulingPoliciesRequest.t ->
         (ListSchedulingPoliciesResponse.t,
-          [ `AWS of ListSchedulingPoliciesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListSchedulingPoliciesResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val register_job_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegisterJobDefinitionRequest.t ->
         (RegisterJobDefinitionResponse.t,
-          [ `AWS of RegisterJobDefinitionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          RegisterJobDefinitionResponse.error) Result.t Lwt.t
 val submit_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SubmitJobRequest.t ->
-        (SubmitJobResponse.t,
-          [ `AWS of SubmitJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SubmitJobResponse.t, SubmitJobResponse.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val terminate_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TerminateJobRequest.t ->
-        (TerminateJobResponse.t,
-          [ `AWS of TerminateJobResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TerminateJobResponse.t, TerminateJobResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_compute_environment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateComputeEnvironmentRequest.t ->
         (UpdateComputeEnvironmentResponse.t,
-          [ `AWS of UpdateComputeEnvironmentResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateComputeEnvironmentResponse.error) Result.t Lwt.t
 val update_job_queue :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateJobQueueRequest.t ->
-        (UpdateJobQueueResponse.t,
-          [ `AWS of UpdateJobQueueResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateJobQueueResponse.t, UpdateJobQueueResponse.error) Result.t
+          Lwt.t
 val update_scheduling_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSchedulingPolicyRequest.t ->
         (UpdateSchedulingPolicyResponse.t,
-          [ `AWS of UpdateSchedulingPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateSchedulingPolicyResponse.error) Result.t Lwt.t

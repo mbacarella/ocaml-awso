@@ -1394,474 +1394,451 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpgradePublishedSchema ->
       Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
   | AddFacetToObject ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some AddFacetToObjectResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (AddFacetToObjectResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (AddFacetToObjectResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some AddFacetToObjectResponse.error_of_json))
   | ApplySchema ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ApplySchemaResponse.error_of_json)
-       | Ok resp -> Ok (ApplySchemaResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ApplySchemaResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ApplySchemaResponse.error_of_json))
   | AttachObject ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some AttachObjectResponse.error_of_json)
-       | Ok resp -> Ok (AttachObjectResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (AttachObjectResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some AttachObjectResponse.error_of_json))
   | AttachPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some AttachPolicyResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (AttachPolicyResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (AttachPolicyResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some AttachPolicyResponse.error_of_json))
   | AttachToIndex ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some AttachToIndexResponse.error_of_json)
-       | Ok resp ->
-           Ok (AttachToIndexResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (AttachToIndexResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some AttachToIndexResponse.error_of_json))
   | AttachTypedLink ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some AttachTypedLinkResponse.error_of_json)
-       | Ok resp ->
-           Ok (AttachTypedLinkResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (AttachTypedLinkResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some AttachTypedLinkResponse.error_of_json))
   | BatchRead ->
-      (match resp with
-       | Error err -> handle_error err (Some BatchReadResponse.error_of_json)
-       | Ok resp -> Ok (BatchReadResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (BatchReadResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some BatchReadResponse.error_of_json))
   | BatchWrite ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some BatchWriteResponse.error_of_json)
-       | Ok resp -> Ok (BatchWriteResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (BatchWriteResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some BatchWriteResponse.error_of_json))
   | CreateDirectory ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateDirectoryResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateDirectoryResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateDirectoryResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateDirectoryResponse.error_of_json))
   | CreateFacet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateFacetResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (CreateFacetResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CreateFacetResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some CreateFacetResponse.error_of_json))
   | CreateIndex ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateIndexResponse.error_of_json)
-       | Ok resp -> Ok (CreateIndexResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateIndexResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateIndexResponse.error_of_json))
   | CreateObject ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateObjectResponse.error_of_json)
-       | Ok resp -> Ok (CreateObjectResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateObjectResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateObjectResponse.error_of_json))
   | CreateSchema ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateSchemaResponse.error_of_json)
-       | Ok resp -> Ok (CreateSchemaResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateSchemaResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateSchemaResponse.error_of_json))
   | CreateTypedLinkFacet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateTypedLinkFacetResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (CreateTypedLinkFacetResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CreateTypedLinkFacetResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some CreateTypedLinkFacetResponse.error_of_json))
   | DeleteDirectory ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteDirectoryResponse.error_of_json)
-       | Ok resp ->
-           Ok (DeleteDirectoryResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteDirectoryResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DeleteDirectoryResponse.error_of_json))
   | DeleteFacet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteFacetResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteFacetResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteFacetResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some DeleteFacetResponse.error_of_json))
   | DeleteObject ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteObjectResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteObjectResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteObjectResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some DeleteObjectResponse.error_of_json))
   | DeleteSchema ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteSchemaResponse.error_of_json)
-       | Ok resp -> Ok (DeleteSchemaResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DeleteSchemaResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteSchemaResponse.error_of_json))
   | DeleteTypedLinkFacet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteTypedLinkFacetResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteTypedLinkFacetResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteTypedLinkFacetResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteTypedLinkFacetResponse.error_of_json))
   | DetachFromIndex ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DetachFromIndexResponse.error_of_json)
-       | Ok resp ->
-           Ok (DetachFromIndexResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DetachFromIndexResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DetachFromIndexResponse.error_of_json))
   | DetachObject ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DetachObjectResponse.error_of_json)
-       | Ok resp -> Ok (DetachObjectResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DetachObjectResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DetachObjectResponse.error_of_json))
   | DetachPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DetachPolicyResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DetachPolicyResponse.of_header_and_body (headers, ())))
-  | DetachTypedLink -> Ok ()
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DetachPolicyResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some DetachPolicyResponse.error_of_json))
+  | DetachTypedLink ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DisableDirectory ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DisableDirectoryResponse.error_of_json)
-       | Ok resp ->
-           Ok (DisableDirectoryResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DisableDirectoryResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DisableDirectoryResponse.error_of_json))
   | EnableDirectory ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some EnableDirectoryResponse.error_of_json)
-       | Ok resp ->
-           Ok (EnableDirectoryResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (EnableDirectoryResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some EnableDirectoryResponse.error_of_json))
   | GetAppliedSchemaVersion ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetAppliedSchemaVersionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetAppliedSchemaVersionResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (GetAppliedSchemaVersionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetAppliedSchemaVersionResponse.error_of_json))
   | GetDirectory ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetDirectoryResponse.error_of_json)
-       | Ok resp -> Ok (GetDirectoryResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetDirectoryResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetDirectoryResponse.error_of_json))
   | GetFacet ->
-      (match resp with
-       | Error err -> handle_error err (Some GetFacetResponse.error_of_json)
-       | Ok resp -> Ok (GetFacetResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetFacetResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetFacetResponse.error_of_json))
   | GetLinkAttributes ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetLinkAttributesResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetLinkAttributesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetLinkAttributesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetLinkAttributesResponse.error_of_json))
   | GetObjectAttributes ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetObjectAttributesResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetObjectAttributesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetObjectAttributesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetObjectAttributesResponse.error_of_json))
   | GetObjectInformation ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetObjectInformationResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetObjectInformationResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetObjectInformationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetObjectInformationResponse.error_of_json))
   | GetSchemaAsJson ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetSchemaAsJsonResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetSchemaAsJsonResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetSchemaAsJsonResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetSchemaAsJsonResponse.error_of_json))
   | GetTypedLinkFacetInformation ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetTypedLinkFacetInformationResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (GetTypedLinkFacetInformationResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (GetTypedLinkFacetInformationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetTypedLinkFacetInformationResponse.error_of_json))
   | ListAppliedSchemaArns ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListAppliedSchemaArnsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListAppliedSchemaArnsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListAppliedSchemaArnsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListAppliedSchemaArnsResponse.error_of_json))
   | ListAttachedIndices ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListAttachedIndicesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListAttachedIndicesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListAttachedIndicesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListAttachedIndicesResponse.error_of_json))
   | ListDevelopmentSchemaArns ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListDevelopmentSchemaArnsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListDevelopmentSchemaArnsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListDevelopmentSchemaArnsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListDevelopmentSchemaArnsResponse.error_of_json))
   | ListDirectories ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListDirectoriesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListDirectoriesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListDirectoriesResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListDirectoriesResponse.error_of_json))
   | ListFacetAttributes ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListFacetAttributesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListFacetAttributesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListFacetAttributesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListFacetAttributesResponse.error_of_json))
   | ListFacetNames ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListFacetNamesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListFacetNamesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListFacetNamesResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListFacetNamesResponse.error_of_json))
   | ListIncomingTypedLinks ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListIncomingTypedLinksResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListIncomingTypedLinksResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListIncomingTypedLinksResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListIncomingTypedLinksResponse.error_of_json))
   | ListIndex ->
-      (match resp with
-       | Error err -> handle_error err (Some ListIndexResponse.error_of_json)
-       | Ok resp -> Ok (ListIndexResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListIndexResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListIndexResponse.error_of_json))
   | ListManagedSchemaArns ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListManagedSchemaArnsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListManagedSchemaArnsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListManagedSchemaArnsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListManagedSchemaArnsResponse.error_of_json))
   | ListObjectAttributes ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListObjectAttributesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListObjectAttributesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListObjectAttributesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListObjectAttributesResponse.error_of_json))
   | ListObjectChildren ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListObjectChildrenResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListObjectChildrenResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListObjectChildrenResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListObjectChildrenResponse.error_of_json))
   | ListObjectParentPaths ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListObjectParentPathsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListObjectParentPathsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListObjectParentPathsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListObjectParentPathsResponse.error_of_json))
   | ListObjectParents ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListObjectParentsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListObjectParentsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListObjectParentsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListObjectParentsResponse.error_of_json))
   | ListObjectPolicies ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListObjectPoliciesResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListObjectPoliciesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListObjectPoliciesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListObjectPoliciesResponse.error_of_json))
   | ListOutgoingTypedLinks ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListOutgoingTypedLinksResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListOutgoingTypedLinksResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListOutgoingTypedLinksResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListOutgoingTypedLinksResponse.error_of_json))
   | ListPolicyAttachments ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListPolicyAttachmentsResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListPolicyAttachmentsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListPolicyAttachmentsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListPolicyAttachmentsResponse.error_of_json))
   | ListPublishedSchemaArns ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListPublishedSchemaArnsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListPublishedSchemaArnsResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListPublishedSchemaArnsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListPublishedSchemaArnsResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           Ok (ListTagsForResourceResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | ListTypedLinkFacetAttributes ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListTypedLinkFacetAttributesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListTypedLinkFacetAttributesResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (ListTypedLinkFacetAttributesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListTypedLinkFacetAttributesResponse.error_of_json))
   | ListTypedLinkFacetNames ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListTypedLinkFacetNamesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (ListTypedLinkFacetNamesResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (ListTypedLinkFacetNamesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListTypedLinkFacetNamesResponse.error_of_json))
   | LookupPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some LookupPolicyResponse.error_of_json)
-       | Ok resp -> Ok (LookupPolicyResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (LookupPolicyResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some LookupPolicyResponse.error_of_json))
   | PublishSchema ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PublishSchemaResponse.error_of_json)
-       | Ok resp ->
-           Ok (PublishSchemaResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (PublishSchemaResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some PublishSchemaResponse.error_of_json))
   | PutSchemaFromJson ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutSchemaFromJsonResponse.error_of_json)
-       | Ok resp ->
-           Ok (PutSchemaFromJsonResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (PutSchemaFromJsonResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some PutSchemaFromJsonResponse.error_of_json))
   | RemoveFacetFromObject ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some RemoveFacetFromObjectResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok
-             (RemoveFacetFromObjectResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (RemoveFacetFromObjectResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some RemoveFacetFromObjectResponse.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (TagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UntagResourceResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateFacet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateFacetResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UpdateFacetResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateFacetResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UpdateFacetResponse.error_of_json))
   | UpdateLinkAttributes ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateLinkAttributesResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UpdateLinkAttributesResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateLinkAttributesResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some UpdateLinkAttributesResponse.error_of_json))
   | UpdateObjectAttributes ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateObjectAttributesResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpdateObjectAttributesResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (UpdateObjectAttributesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateObjectAttributesResponse.error_of_json))
   | UpdateSchema ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateSchemaResponse.error_of_json)
-       | Ok resp -> Ok (UpdateSchemaResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateSchemaResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateSchemaResponse.error_of_json))
   | UpdateTypedLinkFacet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateTypedLinkFacetResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (UpdateTypedLinkFacetResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateTypedLinkFacetResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some UpdateTypedLinkFacetResponse.error_of_json))
   | UpgradeAppliedSchema ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpgradeAppliedSchemaResponse.error_of_json)
-       | Ok resp ->
-           Ok (UpgradeAppliedSchemaResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpgradeAppliedSchemaResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpgradeAppliedSchemaResponse.error_of_json))
   | UpgradePublishedSchema ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpgradePublishedSchemaResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (UpgradePublishedSchemaResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (UpgradePublishedSchemaResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpgradePublishedSchemaResponse.error_of_json))

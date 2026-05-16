@@ -5,439 +5,375 @@ val associate_firewall_rule_group :
     ?cfg:Awso.Cfg.t ->
       AssociateFirewallRuleGroupRequest.t ->
         (AssociateFirewallRuleGroupResponse.t,
-          [ `AWS of AssociateFirewallRuleGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssociateFirewallRuleGroupResponse.error) Result.t Lwt.t
 val associate_resolver_endpoint_ip_address :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateResolverEndpointIpAddressRequest.t ->
         (AssociateResolverEndpointIpAddressResponse.t,
-          [ `AWS of AssociateResolverEndpointIpAddressResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssociateResolverEndpointIpAddressResponse.error) Result.t Lwt.t
 val associate_resolver_query_log_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateResolverQueryLogConfigRequest.t ->
         (AssociateResolverQueryLogConfigResponse.t,
-          [ `AWS of AssociateResolverQueryLogConfigResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssociateResolverQueryLogConfigResponse.error) Result.t Lwt.t
 val associate_resolver_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateResolverRuleRequest.t ->
         (AssociateResolverRuleResponse.t,
-          [ `AWS of AssociateResolverRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          AssociateResolverRuleResponse.error) Result.t Lwt.t
 val create_firewall_domain_list :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateFirewallDomainListRequest.t ->
         (CreateFirewallDomainListResponse.t,
-          [ `AWS of CreateFirewallDomainListResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateFirewallDomainListResponse.error) Result.t Lwt.t
 val create_firewall_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateFirewallRuleRequest.t ->
-        (CreateFirewallRuleResponse.t,
-          [ `AWS of CreateFirewallRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateFirewallRuleResponse.t, CreateFirewallRuleResponse.error)
+          Result.t Lwt.t
 val create_firewall_rule_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateFirewallRuleGroupRequest.t ->
         (CreateFirewallRuleGroupResponse.t,
-          [ `AWS of CreateFirewallRuleGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateFirewallRuleGroupResponse.error) Result.t Lwt.t
 val create_resolver_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateResolverEndpointRequest.t ->
         (CreateResolverEndpointResponse.t,
-          [ `AWS of CreateResolverEndpointResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateResolverEndpointResponse.error) Result.t Lwt.t
 val create_resolver_query_log_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateResolverQueryLogConfigRequest.t ->
         (CreateResolverQueryLogConfigResponse.t,
-          [ `AWS of CreateResolverQueryLogConfigResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateResolverQueryLogConfigResponse.error) Result.t Lwt.t
 val create_resolver_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateResolverRuleRequest.t ->
-        (CreateResolverRuleResponse.t,
-          [ `AWS of CreateResolverRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateResolverRuleResponse.t, CreateResolverRuleResponse.error)
+          Result.t Lwt.t
 val delete_firewall_domain_list :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteFirewallDomainListRequest.t ->
         (DeleteFirewallDomainListResponse.t,
-          [ `AWS of DeleteFirewallDomainListResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteFirewallDomainListResponse.error) Result.t Lwt.t
 val delete_firewall_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteFirewallRuleRequest.t ->
-        (DeleteFirewallRuleResponse.t,
-          [ `AWS of DeleteFirewallRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteFirewallRuleResponse.t, DeleteFirewallRuleResponse.error)
+          Result.t Lwt.t
 val delete_firewall_rule_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteFirewallRuleGroupRequest.t ->
         (DeleteFirewallRuleGroupResponse.t,
-          [ `AWS of DeleteFirewallRuleGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteFirewallRuleGroupResponse.error) Result.t Lwt.t
 val delete_resolver_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteResolverEndpointRequest.t ->
         (DeleteResolverEndpointResponse.t,
-          [ `AWS of DeleteResolverEndpointResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteResolverEndpointResponse.error) Result.t Lwt.t
 val delete_resolver_query_log_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteResolverQueryLogConfigRequest.t ->
         (DeleteResolverQueryLogConfigResponse.t,
-          [ `AWS of DeleteResolverQueryLogConfigResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteResolverQueryLogConfigResponse.error) Result.t Lwt.t
 val delete_resolver_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteResolverRuleRequest.t ->
-        (DeleteResolverRuleResponse.t,
-          [ `AWS of DeleteResolverRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteResolverRuleResponse.t, DeleteResolverRuleResponse.error)
+          Result.t Lwt.t
 val disassociate_firewall_rule_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateFirewallRuleGroupRequest.t ->
         (DisassociateFirewallRuleGroupResponse.t,
-          [ `AWS of DisassociateFirewallRuleGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateFirewallRuleGroupResponse.error) Result.t Lwt.t
 val disassociate_resolver_endpoint_ip_address :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateResolverEndpointIpAddressRequest.t ->
         (DisassociateResolverEndpointIpAddressResponse.t,
-          [ `AWS of DisassociateResolverEndpointIpAddressResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateResolverEndpointIpAddressResponse.error) Result.t Lwt.t
 val disassociate_resolver_query_log_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateResolverQueryLogConfigRequest.t ->
         (DisassociateResolverQueryLogConfigResponse.t,
-          [ `AWS of DisassociateResolverQueryLogConfigResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateResolverQueryLogConfigResponse.error) Result.t Lwt.t
 val disassociate_resolver_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateResolverRuleRequest.t ->
         (DisassociateResolverRuleResponse.t,
-          [ `AWS of DisassociateResolverRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DisassociateResolverRuleResponse.error) Result.t Lwt.t
 val get_firewall_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetFirewallConfigRequest.t ->
-        (GetFirewallConfigResponse.t,
-          [ `AWS of GetFirewallConfigResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetFirewallConfigResponse.t, GetFirewallConfigResponse.error)
+          Result.t Lwt.t
 val get_firewall_domain_list :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetFirewallDomainListRequest.t ->
         (GetFirewallDomainListResponse.t,
-          [ `AWS of GetFirewallDomainListResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetFirewallDomainListResponse.error) Result.t Lwt.t
 val get_firewall_rule_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetFirewallRuleGroupRequest.t ->
-        (GetFirewallRuleGroupResponse.t,
-          [ `AWS of GetFirewallRuleGroupResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetFirewallRuleGroupResponse.t, GetFirewallRuleGroupResponse.error)
+          Result.t Lwt.t
 val get_firewall_rule_group_association :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetFirewallRuleGroupAssociationRequest.t ->
         (GetFirewallRuleGroupAssociationResponse.t,
-          [ `AWS of GetFirewallRuleGroupAssociationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetFirewallRuleGroupAssociationResponse.error) Result.t Lwt.t
 val get_firewall_rule_group_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetFirewallRuleGroupPolicyRequest.t ->
         (GetFirewallRuleGroupPolicyResponse.t,
-          [ `AWS of GetFirewallRuleGroupPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetFirewallRuleGroupPolicyResponse.error) Result.t Lwt.t
 val get_resolver_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetResolverConfigRequest.t ->
-        (GetResolverConfigResponse.t,
-          [ `AWS of GetResolverConfigResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetResolverConfigResponse.t, GetResolverConfigResponse.error)
+          Result.t Lwt.t
 val get_resolver_dnssec_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetResolverDnssecConfigRequest.t ->
         (GetResolverDnssecConfigResponse.t,
-          [ `AWS of GetResolverDnssecConfigResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetResolverDnssecConfigResponse.error) Result.t Lwt.t
 val get_resolver_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetResolverEndpointRequest.t ->
-        (GetResolverEndpointResponse.t,
-          [ `AWS of GetResolverEndpointResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetResolverEndpointResponse.t, GetResolverEndpointResponse.error)
+          Result.t Lwt.t
 val get_resolver_query_log_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetResolverQueryLogConfigRequest.t ->
         (GetResolverQueryLogConfigResponse.t,
-          [ `AWS of GetResolverQueryLogConfigResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetResolverQueryLogConfigResponse.error) Result.t Lwt.t
 val get_resolver_query_log_config_association :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetResolverQueryLogConfigAssociationRequest.t ->
         (GetResolverQueryLogConfigAssociationResponse.t,
-          [ `AWS of GetResolverQueryLogConfigAssociationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetResolverQueryLogConfigAssociationResponse.error) Result.t Lwt.t
 val get_resolver_query_log_config_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetResolverQueryLogConfigPolicyRequest.t ->
         (GetResolverQueryLogConfigPolicyResponse.t,
-          [ `AWS of GetResolverQueryLogConfigPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetResolverQueryLogConfigPolicyResponse.error) Result.t Lwt.t
 val get_resolver_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetResolverRuleRequest.t ->
-        (GetResolverRuleResponse.t,
-          [ `AWS of GetResolverRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetResolverRuleResponse.t, GetResolverRuleResponse.error) Result.t
+          Lwt.t
 val get_resolver_rule_association :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetResolverRuleAssociationRequest.t ->
         (GetResolverRuleAssociationResponse.t,
-          [ `AWS of GetResolverRuleAssociationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetResolverRuleAssociationResponse.error) Result.t Lwt.t
 val get_resolver_rule_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetResolverRulePolicyRequest.t ->
         (GetResolverRulePolicyResponse.t,
-          [ `AWS of GetResolverRulePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetResolverRulePolicyResponse.error) Result.t Lwt.t
 val import_firewall_domains :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ImportFirewallDomainsRequest.t ->
         (ImportFirewallDomainsResponse.t,
-          [ `AWS of ImportFirewallDomainsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ImportFirewallDomainsResponse.error) Result.t Lwt.t
 val list_firewall_configs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFirewallConfigsRequest.t ->
-        (ListFirewallConfigsResponse.t,
-          [ `AWS of ListFirewallConfigsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListFirewallConfigsResponse.t, ListFirewallConfigsResponse.error)
+          Result.t Lwt.t
 val list_firewall_domain_lists :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFirewallDomainListsRequest.t ->
         (ListFirewallDomainListsResponse.t,
-          [ `AWS of ListFirewallDomainListsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListFirewallDomainListsResponse.error) Result.t Lwt.t
 val list_firewall_domains :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFirewallDomainsRequest.t ->
-        (ListFirewallDomainsResponse.t,
-          [ `AWS of ListFirewallDomainsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListFirewallDomainsResponse.t, ListFirewallDomainsResponse.error)
+          Result.t Lwt.t
 val list_firewall_rule_group_associations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFirewallRuleGroupAssociationsRequest.t ->
         (ListFirewallRuleGroupAssociationsResponse.t,
-          [ `AWS of ListFirewallRuleGroupAssociationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListFirewallRuleGroupAssociationsResponse.error) Result.t Lwt.t
 val list_firewall_rule_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFirewallRuleGroupsRequest.t ->
         (ListFirewallRuleGroupsResponse.t,
-          [ `AWS of ListFirewallRuleGroupsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListFirewallRuleGroupsResponse.error) Result.t Lwt.t
 val list_firewall_rules :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFirewallRulesRequest.t ->
-        (ListFirewallRulesResponse.t,
-          [ `AWS of ListFirewallRulesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListFirewallRulesResponse.t, ListFirewallRulesResponse.error)
+          Result.t Lwt.t
 val list_resolver_configs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListResolverConfigsRequest.t ->
-        (ListResolverConfigsResponse.t,
-          [ `AWS of ListResolverConfigsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListResolverConfigsResponse.t, ListResolverConfigsResponse.error)
+          Result.t Lwt.t
 val list_resolver_dnssec_configs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListResolverDnssecConfigsRequest.t ->
         (ListResolverDnssecConfigsResponse.t,
-          [ `AWS of ListResolverDnssecConfigsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListResolverDnssecConfigsResponse.error) Result.t Lwt.t
 val list_resolver_endpoint_ip_addresses :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListResolverEndpointIpAddressesRequest.t ->
         (ListResolverEndpointIpAddressesResponse.t,
-          [ `AWS of ListResolverEndpointIpAddressesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListResolverEndpointIpAddressesResponse.error) Result.t Lwt.t
 val list_resolver_endpoints :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListResolverEndpointsRequest.t ->
         (ListResolverEndpointsResponse.t,
-          [ `AWS of ListResolverEndpointsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListResolverEndpointsResponse.error) Result.t Lwt.t
 val list_resolver_query_log_config_associations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListResolverQueryLogConfigAssociationsRequest.t ->
         (ListResolverQueryLogConfigAssociationsResponse.t,
-          [ `AWS of ListResolverQueryLogConfigAssociationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListResolverQueryLogConfigAssociationsResponse.error) Result.t
+          Lwt.t
 val list_resolver_query_log_configs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListResolverQueryLogConfigsRequest.t ->
         (ListResolverQueryLogConfigsResponse.t,
-          [ `AWS of ListResolverQueryLogConfigsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListResolverQueryLogConfigsResponse.error) Result.t Lwt.t
 val list_resolver_rule_associations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListResolverRuleAssociationsRequest.t ->
         (ListResolverRuleAssociationsResponse.t,
-          [ `AWS of ListResolverRuleAssociationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListResolverRuleAssociationsResponse.error) Result.t Lwt.t
 val list_resolver_rules :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListResolverRulesRequest.t ->
-        (ListResolverRulesResponse.t,
-          [ `AWS of ListResolverRulesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListResolverRulesResponse.t, ListResolverRulesResponse.error)
+          Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val put_firewall_rule_group_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutFirewallRuleGroupPolicyRequest.t ->
         (PutFirewallRuleGroupPolicyResponse.t,
-          [ `AWS of PutFirewallRuleGroupPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutFirewallRuleGroupPolicyResponse.error) Result.t Lwt.t
 val put_resolver_query_log_config_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutResolverQueryLogConfigPolicyRequest.t ->
         (PutResolverQueryLogConfigPolicyResponse.t,
-          [ `AWS of PutResolverQueryLogConfigPolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutResolverQueryLogConfigPolicyResponse.error) Result.t Lwt.t
 val put_resolver_rule_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutResolverRulePolicyRequest.t ->
         (PutResolverRulePolicyResponse.t,
-          [ `AWS of PutResolverRulePolicyResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          PutResolverRulePolicyResponse.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_firewall_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateFirewallConfigRequest.t ->
-        (UpdateFirewallConfigResponse.t,
-          [ `AWS of UpdateFirewallConfigResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateFirewallConfigResponse.t, UpdateFirewallConfigResponse.error)
+          Result.t Lwt.t
 val update_firewall_domains :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateFirewallDomainsRequest.t ->
         (UpdateFirewallDomainsResponse.t,
-          [ `AWS of UpdateFirewallDomainsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateFirewallDomainsResponse.error) Result.t Lwt.t
 val update_firewall_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateFirewallRuleRequest.t ->
-        (UpdateFirewallRuleResponse.t,
-          [ `AWS of UpdateFirewallRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateFirewallRuleResponse.t, UpdateFirewallRuleResponse.error)
+          Result.t Lwt.t
 val update_firewall_rule_group_association :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateFirewallRuleGroupAssociationRequest.t ->
         (UpdateFirewallRuleGroupAssociationResponse.t,
-          [ `AWS of UpdateFirewallRuleGroupAssociationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateFirewallRuleGroupAssociationResponse.error) Result.t Lwt.t
 val update_resolver_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateResolverConfigRequest.t ->
-        (UpdateResolverConfigResponse.t,
-          [ `AWS of UpdateResolverConfigResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateResolverConfigResponse.t, UpdateResolverConfigResponse.error)
+          Result.t Lwt.t
 val update_resolver_dnssec_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateResolverDnssecConfigRequest.t ->
         (UpdateResolverDnssecConfigResponse.t,
-          [ `AWS of UpdateResolverDnssecConfigResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateResolverDnssecConfigResponse.error) Result.t Lwt.t
 val update_resolver_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateResolverEndpointRequest.t ->
         (UpdateResolverEndpointResponse.t,
-          [ `AWS of UpdateResolverEndpointResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          UpdateResolverEndpointResponse.error) Result.t Lwt.t
 val update_resolver_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateResolverRuleRequest.t ->
-        (UpdateResolverRuleResponse.t,
-          [ `AWS of UpdateResolverRuleResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateResolverRuleResponse.t, UpdateResolverRuleResponse.error)
+          Result.t Lwt.t

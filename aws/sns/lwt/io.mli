@@ -2,271 +2,209 @@
 open Awso_sns.Values
 val add_permission :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      AddPermissionInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> AddPermissionInput.t -> (unit, unit) Result.t Lwt.t
 val check_if_phone_number_is_opted_out :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CheckIfPhoneNumberIsOptedOutInput.t ->
         (CheckIfPhoneNumberIsOptedOutResponse.t,
-          [ `AWS of CheckIfPhoneNumberIsOptedOutResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CheckIfPhoneNumberIsOptedOutResponse.error) Result.t Lwt.t
 val confirm_subscription :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ConfirmSubscriptionInput.t ->
-        (ConfirmSubscriptionResponse.t,
-          [ `AWS of ConfirmSubscriptionResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ConfirmSubscriptionResponse.t, ConfirmSubscriptionResponse.error)
+          Result.t Lwt.t
 val create_platform_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePlatformApplicationInput.t ->
         (CreatePlatformApplicationResponse.t,
-          [ `AWS of CreatePlatformApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreatePlatformApplicationResponse.error) Result.t Lwt.t
 val create_platform_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePlatformEndpointInput.t ->
-        (CreateEndpointResponse.t,
-          [ `AWS of CreateEndpointResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateEndpointResponse.t, CreateEndpointResponse.error) Result.t
+          Lwt.t
 val create_s_m_s_sandbox_phone_number :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSMSSandboxPhoneNumberInput.t ->
         (CreateSMSSandboxPhoneNumberResult.t,
-          [ `AWS of CreateSMSSandboxPhoneNumberResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          CreateSMSSandboxPhoneNumberResult.error) Result.t Lwt.t
 val create_topic :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTopicInput.t ->
-        (CreateTopicResponse.t,
-          [ `AWS of CreateTopicResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateTopicResponse.t, CreateTopicResponse.error) Result.t Lwt.t
 val delete_endpoint :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteEndpointInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteEndpointInput.t -> (unit, unit) Result.t Lwt.t
 val delete_platform_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeletePlatformApplicationInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      DeletePlatformApplicationInput.t -> (unit, unit) Result.t Lwt.t
 val delete_s_m_s_sandbox_phone_number :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSMSSandboxPhoneNumberInput.t ->
         (DeleteSMSSandboxPhoneNumberResult.t,
-          [ `AWS of DeleteSMSSandboxPhoneNumberResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeleteSMSSandboxPhoneNumberResult.error) Result.t Lwt.t
 val delete_topic :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteTopicInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteTopicInput.t -> (unit, unit) Result.t Lwt.t
 val get_endpoint_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEndpointAttributesInput.t ->
         (GetEndpointAttributesResponse.t,
-          [ `AWS of GetEndpointAttributesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetEndpointAttributesResponse.error) Result.t Lwt.t
 val get_platform_application_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetPlatformApplicationAttributesInput.t ->
         (GetPlatformApplicationAttributesResponse.t,
-          [ `AWS of GetPlatformApplicationAttributesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetPlatformApplicationAttributesResponse.error) Result.t Lwt.t
 val get_s_m_s_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSMSAttributesInput.t ->
-        (GetSMSAttributesResponse.t,
-          [ `AWS of GetSMSAttributesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetSMSAttributesResponse.t, GetSMSAttributesResponse.error) Result.t
+          Lwt.t
 val get_s_m_s_sandbox_account_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSMSSandboxAccountStatusInput.t ->
         (GetSMSSandboxAccountStatusResult.t,
-          [ `AWS of GetSMSSandboxAccountStatusResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetSMSSandboxAccountStatusResult.error) Result.t Lwt.t
 val get_subscription_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSubscriptionAttributesInput.t ->
         (GetSubscriptionAttributesResponse.t,
-          [ `AWS of GetSubscriptionAttributesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          GetSubscriptionAttributesResponse.error) Result.t Lwt.t
 val get_topic_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTopicAttributesInput.t ->
-        (GetTopicAttributesResponse.t,
-          [ `AWS of GetTopicAttributesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetTopicAttributesResponse.t, GetTopicAttributesResponse.error)
+          Result.t Lwt.t
 val list_endpoints_by_platform_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEndpointsByPlatformApplicationInput.t ->
         (ListEndpointsByPlatformApplicationResponse.t,
-          [ `AWS of ListEndpointsByPlatformApplicationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListEndpointsByPlatformApplicationResponse.error) Result.t Lwt.t
 val list_origination_numbers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListOriginationNumbersRequest.t ->
-        (ListOriginationNumbersResult.t,
-          [ `AWS of ListOriginationNumbersResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListOriginationNumbersResult.t, ListOriginationNumbersResult.error)
+          Result.t Lwt.t
 val list_phone_numbers_opted_out :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPhoneNumbersOptedOutInput.t ->
         (ListPhoneNumbersOptedOutResponse.t,
-          [ `AWS of ListPhoneNumbersOptedOutResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListPhoneNumbersOptedOutResponse.error) Result.t Lwt.t
 val list_platform_applications :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPlatformApplicationsInput.t ->
         (ListPlatformApplicationsResponse.t,
-          [ `AWS of ListPlatformApplicationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListPlatformApplicationsResponse.error) Result.t Lwt.t
 val list_s_m_s_sandbox_phone_numbers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSMSSandboxPhoneNumbersInput.t ->
         (ListSMSSandboxPhoneNumbersResult.t,
-          [ `AWS of ListSMSSandboxPhoneNumbersResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListSMSSandboxPhoneNumbersResult.error) Result.t Lwt.t
 val list_subscriptions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSubscriptionsInput.t ->
-        (ListSubscriptionsResponse.t,
-          [ `AWS of ListSubscriptionsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListSubscriptionsResponse.t, ListSubscriptionsResponse.error)
+          Result.t Lwt.t
 val list_subscriptions_by_topic :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSubscriptionsByTopicInput.t ->
         (ListSubscriptionsByTopicResponse.t,
-          [ `AWS of ListSubscriptionsByTopicResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListSubscriptionsByTopicResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val list_topics :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTopicsInput.t ->
-        (ListTopicsResponse.t,
-          [ `AWS of ListTopicsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTopicsResponse.t, ListTopicsResponse.error) Result.t Lwt.t
 val opt_in_phone_number :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       OptInPhoneNumberInput.t ->
-        (OptInPhoneNumberResponse.t,
-          [ `AWS of OptInPhoneNumberResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (OptInPhoneNumberResponse.t, OptInPhoneNumberResponse.error) Result.t
+          Lwt.t
 val publish :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PublishInput.t ->
-        (PublishResponse.t,
-          [ `AWS of PublishResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PublishResponse.t, PublishResponse.error) Result.t Lwt.t
 val publish_batch :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PublishBatchInput.t ->
-        (PublishBatchResponse.t,
-          [ `AWS of PublishBatchResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PublishBatchResponse.t, PublishBatchResponse.error) Result.t Lwt.t
 val remove_permission :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      RemovePermissionInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> RemovePermissionInput.t -> (unit, unit) Result.t Lwt.t
 val set_endpoint_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      SetEndpointAttributesInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      SetEndpointAttributesInput.t -> (unit, unit) Result.t Lwt.t
 val set_platform_application_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      SetPlatformApplicationAttributesInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      SetPlatformApplicationAttributesInput.t -> (unit, unit) Result.t Lwt.t
 val set_s_m_s_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SetSMSAttributesInput.t ->
-        (SetSMSAttributesResponse.t,
-          [ `AWS of SetSMSAttributesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SetSMSAttributesResponse.t, SetSMSAttributesResponse.error) Result.t
+          Lwt.t
 val set_subscription_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      SetSubscriptionAttributesInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      SetSubscriptionAttributesInput.t -> (unit, unit) Result.t Lwt.t
 val set_topic_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      SetTopicAttributesInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      SetTopicAttributesInput.t -> (unit, unit) Result.t Lwt.t
 val subscribe :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SubscribeInput.t ->
-        (SubscribeResponse.t,
-          [ `AWS of SubscribeResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SubscribeResponse.t, SubscribeResponse.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
 val unsubscribe :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      UnsubscribeInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> UnsubscribeInput.t -> (unit, unit) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val verify_s_m_s_sandbox_phone_number :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       VerifySMSSandboxPhoneNumberInput.t ->
         (VerifySMSSandboxPhoneNumberResult.t,
-          [ `AWS of VerifySMSSandboxPhoneNumberResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          VerifySMSSandboxPhoneNumberResult.error) Result.t Lwt.t

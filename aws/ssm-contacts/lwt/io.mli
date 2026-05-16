@@ -4,188 +4,149 @@ val accept_page :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AcceptPageRequest.t ->
-        (AcceptPageResult.t,
-          [ `AWS of AcceptPageResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (AcceptPageResult.t, AcceptPageResult.error) Result.t Lwt.t
 val activate_contact_channel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ActivateContactChannelRequest.t ->
-        (ActivateContactChannelResult.t,
-          [ `AWS of ActivateContactChannelResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ActivateContactChannelResult.t, ActivateContactChannelResult.error)
+          Result.t Lwt.t
 val create_contact :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateContactRequest.t ->
-        (CreateContactResult.t,
-          [ `AWS of CreateContactResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateContactResult.t, CreateContactResult.error) Result.t Lwt.t
 val create_contact_channel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateContactChannelRequest.t ->
-        (CreateContactChannelResult.t,
-          [ `AWS of CreateContactChannelResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateContactChannelResult.t, CreateContactChannelResult.error)
+          Result.t Lwt.t
 val deactivate_contact_channel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeactivateContactChannelRequest.t ->
         (DeactivateContactChannelResult.t,
-          [ `AWS of DeactivateContactChannelResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          DeactivateContactChannelResult.error) Result.t Lwt.t
 val delete_contact :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteContactRequest.t ->
-        (DeleteContactResult.t,
-          [ `AWS of DeleteContactResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteContactResult.t, DeleteContactResult.error) Result.t Lwt.t
 val delete_contact_channel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteContactChannelRequest.t ->
-        (DeleteContactChannelResult.t,
-          [ `AWS of DeleteContactChannelResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteContactChannelResult.t, DeleteContactChannelResult.error)
+          Result.t Lwt.t
 val describe_engagement :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEngagementRequest.t ->
-        (DescribeEngagementResult.t,
-          [ `AWS of DescribeEngagementResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribeEngagementResult.t, DescribeEngagementResult.error) Result.t
+          Lwt.t
 val describe_page :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePageRequest.t ->
-        (DescribePageResult.t,
-          [ `AWS of DescribePageResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DescribePageResult.t, DescribePageResult.error) Result.t Lwt.t
 val get_contact :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetContactRequest.t ->
-        (GetContactResult.t,
-          [ `AWS of GetContactResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetContactResult.t, GetContactResult.error) Result.t Lwt.t
 val get_contact_channel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetContactChannelRequest.t ->
-        (GetContactChannelResult.t,
-          [ `AWS of GetContactChannelResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetContactChannelResult.t, GetContactChannelResult.error) Result.t
+          Lwt.t
 val get_contact_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetContactPolicyRequest.t ->
-        (GetContactPolicyResult.t,
-          [ `AWS of GetContactPolicyResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetContactPolicyResult.t, GetContactPolicyResult.error) Result.t
+          Lwt.t
 val list_contact_channels :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListContactChannelsRequest.t ->
-        (ListContactChannelsResult.t,
-          [ `AWS of ListContactChannelsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListContactChannelsResult.t, ListContactChannelsResult.error)
+          Result.t Lwt.t
 val list_contacts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListContactsRequest.t ->
-        (ListContactsResult.t,
-          [ `AWS of ListContactsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListContactsResult.t, ListContactsResult.error) Result.t Lwt.t
 val list_engagements :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEngagementsRequest.t ->
-        (ListEngagementsResult.t,
-          [ `AWS of ListEngagementsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListEngagementsResult.t, ListEngagementsResult.error) Result.t Lwt.t
 val list_page_receipts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPageReceiptsRequest.t ->
-        (ListPageReceiptsResult.t,
-          [ `AWS of ListPageReceiptsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListPageReceiptsResult.t, ListPageReceiptsResult.error) Result.t
+          Lwt.t
 val list_pages_by_contact :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPagesByContactRequest.t ->
-        (ListPagesByContactResult.t,
-          [ `AWS of ListPagesByContactResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListPagesByContactResult.t, ListPagesByContactResult.error) Result.t
+          Lwt.t
 val list_pages_by_engagement :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPagesByEngagementRequest.t ->
-        (ListPagesByEngagementResult.t,
-          [ `AWS of ListPagesByEngagementResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListPagesByEngagementResult.t, ListPagesByEngagementResult.error)
+          Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResult.t,
-          [ `AWS of ListTagsForResourceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListTagsForResourceResult.t, ListTagsForResourceResult.error)
+          Result.t Lwt.t
 val put_contact_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutContactPolicyRequest.t ->
-        (PutContactPolicyResult.t,
-          [ `AWS of PutContactPolicyResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (PutContactPolicyResult.t, PutContactPolicyResult.error) Result.t
+          Lwt.t
 val send_activation_code :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SendActivationCodeRequest.t ->
-        (SendActivationCodeResult.t,
-          [ `AWS of SendActivationCodeResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SendActivationCodeResult.t, SendActivationCodeResult.error) Result.t
+          Lwt.t
 val start_engagement :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartEngagementRequest.t ->
-        (StartEngagementResult.t,
-          [ `AWS of StartEngagementResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StartEngagementResult.t, StartEngagementResult.error) Result.t Lwt.t
 val stop_engagement :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopEngagementRequest.t ->
-        (StopEngagementResult.t,
-          [ `AWS of StopEngagementResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (StopEngagementResult.t, StopEngagementResult.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResult.t,
-          [ `AWS of TagResourceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (TagResourceResult.t, TagResourceResult.error) Result.t Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResult.t,
-          [ `AWS of UntagResourceResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UntagResourceResult.t, UntagResourceResult.error) Result.t Lwt.t
 val update_contact :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateContactRequest.t ->
-        (UpdateContactResult.t,
-          [ `AWS of UpdateContactResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateContactResult.t, UpdateContactResult.error) Result.t Lwt.t
 val update_contact_channel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateContactChannelRequest.t ->
-        (UpdateContactChannelResult.t,
-          [ `AWS of UpdateContactChannelResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateContactChannelResult.t, UpdateContactChannelResult.error)
+          Result.t Lwt.t

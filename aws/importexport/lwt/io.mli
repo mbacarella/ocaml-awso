@@ -4,41 +4,30 @@ val cancel_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CancelJobInput.t ->
-        (CancelJobOutput.t,
-          [ `AWS of CancelJobOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CancelJobOutput.t, CancelJobOutput.error) Result.t Lwt.t
 val create_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateJobInput.t ->
-        (CreateJobOutput.t,
-          [ `AWS of CreateJobOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateJobOutput.t, CreateJobOutput.error) Result.t Lwt.t
 val get_shipping_label :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetShippingLabelInput.t ->
-        (GetShippingLabelOutput.t,
-          [ `AWS of GetShippingLabelOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetShippingLabelOutput.t, GetShippingLabelOutput.error) Result.t
+          Lwt.t
 val get_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetStatusInput.t ->
-        (GetStatusOutput.t,
-          [ `AWS of GetStatusOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetStatusOutput.t, GetStatusOutput.error) Result.t Lwt.t
 val list_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListJobsInput.t ->
-        (ListJobsOutput.t,
-          [ `AWS of ListJobsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListJobsOutput.t, ListJobsOutput.error) Result.t Lwt.t
 val update_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateJobInput.t ->
-        (UpdateJobOutput.t,
-          [ `AWS of UpdateJobOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (UpdateJobOutput.t, UpdateJobOutput.error) Result.t Lwt.t

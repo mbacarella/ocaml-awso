@@ -4,351 +4,277 @@ val abort_environment_update :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AbortEnvironmentUpdateMessage.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val apply_environment_managed_action :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ApplyEnvironmentManagedActionRequest.t ->
         (ApplyEnvironmentManagedActionResult.t,
-          [ `AWS of ApplyEnvironmentManagedActionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ApplyEnvironmentManagedActionResult.error) Result.t
           Async.Deferred.t
 val associate_environment_operations_role :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateEnvironmentOperationsRoleMessage.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val check_d_n_s_availability :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CheckDNSAvailabilityMessage.t ->
         (CheckDNSAvailabilityResultMessage.t,
-          [ `AWS of CheckDNSAvailabilityResultMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CheckDNSAvailabilityResultMessage.error) Result.t Async.Deferred.t
 val compose_environments :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ComposeEnvironmentsMessage.t ->
         (EnvironmentDescriptionsMessage.t,
-          [ `AWS of EnvironmentDescriptionsMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          EnvironmentDescriptionsMessage.error) Result.t Async.Deferred.t
 val create_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateApplicationMessage.t ->
         (ApplicationDescriptionMessage.t,
-          [ `AWS of ApplicationDescriptionMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ApplicationDescriptionMessage.error) Result.t Async.Deferred.t
 val create_application_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateApplicationVersionMessage.t ->
         (ApplicationVersionDescriptionMessage.t,
-          [ `AWS of ApplicationVersionDescriptionMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ApplicationVersionDescriptionMessage.error) Result.t
           Async.Deferred.t
 val create_configuration_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateConfigurationTemplateMessage.t ->
         (ConfigurationSettingsDescription.t,
-          [ `AWS of ConfigurationSettingsDescription.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ConfigurationSettingsDescription.error) Result.t Async.Deferred.t
 val create_environment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateEnvironmentMessage.t ->
-        (EnvironmentDescription.t,
-          [ `AWS of EnvironmentDescription.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (EnvironmentDescription.t, EnvironmentDescription.error) Result.t
           Async.Deferred.t
 val create_platform_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePlatformVersionRequest.t ->
-        (CreatePlatformVersionResult.t,
-          [ `AWS of CreatePlatformVersionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreatePlatformVersionResult.t, CreatePlatformVersionResult.error)
+          Result.t Async.Deferred.t
 val create_storage_location :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       unit ->
         (CreateStorageLocationResultMessage.t,
-          [ `AWS of CreateStorageLocationResultMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateStorageLocationResultMessage.error) Result.t Async.Deferred.t
 val delete_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteApplicationMessage.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteApplicationMessage.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_application_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteApplicationVersionMessage.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val delete_configuration_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteConfigurationTemplateMessage.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val delete_environment_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteEnvironmentConfigurationMessage.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val delete_platform_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePlatformVersionRequest.t ->
-        (DeletePlatformVersionResult.t,
-          [ `AWS of DeletePlatformVersionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeletePlatformVersionResult.t, DeletePlatformVersionResult.error)
+          Result.t Async.Deferred.t
 val describe_account_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       unit ->
         (DescribeAccountAttributesResult.t,
-          [ `AWS of DescribeAccountAttributesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeAccountAttributesResult.error) Result.t Async.Deferred.t
 val describe_application_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeApplicationVersionsMessage.t ->
         (ApplicationVersionDescriptionsMessage.t,
-          [ `AWS of ApplicationVersionDescriptionsMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ApplicationVersionDescriptionsMessage.error) Result.t
           Async.Deferred.t
 val describe_applications :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeApplicationsMessage.t ->
         (ApplicationDescriptionsMessage.t,
-          [ `AWS of ApplicationDescriptionsMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ApplicationDescriptionsMessage.error) Result.t Async.Deferred.t
 val describe_configuration_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeConfigurationOptionsMessage.t ->
         (ConfigurationOptionsDescription.t,
-          [ `AWS of ConfigurationOptionsDescription.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ConfigurationOptionsDescription.error) Result.t Async.Deferred.t
 val describe_configuration_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeConfigurationSettingsMessage.t ->
         (ConfigurationSettingsDescriptions.t,
-          [ `AWS of ConfigurationSettingsDescriptions.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ConfigurationSettingsDescriptions.error) Result.t Async.Deferred.t
 val describe_environment_health :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEnvironmentHealthRequest.t ->
         (DescribeEnvironmentHealthResult.t,
-          [ `AWS of DescribeEnvironmentHealthResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeEnvironmentHealthResult.error) Result.t Async.Deferred.t
 val describe_environment_managed_action_history :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEnvironmentManagedActionHistoryRequest.t ->
         (DescribeEnvironmentManagedActionHistoryResult.t,
-          [ `AWS of DescribeEnvironmentManagedActionHistoryResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeEnvironmentManagedActionHistoryResult.error) Result.t
           Async.Deferred.t
 val describe_environment_managed_actions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEnvironmentManagedActionsRequest.t ->
         (DescribeEnvironmentManagedActionsResult.t,
-          [ `AWS of DescribeEnvironmentManagedActionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeEnvironmentManagedActionsResult.error) Result.t
           Async.Deferred.t
 val describe_environment_resources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEnvironmentResourcesMessage.t ->
         (EnvironmentResourceDescriptionsMessage.t,
-          [ `AWS of EnvironmentResourceDescriptionsMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          EnvironmentResourceDescriptionsMessage.error) Result.t
           Async.Deferred.t
 val describe_environments :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEnvironmentsMessage.t ->
         (EnvironmentDescriptionsMessage.t,
-          [ `AWS of EnvironmentDescriptionsMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          EnvironmentDescriptionsMessage.error) Result.t Async.Deferred.t
 val describe_events :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEventsMessage.t ->
-        (EventDescriptionsMessage.t,
-          [ `AWS of EventDescriptionsMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (EventDescriptionsMessage.t, EventDescriptionsMessage.error) Result.t
           Async.Deferred.t
 val describe_instances_health :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeInstancesHealthRequest.t ->
         (DescribeInstancesHealthResult.t,
-          [ `AWS of DescribeInstancesHealthResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeInstancesHealthResult.error) Result.t Async.Deferred.t
 val describe_platform_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePlatformVersionRequest.t ->
         (DescribePlatformVersionResult.t,
-          [ `AWS of DescribePlatformVersionResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribePlatformVersionResult.error) Result.t Async.Deferred.t
 val disassociate_environment_operations_role :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateEnvironmentOperationsRoleMessage.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val list_available_solution_stacks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       unit ->
         (ListAvailableSolutionStacksResultMessage.t,
-          [ `AWS of ListAvailableSolutionStacksResultMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ListAvailableSolutionStacksResultMessage.error) Result.t
           Async.Deferred.t
 val list_platform_branches :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPlatformBranchesRequest.t ->
-        (ListPlatformBranchesResult.t,
-          [ `AWS of ListPlatformBranchesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListPlatformBranchesResult.t, ListPlatformBranchesResult.error)
+          Result.t Async.Deferred.t
 val list_platform_versions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListPlatformVersionsRequest.t ->
-        (ListPlatformVersionsResult.t,
-          [ `AWS of ListPlatformVersionsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListPlatformVersionsResult.t, ListPlatformVersionsResult.error)
+          Result.t Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceMessage.t ->
         (ResourceTagsDescriptionMessage.t,
-          [ `AWS of ResourceTagsDescriptionMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ResourceTagsDescriptionMessage.error) Result.t Async.Deferred.t
 val rebuild_environment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      RebuildEnvironmentMessage.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      RebuildEnvironmentMessage.t -> (unit, unit) Result.t Async.Deferred.t
 val request_environment_info :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RequestEnvironmentInfoMessage.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val restart_app_server :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      RestartAppServerMessage.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      RestartAppServerMessage.t -> (unit, unit) Result.t Async.Deferred.t
 val retrieve_environment_info :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RetrieveEnvironmentInfoMessage.t ->
         (RetrieveEnvironmentInfoResultMessage.t,
-          [ `AWS of RetrieveEnvironmentInfoResultMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          RetrieveEnvironmentInfoResultMessage.error) Result.t
           Async.Deferred.t
 val swap_environment_c_n_a_m_es :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SwapEnvironmentCNAMEsMessage.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val terminate_environment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TerminateEnvironmentMessage.t ->
-        (EnvironmentDescription.t,
-          [ `AWS of EnvironmentDescription.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (EnvironmentDescription.t, EnvironmentDescription.error) Result.t
           Async.Deferred.t
 val update_application :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateApplicationMessage.t ->
         (ApplicationDescriptionMessage.t,
-          [ `AWS of ApplicationDescriptionMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ApplicationDescriptionMessage.error) Result.t Async.Deferred.t
 val update_application_resource_lifecycle :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateApplicationResourceLifecycleMessage.t ->
         (ApplicationResourceLifecycleDescriptionMessage.t,
-          [ `AWS of ApplicationResourceLifecycleDescriptionMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ApplicationResourceLifecycleDescriptionMessage.error) Result.t
           Async.Deferred.t
 val update_application_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateApplicationVersionMessage.t ->
         (ApplicationVersionDescriptionMessage.t,
-          [ `AWS of ApplicationVersionDescriptionMessage.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ApplicationVersionDescriptionMessage.error) Result.t
           Async.Deferred.t
 val update_configuration_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateConfigurationTemplateMessage.t ->
         (ConfigurationSettingsDescription.t,
-          [ `AWS of ConfigurationSettingsDescription.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ConfigurationSettingsDescription.error) Result.t Async.Deferred.t
 val update_environment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateEnvironmentMessage.t ->
-        (EnvironmentDescription.t,
-          [ `AWS of EnvironmentDescription.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (EnvironmentDescription.t, EnvironmentDescription.error) Result.t
           Async.Deferred.t
 val update_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateTagsForResourceMessage.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val validate_configuration_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ValidateConfigurationSettingsMessage.t ->
         (ConfigurationSettingsValidationMessages.t,
-          [ `AWS of ConfigurationSettingsValidationMessages.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          ConfigurationSettingsValidationMessages.error) Result.t
           Async.Deferred.t

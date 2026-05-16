@@ -2,132 +2,91 @@
 open Awso_sqs.Values
 val add_permission :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      AddPermissionRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> AddPermissionRequest.t -> (unit, unit) Result.t Lwt.t
 val change_message_visibility :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      ChangeMessageVisibilityRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      ChangeMessageVisibilityRequest.t -> (unit, unit) Result.t Lwt.t
 val change_message_visibility_batch :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ChangeMessageVisibilityBatchRequest.t ->
         (ChangeMessageVisibilityBatchResult.t,
-          [ `AWS of ChangeMessageVisibilityBatchResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ChangeMessageVisibilityBatchResult.error) Result.t Lwt.t
 val create_queue :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateQueueRequest.t ->
-        (CreateQueueResult.t,
-          [ `AWS of CreateQueueResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (CreateQueueResult.t, CreateQueueResult.error) Result.t Lwt.t
 val delete_message :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteMessageRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteMessageRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_message_batch :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteMessageBatchRequest.t ->
-        (DeleteMessageBatchResult.t,
-          [ `AWS of DeleteMessageBatchResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (DeleteMessageBatchResult.t, DeleteMessageBatchResult.error) Result.t
+          Lwt.t
 val delete_queue :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteQueueRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> DeleteQueueRequest.t -> (unit, unit) Result.t Lwt.t
 val get_queue_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetQueueAttributesRequest.t ->
-        (GetQueueAttributesResult.t,
-          [ `AWS of GetQueueAttributesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetQueueAttributesResult.t, GetQueueAttributesResult.error) Result.t
+          Lwt.t
 val get_queue_url :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetQueueUrlRequest.t ->
-        (GetQueueUrlResult.t,
-          [ `AWS of GetQueueUrlResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (GetQueueUrlResult.t, GetQueueUrlResult.error) Result.t Lwt.t
 val list_dead_letter_source_queues :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDeadLetterSourceQueuesRequest.t ->
         (ListDeadLetterSourceQueuesResult.t,
-          [ `AWS of ListDeadLetterSourceQueuesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+          ListDeadLetterSourceQueuesResult.error) Result.t Lwt.t
 val list_queue_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListQueueTagsRequest.t ->
-        (ListQueueTagsResult.t,
-          [ `AWS of ListQueueTagsResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListQueueTagsResult.t, ListQueueTagsResult.error) Result.t Lwt.t
 val list_queues :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListQueuesRequest.t ->
-        (ListQueuesResult.t,
-          [ `AWS of ListQueuesResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ListQueuesResult.t, ListQueuesResult.error) Result.t Lwt.t
 val purge_queue :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      PurgeQueueRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> PurgeQueueRequest.t -> (unit, unit) Result.t Lwt.t
 val receive_message :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ReceiveMessageRequest.t ->
-        (ReceiveMessageResult.t,
-          [ `AWS of ReceiveMessageResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (ReceiveMessageResult.t, ReceiveMessageResult.error) Result.t Lwt.t
 val remove_permission :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      RemovePermissionRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      RemovePermissionRequest.t -> (unit, unit) Result.t Lwt.t
 val send_message :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SendMessageRequest.t ->
-        (SendMessageResult.t,
-          [ `AWS of SendMessageResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SendMessageResult.t, SendMessageResult.error) Result.t Lwt.t
 val send_message_batch :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SendMessageBatchRequest.t ->
-        (SendMessageBatchResult.t,
-          [ `AWS of SendMessageBatchResult.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t Lwt.t
+        (SendMessageBatchResult.t, SendMessageBatchResult.error) Result.t
+          Lwt.t
 val set_queue_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      SetQueueAttributesRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+      SetQueueAttributesRequest.t -> (unit, unit) Result.t Lwt.t
 val tag_queue :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      TagQueueRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> TagQueueRequest.t -> (unit, unit) Result.t Lwt.t
 val untag_queue :
   ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      UntagQueueRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Lwt.t
+    ?cfg:Awso.Cfg.t -> UntagQueueRequest.t -> (unit, unit) Result.t Lwt.t

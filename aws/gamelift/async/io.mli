@@ -4,747 +4,568 @@ val accept_match :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AcceptMatchInput.t ->
-        (AcceptMatchOutput.t,
-          [ `AWS of AcceptMatchOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (AcceptMatchOutput.t, AcceptMatchOutput.error) Result.t
           Async.Deferred.t
 val claim_game_server :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ClaimGameServerInput.t ->
-        (ClaimGameServerOutput.t,
-          [ `AWS of ClaimGameServerOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ClaimGameServerOutput.t, ClaimGameServerOutput.error) Result.t
           Async.Deferred.t
 val create_alias :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateAliasInput.t ->
-        (CreateAliasOutput.t,
-          [ `AWS of CreateAliasOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateAliasOutput.t, CreateAliasOutput.error) Result.t
           Async.Deferred.t
 val create_build :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateBuildInput.t ->
-        (CreateBuildOutput.t,
-          [ `AWS of CreateBuildOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateBuildOutput.t, CreateBuildOutput.error) Result.t
           Async.Deferred.t
 val create_fleet :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateFleetInput.t ->
-        (CreateFleetOutput.t,
-          [ `AWS of CreateFleetOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateFleetOutput.t, CreateFleetOutput.error) Result.t
           Async.Deferred.t
 val create_fleet_locations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateFleetLocationsInput.t ->
-        (CreateFleetLocationsOutput.t,
-          [ `AWS of CreateFleetLocationsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateFleetLocationsOutput.t, CreateFleetLocationsOutput.error)
+          Result.t Async.Deferred.t
 val create_game_server_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateGameServerGroupInput.t ->
-        (CreateGameServerGroupOutput.t,
-          [ `AWS of CreateGameServerGroupOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateGameServerGroupOutput.t, CreateGameServerGroupOutput.error)
+          Result.t Async.Deferred.t
 val create_game_session :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateGameSessionInput.t ->
-        (CreateGameSessionOutput.t,
-          [ `AWS of CreateGameSessionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateGameSessionOutput.t, CreateGameSessionOutput.error) Result.t
           Async.Deferred.t
 val create_game_session_queue :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateGameSessionQueueInput.t ->
-        (CreateGameSessionQueueOutput.t,
-          [ `AWS of CreateGameSessionQueueOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreateGameSessionQueueOutput.t, CreateGameSessionQueueOutput.error)
+          Result.t Async.Deferred.t
 val create_matchmaking_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateMatchmakingConfigurationInput.t ->
         (CreateMatchmakingConfigurationOutput.t,
-          [ `AWS of CreateMatchmakingConfigurationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          CreateMatchmakingConfigurationOutput.error) Result.t
           Async.Deferred.t
 val create_matchmaking_rule_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateMatchmakingRuleSetInput.t ->
         (CreateMatchmakingRuleSetOutput.t,
-          [ `AWS of CreateMatchmakingRuleSetOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateMatchmakingRuleSetOutput.error) Result.t Async.Deferred.t
 val create_player_session :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePlayerSessionInput.t ->
-        (CreatePlayerSessionOutput.t,
-          [ `AWS of CreatePlayerSessionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreatePlayerSessionOutput.t, CreatePlayerSessionOutput.error)
+          Result.t Async.Deferred.t
 val create_player_sessions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePlayerSessionsInput.t ->
-        (CreatePlayerSessionsOutput.t,
-          [ `AWS of CreatePlayerSessionsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (CreatePlayerSessionsOutput.t, CreatePlayerSessionsOutput.error)
+          Result.t Async.Deferred.t
 val create_script :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateScriptInput.t ->
-        (CreateScriptOutput.t,
-          [ `AWS of CreateScriptOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateScriptOutput.t, CreateScriptOutput.error) Result.t
           Async.Deferred.t
 val create_vpc_peering_authorization :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateVpcPeeringAuthorizationInput.t ->
         (CreateVpcPeeringAuthorizationOutput.t,
-          [ `AWS of CreateVpcPeeringAuthorizationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          CreateVpcPeeringAuthorizationOutput.error) Result.t
           Async.Deferred.t
 val create_vpc_peering_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateVpcPeeringConnectionInput.t ->
         (CreateVpcPeeringConnectionOutput.t,
-          [ `AWS of CreateVpcPeeringConnectionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          CreateVpcPeeringConnectionOutput.error) Result.t Async.Deferred.t
 val delete_alias :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteAliasInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteAliasInput.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_build :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteBuildInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteBuildInput.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_fleet :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteFleetInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteFleetInput.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_fleet_locations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteFleetLocationsInput.t ->
-        (DeleteFleetLocationsOutput.t,
-          [ `AWS of DeleteFleetLocationsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteFleetLocationsOutput.t, DeleteFleetLocationsOutput.error)
+          Result.t Async.Deferred.t
 val delete_game_server_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteGameServerGroupInput.t ->
-        (DeleteGameServerGroupOutput.t,
-          [ `AWS of DeleteGameServerGroupOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteGameServerGroupOutput.t, DeleteGameServerGroupOutput.error)
+          Result.t Async.Deferred.t
 val delete_game_session_queue :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteGameSessionQueueInput.t ->
-        (DeleteGameSessionQueueOutput.t,
-          [ `AWS of DeleteGameSessionQueueOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DeleteGameSessionQueueOutput.t, DeleteGameSessionQueueOutput.error)
+          Result.t Async.Deferred.t
 val delete_matchmaking_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteMatchmakingConfigurationInput.t ->
         (DeleteMatchmakingConfigurationOutput.t,
-          [ `AWS of DeleteMatchmakingConfigurationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DeleteMatchmakingConfigurationOutput.error) Result.t
           Async.Deferred.t
 val delete_matchmaking_rule_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteMatchmakingRuleSetInput.t ->
         (DeleteMatchmakingRuleSetOutput.t,
-          [ `AWS of DeleteMatchmakingRuleSetOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeleteMatchmakingRuleSetOutput.error) Result.t Async.Deferred.t
 val delete_scaling_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteScalingPolicyInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteScalingPolicyInput.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_script :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteScriptInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteScriptInput.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_vpc_peering_authorization :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteVpcPeeringAuthorizationInput.t ->
         (DeleteVpcPeeringAuthorizationOutput.t,
-          [ `AWS of DeleteVpcPeeringAuthorizationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DeleteVpcPeeringAuthorizationOutput.error) Result.t
           Async.Deferred.t
 val delete_vpc_peering_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteVpcPeeringConnectionInput.t ->
         (DeleteVpcPeeringConnectionOutput.t,
-          [ `AWS of DeleteVpcPeeringConnectionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DeleteVpcPeeringConnectionOutput.error) Result.t Async.Deferred.t
 val deregister_game_server :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeregisterGameServerInput.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeregisterGameServerInput.t -> (unit, unit) Result.t Async.Deferred.t
 val describe_alias :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAliasInput.t ->
-        (DescribeAliasOutput.t,
-          [ `AWS of DescribeAliasOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeAliasOutput.t, DescribeAliasOutput.error) Result.t
           Async.Deferred.t
 val describe_build :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeBuildInput.t ->
-        (DescribeBuildOutput.t,
-          [ `AWS of DescribeBuildOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeBuildOutput.t, DescribeBuildOutput.error) Result.t
           Async.Deferred.t
 val describe_e_c2_instance_limits :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeEC2InstanceLimitsInput.t ->
         (DescribeEC2InstanceLimitsOutput.t,
-          [ `AWS of DescribeEC2InstanceLimitsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeEC2InstanceLimitsOutput.error) Result.t Async.Deferred.t
 val describe_fleet_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeFleetAttributesInput.t ->
         (DescribeFleetAttributesOutput.t,
-          [ `AWS of DescribeFleetAttributesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeFleetAttributesOutput.error) Result.t Async.Deferred.t
 val describe_fleet_capacity :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeFleetCapacityInput.t ->
-        (DescribeFleetCapacityOutput.t,
-          [ `AWS of DescribeFleetCapacityOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeFleetCapacityOutput.t, DescribeFleetCapacityOutput.error)
+          Result.t Async.Deferred.t
 val describe_fleet_events :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeFleetEventsInput.t ->
-        (DescribeFleetEventsOutput.t,
-          [ `AWS of DescribeFleetEventsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeFleetEventsOutput.t, DescribeFleetEventsOutput.error)
+          Result.t Async.Deferred.t
 val describe_fleet_location_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeFleetLocationAttributesInput.t ->
         (DescribeFleetLocationAttributesOutput.t,
-          [ `AWS of DescribeFleetLocationAttributesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeFleetLocationAttributesOutput.error) Result.t
           Async.Deferred.t
 val describe_fleet_location_capacity :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeFleetLocationCapacityInput.t ->
         (DescribeFleetLocationCapacityOutput.t,
-          [ `AWS of DescribeFleetLocationCapacityOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeFleetLocationCapacityOutput.error) Result.t
           Async.Deferred.t
 val describe_fleet_location_utilization :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeFleetLocationUtilizationInput.t ->
         (DescribeFleetLocationUtilizationOutput.t,
-          [ `AWS of DescribeFleetLocationUtilizationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeFleetLocationUtilizationOutput.error) Result.t
           Async.Deferred.t
 val describe_fleet_port_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeFleetPortSettingsInput.t ->
         (DescribeFleetPortSettingsOutput.t,
-          [ `AWS of DescribeFleetPortSettingsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeFleetPortSettingsOutput.error) Result.t Async.Deferred.t
 val describe_fleet_utilization :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeFleetUtilizationInput.t ->
         (DescribeFleetUtilizationOutput.t,
-          [ `AWS of DescribeFleetUtilizationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeFleetUtilizationOutput.error) Result.t Async.Deferred.t
 val describe_game_server :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeGameServerInput.t ->
-        (DescribeGameServerOutput.t,
-          [ `AWS of DescribeGameServerOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeGameServerOutput.t, DescribeGameServerOutput.error) Result.t
           Async.Deferred.t
 val describe_game_server_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeGameServerGroupInput.t ->
         (DescribeGameServerGroupOutput.t,
-          [ `AWS of DescribeGameServerGroupOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeGameServerGroupOutput.error) Result.t Async.Deferred.t
 val describe_game_server_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeGameServerInstancesInput.t ->
         (DescribeGameServerInstancesOutput.t,
-          [ `AWS of DescribeGameServerInstancesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeGameServerInstancesOutput.error) Result.t Async.Deferred.t
 val describe_game_session_details :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeGameSessionDetailsInput.t ->
         (DescribeGameSessionDetailsOutput.t,
-          [ `AWS of DescribeGameSessionDetailsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeGameSessionDetailsOutput.error) Result.t Async.Deferred.t
 val describe_game_session_placement :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeGameSessionPlacementInput.t ->
         (DescribeGameSessionPlacementOutput.t,
-          [ `AWS of DescribeGameSessionPlacementOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeGameSessionPlacementOutput.error) Result.t Async.Deferred.t
 val describe_game_session_queues :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeGameSessionQueuesInput.t ->
         (DescribeGameSessionQueuesOutput.t,
-          [ `AWS of DescribeGameSessionQueuesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeGameSessionQueuesOutput.error) Result.t Async.Deferred.t
 val describe_game_sessions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeGameSessionsInput.t ->
-        (DescribeGameSessionsOutput.t,
-          [ `AWS of DescribeGameSessionsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeGameSessionsOutput.t, DescribeGameSessionsOutput.error)
+          Result.t Async.Deferred.t
 val describe_instances :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeInstancesInput.t ->
-        (DescribeInstancesOutput.t,
-          [ `AWS of DescribeInstancesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeInstancesOutput.t, DescribeInstancesOutput.error) Result.t
           Async.Deferred.t
 val describe_matchmaking :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeMatchmakingInput.t ->
-        (DescribeMatchmakingOutput.t,
-          [ `AWS of DescribeMatchmakingOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeMatchmakingOutput.t, DescribeMatchmakingOutput.error)
+          Result.t Async.Deferred.t
 val describe_matchmaking_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeMatchmakingConfigurationsInput.t ->
         (DescribeMatchmakingConfigurationsOutput.t,
-          [ `AWS of DescribeMatchmakingConfigurationsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeMatchmakingConfigurationsOutput.error) Result.t
           Async.Deferred.t
 val describe_matchmaking_rule_sets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeMatchmakingRuleSetsInput.t ->
         (DescribeMatchmakingRuleSetsOutput.t,
-          [ `AWS of DescribeMatchmakingRuleSetsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeMatchmakingRuleSetsOutput.error) Result.t Async.Deferred.t
 val describe_player_sessions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribePlayerSessionsInput.t ->
-        (DescribePlayerSessionsOutput.t,
-          [ `AWS of DescribePlayerSessionsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribePlayerSessionsOutput.t, DescribePlayerSessionsOutput.error)
+          Result.t Async.Deferred.t
 val describe_runtime_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRuntimeConfigurationInput.t ->
         (DescribeRuntimeConfigurationOutput.t,
-          [ `AWS of DescribeRuntimeConfigurationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeRuntimeConfigurationOutput.error) Result.t Async.Deferred.t
 val describe_scaling_policies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeScalingPoliciesInput.t ->
         (DescribeScalingPoliciesOutput.t,
-          [ `AWS of DescribeScalingPoliciesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DescribeScalingPoliciesOutput.error) Result.t Async.Deferred.t
 val describe_script :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeScriptInput.t ->
-        (DescribeScriptOutput.t,
-          [ `AWS of DescribeScriptOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (DescribeScriptOutput.t, DescribeScriptOutput.error) Result.t
           Async.Deferred.t
 val describe_vpc_peering_authorizations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeVpcPeeringAuthorizationsInput.t ->
         (DescribeVpcPeeringAuthorizationsOutput.t,
-          [ `AWS of DescribeVpcPeeringAuthorizationsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeVpcPeeringAuthorizationsOutput.error) Result.t
           Async.Deferred.t
 val describe_vpc_peering_connections :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeVpcPeeringConnectionsInput.t ->
         (DescribeVpcPeeringConnectionsOutput.t,
-          [ `AWS of DescribeVpcPeeringConnectionsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeVpcPeeringConnectionsOutput.error) Result.t
           Async.Deferred.t
 val get_game_session_log_url :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetGameSessionLogUrlInput.t ->
-        (GetGameSessionLogUrlOutput.t,
-          [ `AWS of GetGameSessionLogUrlOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (GetGameSessionLogUrlOutput.t, GetGameSessionLogUrlOutput.error)
+          Result.t Async.Deferred.t
 val get_instance_access :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetInstanceAccessInput.t ->
-        (GetInstanceAccessOutput.t,
-          [ `AWS of GetInstanceAccessOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetInstanceAccessOutput.t, GetInstanceAccessOutput.error) Result.t
           Async.Deferred.t
 val list_aliases :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAliasesInput.t ->
-        (ListAliasesOutput.t,
-          [ `AWS of ListAliasesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListAliasesOutput.t, ListAliasesOutput.error) Result.t
           Async.Deferred.t
 val list_builds :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListBuildsInput.t ->
-        (ListBuildsOutput.t,
-          [ `AWS of ListBuildsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListBuildsOutput.t, ListBuildsOutput.error) Result.t
           Async.Deferred.t
 val list_fleets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListFleetsInput.t ->
-        (ListFleetsOutput.t,
-          [ `AWS of ListFleetsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListFleetsOutput.t, ListFleetsOutput.error) Result.t
           Async.Deferred.t
 val list_game_server_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListGameServerGroupsInput.t ->
-        (ListGameServerGroupsOutput.t,
-          [ `AWS of ListGameServerGroupsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListGameServerGroupsOutput.t, ListGameServerGroupsOutput.error)
+          Result.t Async.Deferred.t
 val list_game_servers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListGameServersInput.t ->
-        (ListGameServersOutput.t,
-          [ `AWS of ListGameServersOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListGameServersOutput.t, ListGameServersOutput.error) Result.t
           Async.Deferred.t
 val list_scripts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListScriptsInput.t ->
-        (ListScriptsOutput.t,
-          [ `AWS of ListScriptsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListScriptsOutput.t, ListScriptsOutput.error) Result.t
           Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val put_scaling_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutScalingPolicyInput.t ->
-        (PutScalingPolicyOutput.t,
-          [ `AWS of PutScalingPolicyOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (PutScalingPolicyOutput.t, PutScalingPolicyOutput.error) Result.t
           Async.Deferred.t
 val register_game_server :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RegisterGameServerInput.t ->
-        (RegisterGameServerOutput.t,
-          [ `AWS of RegisterGameServerOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (RegisterGameServerOutput.t, RegisterGameServerOutput.error) Result.t
           Async.Deferred.t
 val request_upload_credentials :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RequestUploadCredentialsInput.t ->
         (RequestUploadCredentialsOutput.t,
-          [ `AWS of RequestUploadCredentialsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          RequestUploadCredentialsOutput.error) Result.t Async.Deferred.t
 val resolve_alias :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ResolveAliasInput.t ->
-        (ResolveAliasOutput.t,
-          [ `AWS of ResolveAliasOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ResolveAliasOutput.t, ResolveAliasOutput.error) Result.t
           Async.Deferred.t
 val resume_game_server_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ResumeGameServerGroupInput.t ->
-        (ResumeGameServerGroupOutput.t,
-          [ `AWS of ResumeGameServerGroupOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ResumeGameServerGroupOutput.t, ResumeGameServerGroupOutput.error)
+          Result.t Async.Deferred.t
 val search_game_sessions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SearchGameSessionsInput.t ->
-        (SearchGameSessionsOutput.t,
-          [ `AWS of SearchGameSessionsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (SearchGameSessionsOutput.t, SearchGameSessionsOutput.error) Result.t
           Async.Deferred.t
 val start_fleet_actions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartFleetActionsInput.t ->
-        (StartFleetActionsOutput.t,
-          [ `AWS of StartFleetActionsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StartFleetActionsOutput.t, StartFleetActionsOutput.error) Result.t
           Async.Deferred.t
 val start_game_session_placement :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartGameSessionPlacementInput.t ->
         (StartGameSessionPlacementOutput.t,
-          [ `AWS of StartGameSessionPlacementOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          StartGameSessionPlacementOutput.error) Result.t Async.Deferred.t
 val start_match_backfill :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartMatchBackfillInput.t ->
-        (StartMatchBackfillOutput.t,
-          [ `AWS of StartMatchBackfillOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StartMatchBackfillOutput.t, StartMatchBackfillOutput.error) Result.t
           Async.Deferred.t
 val start_matchmaking :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartMatchmakingInput.t ->
-        (StartMatchmakingOutput.t,
-          [ `AWS of StartMatchmakingOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StartMatchmakingOutput.t, StartMatchmakingOutput.error) Result.t
           Async.Deferred.t
 val stop_fleet_actions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopFleetActionsInput.t ->
-        (StopFleetActionsOutput.t,
-          [ `AWS of StopFleetActionsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StopFleetActionsOutput.t, StopFleetActionsOutput.error) Result.t
           Async.Deferred.t
 val stop_game_session_placement :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopGameSessionPlacementInput.t ->
         (StopGameSessionPlacementOutput.t,
-          [ `AWS of StopGameSessionPlacementOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          StopGameSessionPlacementOutput.error) Result.t Async.Deferred.t
 val stop_matchmaking :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopMatchmakingInput.t ->
-        (StopMatchmakingOutput.t,
-          [ `AWS of StopMatchmakingOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (StopMatchmakingOutput.t, StopMatchmakingOutput.error) Result.t
           Async.Deferred.t
 val suspend_game_server_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       SuspendGameServerGroupInput.t ->
-        (SuspendGameServerGroupOutput.t,
-          [ `AWS of SuspendGameServerGroupOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (SuspendGameServerGroupOutput.t, SuspendGameServerGroupOutput.error)
+          Result.t Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
 val update_alias :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateAliasInput.t ->
-        (UpdateAliasOutput.t,
-          [ `AWS of UpdateAliasOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateAliasOutput.t, UpdateAliasOutput.error) Result.t
           Async.Deferred.t
 val update_build :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateBuildInput.t ->
-        (UpdateBuildOutput.t,
-          [ `AWS of UpdateBuildOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateBuildOutput.t, UpdateBuildOutput.error) Result.t
           Async.Deferred.t
 val update_fleet_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateFleetAttributesInput.t ->
-        (UpdateFleetAttributesOutput.t,
-          [ `AWS of UpdateFleetAttributesOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateFleetAttributesOutput.t, UpdateFleetAttributesOutput.error)
+          Result.t Async.Deferred.t
 val update_fleet_capacity :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateFleetCapacityInput.t ->
-        (UpdateFleetCapacityOutput.t,
-          [ `AWS of UpdateFleetCapacityOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateFleetCapacityOutput.t, UpdateFleetCapacityOutput.error)
+          Result.t Async.Deferred.t
 val update_fleet_port_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateFleetPortSettingsInput.t ->
         (UpdateFleetPortSettingsOutput.t,
-          [ `AWS of UpdateFleetPortSettingsOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateFleetPortSettingsOutput.error) Result.t Async.Deferred.t
 val update_game_server :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateGameServerInput.t ->
-        (UpdateGameServerOutput.t,
-          [ `AWS of UpdateGameServerOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateGameServerOutput.t, UpdateGameServerOutput.error) Result.t
           Async.Deferred.t
 val update_game_server_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateGameServerGroupInput.t ->
-        (UpdateGameServerGroupOutput.t,
-          [ `AWS of UpdateGameServerGroupOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateGameServerGroupOutput.t, UpdateGameServerGroupOutput.error)
+          Result.t Async.Deferred.t
 val update_game_session :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateGameSessionInput.t ->
-        (UpdateGameSessionOutput.t,
-          [ `AWS of UpdateGameSessionOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateGameSessionOutput.t, UpdateGameSessionOutput.error) Result.t
           Async.Deferred.t
 val update_game_session_queue :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateGameSessionQueueInput.t ->
-        (UpdateGameSessionQueueOutput.t,
-          [ `AWS of UpdateGameSessionQueueOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (UpdateGameSessionQueueOutput.t, UpdateGameSessionQueueOutput.error)
+          Result.t Async.Deferred.t
 val update_matchmaking_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateMatchmakingConfigurationInput.t ->
         (UpdateMatchmakingConfigurationOutput.t,
-          [ `AWS of UpdateMatchmakingConfigurationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          UpdateMatchmakingConfigurationOutput.error) Result.t
           Async.Deferred.t
 val update_runtime_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateRuntimeConfigurationInput.t ->
         (UpdateRuntimeConfigurationOutput.t,
-          [ `AWS of UpdateRuntimeConfigurationOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          UpdateRuntimeConfigurationOutput.error) Result.t Async.Deferred.t
 val update_script :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateScriptInput.t ->
-        (UpdateScriptOutput.t,
-          [ `AWS of UpdateScriptOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UpdateScriptOutput.t, UpdateScriptOutput.error) Result.t
           Async.Deferred.t
 val validate_matchmaking_rule_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ValidateMatchmakingRuleSetInput.t ->
         (ValidateMatchmakingRuleSetOutput.t,
-          [ `AWS of ValidateMatchmakingRuleSetOutput.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ValidateMatchmakingRuleSetOutput.error) Result.t Async.Deferred.t

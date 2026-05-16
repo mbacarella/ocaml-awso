@@ -950,580 +950,611 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target", "AWSWAF_20150824.UpdateXssMatchSet")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    let generic_error () = Error (`Transport err) in
-    match err with
-    | `Too_many_redirects -> generic_error ()
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = _ } ->
-        (match (error_of_json, ((code >= 400) && (code <= 599))) with
-         | (Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             (match json |> (Yojson.Safe.Util.member "__type") with
-              | `String error_type ->
-                  Error (`AWS (error_of_json error_type json))
-              | `Null -> generic_error ()
-              | _ ->
-                  failwith
-                    (sprintf "Error '__type' did not have string type: %s"
-                       body))
-         | (None, _) | (_, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = None }) in
+    match (error_of_json, ((code >= 400) && (code <= 599))) with
+    | (Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        (match json |> (Yojson.Safe.Util.member "__type") with
+         | `String error_type -> error_of_json error_type json
+         | `Null -> bail ()
+         | _ ->
+             failwith
+               (sprintf "Error '__type' did not have string type: %s" body))
+    | (None, _) | (_, false) -> bail () in
+  let _ = parse_aws_error in
+  let _ = resp in
   match endpoint with
   | CreateByteMatchSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateByteMatchSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateByteMatchSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateByteMatchSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateByteMatchSetResponse.error_of_json))
   | CreateGeoMatchSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateGeoMatchSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateGeoMatchSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateGeoMatchSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateGeoMatchSetResponse.error_of_json))
   | CreateIPSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateIPSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateIPSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateIPSetResponse.of_json json)
+      else Error (parse_aws_error (Some CreateIPSetResponse.error_of_json))
   | CreateRateBasedRule ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateRateBasedRuleResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateRateBasedRuleResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateRateBasedRuleResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateRateBasedRuleResponse.error_of_json))
   | CreateRegexMatchSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateRegexMatchSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateRegexMatchSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateRegexMatchSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateRegexMatchSetResponse.error_of_json))
   | CreateRegexPatternSet ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateRegexPatternSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateRegexPatternSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateRegexPatternSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateRegexPatternSetResponse.error_of_json))
   | CreateRule ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateRuleResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateRuleResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateRuleResponse.of_json json)
+      else Error (parse_aws_error (Some CreateRuleResponse.error_of_json))
   | CreateRuleGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateRuleGroupResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateRuleGroupResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateRuleGroupResponse.of_json json)
+      else
+        Error (parse_aws_error (Some CreateRuleGroupResponse.error_of_json))
   | CreateSizeConstraintSet ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateSizeConstraintSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateSizeConstraintSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateSizeConstraintSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateSizeConstraintSetResponse.error_of_json))
   | CreateSqlInjectionMatchSet ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateSqlInjectionMatchSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateSqlInjectionMatchSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateSqlInjectionMatchSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateSqlInjectionMatchSetResponse.error_of_json))
   | CreateWebACL ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateWebACLResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateWebACLResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateWebACLResponse.of_json json)
+      else Error (parse_aws_error (Some CreateWebACLResponse.error_of_json))
   | CreateWebACLMigrationStack ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateWebACLMigrationStackResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateWebACLMigrationStackResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateWebACLMigrationStackResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateWebACLMigrationStackResponse.error_of_json))
   | CreateXssMatchSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateXssMatchSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (CreateXssMatchSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateXssMatchSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateXssMatchSetResponse.error_of_json))
   | DeleteByteMatchSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteByteMatchSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteByteMatchSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteByteMatchSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteByteMatchSetResponse.error_of_json))
   | DeleteGeoMatchSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteGeoMatchSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteGeoMatchSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteGeoMatchSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteGeoMatchSetResponse.error_of_json))
   | DeleteIPSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteIPSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteIPSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteIPSetResponse.of_json json)
+      else Error (parse_aws_error (Some DeleteIPSetResponse.error_of_json))
   | DeleteLoggingConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteLoggingConfigurationResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteLoggingConfigurationResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteLoggingConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteLoggingConfigurationResponse.error_of_json))
   | DeletePermissionPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeletePermissionPolicyResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeletePermissionPolicyResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeletePermissionPolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeletePermissionPolicyResponse.error_of_json))
   | DeleteRateBasedRule ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteRateBasedRuleResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteRateBasedRuleResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteRateBasedRuleResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteRateBasedRuleResponse.error_of_json))
   | DeleteRegexMatchSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteRegexMatchSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteRegexMatchSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteRegexMatchSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteRegexMatchSetResponse.error_of_json))
   | DeleteRegexPatternSet ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteRegexPatternSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteRegexPatternSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteRegexPatternSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteRegexPatternSetResponse.error_of_json))
   | DeleteRule ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteRuleResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteRuleResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteRuleResponse.of_json json)
+      else Error (parse_aws_error (Some DeleteRuleResponse.error_of_json))
   | DeleteRuleGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteRuleGroupResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteRuleGroupResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteRuleGroupResponse.of_json json)
+      else
+        Error (parse_aws_error (Some DeleteRuleGroupResponse.error_of_json))
   | DeleteSizeConstraintSet ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteSizeConstraintSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteSizeConstraintSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteSizeConstraintSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteSizeConstraintSetResponse.error_of_json))
   | DeleteSqlInjectionMatchSet ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DeleteSqlInjectionMatchSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteSqlInjectionMatchSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteSqlInjectionMatchSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteSqlInjectionMatchSetResponse.error_of_json))
   | DeleteWebACL ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteWebACLResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteWebACLResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteWebACLResponse.of_json json)
+      else Error (parse_aws_error (Some DeleteWebACLResponse.error_of_json))
   | DeleteXssMatchSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteXssMatchSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (DeleteXssMatchSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteXssMatchSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteXssMatchSetResponse.error_of_json))
   | GetByteMatchSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetByteMatchSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetByteMatchSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetByteMatchSetResponse.of_json json)
+      else
+        Error (parse_aws_error (Some GetByteMatchSetResponse.error_of_json))
   | GetChangeToken ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetChangeTokenResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetChangeTokenResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetChangeTokenResponse.of_json json)
+      else
+        Error (parse_aws_error (Some GetChangeTokenResponse.error_of_json))
   | GetChangeTokenStatus ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetChangeTokenStatusResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetChangeTokenStatusResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetChangeTokenStatusResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetChangeTokenStatusResponse.error_of_json))
   | GetGeoMatchSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetGeoMatchSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetGeoMatchSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetGeoMatchSetResponse.of_json json)
+      else
+        Error (parse_aws_error (Some GetGeoMatchSetResponse.error_of_json))
   | GetIPSet ->
-      (match resp with
-       | Error err -> handle_error err (Some GetIPSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetIPSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetIPSetResponse.of_json json)
+      else Error (parse_aws_error (Some GetIPSetResponse.error_of_json))
   | GetLoggingConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetLoggingConfigurationResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetLoggingConfigurationResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetLoggingConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetLoggingConfigurationResponse.error_of_json))
   | GetPermissionPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetPermissionPolicyResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetPermissionPolicyResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetPermissionPolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetPermissionPolicyResponse.error_of_json))
   | GetRateBasedRule ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetRateBasedRuleResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetRateBasedRuleResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetRateBasedRuleResponse.of_json json)
+      else
+        Error (parse_aws_error (Some GetRateBasedRuleResponse.error_of_json))
   | GetRateBasedRuleManagedKeys ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetRateBasedRuleManagedKeysResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetRateBasedRuleManagedKeysResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetRateBasedRuleManagedKeysResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetRateBasedRuleManagedKeysResponse.error_of_json))
   | GetRegexMatchSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetRegexMatchSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetRegexMatchSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetRegexMatchSetResponse.of_json json)
+      else
+        Error (parse_aws_error (Some GetRegexMatchSetResponse.error_of_json))
   | GetRegexPatternSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetRegexPatternSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetRegexPatternSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetRegexPatternSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetRegexPatternSetResponse.error_of_json))
   | GetRule ->
-      (match resp with
-       | Error err -> handle_error err (Some GetRuleResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetRuleResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetRuleResponse.of_json json)
+      else Error (parse_aws_error (Some GetRuleResponse.error_of_json))
   | GetRuleGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetRuleGroupResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetRuleGroupResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetRuleGroupResponse.of_json json)
+      else Error (parse_aws_error (Some GetRuleGroupResponse.error_of_json))
   | GetSampledRequests ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetSampledRequestsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetSampledRequestsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetSampledRequestsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetSampledRequestsResponse.error_of_json))
   | GetSizeConstraintSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetSizeConstraintSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetSizeConstraintSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetSizeConstraintSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetSizeConstraintSetResponse.error_of_json))
   | GetSqlInjectionMatchSet ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some GetSqlInjectionMatchSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetSqlInjectionMatchSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetSqlInjectionMatchSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetSqlInjectionMatchSetResponse.error_of_json))
   | GetWebACL ->
-      (match resp with
-       | Error err -> handle_error err (Some GetWebACLResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetWebACLResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetWebACLResponse.of_json json)
+      else Error (parse_aws_error (Some GetWebACLResponse.error_of_json))
   | GetXssMatchSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetXssMatchSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (GetXssMatchSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetXssMatchSetResponse.of_json json)
+      else
+        Error (parse_aws_error (Some GetXssMatchSetResponse.error_of_json))
   | ListActivatedRulesInRuleGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListActivatedRulesInRuleGroupResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListActivatedRulesInRuleGroupResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListActivatedRulesInRuleGroupResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListActivatedRulesInRuleGroupResponse.error_of_json))
   | ListByteMatchSets ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListByteMatchSetsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListByteMatchSetsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListByteMatchSetsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListByteMatchSetsResponse.error_of_json))
   | ListGeoMatchSets ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListGeoMatchSetsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListGeoMatchSetsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListGeoMatchSetsResponse.of_json json)
+      else
+        Error (parse_aws_error (Some ListGeoMatchSetsResponse.error_of_json))
   | ListIPSets ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListIPSetsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListIPSetsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListIPSetsResponse.of_json json)
+      else Error (parse_aws_error (Some ListIPSetsResponse.error_of_json))
   | ListLoggingConfigurations ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListLoggingConfigurationsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListLoggingConfigurationsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListLoggingConfigurationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListLoggingConfigurationsResponse.error_of_json))
   | ListRateBasedRules ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListRateBasedRulesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListRateBasedRulesResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListRateBasedRulesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListRateBasedRulesResponse.error_of_json))
   | ListRegexMatchSets ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListRegexMatchSetsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListRegexMatchSetsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListRegexMatchSetsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListRegexMatchSetsResponse.error_of_json))
   | ListRegexPatternSets ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListRegexPatternSetsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListRegexPatternSetsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListRegexPatternSetsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListRegexPatternSetsResponse.error_of_json))
   | ListRuleGroups ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListRuleGroupsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListRuleGroupsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListRuleGroupsResponse.of_json json)
+      else
+        Error (parse_aws_error (Some ListRuleGroupsResponse.error_of_json))
   | ListRules ->
-      (match resp with
-       | Error err -> handle_error err (Some ListRulesResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListRulesResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListRulesResponse.of_json json)
+      else Error (parse_aws_error (Some ListRulesResponse.error_of_json))
   | ListSizeConstraintSets ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListSizeConstraintSetsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListSizeConstraintSetsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListSizeConstraintSetsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListSizeConstraintSetsResponse.error_of_json))
   | ListSqlInjectionMatchSets ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListSqlInjectionMatchSetsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListSqlInjectionMatchSetsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListSqlInjectionMatchSetsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListSqlInjectionMatchSetsResponse.error_of_json))
   | ListSubscribedRuleGroups ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some ListSubscribedRuleGroupsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListSubscribedRuleGroupsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListSubscribedRuleGroupsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListSubscribedRuleGroupsResponse.error_of_json))
   | ListTagsForResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListTagsForResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListTagsForResourceResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListTagsForResourceResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | ListWebACLs ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListWebACLsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListWebACLsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListWebACLsResponse.of_json json)
+      else Error (parse_aws_error (Some ListWebACLsResponse.error_of_json))
   | ListXssMatchSets ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ListXssMatchSetsResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (ListXssMatchSetsResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListXssMatchSetsResponse.of_json json)
+      else
+        Error (parse_aws_error (Some ListXssMatchSetsResponse.error_of_json))
   | PutLoggingConfiguration ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some PutLoggingConfigurationResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (PutLoggingConfigurationResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutLoggingConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some PutLoggingConfigurationResponse.error_of_json))
   | PutPermissionPolicy ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some PutPermissionPolicyResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (PutPermissionPolicyResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutPermissionPolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some PutPermissionPolicyResponse.error_of_json))
   | TagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some TagResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (TagResourceResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (TagResourceResponse.of_json json)
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
   | UntagResource ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UntagResourceResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UntagResourceResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UntagResourceResponse.of_json json)
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateByteMatchSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateByteMatchSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateByteMatchSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateByteMatchSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateByteMatchSetResponse.error_of_json))
   | UpdateGeoMatchSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateGeoMatchSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateGeoMatchSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateGeoMatchSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateGeoMatchSetResponse.error_of_json))
   | UpdateIPSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateIPSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateIPSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateIPSetResponse.of_json json)
+      else Error (parse_aws_error (Some UpdateIPSetResponse.error_of_json))
   | UpdateRateBasedRule ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateRateBasedRuleResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateRateBasedRuleResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateRateBasedRuleResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateRateBasedRuleResponse.error_of_json))
   | UpdateRegexMatchSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateRegexMatchSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateRegexMatchSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateRegexMatchSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateRegexMatchSetResponse.error_of_json))
   | UpdateRegexPatternSet ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateRegexPatternSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateRegexPatternSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateRegexPatternSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateRegexPatternSetResponse.error_of_json))
   | UpdateRule ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateRuleResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateRuleResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateRuleResponse.of_json json)
+      else Error (parse_aws_error (Some UpdateRuleResponse.error_of_json))
   | UpdateRuleGroup ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateRuleGroupResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateRuleGroupResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateRuleGroupResponse.of_json json)
+      else
+        Error (parse_aws_error (Some UpdateRuleGroupResponse.error_of_json))
   | UpdateSizeConstraintSet ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateSizeConstraintSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateSizeConstraintSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateSizeConstraintSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateSizeConstraintSetResponse.error_of_json))
   | UpdateSqlInjectionMatchSet ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some UpdateSqlInjectionMatchSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateSqlInjectionMatchSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateSqlInjectionMatchSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateSqlInjectionMatchSetResponse.error_of_json))
   | UpdateWebACL ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateWebACLResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateWebACLResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateWebACLResponse.of_json json)
+      else Error (parse_aws_error (Some UpdateWebACLResponse.error_of_json))
   | UpdateXssMatchSet ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateXssMatchSetResponse.error_of_json)
-       | Ok resp ->
-           let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-           Ok (UpdateXssMatchSetResponse.of_json json))
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateXssMatchSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateXssMatchSetResponse.error_of_json))

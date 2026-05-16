@@ -3,106 +3,80 @@ open Awso_acm.Values
 val add_tags_to_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      AddTagsToCertificateRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      AddTagsToCertificateRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteCertificateRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      DeleteCertificateRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val describe_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeCertificateRequest.t ->
-        (DescribeCertificateResponse.t,
-          [ `AWS of DescribeCertificateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeCertificateResponse.t, DescribeCertificateResponse.error)
+          Result.t Async.Deferred.t
 val export_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ExportCertificateRequest.t ->
-        (ExportCertificateResponse.t,
-          [ `AWS of ExportCertificateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ExportCertificateResponse.t, ExportCertificateResponse.error)
+          Result.t Async.Deferred.t
 val get_account_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       unit ->
         (GetAccountConfigurationResponse.t,
-          [ `AWS of GetAccountConfigurationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          GetAccountConfigurationResponse.error) Result.t Async.Deferred.t
 val get_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCertificateRequest.t ->
-        (GetCertificateResponse.t,
-          [ `AWS of GetCertificateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (GetCertificateResponse.t, GetCertificateResponse.error) Result.t
           Async.Deferred.t
 val import_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ImportCertificateRequest.t ->
-        (ImportCertificateResponse.t,
-          [ `AWS of ImportCertificateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ImportCertificateResponse.t, ImportCertificateResponse.error)
+          Result.t Async.Deferred.t
 val list_certificates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCertificatesRequest.t ->
-        (ListCertificatesResponse.t,
-          [ `AWS of ListCertificatesResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListCertificatesResponse.t, ListCertificatesResponse.error) Result.t
           Async.Deferred.t
 val list_tags_for_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForCertificateRequest.t ->
         (ListTagsForCertificateResponse.t,
-          [ `AWS of ListTagsForCertificateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListTagsForCertificateResponse.error) Result.t Async.Deferred.t
 val put_account_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutAccountConfigurationRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val remove_tags_from_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RemoveTagsFromCertificateRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val renew_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      RenewCertificateRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+      RenewCertificateRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val request_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RequestCertificateRequest.t ->
-        (RequestCertificateResponse.t,
-          [ `AWS of RequestCertificateResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (RequestCertificateResponse.t, RequestCertificateResponse.error)
+          Result.t Async.Deferred.t
 val resend_validation_email :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ResendValidationEmailRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t
 val update_certificate_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateCertificateOptionsRequest.t ->
-        (unit, [ `AWS of unit  | `Transport of Awso.Http.Io.Error.call ])
-          Result.t Async.Deferred.t
+        (unit, unit) Result.t Async.Deferred.t

@@ -4,111 +4,85 @@ val associate_repository :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AssociateRepositoryRequest.t ->
-        (AssociateRepositoryResponse.t,
-          [ `AWS of AssociateRepositoryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (AssociateRepositoryResponse.t, AssociateRepositoryResponse.error)
+          Result.t Async.Deferred.t
 val create_code_review :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateCodeReviewRequest.t ->
-        (CreateCodeReviewResponse.t,
-          [ `AWS of CreateCodeReviewResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (CreateCodeReviewResponse.t, CreateCodeReviewResponse.error) Result.t
           Async.Deferred.t
 val describe_code_review :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeCodeReviewRequest.t ->
-        (DescribeCodeReviewResponse.t,
-          [ `AWS of DescribeCodeReviewResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (DescribeCodeReviewResponse.t, DescribeCodeReviewResponse.error)
+          Result.t Async.Deferred.t
 val describe_recommendation_feedback :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRecommendationFeedbackRequest.t ->
         (DescribeRecommendationFeedbackResponse.t,
-          [ `AWS of DescribeRecommendationFeedbackResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeRecommendationFeedbackResponse.error) Result.t
           Async.Deferred.t
 val describe_repository_association :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeRepositoryAssociationRequest.t ->
         (DescribeRepositoryAssociationResponse.t,
-          [ `AWS of DescribeRepositoryAssociationResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+          DescribeRepositoryAssociationResponse.error) Result.t
           Async.Deferred.t
 val disassociate_repository :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociateRepositoryRequest.t ->
         (DisassociateRepositoryResponse.t,
-          [ `AWS of DisassociateRepositoryResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          DisassociateRepositoryResponse.error) Result.t Async.Deferred.t
 val list_code_reviews :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCodeReviewsRequest.t ->
-        (ListCodeReviewsResponse.t,
-          [ `AWS of ListCodeReviewsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (ListCodeReviewsResponse.t, ListCodeReviewsResponse.error) Result.t
           Async.Deferred.t
 val list_recommendation_feedback :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRecommendationFeedbackRequest.t ->
         (ListRecommendationFeedbackResponse.t,
-          [ `AWS of ListRecommendationFeedbackResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListRecommendationFeedbackResponse.error) Result.t Async.Deferred.t
 val list_recommendations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRecommendationsRequest.t ->
-        (ListRecommendationsResponse.t,
-          [ `AWS of ListRecommendationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListRecommendationsResponse.t, ListRecommendationsResponse.error)
+          Result.t Async.Deferred.t
 val list_repository_associations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListRepositoryAssociationsRequest.t ->
         (ListRepositoryAssociationsResponse.t,
-          [ `AWS of ListRepositoryAssociationsResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          ListRepositoryAssociationsResponse.error) Result.t Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t,
-          [ `AWS of ListTagsForResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val put_recommendation_feedback :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutRecommendationFeedbackRequest.t ->
         (PutRecommendationFeedbackResponse.t,
-          [ `AWS of PutRecommendationFeedbackResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
-          Async.Deferred.t
+          PutRecommendationFeedbackResponse.error) Result.t Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
-        (TagResourceResponse.t,
-          [ `AWS of TagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
-        (UntagResourceResponse.t,
-          [ `AWS of UntagResourceResponse.error 
-          | `Transport of Awso.Http.Io.Error.call ]) Result.t
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t

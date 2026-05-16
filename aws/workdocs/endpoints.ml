@@ -1088,243 +1088,249 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpdateFolder -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateUser -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
-  (resp : (Awso.Http.Response.t, Awso.Http.Io.Error.call) result) :
-  (o, [ `AWS of e  | `Transport of Awso.Http.Io.Error.call ]) result=
-  let handle_error err error_of_json =
-    match err with
-    | `Too_many_redirects -> Error (`Transport `Too_many_redirects)
-    | `Bad_response
-        { Awso.Http.Io.Error.code = code; body; x_amzn_error_type } ->
-        let generic_error () =
-          Error
-            (`Transport
-               (`Bad_response
-                  { Awso.Http.Io.Error.code = code; body; x_amzn_error_type })) in
-        (match (x_amzn_error_type, error_of_json,
-                 ((code >= 400) && (code <= 599)))
-         with
-         | (Some error_type, Some error_of_json, true) ->
-             let json = Yojson.Safe.from_string body in
-             Error (`AWS (error_of_json error_type json))
-         | (None, Some error_of_json, true) ->
-             (try
-                let json = Yojson.Safe.from_string body in
-                match json |> (Yojson.Safe.Util.member "__type") with
-                | `String error_type ->
-                    let error_type =
-                      match String.lsplit2 error_type ~on:'#' with
-                      | Some (_, s) -> s
-                      | None -> error_type in
-                    Error (`AWS (error_of_json error_type json))
-                | `Null -> generic_error ()
-                | _ ->
-                    failwithf "Error '__type' did not have string type: %s"
-                      body ()
-              with | _ -> generic_error ())
-         | (None, _, _) | (_, None, _) | (_, _, false) -> generic_error ()) in
+  (resp : Awso.Http.Response.t) : (o, e) result=
+  let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
+  let is_success = (code >= 200) && (code < 300) in
+  let x_amzn_error_type =
+    let headers = Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+    match List.Assoc.find ~equal:String.Caseless.equal headers
+            "x-amzn-ErrorType"
+    with
+    | None -> None
+    | Some value ->
+        (match String.lsplit2 value ~on:':' with
+         | None -> Some value
+         | Some (v, _) -> Some v) in
+  let parse_aws_error error_of_json =
+    let body = Awso.Http.Response.body resp in
+    let bail () =
+      raise
+        (Awso.Http.Io.Error.Bad_response
+           { Awso.Http.Io.Error.code = code; body; x_amzn_error_type }) in
+    match (x_amzn_error_type, error_of_json,
+            ((code >= 400) && (code <= 599)))
+    with
+    | (Some error_type, Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        error_of_json error_type json
+    | (None, Some error_of_json, true) ->
+        (try
+           let json = Yojson.Safe.from_string body in
+           match json |> (Yojson.Safe.Util.member "__type") with
+           | `String error_type ->
+               let error_type =
+                 match String.lsplit2 error_type ~on:'#' with
+                 | Some (_, s) -> s
+                 | None -> error_type in
+               error_of_json error_type json
+           | `Null -> bail ()
+           | _ ->
+               failwithf "Error '__type' did not have string type: %s" body
+                 ()
+         with | _ -> bail ())
+    | (None, _, _) | (_, None, _) | (_, _, false) -> bail () in
   let response_to_json resp =
     Yojson.Safe.from_string (Awso.Http.Response.body resp) in
-  let _ = resp in
-  let _ = handle_error in
+  let _ = parse_aws_error in
   let _ = response_to_json in
+  let _ = resp in
   match endpoint with
-  | AbortDocumentVersionUpload -> Ok ()
+  | AbortDocumentVersionUpload ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | ActivateUser ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some ActivateUserResponse.error_of_json)
-       | Ok resp -> Ok (ActivateUserResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (ActivateUserResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ActivateUserResponse.error_of_json))
   | AddResourcePermissions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some AddResourcePermissionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (AddResourcePermissionsResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (AddResourcePermissionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some AddResourcePermissionsResponse.error_of_json))
   | CreateComment ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateCommentResponse.error_of_json)
-       | Ok resp ->
-           Ok (CreateCommentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateCommentResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateCommentResponse.error_of_json))
   | CreateCustomMetadata ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateCustomMetadataResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (CreateCustomMetadataResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CreateCustomMetadataResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some CreateCustomMetadataResponse.error_of_json))
   | CreateFolder ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateFolderResponse.error_of_json)
-       | Ok resp -> Ok (CreateFolderResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (CreateFolderResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateFolderResponse.error_of_json))
   | CreateLabels ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateLabelsResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (CreateLabelsResponse.of_header_and_body (headers, ())))
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CreateLabelsResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some CreateLabelsResponse.error_of_json))
   | CreateNotificationSubscription ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some CreateNotificationSubscriptionResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (CreateNotificationSubscriptionResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (CreateNotificationSubscriptionResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateNotificationSubscriptionResponse.error_of_json))
   | CreateUser ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some CreateUserResponse.error_of_json)
-       | Ok resp -> Ok (CreateUserResponse.of_json (response_to_json resp)))
-  | DeactivateUser -> Ok ()
-  | DeleteComment -> Ok ()
+      if is_success
+      then Ok (CreateUserResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateUserResponse.error_of_json))
+  | DeactivateUser ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteComment ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteCustomMetadata ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteCustomMetadataResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteCustomMetadataResponse.of_header_and_body (headers, ())))
-  | DeleteDocument -> Ok ()
-  | DeleteFolder -> Ok ()
-  | DeleteFolderContents -> Ok ()
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteCustomMetadataResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteCustomMetadataResponse.error_of_json))
+  | DeleteDocument ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteFolder ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteFolderContents ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteLabels ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DeleteLabelsResponse.error_of_json)
-       | Ok resp ->
-           let headers =
-             Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-           Ok (DeleteLabelsResponse.of_header_and_body (headers, ())))
-  | DeleteNotificationSubscription -> Ok ()
-  | DeleteUser -> Ok ()
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteLabelsResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some DeleteLabelsResponse.error_of_json))
+  | DeleteNotificationSubscription ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteUser -> if is_success then Ok () else Error (parse_aws_error None)
   | DescribeActivities ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeActivitiesResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeActivitiesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeActivitiesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeActivitiesResponse.error_of_json))
   | DescribeComments ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeCommentsResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeCommentsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeCommentsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeCommentsResponse.error_of_json))
   | DescribeDocumentVersions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeDocumentVersionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeDocumentVersionsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok (DescribeDocumentVersionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeDocumentVersionsResponse.error_of_json))
   | DescribeFolderContents ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeFolderContentsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeFolderContentsResponse.of_json (response_to_json resp)))
+      if is_success
+      then
+        Ok (DescribeFolderContentsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeFolderContentsResponse.error_of_json))
   | DescribeGroups ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeGroupsResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeGroupsResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeGroupsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeGroupsResponse.error_of_json))
   | DescribeNotificationSubscriptions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeNotificationSubscriptionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeNotificationSubscriptionsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeNotificationSubscriptionsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeNotificationSubscriptionsResponse.error_of_json))
   | DescribeResourcePermissions ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some DescribeResourcePermissionsResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (DescribeResourcePermissionsResponse.of_json
-                (response_to_json resp)))
+      if is_success
+      then
+        Ok
+          (DescribeResourcePermissionsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeResourcePermissionsResponse.error_of_json))
   | DescribeRootFolders ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeRootFoldersResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeRootFoldersResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeRootFoldersResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeRootFoldersResponse.error_of_json))
   | DescribeUsers ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some DescribeUsersResponse.error_of_json)
-       | Ok resp ->
-           Ok (DescribeUsersResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (DescribeUsersResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DescribeUsersResponse.error_of_json))
   | GetCurrentUser ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetCurrentUserResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetCurrentUserResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetCurrentUserResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetCurrentUserResponse.error_of_json))
   | GetDocument ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetDocumentResponse.error_of_json)
-       | Ok resp -> Ok (GetDocumentResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetDocumentResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetDocumentResponse.error_of_json))
   | GetDocumentPath ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetDocumentPathResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetDocumentPathResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetDocumentPathResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetDocumentPathResponse.error_of_json))
   | GetDocumentVersion ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetDocumentVersionResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetDocumentVersionResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetDocumentVersionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetDocumentVersionResponse.error_of_json))
   | GetFolder ->
-      (match resp with
-       | Error err -> handle_error err (Some GetFolderResponse.error_of_json)
-       | Ok resp -> Ok (GetFolderResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetFolderResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetFolderResponse.error_of_json))
   | GetFolderPath ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetFolderPathResponse.error_of_json)
-       | Ok resp ->
-           Ok (GetFolderPathResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetFolderPathResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetFolderPathResponse.error_of_json))
   | GetResources ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some GetResourcesResponse.error_of_json)
-       | Ok resp -> Ok (GetResourcesResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (GetResourcesResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetResourcesResponse.error_of_json))
   | InitiateDocumentVersionUpload ->
-      (match resp with
-       | Error err ->
-           handle_error err
-             (Some InitiateDocumentVersionUploadResponse.error_of_json)
-       | Ok resp ->
-           Ok
-             (InitiateDocumentVersionUploadResponse.of_json
-                (response_to_json resp)))
-  | RemoveAllResourcePermissions -> Ok ()
-  | RemoveResourcePermission -> Ok ()
-  | UpdateDocument -> Ok ()
-  | UpdateDocumentVersion -> Ok ()
-  | UpdateFolder -> Ok ()
+      if is_success
+      then
+        Ok
+          (InitiateDocumentVersionUploadResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some InitiateDocumentVersionUploadResponse.error_of_json))
+  | RemoveAllResourcePermissions ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | RemoveResourcePermission ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateDocument ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateDocumentVersion ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateFolder ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | UpdateUser ->
-      (match resp with
-       | Error err ->
-           handle_error err (Some UpdateUserResponse.error_of_json)
-       | Ok resp -> Ok (UpdateUserResponse.of_json (response_to_json resp)))
+      if is_success
+      then Ok (UpdateUserResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateUserResponse.error_of_json))
