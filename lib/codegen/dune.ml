@@ -120,3 +120,44 @@ let make_cli_async ~service =
     service
     service
 ;;
+
+let make_awso_cli_dune ~services =
+  let libs =
+    services |> List.map ~f:(sprintf "awso-async.%s") |> String.concat ~sep:" "
+  in
+  sprintf
+    {|(executable
+  (package awso-cli)
+  (name awso_main)
+  (public_name awso)
+  (libraries awso-async core_unix.command_unix %s)
+  (preprocess (pps ppx_jane)))
+|}
+    libs
+;;
+
+let make_awso_cli_main ~services =
+  let entries =
+    services
+    |> List.mapi ~f:(fun i service ->
+      let sep = if i = 0 then "[ " else "; " in
+      sprintf
+        {|    %s"%s", Awso_%s_async.Cli.main|}
+        sep
+        service
+        (dashes_to_underscores service))
+    |> String.concat ~sep:"\n"
+  in
+  sprintf
+    {|open! Core
+
+let () =
+  Command_unix.run
+    (Command.group
+       ~summary:"OCaml AWS command-line interface"
+%s
+    ])
+;;
+|}
+    entries
+;;

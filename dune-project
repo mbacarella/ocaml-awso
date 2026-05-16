@@ -60,7 +60,7 @@
 
 (package
  (name awso-common)
- (synopsis "Jane Street Core/Base compatibility shim")
+ (synopsis "AWSO common library")
  (depends
   (ocaml
    (>= 4.14))
@@ -92,3 +92,13 @@
    (>= 4.14))
   awso
   ppx_expect))
+
+(package
+ (name awso-cli)
+ (synopsis "A pure OCaml replacement for Python aws-cli")
+ (depends
+  (ocaml
+   (>= 4.14))
+  awso-async
+  core_unix
+  ppx_jane))

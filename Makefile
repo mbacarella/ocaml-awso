@@ -40,7 +40,7 @@ runtest:
 
 generate-code:
 	dune exec -- bin/awso_bootstrap.exe build-service-module --botocore-data vendor/botocore/botocore/data
-	dune exec -- bin/awso_codegen_main.exe generate-all --botocore-data vendor/botocore/botocore/data -o aws --runtime-dir lib/runtime/awso
+	dune exec -- bin/awso_codegen_main.exe generate-all --botocore-data vendor/botocore/botocore/data -o aws --runtime-dir lib/runtime/awso --cli-dir awso-cli
 
 clean:
 	dune clean

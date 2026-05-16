@@ -178,6 +178,7 @@ module Generate_all = struct
         Set.diff all unsupported_services |> Set.to_list
     in
     let runtime_dir = Arg.flag_required args "--runtime-dir" in
+    let cli_dir_opt = Arg.flag_optional args "--cli-dir" in
     let argv_strs = Array.to_list argv in
     (* generate botocore_endpoints.ml for the runtime *)
     (let endpoints = endpoints_json |> read_file |> Botocore_endpoints.of_json in
@@ -301,6 +302,15 @@ module Generate_all = struct
            write_generated ~argv:argv_strs
              (cli_dir ^/ sprintf "awso_%s.ml" service_under)
              (sprintf "let () = Command_unix.run Awso_%s_async.Cli.main" service_under));
+    (* aggregate awso-cli: one binary that dispatches to every service *)
+    (match cli_dir_opt with
+     | None -> ()
+     | Some cli_dir ->
+       write_dune_file ~argv:argv_strs ~outdir:cli_dir
+         ~data:(Dune.make_awso_cli_dune ~services);
+       write_generated ~argv:argv_strs
+         (cli_dir ^/ "awso_main.ml")
+         (Dune.make_awso_cli_main ~services));
     eprintf "done. generated %d services.\n%!" (List.length services)
   ;;
 end
