@@ -1,5 +1,17 @@
 open! Import
 
+let num_value_submodules = function
+  | "ec2" -> 8
+  | "ssm" | "iot" | "rds" | "sagemaker" -> 2
+  | _ -> 0
+;;
+
+let num_cli_submodules = function
+  | "ec2" -> 3
+  | "iot" | "rds" | "sagemaker" -> 2
+  | _ -> 0
+;;
+
 let dashes_to_underscores : string -> string =
   String.map ~f:(function
     | '-' -> '_'
@@ -35,12 +47,6 @@ let library_base ~service =
     extra_deps
     extra_ppx
     service
-;;
-
-let num_value_submodules = function
-  | "ec2" -> 8
-  | "ssm" | "iot" | "rds" | "sagemaker" -> 2
-  | _ -> 0
 ;;
 
 let make ~service =
@@ -93,12 +99,6 @@ let library_io (io_kind : [ `Async | `Lwt ]) ~service =
     service
     io
     preprocess
-;;
-
-let num_cli_submodules = function
-  | "ec2" -> 3
-  | "iot" | "rds" | "sagemaker" -> 2
-  | _ -> 0
 ;;
 
 let make_io (io_kind : [ `Async | `Lwt ]) ~service =
